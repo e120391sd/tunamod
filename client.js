@@ -1166,7 +1166,7 @@
         let e, n, o, i, s, r;
         return n = new R2({}), {
             c() {
-                e = h("div"), K(n.$$.fragment), o = h("h2"), i = T(t[0]), s = h("small"), s.innerHTML = '<img alt="Hordes.io" class="svgicon" src="/data/ui/icon.svg?v=8862189"/> 0.51.8853 Live', Ve(o, "margin-top", "100px"), p(s, "class", "version textgrey textcenter svelte-aoht7k"), p(e, "class", "l-ui container svelte-aoht7k");
+                e = h("div"), K(n.$$.fragment), o = h("h2"), i = T(t[0]), s = h("small"), s.innerHTML = '<img alt="Hordes.io" class="svgicon" src="/data/ui/icon.svg?v=8868124"/> 0.51.8868 Live', Ve(o, "margin-top", "100px"), p(s, "class", "version textgrey textcenter svelte-aoht7k"), p(e, "class", "l-ui container svelte-aoht7k");
             },
             m(l, a) {
                 w(l, e, a), Q(n, e, null), d(e, o), d(o, i), d(e, s), r = !0;
@@ -2572,7 +2572,7 @@ void main() {
         Zr = ne(80),
         df = ne(30),
         Jr = ne("en"),
-        Zi = ne("faction"),
+        Zi = ne("global"),
         Ks = ne(8),
         er = ne(300),
         Sa = ne(2),
@@ -4047,7 +4047,7 @@ void main(){
 
     var P;
     Jr.subscribe(async t => {
-        await fetch(`/data/loc/${t}.json?v=8862189`).then(async e => {
+        await fetch(`/data/loc/${t}.json?v=8868124`).then(async e => {
             P = await e.json(), wm.set(!0);
         });
     });
@@ -4114,13 +4114,13 @@ void main(){
         let e, n;
         return {
             c() {
-                e = h("img"), p(e, "class", "svgicon"), st(e.src, n = "/data/ui/icons/" + t[8].icon + ".svg?v=8862189") || p(e, "src", n);
+                e = h("img"), p(e, "class", "svgicon"), st(e.src, n = "/data/ui/icons/" + t[8].icon + ".svg?v=8868124") || p(e, "src", n);
             },
             m(o, i) {
                 w(o, e, i);
             },
             p(o, i) {
-                i & 2 && !st(e.src, n = "/data/ui/icons/" + o[8].icon + ".svg?v=8862189") && p(e, "src", n);
+                i & 2 && !st(e.src, n = "/data/ui/icons/" + o[8].icon + ".svg?v=8868124") && p(e, "src", n);
             },
             d(o) {
                 o && x(e);
@@ -5349,10 +5349,11 @@ void main(){
         };
     var S7 = performance,
         Rf = () => S7.now();
-    var xi, w1 = 0,
+    var xi, pageHidden = !1,
+        w1 = 0,
         H3 = 0,
         Q3 = (t, e) => {
-            $n(Mt.serverOnClientConnect.header, n => {
+            window.addEventListener("pagehide", onPageHide), window.addEventListener("pageshow", onPageShow), $n(Mt.serverOnClientConnect.header, n => {
                 t(Mt.serverOnClientConnect.decode(n));
             }), $n("close", n => {
                 e(n.code);
@@ -5369,8 +5370,8 @@ void main(){
             for (let e = 0, n = rl.open.length; e < n; ++e) rl.open[e](t);
         },
         T7 = t => {
-            console.log("Connection closed:", t.reason, t.code), w1 = 0, xi.close(), xi = void 0;
-            for (let e = 0, n = rl.close.length; e < n; ++e) rl.close[e](t);
+            if (console.log("Connection closed:", t.reason, t.code), w1 = 0, xi = void 0, !pageHidden)
+                for (let e = 0, n = rl.close.length; e < n; ++e) rl.close[e](t);
         },
         rpChatHeaderSet = null,
         rpChatHeaders = () => {
@@ -5411,9 +5412,18 @@ void main(){
             xi === void 0 || w1 !== 1 || xi.send(t);
         },
         Z3 = t => {
-            if (xi !== void 0) return;
+            if (xi !== void 0 || pageHidden) return;
             let e = "game1.hordes.io";
             xi = new WebSocket(`wss://${e}:` + t + "/play"), xi.binaryType = "arraybuffer", xi.onerror = P7, xi.onopen = A7, xi.onclose = T7, xi.onmessage = E7;
+        },
+        closeSocket = () => {
+            w1 = 0, xi !== void 0 && (xi.close(), xi = void 0);
+        },
+        onPageHide = () => {
+            pageHidden = !0, closeSocket();
+        },
+        onPageShow = t => {
+            t.persisted && window.location.reload();
         };
     var Y3 = 0,
         x1 = 0,
@@ -5457,6 +5467,13 @@ void main(){
             partycreate: {},
             time: {},
             bosslog: {},
+            dance: {},
+            sit: {},
+            wave: {},
+            global: {
+                a: 1,
+                chat: !0
+            },
             party: {
                 a: 1,
                 chat: !0
@@ -7556,17 +7573,17 @@ void main(){
     L1();
     var D9 = [0, 0, 1, 1, 2, 3],
         q1 = (t, e) => "book" + (e !== void 0 ? e : "") + D9[t % 5],
-        sr = (t, e, n, o) => `/data/items/${t}/${t=="book"?q1(e,n):t+e}_q${o}.${Yn}?v=8862189`,
-        Gf = t => `/data/ui/skills/${t}.${Yn}?v=8862189`,
-        $k = t => `/data/ui/slotbg/${t}.${On}?v=8862189`,
-        Ok = (t, e, n) => `/data/world/${t}/map/${e}/${n}.${Yn}?v=8862189`,
-        ns = t => `/data/ui/classes/${t}.${On}?v=8862189`,
-        R1 = t => `/data/ui/factions/${t}.${On}?v=8862189`,
-        Nk = t => `/data/ui/elo/${Wa(t)}.svg?v=8862189`,
-        Wk = "/data/ui/currency/medal.svg?v=8862189",
-        ja = "/data/ui/currency/prestige.svg?v=8862189",
-        rr = "/data/ui/currency/fame.svg?v=8862189",
-        jk = t => `/data/ui/rank/rank${t}.svg?v=8862189`;
+        sr = (t, e, n, o) => `/data/items/${t}/${t=="book"?q1(e,n):t+e}_q${o}.${Yn}?v=8868124`,
+        Gf = t => `/data/ui/skills/${t}.${Yn}?v=8868124`,
+        $k = t => `/data/ui/slotbg/${t}.${On}?v=8868124`,
+        Ok = (t, e, n) => `/data/world/${t}/map/${e}/${n}.${Yn}?v=8868124`,
+        ns = t => `/data/ui/classes/${t}.${On}?v=8868124`,
+        R1 = t => `/data/ui/factions/${t}.${On}?v=8868124`,
+        Nk = t => `/data/ui/elo/${Wa(t)}.svg?v=8868124`,
+        Wk = "/data/ui/currency/medal.svg?v=8868124",
+        ja = "/data/ui/currency/prestige.svg?v=8868124",
+        rr = "/data/ui/currency/fame.svg?v=8868124",
+        jk = t => `/data/ui/rank/rank${t}.svg?v=8868124`;
     var Gk = t => {
         zt.forEach(e => {
             if (!e.engineOnly)
@@ -9576,11 +9593,11 @@ void main(){
                 let r = new Image;
                 r.onload = () => {
                     n[e] = o(r), i(n[e], t + e), r.onload = void 0;
-                }, r.src = t + e + "?v=8862189";
+                }, r.src = t + e + "?v=8868124";
                 break;
             }
             default: {
-                fetch(t + e + "?v=8862189").then(r => {
+                fetch(t + e + "?v=8868124").then(r => {
                     if (!r.ok) throw new Error;
                     r.arrayBuffer().then(async l => {
                         n[e] = await o(l, e), i(n[e], t + e);
@@ -9702,7 +9719,7 @@ void main(){
                     size: 2,
                     data: new Float32Array([0, 0, 2, 0, 0, 2])
                 }
-            }), 0, j.TRIANGLES), fetch("/data/items/atlas.json?v=8862189").then(async t => {
+            }), 0, j.TRIANGLES), fetch("/data/items/atlas.json?v=8868124").then(async t => {
                 Is = await t.json();
                 for (let e in Is) e != "s" && (Is[e] = Is[e].map(n => n / Is.s));
             });
@@ -9867,14 +9884,14 @@ void main(){
             if (!fn) return void(dds ? eu("data/assets/", name, Z1, X9, e) : eu("data/assets/", name, Z1, Y9, e));
             let key = name + "|" + fkey;
             if (litTextures[key]) return void e(...litTextures[key]);
-            if (dds) fetch("data/assets/" + name + "?v=8862189").then(r => r.arrayBuffer()).then(r => {
+            if (dds) fetch("data/assets/" + name + "?v=8868124").then(r => r.arrayBuffer()).then(r => {
                 e(...(litTextures[key] = X9(applyDxtFilter(r, fn))));
             });
             else {
                 let img = new Image;
                 img.onload = () => {
                     e(...(litTextures[key] = Y9(tintImage(img, fn)))), img.onload = void 0;
-                }, img.src = "data/assets/" + name + "?v=8862189";
+                }, img.src = "data/assets/" + name + "?v=8868124";
             }
         },
         ox, ix = (t, e, n) => {
@@ -10501,7 +10518,7 @@ void main(){
         let e, n;
         return {
             c() {
-                e = h("img"), p(e, "class", "icon svelte-erbdzy"), st(e.src, n = "/data/ui/icons/gem.svg?v=8862189") || p(e, "src", n);
+                e = h("img"), p(e, "class", "icon svelte-erbdzy"), st(e.src, n = "/data/ui/icons/gem.svg?v=8868124") || p(e, "src", n);
             },
             m(o, i) {
                 w(o, e, i);
@@ -10606,19 +10623,19 @@ void main(){
     var bE = t => t.replace(/\$c(\d)/g, (e, n) => `<img class=texticon src='${ns(n)}'>`),
         yE = t => t.replace(/\$l(\d+)/g, (e, n) => `<span class=textwhite>${n}</span>`),
         kE = t => t.replace(/\$f(\d)(\w*)/g, (e, n, o) => `<span class=textf${n}>${o}</span>`),
-        xE = t => t.replace(/\$gt/g, (e, n) => '<img class="svgicon" src="/data/ui/icons/check.svg?v=8862189">'),
+        xE = t => t.replace(/\$gt/g, (e, n) => '<img class="svgicon" src="/data/ui/icons/check.svg?v=8868124">'),
         wE = t => t.replace(/\$e(\d+)/g, (e, n) => su(n, !1)),
         ME = t => t.replace(/\$g(\d+)/g, (e, n) => cg(n, !1)),
         FE = t => t.replace(/\$m(\d+)/g, (e, n) => fg(n, !1)),
-        CE = t => t.replace(/\$sp(\d+)/g, (e, n) => "<img class=texticon src=/data/ui/icons/gem.svg?v=8862189/>" + n),
-        SE = t => t.replace(/\$fm(\d+)/g, (e, n) => `<span class=textfame><img class=svgicon src='/data/ui/currency/fame.svg?v=8862189'> ${n}</span>`),
+        CE = t => t.replace(/\$sp(\d+)/g, (e, n) => "<img class=texticon src=/data/ui/icons/gem.svg?v=8868124/>" + n),
+        SE = t => t.replace(/\$fm(\d+)/g, (e, n) => `<span class=textfame><img class=svgicon src='/data/ui/currency/fame.svg?v=8868124'> ${n}</span>`),
         cg = (t, e = !1) => {
             let {
                 c: n,
                 s: o,
                 g: i
             } = Ix(t), s = "<span/>";
-            return i != "" && (s += `<span class=${e?"textred":"textgold"}>${i}</span> <img class=texticon src='/data/ui/currency/gold.${On}?v=8862189'/>`), o != "" && (s += `<span class=${e?"textred":"textsilver"}>${o}</span> <img class=texticon src='/data/ui/currency/silver.${On}?v=8862189'/>`), n != "" && (s += `<span class=${e?"textred":"textcopper"}>${n}</span> <img class=texticon src='/data/ui/currency/copper.${On}?v=8862189'/>`), s + "</span>";
+            return i != "" && (s += `<span class=${e?"textred":"textgold"}>${i}</span> <img class=texticon src='/data/ui/currency/gold.${On}?v=8868124'/>`), o != "" && (s += `<span class=${e?"textred":"textsilver"}>${o}</span> <img class=texticon src='/data/ui/currency/silver.${On}?v=8868124'/>`), n != "" && (s += `<span class=${e?"textred":"textcopper"}>${n}</span> <img class=texticon src='/data/ui/currency/copper.${On}?v=8868124'/>`), s + "</span>";
         };
     var fg = (t, e = !1) => `<span class='${e?"textred":"textgold"}'><img class='svgicon' src='${Wk}'> ${ht(t)}</span>`,
         su = t => `<span class='bold textpvp'><img class='svgicon' src='${Nk(t)}'> ${ht(t)}</span>`,
@@ -11445,8 +11462,9 @@ void main(){
             m = [],
             g = 0,
             v = !1,
-            _ = "faction",
+            _ = "global",
             b = new Map([
+                ["g", "global"],
                 ["c", "clan"],
                 ["p", "party"],
                 ["f", "faction"]
@@ -11485,7 +11503,7 @@ void main(){
                 let N = i.indexOf(R);
                 kf.update(Y => (N >= 0 ? Y.splice(N, 1) : Y.push(R), Y));
             },
-            D = ["faction", "party", "clan", "pvp", "inv", "yell"],
+            D = ["global", "faction", "party", "clan", "pvp", "inv", "yell"],
             U;
 
         function V(R) {
@@ -11535,13 +11553,13 @@ void main(){
         let e, n;
         return {
             c() {
-                e = h("img"), st(e.src, n = "/data/ui/icons/" + t[1] + ".svg?v=8862189") || p(e, "src", n), p(e, "class", "titleicon svgicon svelte-1f1v3u3");
+                e = h("img"), st(e.src, n = "/data/ui/icons/" + t[1] + ".svg?v=8868124") || p(e, "src", n), p(e, "class", "titleicon svgicon svelte-1f1v3u3");
             },
             m(o, i) {
                 w(o, e, i);
             },
             p(o, i) {
-                i[0] & 2 && !st(e.src, n = "/data/ui/icons/" + o[1] + ".svg?v=8862189") && p(e, "src", n);
+                i[0] & 2 && !st(e.src, n = "/data/ui/icons/" + o[1] + ".svg?v=8868124") && p(e, "src", n);
             },
             d(o) {
                 o && x(e);
@@ -11553,7 +11571,7 @@ void main(){
         let e, n, o, i;
         return {
             c() {
-                e = h("img"), st(e.src, n = "/data/ui/icons/cog.svg?v=8862189") || p(e, "src", n), p(e, "class", "btn black svgicon");
+                e = h("img"), st(e.src, n = "/data/ui/icons/cog.svg?v=8868124") || p(e, "src", n), p(e, "class", "btn black svgicon");
             },
             m(s, r) {
                 w(s, e, r), o || (i = H(e, "click", t[13]), o = !0);
@@ -11569,7 +11587,7 @@ void main(){
         let e, n, o, i;
         return {
             c() {
-                e = h("img"), st(e.src, n = "/data/ui/icons/cross.svg?v=8862189") || p(e, "src", n), p(e, "class", "btn black svgicon");
+                e = h("img"), st(e.src, n = "/data/ui/icons/cross.svg?v=8868124") || p(e, "src", n), p(e, "class", "btn black svgicon");
             },
             m(s, r) {
                 w(s, e, r), o || (i = H(e, "click", t[20]), o = !0);
@@ -15040,13 +15058,13 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         let e, n, o;
         return {
             c() {
-                e = h("img"), p(e, "class", n = "tag icon border black bgf" + t[5].faction + " round svelte-g292qg"), st(e.src, o = "/data/ui/factions/" + t[5].faction + "." + On + "?v=8862189") || p(e, "src", o);
+                e = h("img"), p(e, "class", n = "tag icon border black bgf" + t[5].faction + " round svelte-g292qg"), st(e.src, o = "/data/ui/factions/" + t[5].faction + "." + On + "?v=8868124") || p(e, "src", o);
             },
             m(i, s) {
                 w(i, e, s);
             },
             p(i, s) {
-                s & 32 && n !== (n = "tag icon border black bgf" + i[5].faction + " round svelte-g292qg") && p(e, "class", n), s & 32 && !st(e.src, o = "/data/ui/factions/" + i[5].faction + "." + On + "?v=8862189") && p(e, "src", o);
+                s & 32 && n !== (n = "tag icon border black bgf" + i[5].faction + " round svelte-g292qg") && p(e, "class", n), s & 32 && !st(e.src, o = "/data/ui/factions/" + i[5].faction + "." + On + "?v=8868124") && p(e, "src", o);
             },
             d(i) {
                 i && x(e);
@@ -15058,13 +15076,13 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         let e, n;
         return {
             c() {
-                e = h("img"), p(e, "class", "tag icon border black bgblack round svelte-g292qg"), st(e.src, n = "/data/ui/icons/" + (t[5].role == 2 ? "star" : "starsilver") + "." + On + "?v=8862189") || p(e, "src", n);
+                e = h("img"), p(e, "class", "tag icon border black bgblack round svelte-g292qg"), st(e.src, n = "/data/ui/icons/" + (t[5].role == 2 ? "star" : "starsilver") + "." + On + "?v=8868124") || p(e, "src", n);
             },
             m(o, i) {
                 w(o, e, i);
             },
             p(o, i) {
-                i & 32 && !st(e.src, n = "/data/ui/icons/" + (o[5].role == 2 ? "star" : "starsilver") + "." + On + "?v=8862189") && p(e, "src", n);
+                i & 32 && !st(e.src, n = "/data/ui/icons/" + (o[5].role == 2 ? "star" : "starsilver") + "." + On + "?v=8868124") && p(e, "src", n);
             },
             d(o) {
                 o && x(e);
@@ -15480,7 +15498,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         return t.$$set = ie => {
             "data" in ie && n(0, c = ie.data), "key" in ie && n(1, f = ie.key), "stacks" in ie && n(2, u = ie.stacks), "cd" in ie && n(3, m = ie.cd), "remaining" in ie && n(4, g = ie.remaining), "border" in ie && n(5, v = ie.border), "img" in ie && n(22, _ = ie.img), "meta" in ie && n(23, b = ie.meta), "css" in ie && n(6, k = ie.css), "id" in ie && n(7, y = ie.id), "describe" in ie && n(8, F = ie.describe), "queued" in ie && n(24, A = ie.queued), "pickable" in ie && n(25, C = ie.pickable), "descRoot" in ie && n(26, M = ie.descRoot), "descPos" in ie && n(9, D = ie.descPos), "auto" in ie && n(10, U = ie.auto), "status" in ie && n(27, V = ie.status), "clickToUse" in ie && n(28, B = ie.clickToUse), "shift" in ie && n(29, q = ie.shift), "$$scope" in ie && n(30, a = ie.$$scope);
         }, t.$$.update = () => {
-            t.$$.dirty[0] & 16392 && n(14, o = o || m > 0), t.$$.dirty[0] & 138446856 && n(17, i = _ ? r && L || m > 0 || V == -1 ? _.replace(".", "_grey.").replace(/_q[0-9]/g, "") : _ : `/data/ui/slotbg/bg.${Yn}?v=8862189`), t.$$.dirty[0] & 150995968 && n(16, s = W(U || A, V)), t.$$.dirty[0] & 67112960 && R && M && M.appendChild(R), t.$$.dirty[0] & 8200 && fu(Math.floor(m || 0), _e, 40);
+            t.$$.dirty[0] & 16392 && n(14, o = o || m > 0), t.$$.dirty[0] & 138446856 && n(17, i = _ ? r && L || m > 0 || V == -1 ? _.replace(".", "_grey.").replace(/_q[0-9]/g, "") : _ : `/data/ui/slotbg/bg.${Yn}?v=8868124`), t.$$.dirty[0] & 150995968 && n(16, s = W(U || A, V)), t.$$.dirty[0] & 67112960 && R && M && M.appendChild(R), t.$$.dirty[0] & 8200 && fu(Math.floor(m || 0), _e, 40);
         }, [c, f, u, m, g, v, k, y, F, D, U, L, R, _e, o, r, s, i, N, Y, ge, ve, _, b, A, C, M, V, B, q, a, l, be, Te];
     }
     var Zg = class extends Fe {
@@ -17615,7 +17633,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         let e, n, o, i, s, r;
         return {
             c() {
-                e = h("span"), n = h("img"), i = h("span"), s = T(t[0]), p(n, "class", "svgicon texticon"), st(n.src, o = "/data/ui/icons/gem.svg?v=8862189") || p(n, "src", o), p(i, "class", r = !t[1] || t[0] < t[2] ? "textprimary" : "textred");
+                e = h("span"), n = h("img"), i = h("span"), s = T(t[0]), p(n, "class", "svgicon texticon"), st(n.src, o = "/data/ui/icons/gem.svg?v=8868124") || p(n, "src", o), p(i, "class", r = !t[1] || t[0] < t[2] ? "textprimary" : "textred");
             },
             m(l, a) {
                 w(l, e, a), d(e, n), d(e, i), d(i, s);
@@ -19881,7 +19899,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         }
         return {
             c() {
-                e = h("div"), n = h("img"), p(n, "class", "svgicon"), st(n.src, o = "/data/ui/icons/" + t[5].img + ".svg?v=8862189") || p(n, "src", o), p(e, "id", i = "sys" + t[5].img), p(e, "class", "btn border black");
+                e = h("div"), n = h("img"), p(n, "class", "svgicon"), st(n.src, o = "/data/ui/icons/" + t[5].img + ".svg?v=8868124") || p(n, "src", o), p(e, "id", i = "sys" + t[5].img), p(e, "class", "btn border black");
             },
             m(c, f) {
                 w(c, e, f), d(e, n), s || (r = [H(e, "mouseenter", l), H(e, "mouseleave", t[3]), H(e, "click", a)], s = !0);
@@ -23492,7 +23510,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     skill: zt.get(t[39].id)
                 },
                 css: "slotskill",
-                img: `/data/ui/skills/${t[39].id}.${Yn}?v=8862189`,
+                img: `/data/ui/skills/${t[39].id}.${Yn}?v=8868124`,
                 $$slots: {
                     default: [TV]
                 },
@@ -23526,7 +23544,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 F[0] & 4 && (A.descRoot = y[2]), F[0] & 8 && (A.pickable = y[39].pickable), F[0] & 8 && (A.meta = {
                     type: "skill",
                     skill: zt.get(y[39].id)
-                }), F[0] & 8 && (A.img = `/data/ui/skills/${y[39].id}.${Yn}?v=8862189`), F[0] & 8 | F[1] & 524288 && (A.$$scope = {
+                }), F[0] & 8 && (A.img = `/data/ui/skills/${y[39].id}.${Yn}?v=8868124`), F[0] & 8 | F[1] & 524288 && (A.$$scope = {
                     dirty: F,
                     ctx: y
                 }), n.$set(A), (!f || F[0] & 8) && s !== (s = P.items.book[y[39].id].name + "") && G(r, s), m === (m = u(y, F)) && g ? g.p(y, F) : (g.d(1), g = m(y), g && (g.c(), g.m(o, null))), _ === (_ = v(y, F)) && b ? b.p(y, F) : (b.d(1), b = _(y), b && (b.c(), b.m(a, c))), y[39].engineOnly ? k && (k.d(1), k = null) : k ? k.p(y, F) : (k = dF(y), k.c(), k.m(a, null));
@@ -23590,7 +23608,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     skill: t[39]
                 },
                 css: "slotskill",
-                img: `/data/ui/skills/${t[39].id}.${Yn}?v=8862189`,
+                img: `/data/ui/skills/${t[39].id}.${Yn}?v=8868124`,
                 $$slots: {
                     default: [UV]
                 },
@@ -23610,7 +23628,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 _[0] & 4 && (b.descRoot = v[2]), _[0] & 1 && (b.meta = {
                     type: "skill",
                     skill: v[39]
-                }), _[0] & 1 && (b.img = `/data/ui/skills/${v[39].id}.${Yn}?v=8862189`), _[0] & 1 | _[1] & 524288 && (b.$$scope = {
+                }), _[0] & 1 && (b.img = `/data/ui/skills/${v[39].id}.${Yn}?v=8868124`), _[0] & 1 | _[1] & 524288 && (b.$$scope = {
                     dirty: _,
                     ctx: v
                 }), n.$set(b), (!g || _[0] & 1) && s !== (s = P.items.book[v[39].id].name + "") && G(r, s), (!g || _[0] & 1) && u !== (u = v[39].minlevel + "") && G(m, u);
@@ -25034,7 +25052,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         let e, n, o;
         return {
             c() {
-                e = h("span"), e.innerHTML = 'Upgrade <img class="svgicon texticon" src="/data/ui/icons/gem.svg?v=8862189"/>', p(e, "class", "btn textwhite");
+                e = h("span"), e.innerHTML = 'Upgrade <img class="svgicon texticon" src="/data/ui/icons/gem.svg?v=8868124"/>', p(e, "class", "btn textwhite");
             },
             m(i, s) {
                 w(i, e, s), n || (o = H(e, "click", t[29]), n = !0);
@@ -25112,7 +25130,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             c() {
                 V && V.c(), e = h("div");
                 for (let R = 0; R < q.length; R += 1) q[R].c();
-                n = h("div"), o = h("div"), i = h("span"), r = T(s), l = T(" / "), c = T(a), $ && $.c(), u = h("div"), K(m.$$.fragment), g = h("div"), v = h("img"), k = h("div"), y = h("img"), W && W.c(), C = de(), p(e, "class", "panel-black scrollbar marg-top marg-bot slotparent svelte-gou6xs"), Ve(e, "max-height", t[13] + "px"), p(i, "class", f = t[8].length < (t[10].subscribed_until ? Nn[1].stash : Nn[0].stash) ? "textgreen" : "textred"), p(o, "class", "navbtn panel-black border black gold svelte-gou6xs"), Ve(o, "margin-right", "auto"), p(u, "class", "navbtn panel-black border black gold svelte-gou6xs"), p(v, "class", "svgicon"), st(v.src, _ = "/data/ui/icons/deposit.svg?v=8862189") || p(v, "src", _), p(g, "class", b = "navbtn btn grey gold " + (t[0] === 1 ? "active" : "") + " svelte-gou6xs"), p(y, "class", "svgicon"), st(y.src, F = "/data/ui/icons/withdraw.svg?v=8862189") || p(y, "src", F), p(k, "class", A = "navbtn btn grey gold " + (t[0] === 2 ? "active" : "") + " svelte-gou6xs"), p(n, "class", "formelements svelte-gou6xs");
+                n = h("div"), o = h("div"), i = h("span"), r = T(s), l = T(" / "), c = T(a), $ && $.c(), u = h("div"), K(m.$$.fragment), g = h("div"), v = h("img"), k = h("div"), y = h("img"), W && W.c(), C = de(), p(e, "class", "panel-black scrollbar marg-top marg-bot slotparent svelte-gou6xs"), Ve(e, "max-height", t[13] + "px"), p(i, "class", f = t[8].length < (t[10].subscribed_until ? Nn[1].stash : Nn[0].stash) ? "textgreen" : "textred"), p(o, "class", "navbtn panel-black border black gold svelte-gou6xs"), Ve(o, "margin-right", "auto"), p(u, "class", "navbtn panel-black border black gold svelte-gou6xs"), p(v, "class", "svgicon"), st(v.src, _ = "/data/ui/icons/deposit.svg?v=8868124") || p(v, "src", _), p(g, "class", b = "navbtn btn grey gold " + (t[0] === 1 ? "active" : "") + " svelte-gou6xs"), p(y, "class", "svgicon"), st(y.src, F = "/data/ui/icons/withdraw.svg?v=8868124") || p(y, "src", F), p(k, "class", A = "navbtn btn grey gold " + (t[0] === 2 ? "active" : "") + " svelte-gou6xs"), p(n, "class", "formelements svelte-gou6xs");
             },
             m(R, N) {
                 V && V.m(R, N), w(R, e, N);
@@ -27236,7 +27254,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         }
         return {
             c() {
-                K(e.$$.fragment), n = h("img"), st(n.src, o = "/data/ui/icons/arrow.svg?v=8862189") || p(n, "src", o), p(n, "class", i = "btn " + (t[0][22] > 0 ? "green" : "disabled") + " svgicon statbtn svelte-rbq5ku");
+                K(e.$$.fragment), n = h("img"), st(n.src, o = "/data/ui/icons/arrow.svg?v=8868124") || p(n, "src", o), p(n, "class", i = "btn " + (t[0][22] > 0 ? "green" : "disabled") + " svgicon statbtn svelte-rbq5ku");
             },
             m(f, u) {
                 Q(e, f, u), w(f, n, u), s = !0, r || (l = [H(n, "pointerenter", a), H(n, "pointerleave", t[9]), H(n, "click", c)], r = !0);
@@ -28839,13 +28857,13 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         }
         return ~(Re = Mo(t, -1)) && (St = jn[Re] = wo[Re](t)), {
             c() {
-                e = h("div"), n = h("div"), o = h("div"), i = h("img"), r = h("div"), l = h("div"), a = h("h1"), f = T(c), u = h("h3"), g = T(m), _ = h("p"), k = T(b), y = Ne(), A = T(F), C = h("div"), K(M.$$.fragment), D = h("div"), U = h("div"), V = h("div"), B = h("span"), B.textContent = `${P.ui.clan.level}`, q = h("span"), $ = T(L), W = h("span"), W.textContent = `${P.ui.clan.capacity}`, R = h("span"), Y = T(N), ge = h("span"), ge.textContent = `${P.ui.clan.nextlevel}`, Ce = h("span"), ve = T("+"), le = T(se), _e = Ne(), Te = T(be), ie = h("span"), ie.textContent = `${P.ui.clan.taxrate}`, Ie = h("span"), qe = T(ee), Ge = T("%"), Qe = h("div"), He = h("div"), he = h("span"), he.textContent = `${P.ui.clan.members}`, ce = h("span"), oe = T($e), J = h("span"), J.textContent = `${P.ui.clan.online}`, O = h("span"), je = T(ue), Ue = h("span"), Ue.textContent = `${P.ui.stats.array[20]}`, ke = h("span"), ze = h("img"), dt = Ne(), Ze = T(Ft), Ct = h("span"), Ct.textContent = `${P.ui.clan.treasury}`, K(xe.$$.fragment), Ee && Ee.c(), Je = de(), ct && ct.c(), kt = de(), Ke && Ke.c(), At = de(), mt && mt.c(), De = h("div"), at = h("div"), Ut = h("div"), Ut.textContent = `${P.ui.clan.members}`, hn && hn.c(), St && St.c(), p(i, "class", "helmet absCentered svelte-6t8hqd"), st(i.src, s = "/data/ui/factions/" + t[0].faction + ".svg?v=8862189") || p(i, "src", s), p(l, "class", v = "textf" + t[0].faction + " svelte-6t8hqd"), p(r, "class", "textcenter"), p(o, "class", "hero svelte-6t8hqd"), p(C, "class", "panel-black svelte-6t8hqd"), p(B, "class", "textprimary"), p(W, "class", "textprimary"), p(ge, "class", "textprimary"), p(ie, "class", "textprimary"), p(V, "class", "panel-black grid two svelte-6t8hqd"), p(he, "class", "textprimary"), p(J, "class", "textprimary"), p(Ue, "class", "textprimary"), p(ze, "class", "svgicon"), st(ze.src, Oe = ja) || p(ze, "src", Oe), p(ke, "class", "textprestige"), p(Ct, "class", "textprimary"), p(He, "class", "panel-black grid two svelte-6t8hqd"), p(D, "class", "marg-top grid two"), p(n, "class", "row slim"), p(e, "class", "fold fadeIn"), p(Ut, "class", "btn navbtn grey"), p(at, "class", "subnav marg-top"), p(De, "class", "row slim fadeIn");
+                e = h("div"), n = h("div"), o = h("div"), i = h("img"), r = h("div"), l = h("div"), a = h("h1"), f = T(c), u = h("h3"), g = T(m), _ = h("p"), k = T(b), y = Ne(), A = T(F), C = h("div"), K(M.$$.fragment), D = h("div"), U = h("div"), V = h("div"), B = h("span"), B.textContent = `${P.ui.clan.level}`, q = h("span"), $ = T(L), W = h("span"), W.textContent = `${P.ui.clan.capacity}`, R = h("span"), Y = T(N), ge = h("span"), ge.textContent = `${P.ui.clan.nextlevel}`, Ce = h("span"), ve = T("+"), le = T(se), _e = Ne(), Te = T(be), ie = h("span"), ie.textContent = `${P.ui.clan.taxrate}`, Ie = h("span"), qe = T(ee), Ge = T("%"), Qe = h("div"), He = h("div"), he = h("span"), he.textContent = `${P.ui.clan.members}`, ce = h("span"), oe = T($e), J = h("span"), J.textContent = `${P.ui.clan.online}`, O = h("span"), je = T(ue), Ue = h("span"), Ue.textContent = `${P.ui.stats.array[20]}`, ke = h("span"), ze = h("img"), dt = Ne(), Ze = T(Ft), Ct = h("span"), Ct.textContent = `${P.ui.clan.treasury}`, K(xe.$$.fragment), Ee && Ee.c(), Je = de(), ct && ct.c(), kt = de(), Ke && Ke.c(), At = de(), mt && mt.c(), De = h("div"), at = h("div"), Ut = h("div"), Ut.textContent = `${P.ui.clan.members}`, hn && hn.c(), St && St.c(), p(i, "class", "helmet absCentered svelte-6t8hqd"), st(i.src, s = "/data/ui/factions/" + t[0].faction + ".svg?v=8868124") || p(i, "src", s), p(l, "class", v = "textf" + t[0].faction + " svelte-6t8hqd"), p(r, "class", "textcenter"), p(o, "class", "hero svelte-6t8hqd"), p(C, "class", "panel-black svelte-6t8hqd"), p(B, "class", "textprimary"), p(W, "class", "textprimary"), p(ge, "class", "textprimary"), p(ie, "class", "textprimary"), p(V, "class", "panel-black grid two svelte-6t8hqd"), p(he, "class", "textprimary"), p(J, "class", "textprimary"), p(Ue, "class", "textprimary"), p(ze, "class", "svgicon"), st(ze.src, Oe = ja) || p(ze, "src", Oe), p(ke, "class", "textprestige"), p(Ct, "class", "textprimary"), p(He, "class", "panel-black grid two svelte-6t8hqd"), p(D, "class", "marg-top grid two"), p(n, "class", "row slim"), p(e, "class", "fold fadeIn"), p(Ut, "class", "btn navbtn grey"), p(at, "class", "subnav marg-top"), p(De, "class", "row slim fadeIn");
             },
             m(pt, Vt) {
                 w(pt, e, Vt), d(e, n), d(n, o), d(o, i), d(o, r), d(r, l), d(l, a), d(a, f), d(l, u), d(u, g), d(r, _), d(_, k), d(_, y), d(_, A), d(n, C), Q(M, C, null), d(n, D), d(D, U), d(U, V), d(V, B), d(V, q), d(q, $), d(V, W), d(V, R), d(R, Y), d(V, ge), d(V, Ce), d(Ce, ve), d(Ce, le), d(Ce, _e), d(Ce, Te), d(V, ie), d(V, Ie), d(Ie, qe), d(Ie, Ge), d(D, Qe), d(Qe, He), d(He, he), d(He, ce), d(ce, oe), d(He, J), d(He, O), d(O, je), d(He, Ue), d(He, ke), d(ke, ze), d(ke, dt), d(ke, Ze), d(He, Ct), Q(xe, He, null), Ee && Ee.m(n, null), d(n, Je), ct && ct.m(n, null), d(n, kt), Ke && Ke.m(n, null), d(n, At), mt && mt.m(n, null), w(pt, De, Vt), d(De, at), d(at, Ut), hn && hn.m(at, null), ~Re && jn[Re].m(De, null), Rt = !0, Ye || (et = H(Ut, "click", t[14]), Ye = !0);
             },
             p(pt, Vt) {
-                (!Rt || Vt & 1 && !st(i.src, s = "/data/ui/factions/" + pt[0].faction + ".svg?v=8862189")) && p(i, "src", s), (!Rt || Vt & 1) && c !== (c = pt[0].tag + "") && G(f, c), (!Rt || Vt & 1) && m !== (m = pt[0].name + "") && G(g, m), (!Rt || Vt & 1 && v !== (v = "textf" + pt[0].faction + " svelte-6t8hqd")) && p(l, "class", v), (!Rt || Vt & 1) && b !== (b = P.factions[pt[0].faction].name + "") && G(k, b);
+                (!Rt || Vt & 1 && !st(i.src, s = "/data/ui/factions/" + pt[0].faction + ".svg?v=8868124")) && p(i, "src", s), (!Rt || Vt & 1) && c !== (c = pt[0].tag + "") && G(f, c), (!Rt || Vt & 1) && m !== (m = pt[0].name + "") && G(g, m), (!Rt || Vt & 1 && v !== (v = "textf" + pt[0].faction + " svelte-6t8hqd")) && p(l, "class", v), (!Rt || Vt & 1) && b !== (b = P.factions[pt[0].faction].name + "") && G(k, b);
                 let Fo = {};
                 Vt & 1 && (Fo.fract = Math.ceil(pt[0].exp / Cl(pt[0].level) * 100)), Vt & 1 && (Fo.left = `${ht(pt[0].exp)} / ${ht(Cl(pt[0].level))} EXP`), Vt & 1 && (Fo.right = `${Math.ceil(pt[0].exp/Cl(pt[0].level)*100)}% `), M.$set(Fo), (!Rt || Vt & 1) && L !== (L = pt[0].level + "") && G($, L), (!Rt || Vt & 1) && N !== (N = Sl(pt[0].level) + "") && G(Y, N), (!Rt || Vt & 1) && se !== (se = Sl(pt[0].level + 1) - Sl(pt[0].level) + "") && G(le, se), (!Rt || Vt & 1) && ee !== (ee = pt[0].tax + "") && G(qe, ee), (!Rt || Vt & 1) && $e !== ($e = pt[0].members.length + "") && G(oe, $e), (!Rt || Vt & 1) && ue !== (ue = `${pt[0].online} (+${pt[0].online*60} EXP/h)`) && G(je, ue), (!Rt || Vt & 1) && Ft !== (Ft = ht(pt[0].prestige) + "") && G(Ze, Ft);
                 let Vr = {};
@@ -30799,7 +30817,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 Ve(blTotalNum, "position", "relative");
                 e = h("div"), n = h("div"), o = h("div"), i = h("div"), s = h("span"), s.textContent = `${P.factions[0].name}`, r = h("span"), l = h("img"), c = Ne(), u = T(f), m = h("div"), g = h("span"), v = h("img"), b = Ne(), y = T(k), F = h("span"), C = T(A), M = T(": "), D = h("span"), V = T(U), q = h("span"), $ = T(L), W = T(": "), R = h("span"), Y = T(N), ge = Ne(), Ce = h("div"), ve = h("span"), ve.textContent = `${P.factions[1].name}`, se = h("span"), le = h("img"), be = Ne(), ie = T(Te), K(Ie.$$.fragment), ee = h("div"), qe = h("table"), Ge = h("thead"), Qe = h("tr"), He = h("th"), He.textContent = `${P.ui.war.player}`, he = h("th"), $e = T(ce), J = h("th"), ue = T(O), Ue = h("th"), ze = T(ke), dt = h("th"), Ft = h("img"), Ct = Ne(), Je = T(xe), At = h("tbody");
                 for (let et = 0; et < De.length; et += 1) De[et].c();
-                p(s, "class", "infosmall textf0 svelte-19s383j"), Ve(s, "margin-top", "30px"), p(l, "class", "svgicon"), st(l.src, a = "/data/ui/icons/pvp.svg?v=8862189") || p(l, "src", a), p(r, "class", "infobig textprimary svelte-19s383j"), Ve(r, "margin-top", "10px"), p(v, "class", "svgicon"), st(v.src, _ = rr) || p(v, "src", _), p(g, "class", "infobig textfame svelte-19s383j"), Ve(g, "margin-top", "20px"), p(D, "class", B = "text" + ["red", "orange", "green"][t[2].status] + " svelte-19s383j"), p(F, "class", "infosmall svelte-19s383j"), Ve(F, "margin-top", "10px"), p(R, "class", "textprimary"), p(q, "class", "infosmall svelte-19s383j"), Ve(q, "margin-bottom", "20px"), p(ve, "class", "infosmall textf1 svelte-19s383j"), Ve(ve, "margin-top", "30px"), p(le, "class", "svgicon"), st(le.src, _e = "/data/ui/icons/pvp.svg?v=8862189") || p(le, "src", _e), p(se, "class", "infobig textprimary svelte-19s383j"), Ve(se, "margin-top", "10px"), p(o, "class", "grid three"), p(n, "class", "panel-black border grey"), p(He, "width", "30%"), p(he, "class", oe = "textcenter " + (t[0] == 1 ? "textwhite" : "")), p(J, "class", je = "textcenter " + (t[0] == 2 ? "textwhite" : "")), p(Ue, "class", Oe = "textcenter " + (t[0] == 0 ? "textwhite" : "")), p(Ft, "class", "svgicon"), st(Ft.src, Ze = rr) || p(Ft, "src", Ze), p(dt, "class", kt = "textcenter " + (t[0] == 3 ? "textwhite" : "")), p(Qe, "class", "textprimary"), p(qe, "class", "dense panel-black"), p(ee, "class", "scrollbar"), p(e, "class", "layout svelte-19s383j");
+                p(s, "class", "infosmall textf0 svelte-19s383j"), Ve(s, "margin-top", "30px"), p(l, "class", "svgicon"), st(l.src, a = "/data/ui/icons/pvp.svg?v=8868124") || p(l, "src", a), p(r, "class", "infobig textprimary svelte-19s383j"), Ve(r, "margin-top", "10px"), p(v, "class", "svgicon"), st(v.src, _ = rr) || p(v, "src", _), p(g, "class", "infobig textfame svelte-19s383j"), Ve(g, "margin-top", "20px"), p(D, "class", B = "text" + ["red", "orange", "green"][t[2].status] + " svelte-19s383j"), p(F, "class", "infosmall svelte-19s383j"), Ve(F, "margin-top", "10px"), p(R, "class", "textprimary"), p(q, "class", "infosmall svelte-19s383j"), Ve(q, "margin-bottom", "20px"), p(ve, "class", "infosmall textf1 svelte-19s383j"), Ve(ve, "margin-top", "30px"), p(le, "class", "svgicon"), st(le.src, _e = "/data/ui/icons/pvp.svg?v=8868124") || p(le, "src", _e), p(se, "class", "infobig textprimary svelte-19s383j"), Ve(se, "margin-top", "10px"), p(o, "class", "grid three"), p(n, "class", "panel-black border grey"), p(He, "width", "30%"), p(he, "class", oe = "textcenter " + (t[0] == 1 ? "textwhite" : "")), p(J, "class", je = "textcenter " + (t[0] == 2 ? "textwhite" : "")), p(Ue, "class", Oe = "textcenter " + (t[0] == 0 ? "textwhite" : "")), p(Ft, "class", "svgicon"), st(Ft.src, Ze = rr) || p(Ft, "src", Ze), p(dt, "class", kt = "textcenter " + (t[0] == 3 ? "textwhite" : "")), p(Qe, "class", "textprimary"), p(qe, "class", "dense panel-black"), p(ee, "class", "scrollbar"), p(e, "class", "layout svelte-19s383j");
             },
             m(et, Ee) {
                 w(et, e, Ee), d(e, n), d(n, o), d(o, i), d(i, s), d(i, r), d(i, vgStatRow), d(vgStatRow, vg1), d(vg1, vgWarriorImage), d(vg1, vgWarriorText), d(vgStatRow, vg2), d(vg2, vgMageImage), d(vg2, vgMageText), d(vgStatRow, vg3), d(vg3, vgArcherImage), d(vg3, vgArcherText), d(vgStatRow, vg4), d(vg4, vgShamanImage), d(vg4, vgShamanText), d(r, l), d(r, c), d(r, u), d(o, m), d(m, g), d(g, v), d(g, b), d(g, y), d(m, F), d(F, C), d(F, M), d(F, D), d(D, V), d(m, q), d(q, $), d(q, W), d(q, R), d(R, Y), d(m, ge), d(m, totalText), d(totalText, vgTotalNum), d(totalText, vsTotalText), d(totalText, blTotalNum), d(o, Ce), d(Ce, ve), d(Ce, se), d(se, le), d(se, be), d(se, ie), d(Ce, blStatRow), d(blStatRow, bl1), d(bl1, blWarriorImage), d(bl1, blWarriorText), d(blStatRow, bl2), d(bl2, blMageImage), d(bl2, blMageText), d(blStatRow, bl3), d(bl3, blArcherImage), d(bl3, blArcherText), d(blStatRow, bl4), d(bl4, blShamanImage), d(bl4, blShamanText), Q(Ie, n, null), d(e, ee), d(ee, qe), d(qe, Ge), d(Ge, Qe), d(Qe, He), d(Qe, he), d(he, $e), d(Qe, J), d(J, ue), d(Qe, Ue), d(Ue, ze), d(Qe, dt), d(dt, Ft), d(dt, Ct), d(dt, Je), d(qe, At);
@@ -31346,7 +31364,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             je;
         return {
             c() {
-                e = h("div"), n = h("div"), n.innerHTML = '<img class="artwork svelte-cbx1m" src="/data/ui/elixir.svg?v=8862189"/><div class="sparkle svelte-cbx1m" style="font-size:35px; left:30%; top:30%; animation-delay: -1s;">+</div><div class="sparkle svelte-cbx1m" style="font-size:50px; left:40%; top:60%; animation-delay: -2s;">+</div><div class="sparkle svelte-cbx1m" style="font-size:80px; left:60%; top:20%; animation-delay: -3s;">+</div>', o = h("div"), i = h("h1"), i.innerHTML = 'Hordes <span class="textsub">Elixir</span>', s = h("div"), r = h("img"), a = Ne(), f = T(c), u = h("div"), m = h("img"), v = Ne(), b = T(_), k = h("div"), y = h("img"), A = Ne(), C = h("span"), C.textContent = `${Nn[0].inventory}`, M = Ne(), D = h("span"), D.textContent = `${Nn[1].inventory}`, U = Ne(), B = T(V), q = h("div"), L = h("img"), W = Ne(), R = h("span"), R.textContent = `${Nn[0].stash}`, N = Ne(), Y = h("span"), Y.textContent = `${Nn[1].stash}`, ge = Ne(), ve = T(Ce), se = h("div"), le = h("img"), be = Ne(), Te = h("span"), Te.textContent = `${Nn[0].auction}`, ie = Ne(), Ie = h("span"), Ie.textContent = `${Nn[1].auction}`, ee = Ne(), Ge = T(qe), Qe = h("div"), He = h("img"), ce = Ne(), $e = h("span"), $e.textContent = `${Nn[0].auctionHours}h`, oe = Ne(), J = h("span"), J.textContent = `${Nn[1].auctionHours}h`, O = Ne(), je = T(ue), p(n, "class", "artcontainer svelte-cbx1m"), p(i, "class", "textprimary"), p(r, "class", "svgicon"), st(r.src, l = "/data/ui/icons/gem.svg?v=8862189") || p(r, "src", l), p(s, "class", "textwhite"), p(m, "class", "svgicon"), st(m.src, g = "/data/ui/icons/check.svg?v=8862189") || p(m, "src", g), p(u, "class", "textwhite"), p(y, "class", "svgicon"), st(y.src, F = "/data/ui/icons/check.svg?v=8862189") || p(y, "src", F), p(C, "class", "old svelte-cbx1m"), p(D, "class", "textsub"), p(k, "class", "textwhite"), p(L, "class", "svgicon"), st(L.src, $ = "/data/ui/icons/check.svg?v=8862189") || p(L, "src", $), p(R, "class", "old svelte-cbx1m"), p(Y, "class", "textsub"), p(q, "class", "textwhite"), p(le, "class", "svgicon"), st(le.src, _e = "/data/ui/icons/check.svg?v=8862189") || p(le, "src", _e), p(Te, "class", "old svelte-cbx1m"), p(Ie, "class", "textsub"), p(se, "class", "textwhite"), p(He, "class", "svgicon"), st(He.src, he = "/data/ui/icons/check.svg?v=8862189") || p(He, "src", he), p($e, "class", "old svelte-cbx1m"), p(J, "class", "textsub"), p(Qe, "class", "textwhite"), p(e, "class", "split svelte-cbx1m");
+                e = h("div"), n = h("div"), n.innerHTML = '<img class="artwork svelte-cbx1m" src="/data/ui/elixir.svg?v=8868124"/><div class="sparkle svelte-cbx1m" style="font-size:35px; left:30%; top:30%; animation-delay: -1s;">+</div><div class="sparkle svelte-cbx1m" style="font-size:50px; left:40%; top:60%; animation-delay: -2s;">+</div><div class="sparkle svelte-cbx1m" style="font-size:80px; left:60%; top:20%; animation-delay: -3s;">+</div>', o = h("div"), i = h("h1"), i.innerHTML = 'Hordes <span class="textsub">Elixir</span>', s = h("div"), r = h("img"), a = Ne(), f = T(c), u = h("div"), m = h("img"), v = Ne(), b = T(_), k = h("div"), y = h("img"), A = Ne(), C = h("span"), C.textContent = `${Nn[0].inventory}`, M = Ne(), D = h("span"), D.textContent = `${Nn[1].inventory}`, U = Ne(), B = T(V), q = h("div"), L = h("img"), W = Ne(), R = h("span"), R.textContent = `${Nn[0].stash}`, N = Ne(), Y = h("span"), Y.textContent = `${Nn[1].stash}`, ge = Ne(), ve = T(Ce), se = h("div"), le = h("img"), be = Ne(), Te = h("span"), Te.textContent = `${Nn[0].auction}`, ie = Ne(), Ie = h("span"), Ie.textContent = `${Nn[1].auction}`, ee = Ne(), Ge = T(qe), Qe = h("div"), He = h("img"), ce = Ne(), $e = h("span"), $e.textContent = `${Nn[0].auctionHours}h`, oe = Ne(), J = h("span"), J.textContent = `${Nn[1].auctionHours}h`, O = Ne(), je = T(ue), p(n, "class", "artcontainer svelte-cbx1m"), p(i, "class", "textprimary"), p(r, "class", "svgicon"), st(r.src, l = "/data/ui/icons/gem.svg?v=8868124") || p(r, "src", l), p(s, "class", "textwhite"), p(m, "class", "svgicon"), st(m.src, g = "/data/ui/icons/check.svg?v=8868124") || p(m, "src", g), p(u, "class", "textwhite"), p(y, "class", "svgicon"), st(y.src, F = "/data/ui/icons/check.svg?v=8868124") || p(y, "src", F), p(C, "class", "old svelte-cbx1m"), p(D, "class", "textsub"), p(k, "class", "textwhite"), p(L, "class", "svgicon"), st(L.src, $ = "/data/ui/icons/check.svg?v=8868124") || p(L, "src", $), p(R, "class", "old svelte-cbx1m"), p(Y, "class", "textsub"), p(q, "class", "textwhite"), p(le, "class", "svgicon"), st(le.src, _e = "/data/ui/icons/check.svg?v=8868124") || p(le, "src", _e), p(Te, "class", "old svelte-cbx1m"), p(Ie, "class", "textsub"), p(se, "class", "textwhite"), p(He, "class", "svgicon"), st(He.src, he = "/data/ui/icons/check.svg?v=8868124") || p(He, "src", he), p($e, "class", "old svelte-cbx1m"), p(J, "class", "textsub"), p(Qe, "class", "textwhite"), p(e, "class", "split svelte-cbx1m");
             },
             m(Ue, ke) {
                 w(Ue, e, ke), d(e, n), d(e, o), d(o, i), d(o, s), d(s, r), d(s, a), d(s, f), d(o, u), d(u, m), d(u, v), d(u, b), d(o, k), d(k, y), d(k, A), d(k, C), d(k, M), d(k, D), d(k, U), d(k, B), d(o, q), d(q, L), d(q, W), d(q, R), d(q, N), d(q, Y), d(q, ge), d(q, ve), d(o, se), d(se, le), d(se, be), d(se, Te), d(se, ie), d(se, Ie), d(se, ee), d(se, Ge), d(o, Qe), d(Qe, He), d(Qe, ce), d(Qe, $e), d(Qe, oe), d(Qe, J), d(Qe, O), d(Qe, je);
@@ -31767,7 +31785,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             s;
         return {
             c() {
-                e = h("img"), o = Ne(), s = T(i), p(e, "class", "svgicon"), st(e.src, n = "/data/ui/icons/check.svg?v=8862189") || p(e, "src", n);
+                e = h("img"), o = Ne(), s = T(i), p(e, "class", "svgicon"), st(e.src, n = "/data/ui/icons/check.svg?v=8868124") || p(e, "src", n);
             },
             m(r, l) {
                 w(r, e, l), w(r, o, l), w(r, s, l);
@@ -32277,7 +32295,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         return {
             c() {
                 e = h("div"), n = h("h3"), o = T("Hordes.io is free!"), i = h("br"), s = T(`
-    Buy `), r = h("span"), r.innerHTML = '<span class="textwhite">Hordes</span> <img class="svgicon texticon" src="/data/ui/icons/gem.svg?v=8862189"/>  Elixir', l = T(`
+    Buy `), r = h("span"), r.innerHTML = '<span class="textwhite">Hordes</span> <img class="svgicon texticon" src="/data/ui/icons/gem.svg?v=8868124"/>  Elixir', l = T(`
      to hide ads & unlock extra features!`), p(r, "class", "btn black textsub"), p(n, "class", "textgrey textcenter"), p(e, "class", "container panel-black svelte-um60d1");
             },
             m(f, u) {
@@ -32721,7 +32739,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 }
             } else {
                 let o = document.createElement("img");
-                o.src = "data/assets/" + td(e) + "?v=8862189", o.onload = t8, o_.set(e, o);
+                o.src = "data/assets/" + td(e) + "?v=8868124", o.onload = t8, o_.set(e, o);
             }
         },
         e8 = (t, e, n, o, entity) => {
@@ -32762,7 +32780,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         let e, n, o, i;
         return {
             c() {
-                e = h("img"), p(e, "class", "btn border black bgblack round warIcon svelte-1khf45q"), st(e.src, n = "/data/ui/icons/war0." + On + "?v=8862189") || p(e, "src", n);
+                e = h("img"), p(e, "class", "btn border black bgblack round warIcon svelte-1khf45q"), st(e.src, n = "/data/ui/icons/war0." + On + "?v=8868124") || p(e, "src", n);
             },
             m(s, r) {
                 w(s, e, r), o || (i = H(e, "click", t[2]), o = !0);
@@ -35445,7 +35463,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         eB = async t => {
             try {
                 t.abort = new AbortController;
-                let n = await (await fetch(`data/world/${I.file}/${t.id}?v=8862189`, {
+                let n = await (await fetch(`data/world/${I.file}/${t.id}?v=8868124`, {
                     signal: t.abort.signal,
                     cache: "default"
                 })).arrayBuffer();
@@ -36642,10 +36660,59 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             return this.tags.get(e).size > 0;
         }
     };
+    var emoteSet = (t, e, n, o, i = 0, s = 0, r = 0) => {
+            t && (X(t.position, e, n, o), X(t.rotation, i, s, r), t.matrixNeedsUpdate = !0);
+        },
+        emoteAnims = {
+            1: (t, e) => {
+                let n = t.body,
+                    o = e % 1.2 / 1.2 * pl,
+                    i = Math.sin(o * 2),
+                    s = Math.sin(o),
+                    r = s * (t.entity.class === 2 ? .2 : 1);
+                emoteSet(n[0], 0, .4 + i * .5, 0, r * .3, r * .5);
+                for (let l = 0; l < 2; ++l) {
+                    let a = l === 0 ? -1 : 1;
+                    emoteSet(n[2 + l], a * (.9 + i * .4), .6 + i * .3, 0, 0, i * .3, s * .5), emoteSet(n[4 + l], a * (.4 - i * .2), -.65, 0);
+                }
+            },
+            2: t => {
+                let e = t.body;
+                emoteSet(e[0], 0, -.1, 0);
+                for (let n = 0; n < 2; ++n) {
+                    let o = n === 0 ? -1 : 1;
+                    emoteSet(e[4 + n], o * .3, -.8, .5, -.9, o * .2, o * 0), emoteSet(e[2 + n], o * .65, -.35, .3, -.4, 0, -o * .3);
+                }
+            },
+            3: (t, e) => {
+                let n = t.body,
+                    o = e * 2,
+                    i = Math.sin(o * pl),
+                    s = Math.sin(o * .15 * pl),
+                    r = Math.sin(o * pl - 1.3),
+                    l = Math.sin(o * pl + .5),
+                    a = (1 - Math.cos(o / 1.13 * pl)) * .02;
+                emoteSet(n[0], r * .03, .4 - a, 0, s * .2 + i * .01, -l * .02, -r * .05);
+                let c = .64 + i * .25;
+                emoteSet(n[2], -.4 - Math.sin(c), .1 + Math.cos(c), .15, 0, 0, Math.PI + c);
+                for (let f = 0; f < 2; ++f) {
+                    let u = f === 0 ? -1 : 1;
+                    emoteSet(n[4 + f], u * .45, -.65, 0, 0, u * .1);
+                }
+            }
+        },
+        tickEmote = (t, e, n) => {
+            let o = t.entity.emote;
+            t.emoteId !== o && (t.emoteId = o, t.emoteStartedAt = n - Math.random() * 1.2);
+            let i = emoteAnims[o];
+            return !i || !t.entity.stats.alive ? !1 : (i(t, n - t.emoteStartedAt, e), !0);
+        };
     var Go = [5, 4, 0, 2, 3, 8, 9],
         Ho = (t, e, n, o) => {
-            let i = t.entity.mount !== void 0;
-            t.walking = !i && t.walking, xB(t, i), wB(t, i), kB(t, i), yB(t, e, n, o, i), bB(t, e, n, o, i);
+            let i = t.entity.emote === 2 || t.entity.emote === 3;
+            if ((i || t.emoteId === 2 || t.emoteId === 3) && jo(t, i), tickEmote(t, e, n)) return;
+            let s = t.entity.mount !== void 0;
+            t.walking = !s && t.walking, xB(t, s), wB(t, s), kB(t, s), yB(t, e, n, o, s), bB(t, e, n, o, s);
         },
         bB = (t, e, n, o) => {
             if (t.body[0].visible && t.entity.buffs.visualIncapacitate > 0) {
@@ -37758,13 +37825,13 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
     };
     var Y0 = class extends Dr {
         constructor(e) {
-            e.creature && (e.skin = e.creature.skin, e.name = e.creature.name), super(e), this.creatureId = e.creature ? e.creature.id : -1, this.stats = new H0(this), this.buffs = new N0(this), this.skills = new G0(this), this.steer = [0, 0], this.speed = 1, this.static = !1, this.jump = 0, this.onGround = !0, this.belowGround = !1, this.inWater = 0, this.groundNormal = [0, 0, 0], this.target = 0, this.level = 0, this.faction = 0, this.posLock = [0, 0], this.posLockRadius = 0, this.aabb = Ru();
+            e.creature && (e.skin = e.creature.skin, e.name = e.creature.name), super(e), this.creatureId = e.creature ? e.creature.id : -1, this.stats = new H0(this), this.buffs = new N0(this), this.skills = new G0(this), this.steer = [0, 0], this.emote = 0, this.speed = 1, this.static = !1, this.jump = 0, this.onGround = !0, this.belowGround = !1, this.inWater = 0, this.groundNormal = [0, 0, 0], this.target = 0, this.level = 0, this.faction = 0, this.posLock = [0, 0], this.posLockRadius = 0, this.aabb = Ru();
         }
         setAABB() {
             k0(this.aabb, this.pos, this.size, this.size, this.size);
         }
         preFixed(e, n, o) {
-            super.preFixed(e, n, o), this.buffs.tick(e, n, o), this.stats.tick(e, n), this.skills.tick(e, n, o), this.setSize((this.stats.getStat(27) || 100) / 100);
+            super.preFixed(e, n, o), this.buffs.tick(e, n, o), this.stats.tick(e, n), this.emote !== 0 && (!this.stats.alive || this.steer[0] || this.steer[1]) && this.setEmote(0), this.skills.tick(e, n, o), this.setSize((this.stats.getStat(27) || 100) / 100);
         }
         getStatBasedMoveSpeed() {
             return Math.max(Math.min(65534, this.stats.getStat(15)));
@@ -37813,6 +37880,9 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         }
         setSteer(e, n) {
             this.steer[0] = e, this.steer[1] = n;
+        }
+        setEmote(e) {
+            return this.emote === e ? !1 : (this.emote = e, !0);
         }
         setJump(e) {
             this.jump = e;
@@ -38062,13 +38132,13 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             AT.push(t);
         },
         nU = (t, e, n, o) => {
-            e.logic.customIcon === void 0 ? n.icon = `/data/${e.logic.icon}.${Yn}?v=8862189` : n.icon = `/data/${(() => {
+            e.logic.customIcon === void 0 ? n.icon = `/data/${e.logic.icon}.${Yn}?v=8868124` : n.icon = `/data/${(() => {
                 try {
                     return e.logic.customIcon(e);
                 } catch (i) {
                     return e.logic.icon;
                 }
-            })()}.${Yn}?v=8862189`, n.cancel = o && e.logic.tags.has(12) ? e.logic.id : -1, n.type = e.logic.type, n.time = Math.min(e.timer.duration, e.timer.passed(t)), n.duration = e.timer.duration, n.stacks = e.uniqueInstances > 1 ? e.uniqueInstances : e.stacks;
+            })()}.${Yn}?v=8868124`, n.cancel = o && e.logic.tags.has(12) ? e.logic.id : -1, n.type = e.logic.type, n.time = Math.min(e.timer.duration, e.timer.passed(t)), n.duration = e.timer.duration, n.stacks = e.uniqueInstances > 1 ? e.uniqueInstances : e.stacks;
         };
     var co = class extends ci {
         constructor(e) {
@@ -39453,6 +39523,8 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         t.setName(Yo(e, 1));
     }).set(13, (t, e, n) => {
         t.skin = e[1], t.remakeTransform();
+    }).set(30, (t, e) => {
+        t.setEmote(e[1]);
     }).set(14, (t, e, n) => {
         t.setClan(e.length > 2 ? Yo(e, 2) : void 0, e[1]);
     }).set(16, (t, e, n) => {
@@ -39731,8 +39803,8 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         }
     };
     window.onload = async () => {
-        console.log("Hordes 0.51.8853 Live"), await L1();
-        let t = await fetch("data/game/game.bin?v=8862189");
+        console.log("Hordes 0.51.8868 Live"), await L1();
+        let t = await fetch("data/game/game.bin?v=8868124");
         z1(Ia.gamedata.decode(new Uint8Array(await t.arrayBuffer()))), xx(), yA(), RA(), new a8({
             target: document.querySelector("body")
         }), Q3(XA, QA), N3(new Fh({})), Z_(!0), BT();
