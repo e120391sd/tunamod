@@ -1002,7 +1002,7 @@
         Mi = y(80),
         ql = y(30),
         ki = y("en"),
-        Ol = y("faction"),
+        Ol = y("global"),
         Nl = y(8),
         Wl = y(300),
         Gl = y(2),
@@ -1142,7 +1142,7 @@
     for (let t in _a) ru(t, _a[t]);
     var X;
     ki.subscribe(async t => {
-        await fetch(`/data/loc/${t}.json?v=8862189`).then(async e => {
+        await fetch(`/data/loc/${t}.json?v=8868124`).then(async e => {
             X = await e.json(), gi.set(!0)
         })
     });
@@ -3590,9 +3590,9 @@ void main() {
     _b();
     var yb = [0, 0, 1, 1, 2, 3],
         x0 = (t, e) => "book" + (e !== void 0 ? e : "") + yb[t % 5];
-    var Er = t => `/data/ui/skills/${t}.${Tn}?v=8862189`;
-    var Ba = t => `/data/ui/classes/${t}.${Xo}?v=8862189`,
-        ja = t => `/data/ui/factions/${t}.${Xo}?v=8862189`;
+    var Er = t => `/data/ui/skills/${t}.${Tn}?v=8868124`;
+    var Ba = t => `/data/ui/classes/${t}.${Xo}?v=8868124`,
+        ja = t => `/data/ui/factions/${t}.${Xo}?v=8868124`;
     var w0 = t => {
         mo.forEach(e => {
             if (!e.engineOnly)
@@ -5491,11 +5491,11 @@ void main() {
                 let s = new Image;
                 s.onload = () => {
                     o[e] = r(s), n(o[e], t + e), s.onload = void 0
-                }, s.src = t + e + "?v=8862189";
+                }, s.src = t + e + "?v=8868124";
                 break
             }
             default: {
-                fetch(t + e + "?v=8862189").then(s => {
+                fetch(t + e + "?v=8868124").then(s => {
                     if (!s.ok) throw new Error;
                     s.arrayBuffer().then(async a => {
                         o[e] = await r(a), n(o[e], t + e)
@@ -5549,7 +5549,7 @@ void main() {
                     size: 2,
                     data: new Float32Array([0, 0, 2, 0, 0, 2])
                 }
-            }), 0, v.TRIANGLES), fetch("/data/items/atlas.json?v=8862189").then(async t => {
+            }), 0, v.TRIANGLES), fetch("/data/items/atlas.json?v=8868124").then(async t => {
                 Rn = await t.json();
                 for (let e in Rn) e != "s" && (Rn[e] = Rn[e].map(o => o / Rn.s))
             })
@@ -6547,7 +6547,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             o = t[1];
         return Math.sqrt(e * e + o * o)
     }
-    var assetVersion = "8862189";
+    var assetVersion = "8868124";
     var settingDefaults = {
         cinematicLighting: false,
         ssao: false,
@@ -11540,7 +11540,7 @@ void main(){
         Sy = async t => {
             try {
                 t.abort = new AbortController;
-                let o = await (await fetch(`data/world/${ne.file}/${t.id}?v=8862189`, {
+                let o = await (await fetch(`data/world/${ne.file}/${t.id}?v=8868124`, {
                     signal: t.abort.signal,
                     cache: "default"
                 })).arrayBuffer();
@@ -12097,8 +12097,8 @@ void main(){
         dtHighTrack: 1 / 0
     });
     window.onload = async () => {
-        console.log("Hordes 0.51.8862 Live");
-        let t = await fetch("data/game/game.bin?v=8862189");
+        console.log("Hordes 0.51.8868 Live");
+        let t = await fetch("data/game/game.bin?v=8868124");
         qa(Ur.gamedata.decode(new Uint8Array(await t.arrayBuffer()))), applyFaivel(), Cg(), document.body.appendChild(ko);
         let e = new na({});
         Ku(e), e.load(...trackWorld()), e.setTimeFromTickId(startTick()), Vu(gfe.menuTrackSpeed), zu(.03), Yt.push(...Eg), he.fov = 65, Go(he), is(400, 2), Te.fxaa = !0, Te.bloom = !0, vi.set(!1), zg()
@@ -12198,9 +12198,9 @@ void main(){
         let u = t[1] && Bg(t);
         return {
             c() {
-                e = C("div"), o = C("div"), r = C("a"), r.innerHTML = '<img alt="Hordes.io" class="icon svelte-dgj98e" src="/data/ui/icon.svg?v=8862189"/>', n = C("nav");
+                e = C("div"), o = C("div"), r = C("a"), r.innerHTML = '<img alt="Hordes.io" class="icon svelte-dgj98e" src="/data/ui/icon.svg?v=8868124"/>', n = C("nav");
                 for (let m = 0; m < d.length; m += 1) d[m].c();
-                i = C("img"), u && u.c(), F(r, "href", "/"), F(n, "class", "nav svelte-dgj98e"), F(i, "class", "icon menubtn svelte-dgj98e"), Ne(i.src, s = "/data/ui/icons/menu.svg?v=8862189") || F(i, "src", s), F(o, "class", "navcontainer svelte-dgj98e"), F(e, "class", "row svelte-dgj98e"), F(e, "style", a = t[0] ? "text-align: center;" : "")
+                i = C("img"), u && u.c(), F(r, "href", "/"), F(n, "class", "nav svelte-dgj98e"), F(i, "class", "icon menubtn svelte-dgj98e"), Ne(i.src, s = "/data/ui/icons/menu.svg?v=8868124") || F(i, "src", s), F(o, "class", "navcontainer svelte-dgj98e"), F(e, "class", "row svelte-dgj98e"), F(e, "style", a = t[0] ? "text-align: center;" : "")
             },
             m(m, h) {
                 z(m, e, h), w(e, o), w(o, r), w(o, n);
@@ -12369,7 +12369,7 @@ void main(){
             Me;
         return {
             c() {
-                e = C("div"), o = C("div"), o.innerHTML = '<img class="artwork svelte-cbx1m" src="/data/ui/elixir.svg?v=8862189"/><div class="sparkle svelte-cbx1m" style="font-size:35px; left:30%; top:30%; animation-delay: -1s;">+</div><div class="sparkle svelte-cbx1m" style="font-size:50px; left:40%; top:60%; animation-delay: -2s;">+</div><div class="sparkle svelte-cbx1m" style="font-size:80px; left:60%; top:20%; animation-delay: -3s;">+</div>', r = C("div"), n = C("h1"), n.innerHTML = 'Hordes <span class="textsub">Elixir</span>', i = C("div"), s = C("img"), c = Ae(), f = B(l), d = C("div"), u = C("img"), h = Ae(), M = B(g), b = C("div"), _ = C("img"), U = Ae(), T = C("span"), T.textContent = `${wo[0].inventory}`, V = Ae(), ae = C("span"), ae.textContent = `${wo[1].inventory}`, q = Ae(), oe = B(O), Z = C("div"), te = C("img"), W = Ae(), A = C("span"), A.textContent = `${wo[0].stash}`, J = Ae(), ie = C("span"), ie.textContent = `${wo[1].stash}`, xe = Ae(), _e = B(Ie), ye = C("div"), rt = C("img"), Dt = Ae(), je = C("span"), je.textContent = `${wo[0].auction}`, H = Ae(), Le = C("span"), Le.textContent = `${wo[1].auction}`, Ke = Ae(), nt = B(Ze), Ee = C("div"), Xe = C("img"), qe = Ae(), co = C("span"), co.textContent = `${wo[0].auctionHours}h`, D = Ae(), P = C("span"), P.textContent = `${wo[1].auctionHours}h`, x = Ae(), Me = B(K), F(o, "class", "artcontainer svelte-cbx1m"), F(n, "class", "textprimary"), F(s, "class", "svgicon"), Ne(s.src, a = "/data/ui/icons/gem.svg?v=8862189") || F(s, "src", a), F(i, "class", "textwhite"), F(u, "class", "svgicon"), Ne(u.src, m = "/data/ui/icons/check.svg?v=8862189") || F(u, "src", m), F(d, "class", "textwhite"), F(_, "class", "svgicon"), Ne(_.src, k = "/data/ui/icons/check.svg?v=8862189") || F(_, "src", k), F(T, "class", "old svelte-cbx1m"), F(ae, "class", "textsub"), F(b, "class", "textwhite"), F(te, "class", "svgicon"), Ne(te.src, L = "/data/ui/icons/check.svg?v=8862189") || F(te, "src", L), F(A, "class", "old svelte-cbx1m"), F(ie, "class", "textsub"), F(Z, "class", "textwhite"), F(rt, "class", "svgicon"), Ne(rt.src, Ye = "/data/ui/icons/check.svg?v=8862189") || F(rt, "src", Ye), F(je, "class", "old svelte-cbx1m"), F(Le, "class", "textsub"), F(ye, "class", "textwhite"), F(Xe, "class", "svgicon"), Ne(Xe.src, Et = "/data/ui/icons/check.svg?v=8862189") || F(Xe, "src", Et), F(co, "class", "old svelte-cbx1m"), F(P, "class", "textsub"), F(Ee, "class", "textwhite"), F(e, "class", "split svelte-cbx1m")
+                e = C("div"), o = C("div"), o.innerHTML = '<img class="artwork svelte-cbx1m" src="/data/ui/elixir.svg?v=8868124"/><div class="sparkle svelte-cbx1m" style="font-size:35px; left:30%; top:30%; animation-delay: -1s;">+</div><div class="sparkle svelte-cbx1m" style="font-size:50px; left:40%; top:60%; animation-delay: -2s;">+</div><div class="sparkle svelte-cbx1m" style="font-size:80px; left:60%; top:20%; animation-delay: -3s;">+</div>', r = C("div"), n = C("h1"), n.innerHTML = 'Hordes <span class="textsub">Elixir</span>', i = C("div"), s = C("img"), c = Ae(), f = B(l), d = C("div"), u = C("img"), h = Ae(), M = B(g), b = C("div"), _ = C("img"), U = Ae(), T = C("span"), T.textContent = `${wo[0].inventory}`, V = Ae(), ae = C("span"), ae.textContent = `${wo[1].inventory}`, q = Ae(), oe = B(O), Z = C("div"), te = C("img"), W = Ae(), A = C("span"), A.textContent = `${wo[0].stash}`, J = Ae(), ie = C("span"), ie.textContent = `${wo[1].stash}`, xe = Ae(), _e = B(Ie), ye = C("div"), rt = C("img"), Dt = Ae(), je = C("span"), je.textContent = `${wo[0].auction}`, H = Ae(), Le = C("span"), Le.textContent = `${wo[1].auction}`, Ke = Ae(), nt = B(Ze), Ee = C("div"), Xe = C("img"), qe = Ae(), co = C("span"), co.textContent = `${wo[0].auctionHours}h`, D = Ae(), P = C("span"), P.textContent = `${wo[1].auctionHours}h`, x = Ae(), Me = B(K), F(o, "class", "artcontainer svelte-cbx1m"), F(n, "class", "textprimary"), F(s, "class", "svgicon"), Ne(s.src, a = "/data/ui/icons/gem.svg?v=8868124") || F(s, "src", a), F(i, "class", "textwhite"), F(u, "class", "svgicon"), Ne(u.src, m = "/data/ui/icons/check.svg?v=8868124") || F(u, "src", m), F(d, "class", "textwhite"), F(_, "class", "svgicon"), Ne(_.src, k = "/data/ui/icons/check.svg?v=8868124") || F(_, "src", k), F(T, "class", "old svelte-cbx1m"), F(ae, "class", "textsub"), F(b, "class", "textwhite"), F(te, "class", "svgicon"), Ne(te.src, L = "/data/ui/icons/check.svg?v=8868124") || F(te, "src", L), F(A, "class", "old svelte-cbx1m"), F(ie, "class", "textsub"), F(Z, "class", "textwhite"), F(rt, "class", "svgicon"), Ne(rt.src, Ye = "/data/ui/icons/check.svg?v=8868124") || F(rt, "src", Ye), F(je, "class", "old svelte-cbx1m"), F(Le, "class", "textsub"), F(ye, "class", "textwhite"), F(Xe, "class", "svgicon"), Ne(Xe.src, Et = "/data/ui/icons/check.svg?v=8868124") || F(Xe, "src", Et), F(co, "class", "old svelte-cbx1m"), F(P, "class", "textsub"), F(Ee, "class", "textwhite"), F(e, "class", "split svelte-cbx1m")
             },
             m(ee, le) {
                 z(ee, e, le), w(e, o), w(e, r), w(r, n), w(r, i), w(i, s), w(i, c), w(i, f), w(r, d), w(d, u), w(d, h), w(d, M), w(r, b), w(b, _), w(b, U), w(b, T), w(b, V), w(b, ae), w(b, q), w(b, oe), w(r, Z), w(Z, te), w(Z, W), w(Z, A), w(Z, J), w(Z, ie), w(Z, xe), w(Z, _e), w(r, ye), w(ye, rt), w(ye, Dt), w(ye, je), w(ye, H), w(ye, Le), w(ye, Ke), w(ye, nt), w(r, Ee), w(Ee, Xe), w(Ee, qe), w(Ee, co), w(Ee, D), w(Ee, P), w(Ee, x), w(Ee, Me)
@@ -13041,7 +13041,7 @@ void main(){
         return t.$$set = H => {
             "data" in H && o(0, l = H.data), "key" in H && o(1, f = H.key), "stacks" in H && o(2, d = H.stacks), "cd" in H && o(3, u = H.cd), "remaining" in H && o(4, m = H.remaining), "border" in H && o(5, h = H.border), "img" in H && o(22, g = H.img), "meta" in H && o(23, M = H.meta), "css" in H && o(6, b = H.css), "id" in H && o(7, _ = H.id), "describe" in H && o(8, k = H.describe), "queued" in H && o(24, U = H.queued), "pickable" in H && o(25, T = H.pickable), "descRoot" in H && o(26, V = H.descRoot), "descPos" in H && o(9, ae = H.descPos), "auto" in H && o(10, q = H.auto), "status" in H && o(27, O = H.status), "clickToUse" in H && o(28, oe = H.clickToUse), "shift" in H && o(29, Z = H.shift), "$$scope" in H && o(30, c = H.$$scope)
         }, t.$$.update = () => {
-            t.$$.dirty[0] & 16392 && o(14, r = r || u > 0), t.$$.dirty[0] & 138446856 && o(17, n = g ? s && te || u > 0 || O == -1 ? g.replace(".", "_grey.").replace(/_q[0-9]/g, "") : g : `/data/ui/slotbg/bg.${Tn}?v=8862189`), t.$$.dirty[0] & 150995968 && o(16, i = W(q || U, O)), t.$$.dirty[0] & 67112960 && A && V && V.appendChild(A), t.$$.dirty[0] & 8200 && Kg(Math.floor(u || 0), Ye, 40)
+            t.$$.dirty[0] & 16392 && o(14, r = r || u > 0), t.$$.dirty[0] & 138446856 && o(17, n = g ? s && te || u > 0 || O == -1 ? g.replace(".", "_grey.").replace(/_q[0-9]/g, "") : g : `/data/ui/slotbg/bg.${Tn}?v=8868124`), t.$$.dirty[0] & 150995968 && o(16, i = W(q || U, O)), t.$$.dirty[0] & 67112960 && A && V && V.appendChild(A), t.$$.dirty[0] & 8200 && Kg(Math.floor(u || 0), Ye, 40)
         }, [l, f, d, u, m, h, b, _, k, ae, q, te, A, Ye, r, s, i, n, J, ie, xe, _e, g, M, U, T, V, O, oe, Z, c, a, Dt, je]
     }
     var sl = class extends et {
@@ -15851,7 +15851,7 @@ void main(){
         let e;
         return {
             c() {
-                e = C("div"), e.innerHTML = '<h1 class="title success svelte-1ua636q">Success!</h1><p>Thank you for signing up! Your account has not yet been unlocked. Please check back in the future for PTR tests.</p><a href="https://discord.gg/hordes" target="_blank" rel="noopener"><img class="social svelte-1ua636q" src="/data/ui/interface/discord-icon.svg?v=8862189"/></a>', We(e, "width", "300px")
+                e = C("div"), e.innerHTML = '<h1 class="title success svelte-1ua636q">Success!</h1><p>Thank you for signing up! Your account has not yet been unlocked. Please check back in the future for PTR tests.</p><a href="https://discord.gg/hordes" target="_blank" rel="noopener"><img class="social svelte-1ua636q" src="/data/ui/interface/discord-icon.svg?v=8868124"/></a>', We(e, "width", "300px")
             },
             m(o, r) {
                 z(o, e, r)
@@ -16241,7 +16241,7 @@ void main(){
         let e, o;
         return {
             c() {
-                e = C("span"), e.innerHTML = '<img class="svgicon texticon" src="/data/ui/icons/gem.svg?v=8862189"/> Elixir Active', o = B(" | "), F(e, "class", "textsub")
+                e = C("span"), e.innerHTML = '<img class="svgicon texticon" src="/data/ui/icons/gem.svg?v=8868124"/> Elixir Active', o = B(" | "), F(e, "class", "textsub")
             },
             m(r, n) {
                 z(r, e, n), z(r, o, n)
@@ -16266,7 +16266,7 @@ void main(){
             J = t[5] === !0 && n3(t);
         return {
             c() {
-                e = C("div"), o = C("div"), vt(r.$$.fragment), n = C("div"), i = C("img"), c = C("img"), d = C("div"), u = B("Live"), g.c(), M = C("div"), b = C("div"), _ = C("div"), A && A.c(), k = C("p"), k.innerHTML = '<a class="btn small cyan" href="https://twitter.com/shatterspine" target="_blank">@shatterspine</a> <a class="btn small purp" href="https://discord.gg/hordes" target="_blank">Discord</a>', U = C("div"), T = C("small"), T.innerHTML = '<a class="textgrey" href="/terms#terms-and-conditions">Terms</a> | <a class="textgrey" href="/terms#privacy-policy">Privacy</a>', V = C("small"), J && J.c(), ae = C("span"), ae.textContent = "0.51.8862 Live", q = C("div"), F(o, "class", "textshadow svelte-1ua636q"), F(i, "alt", "Sword"), Ne(i.src, s = "/data/ui/sword.svg?v=8862189") || F(i, "src", s), F(i, "class", a = "sword " + (t[2] !== "denied" ? "logosmall" : "") + " svelte-1ua636q"), F(c, "alt", "Logo"), Ne(c.src, l = "/data/ui/logo.svg?v=8862189") || F(c, "src", l), F(c, "class", f = "logo " + (t[2] !== "denied" ? "logosmall" : "") + " svelte-1ua636q"), F(d, "class", m = "inlinetag versionbox " + (t[2] !== "denied" ? "logosmall" : "") + " svelte-1ua636q"), F(n, "class", "menu svelte-1ua636q"), F(_, "class", "textshadow svelte-1ua636q"), F(b, "class", "row messagebox svelte-1ua636q"), F(T, "class", "textgrey "), F(V, "class", "textgrey"), F(U, "class", "row footerwrapper textshadow svelte-1ua636q"), F(e, "class", "l-menu menuwrapper svelte-1ua636q"), F(q, "class", "l-menu darkgradient svelte-1ua636q")
+                e = C("div"), o = C("div"), vt(r.$$.fragment), n = C("div"), i = C("img"), c = C("img"), d = C("div"), u = B("Live"), g.c(), M = C("div"), b = C("div"), _ = C("div"), A && A.c(), k = C("p"), k.innerHTML = '<a class="btn small cyan" href="https://twitter.com/shatterspine" target="_blank">@shatterspine</a> <a class="btn small purp" href="https://discord.gg/hordes" target="_blank">Discord</a>', U = C("div"), T = C("small"), T.innerHTML = '<a class="textgrey" href="/terms#terms-and-conditions">Terms</a> | <a class="textgrey" href="/terms#privacy-policy">Privacy</a>', V = C("small"), J && J.c(), ae = C("span"), ae.textContent = "0.51.8868 Live", q = C("div"), F(o, "class", "textshadow svelte-1ua636q"), F(i, "alt", "Sword"), Ne(i.src, s = "/data/ui/sword.svg?v=8868124") || F(i, "src", s), F(i, "class", a = "sword " + (t[2] !== "denied" ? "logosmall" : "") + " svelte-1ua636q"), F(c, "alt", "Logo"), Ne(c.src, l = "/data/ui/logo.svg?v=8868124") || F(c, "src", l), F(c, "class", f = "logo " + (t[2] !== "denied" ? "logosmall" : "") + " svelte-1ua636q"), F(d, "class", m = "inlinetag versionbox " + (t[2] !== "denied" ? "logosmall" : "") + " svelte-1ua636q"), F(n, "class", "menu svelte-1ua636q"), F(_, "class", "textshadow svelte-1ua636q"), F(b, "class", "row messagebox svelte-1ua636q"), F(T, "class", "textgrey "), F(V, "class", "textgrey"), F(U, "class", "row footerwrapper textshadow svelte-1ua636q"), F(e, "class", "l-menu menuwrapper svelte-1ua636q"), F(q, "class", "l-menu darkgradient svelte-1ua636q")
             },
             m(ie, xe) {
                 z(ie, e, xe), w(e, o), mt(r, o, null), w(e, n), w(n, i), w(n, c), w(n, d), w(d, u), L[h].m(n, null), w(e, M), w(M, b), w(b, _), A && A.m(_, null), w(b, k), w(M, U), w(U, T), w(U, V), J && J.m(V, null), w(V, ae), z(ie, q, xe), O = !0, oe || (Z = Pe(d, "click", t[11]), oe = !0)
