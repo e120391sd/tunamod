@@ -2542,6 +2542,7 @@ void main() {
         godRaysDust: () => godRaysDust,
         godRaysGate: () => godRaysGate,
         simpleSky: () => simpleSky,
+        classicSky: () => classicSky,
         spoofPlayerName: () => spoofPlayerName,
         sharpen: () => sharpen,
         sharpenAmount: () => sharpenAmount,
@@ -2872,6 +2873,7 @@ void main() {
         bloomRadius = ne(100),
         bloomSky = ne(25),
         simpleSky = ne(false),
+        classicSky = ne(false),
         spoofPlayerName = ne(""),
         customCape = ne("#000000"),
         customCrown = ne("#000000"),
@@ -9402,7 +9404,7 @@ void main(){
         O1.set(23, shadowstrider);
         O1.set(31, scarab);
 
-        //faivel retexture:
+        /* faivel retexture (disabled, replaced by the classic sky mod):
         if (fe.faivelRetexture) {
             textureOverrides.set(2124, {
                 id: 2124,
@@ -9416,10 +9418,6 @@ void main(){
                 hue: -13.1,
                 contrast: .9
             })
-            /*             textureOverrides.set(2119, {
-                            id: 2119,
-                            hue: 5,
-                        })  */
             textureOverrides.set(2125, {
                 id: 2051,
                 exposure: 0,
@@ -9464,6 +9462,7 @@ void main(){
             //setFoliageSheet([56, 57, 58, 59, 60, 61, 62, 63], 1213, [13, 5, 6, 7, 15, 4, 0]);
             applyFoliageOverrides();
         }
+        */
 
         Fi.set(8888, {
             "cull": 0,
@@ -13661,6 +13660,37 @@ precision highp float;precision highp int;uniform Environment{vec3 worldlight[3]
 precision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};in float vCameraDistance;in vec4 vWorldPos;uniform Sky{vec3 skycolors[5];vec3 suncolor;};uniform sampler2D skyDiffuse;uniform sampler2D cloudDiffuse;in vec2 vUv;in vec3 vPos;out vec4 fragColor;void main(){gl_FragDepth=0.999999;vec3 a=vec3(0.0);float b=vPos.y/0.5;if(b>0.4){a=mix(skycolors[1],skycolors[0],smoothstep(0.4,1.0,b));}else if(b>0.25){a=mix(skycolors[2],skycolors[1],smoothstep(0.25,0.4,b));}else if(b>0.06){a=mix(skycolors[3],skycolors[2],smoothstep(0.06,0.25,b));}else{a=mix(fog[0],skycolors[3],smoothstep(0.0,0.06,b));}float c=1.0-sin(daycycle*6.28)+0.02;float d=smoothstep(0.1,0.5,b)*smoothstep(0.9,0.6,b);a+=texture(skyDiffuse,vUv*vec2(4.0,1.0)).rgb*c*d;float e=texture(cloudDiffuse,vec2(vUv.x+time/80.0,vUv.y*0.6+time/120.0)).r*texture(cloudDiffuse,vec2(vUv.x*2.0+time/300.0,vUv.y*0.6)).r;e=e*smoothstep(0.0,0.1,b)*smoothstep(1.0,0.85,b);e=smoothstep(0.25,0.7,e);a=mix(a,skycolors[4],e);fragColor=vec4(a,1.0);}`;
     var Kw_orig = `#version 300 es
 precision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};in float vCameraDistance;in vec4 vWorldPos;uniform Sky{vec3 skycolors[5];vec3 suncolor;};uniform float u_rain;in vec2 vUv;in vec3 vPos;out vec4 fragColor;void main(){gl_FragDepth=0.999998;float a=length(vec2(0.5,0.5)-vUv);float b=smoothstep(0.3,0.2,a)*2.0;b+=smoothstep(0.5,0.1,a);b*=smoothstep(0.08,0.15,(vPos.y+0.2)*0.2+abs(sin(daycycle*6.282)));b*=1.0-u_rain;fragColor.rgba=vec4(suncolor,b);}`;
+    var classicSkyFrag = `#version 300 es
+
+precision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};uniform Sky{vec3 skycolors[5];vec3 suncolor;};uniform sampler2D skyDiffuse;uniform float u_rain;in vec2 vUv;in vec3 vPos;out vec4 fragColor;
+
+vec2 chash(vec2 p){p=vec2(dot(p,vec2(127.1,311.7)),dot(p,vec2(269.5,183.3)));return -1.0+2.0*fract(sin(p)*43758.5453123);}
+
+float cnoise(vec2 p){const float K1=0.366025404;const float K2=0.211324865;vec2 i=floor(p+(p.x+p.y)*K1);vec2 a=p-i+(i.x+i.y)*K2;vec2 o=(a.x>a.y)?vec2(1.0,0.0):vec2(0.0,1.0);vec2 b=a-o+K2;vec2 c=a-1.0+2.0*K2;vec3 h=max(0.5-vec3(dot(a,a),dot(b,b),dot(c,c)),0.0);vec3 n=h*h*h*vec3(dot(a,chash(i)),dot(b,chash(i+o)),dot(c,chash(i+1.0)));return smoothstep(-1.0,1.0,dot(n,vec3(70.0)));}
+
+float cloudTex(vec2 p){float n=0.0;for(int i=1;i<8;++i){float f=float(i);n+=cnoise(p*pow(f,1.2+f*0.05)+vec2(pow(f,3.5)*0.0002,f))/f;}n+=cnoise(p*25.0)/15.0;n+=cnoise(p*40.0)/35.0;n=n/3.0*0.8+0.05;return n;}
+
+void main(){gl_FragDepth=0.999999;vec3 sky=skycolors[1];vec3 dir=normalize(vPos);float cn=dot(worldlight[2],dir);float tf=pow((1.0+cn)*0.5,3.0);vec3 hz=fog[0];float c=pow(clamp((1.0-(0.5+vPos.y))*2.0,0.0,1.0),3.0);float pp=c<0.85?smoothstep(0.85-tf*0.8,0.85,c):1.0-smoothstep(0.85,1.0,c);c=pow(max(c,1e-5),max((1.0-tf)*3.0,1e-3));hz+=worldlight[0]*pp*0.4*tf;vec3 top=mix(sky*0.8,sky,tf);vec3 a=mix(top,hz,c);
+
+float night=1.0-sin(daycycle*6.28)+0.02;vec3 sd=dir*260.0;vec3 si=floor(sd);vec3 sf=fract(sd)-0.5;float sh=fract(sin(dot(si,vec3(127.1,311.7,74.7)))*43758.5453);float st=step(0.982,sh)*smoothstep(0.3,0.05,length(sf))*(0.5+0.5*sin(time*2.0+sh*400.0));a+=vec3(st)*night*clamp(vPos.y*5.0,0.0,1.0)*0.5;
+
+vec2 cp=dir.xz/(max(dir.y,0.0)+0.25)*0.45+vec2(time*0.008,time*0.003);float cl=cloudTex(cp)+sin(daycycle*6.28)*0.04-0.035+u_rain*0.2;float ca=cl<0.17?0.0:smoothstep(0.3,0.6,cl);ca*=smoothstep(0.0,0.3,vPos.y);float sg=pow(max(cn,0.0),6.0)*0.3;a=mix(a,mix(fog[0]+sg+vec3(0.3),fog[0]+sg+vec3(0.1),ca),ca);
+
+fragColor=vec4(a,1.0);}`;
+
+    var classicSunFrag = Kw_orig.replace("fragColor.rgba=vec4(suncolor,b);", "float sh=clamp(abs(sin(daycycle*6.282))+vUv.y*0.1-0.15,0.0,1.0);fragColor.rgba=vec4(mix(vec3(1.0),fog[0],min(1.0,pow(1.0-sh*sh,100.0))),b);");
+    var classicWaveAt = (x, z) => {
+
+        let t = Jt.environment && Jt.environment.data ? Jt.environment.data.time[0] : 0;
+
+        return Math.cos(z * .25) * Math.sin(x * .1 + z * .4 + t * 1.2) * .3;
+
+    };
+
+    var classicWaterVert = `#version 300 es
+
+precision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};out float vCameraDistance;out vec4 vWorldPos;uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform Water{vec3 verts[4];};in vec3 position;out vec2 vUv;void main(){vec3 a=mix(verts[0],verts[1],position.x);vec3 b=mix(verts[2],verts[3],position.x);vWorldPos=vec4(mix(a,b,position.z),1.0);vWorldPos.y+=cos(vWorldPos.z*0.25)*sin(vWorldPos.x*0.1+vWorldPos.z*0.4+time*1.2)*0.3;vUv=vWorldPos.xz/2.0;vCameraDistance=length(cameraPosition-vWorldPos.xyz);gl_Position=projectionViewMatrix*vWorldPos;}`;
+
     if (sandShaderEnabled) {
         e4 = e4.replace("uniform sampler2D diffuse[4];", "uniform sampler2D diffuse[4];uniform sampler2D sandDiffuse;uniform highp sampler2DArray sandMask;float sandHash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}float sandNoise(vec2 p){vec2 i=floor(p);vec2 f=fract(p);vec2 u=f*f*(3.0-2.0*f);return mix(mix(sandHash(i),sandHash(i+vec2(1.0,0.0)),u.x),mix(sandHash(i+vec2(0.0,1.0)),sandHash(i+vec2(1.0,1.0)),u.x),u.y);}").replace("d.rgb/=d.a;e/=d.a;d.a=1.0;", "d.rgb/=d.a;e/=d.a;d.a=1.0;" + sandFragCode);
     }
@@ -13782,13 +13812,13 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             vert: Qw
         },
         Rg = {
-            frag: Zw_orig
+            frag: fe.classicSky ? classicSkyFrag : Zw_orig
         },
         zg = {
             frag: Jw
         },
         Bg = {
-            frag: Kw_orig
+            frag: fe.classicSky ? classicSunFrag : Kw_orig
         },
         xd = {
             frag: e4_orig,
@@ -13813,7 +13843,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         },
         Md = {
             frag: c4,
-            vert: f4
+            vert: classicWaterVert
         },
         nD = {
             frag: u4
@@ -22655,12 +22685,16 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 cls: "textgrey"
             }),
             makeToggle("Simple sky", simpleSky),
+            makeToggle("Pre 0.5 sky", classicSky, {
+                note: P.ui.settings.reload,
+                reload: true
+            }),
             makeToggle("Cinematic lighting", cinematicLighting),
-            makeToggle("Faivel retexture", faivelRetexture, {
+            /*makeToggle("Faivel retexture", faivelRetexture, {
                 note: P.ui.settings.reload,
                 reload: true,
                 color: "#3ed363"
-            }),
+            }),*/
             makeSlider("Foliage distance", foliageDistance, {
                 min: 32,
                 max: 1200
@@ -35359,16 +35393,28 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             }
         };
     var XP, QP = () => {
-            XP = Pn({
-                position: {
-                    size: 3,
-                    data: new Float32Array([0, 0, 0, 64, 0, 0, 0, 0, 64, 64, 0, 64])
-                },
-                index: {
-                    type: j.UNSIGNED_INT,
-                    data: new Uint32Array([0, 2, 1, 2, 3, 1])
-                }
-            }), vo(1748, t => qn("waterNoise", t, 0, ut[20])), vo(1243, t => qn("waterLines", t, 0, ut[20])), qn("bufferPongColor", Ls.colorTexture, 0, ut[20]), qn("bufferPongDepth", Ls.depthTexture, 0, ut[20]);
+            XP = Pn((() => {
+                let n = 32,
+                    pos = [],
+                    idx = [];
+                for (let z = 0; z <= n; ++z)
+                    for (let x = 0; x <= n; ++x) pos.push(x / n, 0, z / n);
+                for (let z = 0; z < n; ++z)
+                    for (let x = 0; x < n; ++x) {
+                        let i = x + z * (n + 1);
+                        idx.push(i, i + n + 1, i + 1, i + n + 1, i + n + 2, i + 1);
+                    }
+                return {
+                    position: {
+                        size: 3,
+                        data: new Float32Array(pos)
+                    },
+                    index: {
+                        type: j.UNSIGNED_INT,
+                        data: new Uint32Array(idx)
+                    }
+                };
+            })()), vo(1748, t => qn("waterNoise", t, 0, ut[20])), vo(1243, t => qn("waterLines", t, 0, ut[20])), qn("bufferPongColor", Ls.colorTexture, 0, ut[20]), qn("bufferPongDepth", Ls.depthTexture, 0, ut[20]);
         },
         ZP = (t, e) => {
             if (!e || t.data.water.length === 0) return;
@@ -37570,7 +37616,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         }
         watersplash(e) {
             let n = rn();
-            it(n.position, this.entity.pos), n.position[1] = this.entity.pos[1] + this.entity.inWater + .05, $t(n), Ii(e, n, this.soundPrio, !0);
+            it(n.position, this.entity.pos), n.position[1] = this.entity.pos[1] + this.entity.inWater + .05 + classicWaveAt(n.position[0], n.position[2]), $t(n), Ii(e, n, this.soundPrio, !0);
         }
     };
     var N0 = class extends U0 {
