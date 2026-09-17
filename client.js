@@ -2542,7 +2542,9 @@ void main() {
         godRaysDust: () => godRaysDust,
         godRaysGate: () => godRaysGate,
         simpleSky: () => simpleSky,
+        ssaoIncludeFoliage: () => ssaoIncludeFoliage,
         classicSky: () => classicSky,
+        classicWater: () => classicWater,
         spoofPlayerName: () => spoofPlayerName,
         sharpen: () => sharpen,
         sharpenAmount: () => sharpenAmount,
@@ -2873,7 +2875,9 @@ void main() {
         bloomRadius = ne(100),
         bloomSky = ne(25),
         simpleSky = ne(false),
+        ssaoIncludeFoliage = ne(false),
         classicSky = ne(false),
+        classicWater = ne(false),
         spoofPlayerName = ne(""),
         customCape = ne("#000000"),
         customCrown = ne("#000000"),
@@ -12860,7 +12864,7 @@ in vec2 vUv;
 out vec4 fragColor;
 
 bool isFoliage(vec2 uv){
-    return texture(inputA, uv).a < 0.02;
+    return ${fe.ssaoIncludeFoliage ? "false" : "texture(inputA, uv).a < 0.02"};
 }
 
 const int zr=32;
@@ -13043,6 +13047,7 @@ uniform int blurStep;
 in vec2 vUv;
 out vec4 fragColor;
 
+const float classicHalo = 1.0;
 const float weight[${ssaoBlurRadius + 1}] = float[${ssaoBlurRadius + 1}](${ssaoBlurWeights.join(', ')});
 
 float linearZ(float depth){
@@ -13067,7 +13072,7 @@ void main(){
 
     vec2 step = (blurStep == 0) ? vec2(texel.x, 0.0) : vec2(0.0, texel.y);
 
-    int rEff = int(floor(mix(1.0, float(${ssaoBlurRadius}), smoothstep(5.0, 60.0, abs(zCenter))) + 0.5));
+    int rEff = classicHalo > 0.5 ? ${ssaoBlurRadius} : int(floor(mix(1.0, float(${ssaoBlurRadius}), smoothstep(5.0, 60.0, abs(zCenter))) + 0.5));
 
     for(int i = 1; i < ${ssaoBlurRadius + 1}; i++){
         if(i > rEff) break;
@@ -13077,7 +13082,7 @@ void main(){
         float dP = texture(depthTex, uvP).r;
         if(dP < 0.9999){
             float dz = linearZ(dP) - zCenter;
-            float w = weight[i] * exp(-dz * dz * invTwoSigmaZSq);
+            float w = weight[i] * mix(exp(-dz * dz * invTwoSigmaZSq), 1.0, classicHalo);
             result += texture(inputA, uvP).rgb * w;
             wSum += w;
         }
@@ -13086,7 +13091,7 @@ void main(){
         float dN = texture(depthTex, uvN).r;
         if(dN < 0.9999){
             float dz = linearZ(dN) - zCenter;
-            float w = weight[i] * exp(-dz * dz * invTwoSigmaZSq);
+            float w = weight[i] * mix(exp(-dz * dz * invTwoSigmaZSq), 1.0, classicHalo);
             result += texture(inputA, uvN).rgb * w;
             wSum += w;
         }
@@ -13155,12 +13160,14 @@ precision highp float;precision highp int;
 
 uniform sampler2D inputA;
 uniform sampler2D inputB;
-
+uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};
 in vec2 vUv;
 out vec4 fragColor;
 
 void main(){
-    fragColor = vec4(texture(inputA, vUv).rgb * texture(inputB, vUv).rgb, 1.0);
+    vec3 ao = texture(inputA, vUv).rgb;
+    ao = mix(worldlight[1] * 0.2, vec3(1.0), ao.r);
+    fragColor = vec4(ao * texture(inputB, vUv).rgb, 1.0);
 }`;
 
 
@@ -13683,13 +13690,43 @@ fragColor=vec4(a,1.0);}`;
 
         let t = Jt.environment && Jt.environment.data ? Jt.environment.data.time[0] : 0;
 
-        return Math.cos(z * .25) * Math.sin(x * .1 + z * .4 + t * 1.2) * .3;
+        return Math.cos(z * .25) * Math.sin(x * .1 + z * .4 + t * 1.2) * .22;
 
     };
 
+    var classicWaterFrag = `#version 300 es
+
+precision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};in float vCameraDistance;in vec4 vWorldPos;uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform Screen{vec2 resolution;};uniform sampler2D waterLines;uniform sampler2D waterNoise;uniform sampler2D bufferPongDepth;in vec2 vUv;out vec4 fragColor;
+
+const float speed=0.05;const float LX=0.6;
+
+void main(){float dist=length(cameraPosition-vWorldPos.xyz);if(dist>fog[1][1]){fragColor=vec4(fog[0],1.0);return;}
+
+float zw=gl_FragCoord.z*2.0-1.0;zw=projectionMatrix[3][2]/(zw+projectionMatrix[2][2]);float zs=texture(bufferPongDepth,gl_FragCoord.xy/resolution).r*2.0-1.0;zs=projectionMatrix[3][2]/(zs+projectionMatrix[2][2]);
+
+vec3 V=normalize(cameraPosition-vWorldPos.xyz);float BS=max(0.0,zs-zw)*max(abs(V.y),0.15)*0.25;
+
+vec3 Hd=watercolors[0];vec3 Rj=watercolors[1];vec3 Tp=watercolors[2];vec2 CR=vUv;vec2 wdir=vec2(0.98,0.196);float Lr=0.0;float Wm=1.0;
+
+for(int i=0;i<2;++i){float Jp=float(i)/3.0;float t=mod(time*0.2+Jp,1.0)*3.141;float gY=speed+0.2;vec2 shift=vec2(gY*wdir.y*t+Jp,gY*wdir.x*t+Jp);float curve=abs(sin(t));Lr+=texture(waterNoise,CR.yx*0.5+shift).r*curve;Wm+=(sin((CR.x+shift.y)*10.0)+cos((CR.y+shift.x)*10.0))*curve*(0.2+gY*0.6);}
+
+vec4 Jo=texture(waterLines,CR.yx+time*speed*2.0+Lr*0.1);
+
+vec4 Pp=vec4(Hd,0.0);vec4 AE=vec4(Hd,0.9);vec4 jS=vec4(mix(Hd,Rj,0.9)*0.8,0.5)+speed*0.1;vec4 aV=vec4(Rj,0.4)+Jo*0.05;vec4 Fm=vec4(mix(Rj,Tp,0.5),0.8-LX*0.4)+Jo*0.08;vec4 PN=vec4(Tp,1.4-LX*0.8)+Jo*0.12;
+
+float TW=0.03+0.01*Lr;float kZ=TW+0.02+speed*0.05+0.03*Lr+Wm*0.02;float SZ=kZ+(0.05+speed*0.5*Lr+Wm*0.05)*LX;float TV=SZ+(0.2+speed*0.2-Lr*0.1)*LX;float SG=TV+0.2*LX;
+
+vec4 r;if(BS<TW){r=mix(Pp,AE,smoothstep(0.0,TW,BS));}else if(BS<kZ){r=mix(AE,jS,smoothstep(TW,kZ,BS));}else if(BS<SZ){r=mix(jS,aV,smoothstep(kZ+(SZ-kZ)*0.3,SZ,BS));}else if(BS<TV){r=mix(aV,Fm,smoothstep(SZ+(TV-SZ)*0.4,TV,BS));}else{r=mix(Fm,PN,smoothstep(SG,1.0,BS));}
+
+r.rgb-=0.19;vec3 N=vec3(0.0,1.0,0.0);float Hf=max(dot(worldlight[2],N),0.0);float Xr=min(1.0,pow(max(dot(reflect(-worldlight[2],N),V),0.0),10.0))*0.6;
+
+r.rgb=r.rgb*worldlight[0]*Hf+r.rgb*worldlight[1]+Xr*worldlight[0];
+
+r.rgb=mix(fog[0],r.rgb,clamp((fog[1][1]-dist)/(fog[1][1]-fog[1][0]),0.0,1.0));fragColor=vec4(r.rgb,clamp(r.a,0.0,1.0));}`;
+
     var classicWaterVert = `#version 300 es
 
-precision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};out float vCameraDistance;out vec4 vWorldPos;uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform Water{vec3 verts[4];};in vec3 position;out vec2 vUv;void main(){vec3 a=mix(verts[0],verts[1],position.x);vec3 b=mix(verts[2],verts[3],position.x);vWorldPos=vec4(mix(a,b,position.z),1.0);vWorldPos.y+=cos(vWorldPos.z*0.25)*sin(vWorldPos.x*0.1+vWorldPos.z*0.4+time*1.2)*0.3;vUv=vWorldPos.xz/2.0;vCameraDistance=length(cameraPosition-vWorldPos.xyz);gl_Position=projectionViewMatrix*vWorldPos;}`;
+precision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};out float vCameraDistance;out vec4 vWorldPos;uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform Water{vec3 verts[4];};in vec3 position;out vec2 vUv;void main(){vec3 a=mix(verts[0],verts[1],position.x);vec3 b=mix(verts[2],verts[3],position.x);vWorldPos=vec4(mix(a,b,position.z),1.0);vWorldPos.y+=cos(vWorldPos.z*0.25)*sin(vWorldPos.x*0.1+vWorldPos.z*0.4+time*1.2)*0.22;vUv=vWorldPos.xz/2.0;vCameraDistance=length(cameraPosition-vWorldPos.xyz);gl_Position=projectionViewMatrix*vWorldPos;}`;
 
     if (sandShaderEnabled) {
         e4 = e4.replace("uniform sampler2D diffuse[4];", "uniform sampler2D diffuse[4];uniform sampler2D sandDiffuse;uniform highp sampler2DArray sandMask;float sandHash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}float sandNoise(vec2 p){vec2 i=floor(p);vec2 f=fract(p);vec2 u=f*f*(3.0-2.0*f);return mix(mix(sandHash(i),sandHash(i+vec2(1.0,0.0)),u.x),mix(sandHash(i+vec2(0.0,1.0)),sandHash(i+vec2(1.0,1.0)),u.x),u.y);}").replace("d.rgb/=d.a;e/=d.a;d.a=1.0;", "d.rgb/=d.a;e/=d.a;d.a=1.0;" + sandFragCode);
@@ -13842,7 +13879,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             vert: a4
         },
         Md = {
-            frag: c4,
+            frag: fe.classicWater ? classicWaterFrag : c4,
             vert: classicWaterVert
         },
         nD = {
@@ -22628,6 +22665,10 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 min: 1,
                 max: 20
             }),
+            makeToggle("SSAO on foliage / entities", ssaoIncludeFoliage, {
+                note: P.ui.settings.reload,
+                reload: true
+            }),
             makeToggle("Light shafts", godRays),
             makeLabel("-- Ambience tint: --", {
                 sep: true,
@@ -22686,6 +22727,10 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             }),
             makeToggle("Simple sky", simpleSky),
             makeToggle("Pre 0.5 sky", classicSky, {
+                note: P.ui.settings.reload,
+                reload: true
+            }),
+            makeToggle("Pre 0.5 water", classicWater, {
                 note: P.ui.settings.reload,
                 reload: true
             }),
@@ -35456,7 +35501,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         z_ = t => {
             Sc.splice(Sc.indexOf(t), 1);
         },
-        ssaoDefersFoliage = () => fe.ssao,
+        ssaoDefersFoliage = () => fe.ssao && !fe.ssaoIncludeFoliage,
         sA = t => {
             YP(t), I8(), LP(), ssaoDefersFoliage() || CP(t);
         },

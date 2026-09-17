@@ -6347,7 +6347,7 @@ precision highp float;precision highp int;uniform Camera{mat4 projectionMatrix;m
 precision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};in float vCameraDistance;in vec4 vWorldPos;uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform Screen{vec2 resolution;};uniform sampler2D waterLines;uniform sampler2D waterNoise;uniform sampler2D bufferPongColor;uniform sampler2D bufferPongDepth;in vec2 vUv;out vec4 fragColor;void main(){float a=length(cameraPosition-vWorldPos.xyz);float b=(texture(waterNoise,vUv.yx/4.0+time*0.1).r-0.5);float c=gl_FragCoord.z;c=c*2.0-1.0;c=projectionMatrix[3][2]/(c+projectionMatrix[2][2]);if(a>fog[1][1]){fragColor=vec4(fog[0],1.0);return;}vec2 d=gl_FragCoord.xy/resolution;float e=texture(bufferPongDepth,d.xy).r;e=e*2.0-1.0;e=projectionMatrix[3][2]/(e+projectionMatrix[2][2]);float f=e-c;vec2 g=vec2(b*0.05,0.0);float h=f;float i=1.0-clamp(h/0.1,0.0,1.0);float j=1.0-clamp(h/0.6,0.0,1.0);float k=1.0-clamp(h/2.0,0.0,1.0);float l=1.0-clamp(h/10.0,0.0,1.0);float m=1.0-clamp(h/100.0+0.5,0.0,1.0);float n=texture(waterLines,vUv.yx+b*0.15).r;vec3 o=mix(watercolors[2],watercolors[1],l);vec3 p=texture(bufferPongColor,d.xy+g).rgb;vec3 q=(worldlight[0]+worldlight[1]);vec3 r=mix(o,p*o,m)+n*watercolors[0]*(0.05+k*0.3);r=mix(r,watercolors[0],j)*q;vec4 s=vec4(r,1.0-i);float t=min(1.0,max(0.0,(n*(b+0.3)*0.5)));s.rgb+=t*worldlight[0];float u=clamp((fog[1][1]-a)/(fog[1][1]-fog[1][0]),0.0,1.0);s.rgb=mix(fog[0],s.rgb,u);fragColor=s;}`;
     var F1 = `#version 300 es
 
-precision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};out float vCameraDistance;out vec4 vWorldPos;uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform Water{vec3 verts[4];};in vec3 position;out vec2 vUv;void main(){vec3 a=mix(verts[0],verts[1],position.x);vec3 b=mix(verts[2],verts[3],position.x);vWorldPos=vec4(mix(a,b,position.z),1.0);vWorldPos.y+=cos(vWorldPos.z*0.25)*sin(vWorldPos.x*0.1+vWorldPos.z*0.4+time*1.2)*0.3;vUv=vWorldPos.xz/2.0;vCameraDistance=length(cameraPosition-vWorldPos.xyz);gl_Position=projectionViewMatrix*vWorldPos;}`;
+precision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};out float vCameraDistance;out vec4 vWorldPos;uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform Water{vec3 verts[4];};in vec3 position;out vec2 vUv;void main(){vec3 a=mix(verts[0],verts[1],position.x);vec3 b=mix(verts[2],verts[3],position.x);vWorldPos=vec4(mix(a,b,position.z),1.0);vWorldPos.y+=cos(vWorldPos.z*0.25)*sin(vWorldPos.x*0.1+vWorldPos.z*0.4+time*1.2)*0.18;vUv=vWorldPos.xz/2.0;vCameraDistance=length(cameraPosition-vWorldPos.xyz);gl_Position=projectionViewMatrix*vWorldPos;}`;
     var C1 = `#version 300 es
 precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;void main(){fragColor.rgba=vec4(1.0,mod(vWorldPos.y+0.001,1.0),0.0,0.5);}`;
     var ls = {
@@ -6563,6 +6563,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         ssaoBias: 9,
         ssaoFadeDist: 300,
         ssaoBlur: true,
+        ssaoIncludeFoliage: false,
         ssaoIGN: true,
         godRays: false,
         godRaysIntensity: 19,
@@ -6587,6 +6588,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         bloomSky: 25,
         simpleSky: false,
         classicSky: false,
+        classicWater: false,
         foliageDistance: 130,
         sharpenAmount: 0,
         ambienceTint: false,
@@ -6941,7 +6943,7 @@ in vec2 vUv;
 out vec4 fragColor;
 
 bool isFoliage(vec2 uv){
-    return texture(inputA, uv).a < 0.02;
+    return ${gfe.ssaoIncludeFoliage ? "false" : "texture(inputA, uv).a < 0.02"};
 }
 
 const int zr=32;
@@ -7124,6 +7126,7 @@ uniform int blurStep;
 in vec2 vUv;
 out vec4 fragColor;
 
+const float classicHalo = 1.0;
 const float weight[${ssaoBlurRadius + 1}] = float[${ssaoBlurRadius + 1}](${ssaoBlurWeights.join(', ')});
 
 float linearZ(float depth){
@@ -7148,7 +7151,7 @@ void main(){
 
     vec2 step = (blurStep == 0) ? vec2(texel.x, 0.0) : vec2(0.0, texel.y);
 
-    int rEff = int(floor(mix(1.0, float(${ssaoBlurRadius}), smoothstep(5.0, 60.0, abs(zCenter))) + 0.5));
+    int rEff = classicHalo > 0.5 ? ${ssaoBlurRadius} : int(floor(mix(1.0, float(${ssaoBlurRadius}), smoothstep(5.0, 60.0, abs(zCenter))) + 0.5));
 
     for(int i = 1; i < ${ssaoBlurRadius + 1}; i++){
         if(i > rEff) break;
@@ -7158,7 +7161,7 @@ void main(){
         float dP = texture(depthTex, uvP).r;
         if(dP < 0.9999){
             float dz = linearZ(dP) - zCenter;
-            float w = weight[i] * exp(-dz * dz * invTwoSigmaZSq);
+            float w = weight[i] * mix(exp(-dz * dz * invTwoSigmaZSq), 1.0, classicHalo);
             result += texture(inputA, uvP).rgb * w;
             wSum += w;
         }
@@ -7167,7 +7170,7 @@ void main(){
         float dN = texture(depthTex, uvN).r;
         if(dN < 0.9999){
             float dz = linearZ(dN) - zCenter;
-            float w = weight[i] * exp(-dz * dz * invTwoSigmaZSq);
+            float w = weight[i] * mix(exp(-dz * dz * invTwoSigmaZSq), 1.0, classicHalo);
             result += texture(inputA, uvN).rgb * w;
             wSum += w;
         }
@@ -7236,12 +7239,14 @@ precision highp float;precision highp int;
 
 uniform sampler2D inputA;
 uniform sampler2D inputB;
-
+uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};
 in vec2 vUv;
 out vec4 fragColor;
 
 void main(){
-    fragColor = vec4(texture(inputA, vUv).rgb * texture(inputB, vUv).rgb, 1.0);
+    vec3 ao = texture(inputA, vUv).rgb;
+    ao = mix(worldlight[1] * 0.2, vec3(1.0), ao.r);
+    fragColor = vec4(ao * texture(inputB, vUv).rgb, 1.0);
 }`;
 
 
@@ -7720,6 +7725,21 @@ float night=1.0-sin(daycycle*6.28)+0.02;vec3 sd=dir*260.0;vec3 si=floor(sd);vec3
 vec2 cp=dir.xz/(max(dir.y,0.0)+0.25)*0.45+vec2(time*0.008,time*0.003);float cl=cloudTex(cp)+sin(daycycle*6.28)*0.04-0.035+u_rain*0.2;float ca=cl<0.17?0.0:smoothstep(0.3,0.6,cl);ca*=smoothstep(0.0,0.3,vPos.y);float sg=pow(max(cn,0.0),6.0)*0.3;a=mix(a,mix(fog[0]+sg+vec3(0.3),fog[0]+sg+vec3(0.1),ca),ca);
 
 fragColor=vec4(a,1.0);}`;
+    var classicWaterFrag = `#version 300 es
+precision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};in float vCameraDistance;in vec4 vWorldPos;uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform Screen{vec2 resolution;};uniform sampler2D waterLines;uniform sampler2D waterNoise;uniform sampler2D bufferPongDepth;in vec2 vUv;out vec4 fragColor;
+const float speed=0.05;const float LX=0.6;
+void main(){float dist=length(cameraPosition-vWorldPos.xyz);if(dist>fog[1][1]){fragColor=vec4(fog[0],1.0);return;}
+float zw=gl_FragCoord.z*2.0-1.0;zw=projectionMatrix[3][2]/(zw+projectionMatrix[2][2]);float zs=texture(bufferPongDepth,gl_FragCoord.xy/resolution).r*2.0-1.0;zs=projectionMatrix[3][2]/(zs+projectionMatrix[2][2]);
+vec3 V=normalize(cameraPosition-vWorldPos.xyz);float BS=max(0.0,zs-zw)*max(abs(V.y),0.15)*0.25;
+vec3 Hd=watercolors[0];vec3 Rj=watercolors[1];vec3 Tp=watercolors[2];vec2 CR=vUv;vec2 wdir=vec2(0.98,0.196);float Lr=0.0;float Wm=1.0;
+for(int i=0;i<2;++i){float Jp=float(i)/3.0;float t=mod(time*0.2+Jp,1.0)*3.141;float gY=speed+0.2;vec2 shift=vec2(gY*wdir.y*t+Jp,gY*wdir.x*t+Jp);float curve=abs(sin(t));Lr+=texture(waterNoise,CR.yx*0.5+shift).r*curve;Wm+=(sin((CR.x+shift.y)*10.0)+cos((CR.y+shift.x)*10.0))*curve*(0.2+gY*0.6);}
+vec4 Jo=texture(waterLines,CR.yx+time*speed*2.0+Lr*0.1);
+vec4 Pp=vec4(Hd,0.0);vec4 AE=vec4(Hd,0.9);vec4 jS=vec4(mix(Hd,Rj,0.9)*0.8,0.5)+speed*0.1;vec4 aV=vec4(Rj,0.4)+Jo*0.05;vec4 Fm=vec4(mix(Rj,Tp,0.5),0.8-LX*0.4)+Jo*0.08;vec4 PN=vec4(Tp,1.4-LX*0.8)+Jo*0.12;
+float TW=0.03+0.01*Lr;float kZ=TW+0.02+speed*0.05+0.03*Lr+Wm*0.02;float SZ=kZ+(0.05+speed*0.5*Lr+Wm*0.05)*LX;float TV=SZ+(0.2+speed*0.2-Lr*0.1)*LX;float SG=TV+0.2*LX;
+vec4 r;if(BS<TW){r=mix(Pp,AE,smoothstep(0.0,TW,BS));}else if(BS<kZ){r=mix(AE,jS,smoothstep(TW,kZ,BS));}else if(BS<SZ){r=mix(jS,aV,smoothstep(kZ+(SZ-kZ)*0.3,SZ,BS));}else if(BS<TV){r=mix(aV,Fm,smoothstep(SZ+(TV-SZ)*0.4,TV,BS));}else{r=mix(Fm,PN,smoothstep(SG,1.0,BS));}
+r.rgb-=0.19;vec3 N=vec3(0.0,1.0,0.0);float Hf=max(dot(worldlight[2],N),0.0);float Xr=min(1.0,pow(max(dot(reflect(-worldlight[2],N),V),0.0),10.0))*0.6;
+r.rgb=r.rgb*worldlight[0]*Hf+r.rgb*worldlight[1]+Xr*worldlight[0];
+r.rgb=mix(fog[0],r.rgb,clamp((fog[1][1]-dist)/(fog[1][1]-fog[1][0]),0.0,1.0));fragColor=vec4(r.rgb,clamp(r.a,0.0,1.0));}`;
     var classicSunPatch = s => s.replace("fragColor.rgba=vec4(suncolor,b);", "float sh=clamp(abs(sin(daycycle*6.282))+vUv.y*0.1-0.15,0.0,1.0);fragColor.rgba=vec4(mix(vec3(1.0),fog[0],min(1.0,pow(1.0-sh*sh,100.0))),b);");
     var waterGridCache = null,
         waterGrid = () => {
@@ -7811,6 +7831,7 @@ fragColor=vec4(a,1.0);}`;
             ]);
             return bloomMips[0];
         },
+        ssaoDefersFoliage = () => gfe.ssao && !gfe.ssaoIncludeFoliage,
         postScene = e => {
             if (gfe.ssao) {
                 bindSampler("depthTex", Kt.depthTexture, 0, Z[35]);
@@ -7851,7 +7872,7 @@ fragColor=vec4(a,1.0);}`;
                 ssaoHistIdx ^= 1;
                 ssaoFirstFrame = false;
 
-                ai(Kt), Ih(e), Iy(e);
+                ssaoDefersFoliage() && (ai(Kt), Ih(e), Iy(e));
             } else {
                 ssaoFirstFrame = true;
             }
@@ -9219,7 +9240,7 @@ void main(){
                 attributeLocations: t.mesh
             }), Z[20] = He({
                 vertex: ws.vert,
-                fragment: ws.frag,
+                fragment: gfe.classicWater ? classicWaterFrag : ws.frag,
                 transparent: !0,
                 cullFace: !1,
                 globalUniforms: Ye,
@@ -11538,7 +11559,7 @@ void main(){
             on.splice(on.indexOf(t), 1)
         },
         dg = t => {
-            tg(t), q1(), Oh(), gfe.ssao || Ih(t)
+            tg(t), q1(), Oh(), ssaoDefersFoliage() || Ih(t)
         },
         ug = t => {
             Gh()
@@ -11736,7 +11757,7 @@ void main(){
         kg = t => {
             Ey();
             let e = yg(on, ge, !1);
-            Ty(e), gfe.ssao || Iy(e), postScene(e), zy(t)
+            Ty(e), ssaoDefersFoliage() || Iy(e), postScene(e), zy(t)
         };
     var nn = Ie.resolution / 100,
         Cg = !1,
