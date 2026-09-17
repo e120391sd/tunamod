@@ -13694,36 +13694,6 @@ fragColor=vec4(a,1.0);}`;
 
     };
 
-    var classicWaterFrag = `#version 300 es
-
-precision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};in float vCameraDistance;in vec4 vWorldPos;uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform Screen{vec2 resolution;};uniform sampler2D waterLines;uniform sampler2D waterNoise;uniform sampler2D bufferPongDepth;in vec2 vUv;out vec4 fragColor;
-
-const float speed=0.05;const float LX=0.6;
-
-void main(){float dist=length(cameraPosition-vWorldPos.xyz);if(dist>fog[1][1]){fragColor=vec4(fog[0],1.0);return;}
-
-float zw=gl_FragCoord.z*2.0-1.0;zw=projectionMatrix[3][2]/(zw+projectionMatrix[2][2]);float zs=texture(bufferPongDepth,gl_FragCoord.xy/resolution).r*2.0-1.0;zs=projectionMatrix[3][2]/(zs+projectionMatrix[2][2]);
-
-vec3 V=normalize(cameraPosition-vWorldPos.xyz);float BS=max(0.0,zs-zw)*max(abs(V.y),0.15)*0.25;
-
-vec3 Hd=watercolors[0];vec3 Rj=watercolors[1];vec3 Tp=watercolors[2];vec2 CR=vUv;vec2 wdir=vec2(0.98,0.196);float Lr=0.0;float Wm=1.0;
-
-for(int i=0;i<2;++i){float Jp=float(i)/3.0;float t=mod(time*0.2+Jp,1.0)*3.141;float gY=speed+0.2;vec2 shift=vec2(gY*wdir.y*t+Jp,gY*wdir.x*t+Jp);float curve=abs(sin(t));Lr+=texture(waterNoise,CR.yx*0.5+shift).r*curve;Wm+=(sin((CR.x+shift.y)*10.0)+cos((CR.y+shift.x)*10.0))*curve*(0.2+gY*0.6);}
-
-vec4 Jo=texture(waterLines,CR.yx+time*speed*2.0+Lr*0.1);
-
-vec4 Pp=vec4(Hd,0.0);vec4 AE=vec4(Hd,0.9);vec4 jS=vec4(mix(Hd,Rj,0.9)*0.8,0.5)+speed*0.1;vec4 aV=vec4(Rj,0.4)+Jo*0.05;vec4 Fm=vec4(mix(Rj,Tp,0.5),0.8-LX*0.4)+Jo*0.08;vec4 PN=vec4(Tp,1.4-LX*0.8)+Jo*0.12;
-
-float TW=0.03+0.01*Lr;float kZ=TW+0.02+speed*0.05+0.03*Lr+Wm*0.02;float SZ=kZ+(0.05+speed*0.5*Lr+Wm*0.05)*LX;float TV=SZ+(0.2+speed*0.2-Lr*0.1)*LX;float SG=TV+0.2*LX;
-
-vec4 r;if(BS<TW){r=mix(Pp,AE,smoothstep(0.0,TW,BS));}else if(BS<kZ){r=mix(AE,jS,smoothstep(TW,kZ,BS));}else if(BS<SZ){r=mix(jS,aV,smoothstep(kZ+(SZ-kZ)*0.3,SZ,BS));}else if(BS<TV){r=mix(aV,Fm,smoothstep(SZ+(TV-SZ)*0.4,TV,BS));}else{r=mix(Fm,PN,smoothstep(SG,1.0,BS));}
-
-r.rgb-=0.19;vec3 N=vec3(0.0,1.0,0.0);float Hf=max(dot(worldlight[2],N),0.0);float Xr=min(1.0,pow(max(dot(reflect(-worldlight[2],N),V),0.0),10.0))*0.6;
-
-r.rgb=r.rgb*worldlight[0]*Hf+r.rgb*worldlight[1]+Xr*worldlight[0];
-
-r.rgb=mix(fog[0],r.rgb,clamp((fog[1][1]-dist)/(fog[1][1]-fog[1][0]),0.0,1.0));fragColor=vec4(r.rgb,clamp(r.a,0.0,1.0));}`;
-
     var classicWaterVert = `#version 300 es
 
 precision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};out float vCameraDistance;out vec4 vWorldPos;uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform Water{vec3 verts[4];};in vec3 position;out vec2 vUv;void main(){vec3 a=mix(verts[0],verts[1],position.x);vec3 b=mix(verts[2],verts[3],position.x);vWorldPos=vec4(mix(a,b,position.z),1.0);vWorldPos.y+=cos(vWorldPos.z*0.25)*sin(vWorldPos.x*0.1+vWorldPos.z*0.4+time*1.2)*0.22;vUv=vWorldPos.xz/2.0;vCameraDistance=length(cameraPosition-vWorldPos.xyz);gl_Position=projectionViewMatrix*vWorldPos;}`;
@@ -13879,8 +13849,8 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             vert: a4
         },
         Md = {
-            frag: fe.classicWater ? classicWaterFrag : c4,
-            vert: classicWaterVert
+            frag: c4,
+            vert: fe.classicWater ? classicWaterVert : f4
         },
         nD = {
             frag: u4
@@ -22731,6 +22701,10 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 reload: true
             }),
             makeToggle("Pre 0.5 water", classicWater, {
+                note: P.ui.settings.reload,
+                reload: true
+            }),
+            makeToggle("Sand on water edges", sandOverlay, {
                 note: P.ui.settings.reload,
                 reload: true
             }),
@@ -35438,7 +35412,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             }
         };
     var XP, QP = () => {
-            XP = Pn((() => {
+            XP = Pn(fe.classicWater ? (() => {
                 let n = 32,
                     pos = [],
                     idx = [];
@@ -35459,7 +35433,16 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                         data: new Uint32Array(idx)
                     }
                 };
-            })()), vo(1748, t => qn("waterNoise", t, 0, ut[20])), vo(1243, t => qn("waterLines", t, 0, ut[20])), qn("bufferPongColor", Ls.colorTexture, 0, ut[20]), qn("bufferPongDepth", Ls.depthTexture, 0, ut[20]);
+            })() : {
+                position: {
+                    size: 3,
+                    data: new Float32Array([0, 0, 0, 64, 0, 0, 0, 0, 64, 64, 0, 64])
+                },
+                index: {
+                    type: j.UNSIGNED_INT,
+                    data: new Uint32Array([0, 2, 1, 2, 3, 1])
+                }
+            }), vo(1748, t => qn("waterNoise", t, 0, ut[20])), vo(1243, t => qn("waterLines", t, 0, ut[20])), qn("bufferPongColor", Ls.colorTexture, 0, ut[20]), qn("bufferPongDepth", Ls.depthTexture, 0, ut[20]);
         },
         ZP = (t, e) => {
             if (!e || t.data.water.length === 0) return;
@@ -37661,7 +37644,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         }
         watersplash(e) {
             let n = rn();
-            it(n.position, this.entity.pos), n.position[1] = this.entity.pos[1] + this.entity.inWater + .05 + classicWaveAt(n.position[0], n.position[2]), $t(n), Ii(e, n, this.soundPrio, !0);
+            it(n.position, this.entity.pos), n.position[1] = this.entity.pos[1] + this.entity.inWater + .05 + (fe.classicWater ? classicWaveAt(n.position[0], n.position[2]) : 0), $t(n), Ii(e, n, this.soundPrio, !0);
         }
     };
     var N0 = class extends U0 {
