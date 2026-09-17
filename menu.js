@@ -6588,6 +6588,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         simpleSky: false,
         classicSky: false,
         classicWater: false,
+        classicFog: false,
         foliageDistance: 130,
         sharpenAmount: 0,
         ambienceTint: false,
@@ -6664,6 +6665,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
 
         if (shadowAlphaVal > 0 && e.indexOf("texture(shadowMaps") >= 0 && e.indexOf("/*sa*/") < 0)
             e = e.replace(/\b([A-Za-z_]\w*)\s*=\s*max\(\1\s*,\s*[A-Za-z_]\w*\)\s*;/, (o, i) => o + "/*sa*/" + i + "=mix(" + shadowAlphaVal.toFixed(4) + ",1.0," + i + ");");
+        if (gfe.classicFog) e = e.replace(/clamp\(\(fog\[1\]\[1\]-(\w+)\)\/\(fog\[1\]\[1\]-fog\[1\]\[0\]\),0\.0,1\.0\)/g, "(1.0-smoothstep(fog[1][0],fog[1][1],$1))");
         e = e.replace(/b\.a=b\.a\*smoothstep\(1\.0,0\.0,\(vCameraDistance-[0-9.]+\)\/20\.0\);/, () => (n += "uniform float folFadeEnd;", "b.a=b.a*smoothstep(1.0,0.0,(vCameraDistance-folFadeEnd*0.8461538)/(folFadeEnd*0.1538462));"));
         return n ? e.replace("precision highp int;", "precision highp int;" + n) : e;
     };
@@ -7956,7 +7958,7 @@ precision highp float;precision highp int;uniform Environment{vec3 worldlight[3]
                 tint(a.worldlight, 0, 3);
                 gfe.tintSunColor && tint(s.suncolor, 0, 3);
             }
-            ao(a.fog, 0, Ne.fog[n], Ne.fog[i], r), a.fog[3] = o > 0 ? -100 : nc, a.fog[4] = o > 0 ? ic : Gt, a.daycycle[0] = t, a.time[0] = e % 3600, Z[31].uniforms.amount.value = Tn(r, Ne.bloom[n], Ne.bloom[i]);
+            ao(a.fog, 0, Ne.fog[n], Ne.fog[i], r), a.fog[3] = o > 0 ? -100 : gfe.classicFog ? 5 : nc, a.fog[4] = o > 0 ? ic : Gt, a.daycycle[0] = t, a.time[0] = e % 3600, Z[31].uniforms.amount.value = Tn(r, Ne.bloom[n], Ne.bloom[i]);
             if (_ra > 0) {
                 for (let k = 0; k < 3; k++) a.fog[k] *= _dm;
                 for (let k = 0; k < 3; k++) a.fog[k] += ((a.worldlight[3 + k] * 1.1 + a.worldlight[k] * 0.15) * rainFogTint[k] - a.fog[k]) * _ra;

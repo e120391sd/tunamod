@@ -2545,6 +2545,7 @@ void main() {
         ssaoIncludeFoliage: () => ssaoIncludeFoliage,
         classicSky: () => classicSky,
         classicWater: () => classicWater,
+        classicFog: () => classicFog,
         spoofPlayerName: () => spoofPlayerName,
         sharpen: () => sharpen,
         sharpenAmount: () => sharpenAmount,
@@ -2878,6 +2879,7 @@ void main() {
         ssaoIncludeFoliage = ne(false),
         classicSky = ne(false),
         classicWater = ne(false),
+        classicFog = ne(false),
         spoofPlayerName = ne(""),
         customCape = ne("#000000"),
         customCrown = ne("#000000"),
@@ -13871,6 +13873,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
 
         if (shadowAlphaVal > 0 && e.indexOf("texture(shadowMaps") >= 0 && e.indexOf("/*sa*/") < 0)
             e = e.replace(/\b([A-Za-z_]\w*)\s*=\s*max\(\1\s*,\s*[A-Za-z_]\w*\)\s*;/, (o, i) => o + "/*sa*/" + i + "=mix(" + shadowAlphaVal.toFixed(4) + ",1.0," + i + ");");
+        if (fe.classicFog) e = e.replace(/clamp\(\(fog\[1\]\[1\]-(\w+)\)\/\(fog\[1\]\[1\]-fog\[1\]\[0\]\),0\.0,1\.0\)/g, "(1.0-smoothstep(fog[1][0],fog[1][1],$1))");
         e = e.replace(/b\.a=b\.a\*smoothstep\(1\.0,0\.0,\(vCameraDistance-[0-9.]+\)\/20\.0\);/, () => (n += "uniform float folFadeEnd;", "b.a=b.a*smoothstep(1.0,0.0,(vCameraDistance-folFadeEnd*0.8461538)/(folFadeEnd*0.1538462));"));
         return n ? e.replace("precision highp int;", "precision highp int;" + n) : e;
     };
@@ -22701,6 +22704,10 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 reload: true
             }),
             makeToggle("Pre 0.5 water", classicWater, {
+                note: P.ui.settings.reload,
+                reload: true
+            }),
+            makeToggle("Pre 0.5 fog", classicFog, {
                 note: P.ui.settings.reload,
                 reload: true
             }),
@@ -34162,7 +34169,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             tint(l.worldlight, 0, 3, ts);
             fe.tintSunColor && tint(r.suncolor, 0, 3, ts);
         }
-        ls(l.fog, 0, fn.fog[i], fn.fog[s], o), l.fog[3] = n > 0 ? -100 : u_, l.fog[4] = n > 0 ? m_ : li, l.daycycle[0] = t, l.time[0] = (typeof rpv !== "undefined" && rpv.active ? performance.now() / 1e3 : e) % 3600, ut[31].uniforms.amount.value = qf(o, fn.bloom[i], fn.bloom[s]);
+        ls(l.fog, 0, fn.fog[i], fn.fog[s], o), l.fog[3] = n > 0 ? -100 : fe.classicFog ? 5 : u_, l.fog[4] = n > 0 ? m_ : li, l.daycycle[0] = t, l.time[0] = (typeof rpv !== "undefined" && rpv.active ? performance.now() / 1e3 : e) % 3600, ut[31].uniforms.amount.value = qf(o, fn.bloom[i], fn.bloom[s]);
         if (_ra > 0) {
             l.fog[0] *= _dm;
             l.fog[1] *= _dm;
