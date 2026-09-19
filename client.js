@@ -2553,6 +2553,10 @@ void main() {
         ssaoIncludeFoliage: () => ssaoIncludeFoliage,
         classicSky: () => classicSky,
         classicWater: () => classicWater,
+        classicWaterLook: () => classicWaterLook,
+        classicWaterColors: () => classicWaterColors,
+        classicLighting: () => classicLighting,
+        classicDayBrightness: () => classicDayBrightness,
         spoofPlayerName: () => spoofPlayerName,
         sharpen: () => sharpen,
         sharpenAmount: () => sharpenAmount,
@@ -2889,6 +2893,10 @@ void main() {
         ssaoIncludeFoliage = te(false),
         classicSky = te(false),
         classicWater = te(false),
+        classicWaterLook = te(false),
+        classicWaterColors = te(false),
+        classicLighting = te(false),
+        classicDayBrightness = te(70),
         spoofPlayerName = te(""),
         customCape = te("#000000"),
         customCrown = te("#000000"),
@@ -8931,25 +8939,65 @@ void main(){
         vv.set(23, shadowstrider);
         vv.set(31, scarab);
 
-        /* faivel retexture
-        if (fe.faivelRetexture) {
-            textureOverrides.set(2124, {
-                id: 2124,
-                exposure: 0.08,
-                hue: -4.2,
-                contrast: 1
-            })
+        //faivel retexture:
+        if (ne.faivelRetexture) {
             textureOverrides.set(2118, {
-                id: 2118,
-                exposure: -.2,
-                hue: -13.1,
-                contrast: .9
+                id: 1227,
             })
-            textureOverrides.set(2125, {
-                id: 2051,
-                exposure: 0,
-                hue: -10.4,
-                contrast: 1.1
+            textureOverrides.set(2124, 1235)
+            textureOverrides.set(2125, 1227)
+            textureOverrides.set(2119, {
+                id: 1235
+            })
+            textureOverrides.set(2060, 1229)
+            textureOverrides.set(1216, {
+                id: 1224,
+                light: [1.2, 1.3, 1.4],
+                hue: -50
+            })
+            textureOverrides.set(2126, {
+                id: 1233,
+                light: [1,1.1,1.2]
+            })
+            /*             textureOverrides.set(2119, {
+                            id: 2119,
+                            hue: 5,
+                        })  */
+            meshOverrides.set(1616, {
+                model: 1482,
+                texture: 1216,
+                scale: [1, 1],
+                offset: {
+                    y: -3
+                },
+                ground: true
+            })
+            meshOverrides.set(1615, {
+                model: 1482,
+                texture: 1216,
+                scale: [1.8, 2.0],
+                offset: {
+                    y: -3
+                },
+                ground: true
+            })
+            meshOverrides.set(1614, {
+                model: 1482,
+                texture: 1216,
+                scale: [2.0, 2.2],
+                offset: {
+                    y: -3
+                },
+                ground: true
+            })
+            meshOverrides.set(1613, {
+                model: 1482,
+                texture: 1216,
+                scale: [5.3, 5.5],
+                offset: {
+                    y: -3
+                },
+                ground: true
             })
             meshOverrides.set(1662, {
                 model: 1482,
@@ -8986,10 +9034,9 @@ void main(){
             })
             textureOverrides.set(2060, 1229)
             applyMeshOverrides();
-            //setFoliageSheet([56, 57, 58, 59, 60, 61, 62, 63], 1213, [13, 5, 6, 7, 15, 4, 0]);
+            setFoliageSheet([56, 57, 58, 59, 60, 61, 62, 63], 1213, [13, 5, 6, 7, 15, 4, 0]);
             applyFoliageOverrides();
         }
-        */
 
         Os.set(8888, {
             "cull": 0,
@@ -14386,6 +14433,21 @@ vec2 cp=dir.xz/(max(dir.y,0.0)+0.25)*0.45+vec2(time*0.008,time*0.003);float cl=c
 fragColor=vec4(a,1.0);}`;
 
     var classicSunFrag = Kw_orig.replace("fragColor.rgba=vec4(suncolor,b);", "float sh=clamp(abs(sin(daycycle*6.282))+vUv.y*0.1-0.15,0.0,1.0);fragColor.rgba=vec4(mix(vec3(1.0),fog[0],min(1.0,pow(1.0-sh*sh,100.0))),b);");
+    var classicWaterFrag = `#version 300 es
+precision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};in float vCameraDistance;in vec4 vWorldPos;uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform Screen{vec2 resolution;};uniform sampler2D waterLines;uniform sampler2D waterNoise;uniform sampler2D bufferPongDepth;in vec2 vUv;out vec4 fragColor;
+const float speed=0.05;const float LX=0.6;
+void main(){float dist=length(cameraPosition-vWorldPos.xyz);if(dist>fog[1][1]){fragColor=vec4(fog[0],1.0);return;}
+float zw=gl_FragCoord.z*2.0-1.0;zw=projectionMatrix[3][2]/(zw+projectionMatrix[2][2]);float zs=texture(bufferPongDepth,gl_FragCoord.xy/resolution).r*2.0-1.0;zs=projectionMatrix[3][2]/(zs+projectionMatrix[2][2]);
+vec3 V=normalize(cameraPosition-vWorldPos.xyz);float BS=max(0.0,zs-zw)*max(abs(V.y),0.15)*0.25;
+vec3 Hd=watercolors[0];vec3 Rj=watercolors[1];vec3 Tp=watercolors[2];vec2 CR=vUv;vec2 wdir=vec2(0.98,0.196);float Lr=0.0;float Wm=1.0;
+for(int i=0;i<2;++i){float Jp=float(i)/3.0;float t=mod(time*0.2+Jp,1.0)*3.141;float gY=speed+0.2;vec2 shift=vec2(gY*wdir.y*t+Jp,gY*wdir.x*t+Jp);float curve=abs(sin(t));Lr+=texture(waterNoise,CR.yx*0.5+shift).r*curve;Wm+=(sin((CR.x+shift.y)*10.0)+cos((CR.y+shift.x)*10.0))*curve*(0.2+gY*0.6);}
+vec4 Jo=texture(waterLines,CR.yx+time*speed*2.0+Lr*0.1);
+vec4 Pp=vec4(Hd,0.0);vec4 AE=vec4(Hd,0.9);vec4 jS=vec4(mix(Hd,Rj,0.9)*0.8,0.5)+speed*0.1;vec4 aV=vec4(Rj,0.4)+Jo*0.05;vec4 Fm=vec4(mix(Rj,Tp,0.5),0.8-LX*0.4)+Jo*0.08;vec4 PN=vec4(Tp,1.4-LX*0.8)+Jo*0.12;
+float TW=0.03+0.01*Lr;float kZ=TW+0.02+speed*0.05+0.03*Lr+Wm*0.02;float SZ=kZ+(0.05+speed*0.5*Lr+Wm*0.05)*LX;float TV=SZ+(0.2+speed*0.2-Lr*0.1)*LX;float SG=TV+0.2*LX;
+vec4 r;if(BS<TW){r=mix(Pp,AE,smoothstep(0.0,TW,BS));}else if(BS<kZ){r=mix(AE,jS,smoothstep(TW,kZ,BS));}else if(BS<SZ){r=mix(jS,aV,smoothstep(kZ+(SZ-kZ)*0.3,SZ,BS));}else if(BS<TV){r=mix(aV,Fm,smoothstep(SZ+(TV-SZ)*0.4,TV,BS));}else{r=mix(Fm,PN,smoothstep(SG,1.0,BS));}
+r.rgb-=0.19;vec3 N=vec3(0.0,1.0,0.0);float Hf=max(dot(worldlight[2],N),0.0);float Xr=min(1.0,pow(max(dot(reflect(-worldlight[2],N),V),0.0),10.0))*0.6;
+r.rgb=r.rgb*worldlight[0]*Hf+r.rgb*worldlight[1]+Xr*worldlight[0];
+r.rgb=mix(fog[0],r.rgb,clamp((fog[1][1]-dist)/(fog[1][1]-fog[1][0]),0.0,1.0));fragColor=vec4(r.rgb,clamp(r.a,0.0,1.0));}`;
     var classicWaveAt = (w, B) => {
 
         let t = nn.environment && nn.environment.data ? nn.environment.data.time[0] : 0;
@@ -14549,7 +14611,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             vert: YM
         },
         Z0 = {
-            frag: QM,
+            frag: ne.classicWaterLook ? classicWaterFrag : QM,
             vert: ne.classicWater ? classicWaterVert : XM
         },
         Gq = {
@@ -23586,20 +23648,37 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 note: P.ui.settings.reload,
                 reload: true
             }),
-            makeToggle("Pre 0.5 water", classicWater, {
+            makeToggle("Pre 0.5 water movement", classicWater, {
                 note: P.ui.settings.reload,
                 reload: true
+            }),
+            makeToggle("Pre 0.5 water shader", classicWaterLook, {
+                note: P.ui.settings.reload,
+                reload: true
+            }),
+            makeToggle("Fix water colors", classicWaterColors, {
+                note: "Enable if you prefer bluish water everywhere, rather than the server values"
+            }
+            ),
+            makeToggle("Pre 0.5 lighting colors", classicLighting, {
+                note: "Some colors will be very bright, change the slider below to adjust to your liking"
+            }),
+            makeSlider("Lighting colors brightness", classicDayBrightness, {
+                min: 50,
+                max: 100,
+                showValue: true,
+                suffix: "%"
             }),
             makeToggle("Sand on water edges", sandOverlay, {
                 note: P.ui.settings.reload,
                 reload: true
             }),
             makeToggle("Cinematic lighting", cinematicLighting),
-            /*makeToggle("Faivel retexture", faivelRetexture, {
-                note: P.ui.settings.reload,
+            makeToggle("Pre 0.5 retexture", faivelRetexture, {
+                note: P.ui.settings.reload + ", unfinished, only includes innaccurate faivel changes atm",
                 reload: true,
                 color: "#3ed363"
-            }),*/
+            }),
             makeSlider("Foliage distance", foliageDistance, {
                 min: 32,
                 max: 1200
@@ -35645,6 +35724,91 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         [.5, .5, .5]
     ];
     for (let t = 0; t < Hh.length; ++t) hn[Hh[t]] = [0, 0, 0];
+
+    var classicPalettes = {
+        guardstone: [
+            [0xa0e0fd, 0x66756d, 0x6bbeee, 0x79eefb],
+            [0x6687c4, 0x437d81, 0x579de3, 0xe089c1],
+            [0x215198, 0x1818c5, 0x2c3372, 0x20299f]
+        ],
+        faivel: [
+            [0xa5c9ed, 0x919449, 0xabd1e7, 0x81d6e4],
+            [0x94bdcd, 0x414398, 0x50c9e2, 0x7a81ba],
+            [0x465886, 0x1e3175, 0x4e5bda, 0x2f3980]
+        ],
+        headless: [
+            [0x76deea, 0x918769, 0x6ddcdc, 0x5ee7ff],
+            [0x1952d7, 0x372744, 0x15466a, 0xd28c4d],
+            [0x303aab, 0x142d66, 0x4538e2, 0x6241c5]
+        ]
+    };
+    var classicWaterCols = {
+        default: [0xffffff, 0x94eef8, 0x3a487e],
+        guardstone: [0xc0dccd, 0x52888b, 0x416f78],
+        faivel: [0xd7d7d7, 0xb0d9db, 0x4f6693],
+        headless: [0xffffff, 0x94d7f8, 0x324587]
+    };
+    var classicEnvWorlds = {
+        2: "guardstone",
+        13: "faivel",
+        3: "headless"
+    };
+    var classicSoftness = .65;
+    var classicEnvCache = new Map;
+    [classicLighting, classicDayBrightness, classicWaterColors].forEach(pt => pt.subscribe(() => classicEnvCache.clear()));
+    var classicClamp01 = v => Math.max(0, Math.min(1, v)),
+        classicHex = n => [(n >> 16 & 255) / 255, (n >> 8 & 255) / 255, (n & 255) / 255],
+        classicLum = c => c[0] * .299 + c[1] * .587 + c[2] * .114,
+        classicDesat = (c, k) => {
+            let l = classicLum(c);
+            return [c[0] + (l - c[0]) * k, c[1] + (l - c[1]) * k, c[2] + (l - c[2]) * k];
+        },
+        buildClassicEnv = env => {
+            let out = Object.assign({}, env),
+                pal = classicPalettes[classicEnvWorlds[env.id]],
+                phases = [0, 1, 2];
+            if (pal) {
+                let db = Math.max(.5, classicClamp01(ne.classicDayBrightness / 100)),
+                    scale = [db, 1 - (1 - db) * .5, 1],
+                    col = (p, i) => classicHex(pal[p][i]).map(v => v * scale[p]);
+                out.ambient = phases.map(p => col(p, 0));
+                out.direct = phases.map(p => col(p, 1));
+                out.fog = phases.map(p => col(p, 2));
+                out.skytop = out.skymid = out.skybot = phases.map(p => col(p, 3));
+                out.horizon = out.clouds = out.fog;
+                out.sun = phases.map(() => [1, 1, 1]);
+                return out;
+            }
+            let k = classicSoftness;
+            out.ambient = [], out.direct = [], out.fog = [], out.skymid = [];
+            for (let p = 0; p < 3; ++p) {
+                let amb = env.ambient[p],
+                    dir = env.direct[p],
+                    a = [0, 0, 0],
+                    d = [0, 0, 0];
+                for (let c = 0; c < 3; ++c) {
+                    let total = amb[c] + dir[c];
+                    a[c] = amb[c] + (total * .6 - amb[c]) * k * .6;
+                    d[c] = dir[c] + (total * .4 - dir[c]) * k * .6;
+                }
+                out.ambient[p] = classicDesat(a, k * .3);
+                out.direct[p] = classicDesat(d, k * .3);
+                out.fog[p] = classicDesat(env.fog[p], k * .3);
+                out.skymid[p] = classicDesat(env.skymid[p], k * .3);
+            }
+            out.skytop = out.skybot = out.skymid;
+            out.horizon = out.fog;
+            return out;
+        },
+        envAt = id => {
+            let env = wc.get(id);
+            if (!env || !ne.classicLighting && !ne.classicWaterColors) return env;
+            let c = classicEnvCache.get(id);
+            if (c) return c;
+            c = ne.classicLighting ? buildClassicEnv(env) : Object.assign({}, env);
+            if (ne.classicWaterColors) c.water = (classicWaterCols[classicEnvWorlds[id]] || classicWaterCols.default).map(classicHex);
+            return classicEnvCache.set(id, c), c;
+        };
     var f9 = (t, e, n, o) => {
             F$(), T$(t, n, e), C$(), e > 0 && S$(e, o), _o(nn.sky), _o(nn.environment);
             let s = nn.environment.data;
@@ -35672,10 +35836,10 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 o = e,
                 s = t + 32,
                 i = e + 32,
-                r = wc.get(T.getEnvironmentId(n, o)),
-                l = wc.get(T.getEnvironmentId(s, o)),
-                a = wc.get(T.getEnvironmentId(n, i)),
-                c = wc.get(T.getEnvironmentId(s, i));
+                r = envAt(T.getEnvironmentId(n, o)),
+                l = envAt(T.getEnvironmentId(s, o)),
+                a = envAt(T.getEnvironmentId(n, i)),
+                c = envAt(T.getEnvironmentId(s, i));
             if (!r || !l || !a || !c) return;
             let f = t / 32 % 1,
                 u = e / 32 % 1;
