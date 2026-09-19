@@ -8971,6 +8971,7 @@ void main(){
 
         //faivel retexture:
         if (ne.faivelRetexture) {
+            textureOverrides.set(1867, 1226);
             textureOverrides.set(2118, {
                 id: 1227,
                 contrast: 1.15
@@ -13041,7 +13042,7 @@ void main(){
         stoneNoiseAmount = 1.2,
         stoneNoiseScale = 0.1,
         stoneFoliageCutoff = 0.2,
-        stoneMaxLakeArea = 4 * 64 * 64,
+        stoneMaxLakeArea = 12 * 64 * 64,
         stoneShaderTex = null,
         stoneShaderTexRequested = !1;
     let dirtPatchTexture = 1228,
