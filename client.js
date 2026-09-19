@@ -1817,7 +1817,7 @@
             currentProgram: -1
         },
         S3 = (t, e) => {
-            it.width = t, it.height = e, zo.width = t, zo.height = e, Nn.width = t, Nn.height = e
+            it.width = t, it.height = e, zo.width = t, zo.height = e, Nn.width = Math.round(window.innerWidth), Nn.height = Math.round(window.innerHeight)
         },
         Yf = (t, e) => {
             it.viewport.width === t && it.viewport.height === e || (it.viewport.width = t, it.viewport.height = e, W.viewport(0, 0, t, e))
@@ -2517,7 +2517,6 @@ void main() {
         hideOwnHpBar: () => hideOwnHpBar,
         ssaoBlur: () => ssaoBlur,
         ssaoIGN: () => ssaoIGN,
-        sandOverlay: () => sandOverlay,
         mouseLock: () => mouseLock,
         shadowAlpha: () => shadowAlpha,
         rainEnabled: () => rainEnabled,
@@ -2542,6 +2541,8 @@ void main() {
         bloomRadius: () => bloomRadius,
         bloomSky: () => bloomSky,
         godRays: () => godRays,
+        waterReflections: () => waterReflections,
+        bloomStrength: () => bloomStrength,
         godRaysIntensity: () => godRaysIntensity,
         godRaysDistance: () => godRaysDistance,
         godRaysPhase: () => godRaysPhase,
@@ -2857,8 +2858,9 @@ void main() {
         hiddenClassBuffs = te([80, 78, 81, 76, 75]),
         ssaoBlur = te(true),
         ssaoIGN = te(true),
-        sandOverlay = te(false),
         godRays = te(false),
+        waterReflections = te(true),
+        bloomStrength = te(100),
         godRaysIntensity = te(19),
         godRaysDistance = te(70),
         godRaysPhase = te(44),
@@ -2919,9 +2921,11 @@ void main() {
             for (let k in nameBarCache) delete nameBarCache[k];
     };
     [mobNameColor].forEach(pt => pt.subscribe(nameBarCacheReset));
-    var sandShaderEnabled = false;
-
-    sandOverlay.subscribe(v => sandShaderEnabled = v);
+    var stoneShaderEnabled = false,
+        dirtPatchEnabled = false,
+        gloomEnabled = false,
+        shoreShaderEnabled = false;
+    faivelRetexture.subscribe(v => (stoneShaderEnabled = dirtPatchEnabled = gloomEnabled = shoreShaderEnabled = v));
     ssaoRadius.subscribe(v => ssaoRadiusVal = v / 100);
     ssaoBias.subscribe(v => ssaoBiasVal = v / 10);
     ssaoFadeDist.subscribe(v => ssaoFadeVal = v);
@@ -2991,9 +2995,9 @@ void main() {
         godRaysDistance: 250,
         godRaysPhase: 50,
         godRaysHeight: 50,
-        godRaysContrast: 160,
+        godRaysContrast: 120,
         godRaysDust: 50,
-        godRaysGate: 150,
+        godRaysGate: 90,
         tonemapMode: 1,
         tonemapExposure: 130,
         tonemapContrast: 100,
@@ -8067,13 +8071,6 @@ void main(){
         yv = new Map,
         e0 = new Map,
         textureOverrides = new Map,
-        // Terrain layer blending, keyed by texture file id (a terrain's .texture, the same ids textureOverrides uses,
-        // i.e. before any texture override remaps them):
-        //   weight:       multiplies this layer's blend weight (default 1)
-        //   sharpness:    exponent on the blend weight, >1 gives harder edges (default 1, unchanged)
-        //   suppressedBy: {textureId: amount}, fade this layer out where those textures are present (0..1, default none)
-        // e.g. terrainBlendOverrides.set(2118, { sharpness: 3, suppressedBy: { 2124: 1 } }) keeps texture 2118 out from under texture 2124.
-        // Read when a chunk's terrain is built, so changes apply to chunks loaded afterwards.
         terrainBlendOverrides = new Map,
         meshOverrides = new Map,
         foliageOverrides = new Map,
@@ -8113,13 +8110,38 @@ void main(){
                 }]
             };
         },
+        foliageExtras = (fol, o) => {
+            let scale = o.scale == null ? 1 : Math.max(0, o.scale),
+                cov = Math.max(0, Math.round(o.coverage || 0));
+            if (scale === 1 && !cov) return fol;
+            let nodes = fol.nodes.map(n => Object.assign({}, n, {
+                size: n.size * scale,
+                radius: (n.radius || 0) * scale,
+                y: (n.y || 0) * scale
+            }));
+            if (cov) {
+                let copies = [];
+                nodes.forEach(n => {
+                    let spread = o.spread == null ? n.size * .5 : Math.max(0, o.spread);
+                    for (let c = 0; c < cov; ++c) copies.push(Object.assign({}, n, {
+                        radius: spread,
+                        jitter_radius: 1,
+                        jitter_rotation: Math.PI
+                    }));
+                });
+                nodes = nodes.concat(copies);
+            }
+            return Object.assign({}, fol, {
+                nodes
+            });
+        },
         applyFoliageOverrides = () => {
             foliageOverrides.forEach((o, V0) => {
                 let base = kc.get(V0);
                 if (!base) return console.log("foliage override " + V0 + ": unknown foliage id");
                 if (o.hide != null && (hiddenFoliage[o.hide ? "add" : "delete"](V0), o.hide)) return;
                 if (o.texture != null && !bc.has(o.texture)) return console.log("foliage override " + V0 + ": unknown texture " + o.texture);
-                kc.set(V0, o.cell == null ? Object.assign({}, base, o) : gridCellFoliage(base, o));
+                kc.set(V0, foliageExtras(o.cell == null ? Object.assign({}, base, o) : gridCellFoliage(base, o), o));
             });
         },
         setFoliageSheet = (ids, texture, cells, o) => {
@@ -8951,21 +8973,31 @@ void main(){
         if (ne.faivelRetexture) {
             textureOverrides.set(2118, {
                 id: 1227,
+                contrast: 1.15
             })
-            textureOverrides.set(2124, 1235)
+            textureOverrides.set(2124, 1227)
             textureOverrides.set(2125, 1227)
             textureOverrides.set(2119, {
-                id: 1235
+                id: 1227,
+                exposure: -0.1
             })
             textureOverrides.set(2060, 1229)
             textureOverrides.set(1846, {
                 id: 1224,
-                light: [1.2, 1.3, 1.4],
-                hue: -50
+                light: [1, 1, 1],
+                hue: -35
             })
             textureOverrides.set(2126, {
                 id: 1233,
-                light: [1,1.1,1.2]
+                contrast: 1.15
+            })
+            textureOverrides.set(2120, {
+                id: 1233,
+                contrast: 1.15
+            })
+            textureOverrides.set(1233, {
+                id: 1233,
+                contrast: 1.15
             })
             /*             textureOverrides.set(2119, {
                             id: 2119,
@@ -8974,7 +9006,7 @@ void main(){
             meshOverrides.set(1616, {
                 model: 1482,
                 texture: 1846,
-                scale: [1, 1],
+                scale: [1.5, 1.8],
                 offset: {
                     y: -3
                 },
@@ -8983,7 +9015,7 @@ void main(){
             meshOverrides.set(1615, {
                 model: 1482,
                 texture: 1846,
-                scale: [1.8, 2.0],
+                scale: [1.8, 2.2],
                 offset: {
                     y: -3
                 },
@@ -8992,7 +9024,7 @@ void main(){
             meshOverrides.set(1614, {
                 model: 1482,
                 texture: 1846,
-                scale: [2.0, 2.2],
+                scale: [2.0, 2.4],
                 offset: {
                     y: -3
                 },
@@ -9001,7 +9033,7 @@ void main(){
             meshOverrides.set(1613, {
                 model: 1482,
                 texture: 1846,
-                scale: [5.3, 5.5],
+                scale: [5.3, 5.7],
                 offset: {
                     y: -3
                 },
@@ -9040,11 +9072,17 @@ void main(){
                 scale: [4.2, 4.3],
                 ground: true
             })
-            textureOverrides.set(2060, 1229)
+            textureOverrides.set(2060, {
+                id: 1233,
+                contrast: 1.15
+            })
             applyMeshOverrides();
-            setFoliageSheet([56, 57, 58, 59, 60, 61, 62, 63], 1213, [13, 5, 6, 7, 15, 4, 0]);
+            gloomFolBase = kc.get(56);
+            setFoliageSheet([56, 57, 58, 59, 60, 61, 62, 63], 1213, [0, 4, 15, 5, 6, 13], { coverage: 1.5, spread: 1.5, scale: 1.5 });
             applyFoliageOverrides();
+
         }
+        ne.faivelRetexture && retextureTerrains();
 
         Os.set(8888, {
             "cull": 0,
@@ -10896,12 +10934,12 @@ void main(){
         },
         filterKey = o => [o.light, o.exposure, o.contrast, o.hue].join("/"),
         applyDxtFilter = (buffer, hn) => {
-            let head = new Int32Array(buffer, 0, e9),
-                dxt3 = head[r9] === a9,
+            let head = new Int32Array(buffer, 0, RL),
+                dxt3 = head[NL] === jL,
                 stride = dxt3 ? 16 : 8,
                 cOff = dxt3 ? 8 : 0,
                 out = buffer.slice(0),
-                b = new Uint8Array(out, head[t9] + 4),
+                b = new Uint8Array(out, head[zL] + 4),
                 px = [0, 0, 0];
             for (let m = 0; m + stride <= b.length; m += stride) {
                 let o = m + cOff,
@@ -12893,7 +12931,7 @@ void main(){
         },
         lp = 0,
         VV = t => {
-            if (So(B0, 2 * (t.x * ne.resolutionScale / zo.width) - 1, 2 * (1 - t.y * ne.resolutionScale / zo.height) - 1), So(Oc, ~~(t.x * ne.resolutionScale), ~~(t.y * ne.resolutionScale)), mt.rmb.down || mt.lmb.down) {
+            if (So(B0, 2 * (t.x * ne.resolutionScale / zo.width) - 1, 2 * (1 - t.y * ne.resolutionScale / zo.height) - 1), So(Oc, ~~t.x, ~~t.y), mt.rmb.down || mt.lmb.down) {
                 let e = xt(t.movementX, -100, 100),
                     n = xt(t.movementY, -100, 100);
                 bo[1] = xt(bo[1] + n * .0028 * (ne.invertMouseY ? -ne.mouseSensitivity : ne.mouseSensitivity), -Math.PI / 2, Math.PI / 2), bo[0] = zc(bo[0] - e * .005 * (ne.invertMouseX ? -ne.mouseSensitivity : ne.mouseSensitivity)), lp += Math.abs(n) + Math.abs(e)
@@ -12939,6 +12977,7 @@ void main(){
             let e = t.target.tagName.toLowerCase();
             return e !== "input" && e !== "textarea"
         };
+    var pfxTemp, pfxDim = v => Math.max(1, Math.ceil(v / Math.max(1, _f)));
     var $c = [],
         Nc, Hs, rr, ta, na, ssaoFb1, ssaoFb2, ssaoHistA, ssaoHistB, bloomMips = [],
         bloomMipCount = 6,
@@ -12947,13 +12986,13 @@ void main(){
             let e = it.width,
                 n = it.height;
             for (let o = 0; o < 2; ++o) $c.push(nr(t, t, 0, !0, W.COMPARE_REF_TO_TEXTURE));
-            Nc = nr(t, t, 0, !0, W.COMPARE_REF_TO_TEXTURE), Hs = nr(e, n, 1, !0), rr = nr(e, n, 1, !0), ssaoFb1 = nr(e, n, 1, !1), ssaoFb2 = nr(e, n, 1, !1), ssaoHistA = nr(e, n, 1, !1), ssaoHistB = nr(e, n, 1, !1), ta = nr(Math.ceil(e / 4), Math.ceil(n / 4)), na = nr(Math.ceil(e / 4), Math.ceil(n / 4));
+            Nc = nr(t, t, 0, !0, W.COMPARE_REF_TO_TEXTURE), Hs = nr(e, n, 1, !0), rr = nr(e, n, 1, !0), ssaoFb1 = nr(pfxDim(e), pfxDim(n), 1, !1), ssaoFb2 = nr(pfxDim(e), pfxDim(n), 1, !1), ssaoHistA = nr(pfxDim(e), pfxDim(n), 1, !1), ssaoHistB = nr(pfxDim(e), pfxDim(n), 1, !1), pfxTemp = nr(pfxDim(e), pfxDim(n), 1, !1), ta = nr(Math.ceil(pfxDim(e) / 4), Math.ceil(pfxDim(n) / 4)), na = nr(Math.ceil(pfxDim(e) / 4), Math.ceil(pfxDim(n) / 4));
             bloomMips.length = 0;
-            for (let o = 0; o < bloomMipCount; ++o) bloomMips.push(nr(bloomMipSize(e, o), bloomMipSize(n, o), 1, !1));
+            for (let o = 0; o < bloomMipCount; ++o) bloomMips.push(nr(bloomMipSize(pfxDim(e), o), bloomMipSize(pfxDim(n), o), 1, !1));
         },
         J5 = (t, e) => {
-            Ku(Hs, t, e), Ku(rr, t, e), Ku(ssaoFb1, t, e), Ku(ssaoFb2, t, e), Ku(ssaoHistA, t, e), Ku(ssaoHistB, t, e), Ku(ta, Math.ceil(t / 4), Math.ceil(e / 4)), Ku(na, Math.ceil(t / 4), Math.ceil(e / 4));
-            for (let n = 0; n < bloomMips.length; ++n) Ku(bloomMips[n], bloomMipSize(t, n), bloomMipSize(e, n));
+            Ku(Hs, t, e), Ku(rr, t, e), Ku(ssaoFb1, pfxDim(t), pfxDim(e)), Ku(ssaoFb2, pfxDim(t), pfxDim(e)), Ku(ssaoHistA, pfxDim(t), pfxDim(e)), Ku(ssaoHistB, pfxDim(t), pfxDim(e)), Ku(pfxTemp, pfxDim(t), pfxDim(e)), Ku(ta, Math.ceil(pfxDim(t) / 4), Math.ceil(pfxDim(e) / 4)), Ku(na, Math.ceil(pfxDim(t) / 4), Math.ceil(pfxDim(e) / 4));
+            for (let n = 0; n < bloomMips.length; ++n) Ku(bloomMips[n], bloomMipSize(pfxDim(t), n), bloomMipSize(pfxDim(e), n));
         };
     var J0 = {};
     no(J0, {
@@ -12992,18 +13031,74 @@ void main(){
         water: () => Z0,
         waterEditorGrid: () => Gq
     });
-    let sandTextureId = 27,
-        sandShaderUvScale = 1,
-        sandOverlayStrength = 1.1,
-        sandWaterDistance = 2,
-        sandFade = 0.9 * sandWaterDistance,
-        sandMaxHeight = 10,
-        sandSmooth = 0.25,
-        sandNoiseAmount = 0.25,
-        sandNoiseScale = 1.5,
-        sandFoliageCutoff = 0.1,
-        sandShaderTex = null;
-    let sandFragCode = `float sandM=texture(sandMask,vUvChannel).r;float sandNz=(sandNoise(vWorldPos.xz/${sandNoiseScale.toFixed(4)})-0.5)*${sandNoiseAmount.toFixed(4)}*4.0*sandM*(1.0-sandM);sandM=clamp(sandM+sandNz,0.0,1.0)*${sandOverlayStrength.toFixed(4)};vec2 sandUv=vec2(-vWorldPos.x,vWorldPos.z)/4.0*${sandShaderUvScale.toFixed(4)};d.rgb=mix(d.rgb,texture(sandDiffuse,sandUv).rgb,sandM);`;
+    let stoneTextureId = 1233,
+        stoneStretch = 1.6,
+        stoneShaderUvScale = 1 / stoneStretch,
+        stoneOverlayStrength = 1,
+        stoneWaterDistance = 4.9,
+        stoneFade = 1.3 * stoneWaterDistance,
+        stoneMaxHeight = 6,
+        stoneNoiseAmount = 1.2,
+        stoneNoiseScale = 0.1,
+        stoneFoliageCutoff = 0.2,
+        stoneMaxLakeArea = 4 * 64 * 64,
+        stoneShaderTex = null,
+        stoneShaderTexRequested = !1;
+    let dirtPatchTexture = 1228,
+        dirtPatchTextures = [1227, 1235],
+        dirtPatchSpacing = .5,
+        dirtPatchChance = .2,
+        dirtPatchMinRadius = .45,
+        dirtPatchMaxRadius = .65,
+        dirtPatchBlend = 3.9,
+        dirtPatchShapeNoise = 4.5,
+        dirtPatchNoiseScale = 3.1,
+        dirtPatchPropChance = .2,
+        dirtPatchPropRange = 1,
+        dirtPatchPropPull = 1,
+        dirtPatchUvScale = 1,
+        dirtPatchStrength = 1,
+        dirtPatchTex = null,
+        dirtPatchTexRequested = !1;
+    let gloomWorld = "main",
+        gloomX = 3935,
+        gloomZ = 4498,
+        gloomRadius = 130,
+        gloomFade = 15,
+        gloomShapeNoise = 45,
+        gloomShapeNoiseScale = 55,
+        gloomEdgeNoise = 14,
+        gloomEdgeNoiseScale = 9,
+        gloomDetailNoise = 4,
+        gloomDetailNoiseScale = 2.2,
+        gloomGrassTextures = [1227, 1235],
+        gloomGrassTexture = 1232,
+        gloomUvScale = 1,
+        gloomDirtFactor = .2,
+        gloomFolCells = [0, 3],
+        gloomFolShare = [.5, .5],
+        gloomFolIds = null,
+        gloomFolBase = null,
+        gloomFolCache = new Map,
+        gloomGrassTex = null,
+        gloomTexRequested = !1,
+        steepStoneStart = .74,
+        steepStoneFull = .64,
+        steepFillRadius = 2,
+        steepFillShare = .35;
+    let meadowPatchTint = [1.07, .84, .9],
+        meadowPatchSpacing = 7,
+        meadowPatchChance = .3,
+        meadowPatchMinRadius = 3.6,
+        meadowPatchMaxRadius = 6.3,
+        meadowPatchBlend = 3.3,
+        meadowPatchShapeNoise = .45,
+        meadowPatchNoiseScale = 2.4;
+    let gloomNoiseGlsl = "float gloomH(ivec2 c){uint h=uint(c.x)*374761393u+uint(c.y)*668265263u;h=(h^(h>>13u))*1274126177u;h^=h>>16u;return float(h)/4294967296.0;}float gloomN(vec2 p){vec2 i=floor(p);vec2 f=p-i;vec2 u=f*f*(3.0-2.0*f);ivec2 c=ivec2(i);return mix(mix(gloomH(c),gloomH(c+ivec2(1,0)),u.x),mix(gloomH(c+ivec2(0,1)),gloomH(c+ivec2(1,1)),u.x),u.y);}";
+    let gloomFragCode = `gloomT=vec4(0.0);gloomA=0.0;if(layerFlags!=vec4(0.0)){vec2 gq=vWorldPos.xz;float gd=length(gq-vec2(${gloomX.toFixed(2)},${gloomZ.toFixed(2)}))+(gloomN(gq/${gloomShapeNoiseScale.toFixed(4)}+vec2(41.3,17.9))-0.5)*${(2 * gloomShapeNoise).toFixed(4)}+(gloomN(gq/${gloomEdgeNoiseScale.toFixed(4)}+vec2(5.3,31.7))-0.5)*${(2 * gloomEdgeNoise).toFixed(4)}+(gloomN(gq/${gloomDetailNoiseScale.toFixed(4)}+vec2(23.1,8.9))-0.5)*${(2 * gloomDetailNoise).toFixed(4)};gloomA=1.0-smoothstep(${(gloomRadius - gloomFade).toFixed(2)},${gloomRadius.toFixed(2)},gd);gloomT=texture(gloomGrass,vec2(-gq.x,gq.y)/4.0*${gloomUvScale.toFixed(4)});}`;
+    let dirtPatchFragCode = `float patchM=texture(sandMask,vUvChannel).b*terrGrassW*${dirtPatchStrength.toFixed(4)};d.rgb=mix(d.rgb,texture(patchDiffuse,vec2(-vWorldPos.x,vWorldPos.z)/4.0*${dirtPatchUvScale.toFixed(4)}).rgb,patchM);`;
+    let stoneFragCode = `float stoneM=texture(sandMask,vUvChannel).g;float stoneN=0.5*sandNoise(vWorldPos.xz/${(3.2 * stoneNoiseScale).toFixed(4)})+0.3*sandNoise(vWorldPos.xz/${(1.1 * stoneNoiseScale).toFixed(4)}+vec2(17.3,5.1))+0.2*sandNoise(vWorldPos.xz/${(0.4 * stoneNoiseScale).toFixed(4)}+vec2(41.7,23.9));stoneM=smoothstep(0.3,0.6,stoneM*${(1 + stoneNoiseAmount * 0.5).toFixed(4)}+(stoneN-0.5)*${stoneNoiseAmount.toFixed(4)}*min(1.0,stoneM*3.0))*${stoneOverlayStrength.toFixed(4)}*terrGrassW;vec2 stoneUv=vec2(-vWorldPos.x,vWorldPos.z)/4.0*${stoneShaderUvScale.toFixed(4)};d.rgb=mix(d.rgb,texture(stoneDiffuse,stoneUv).rgb,stoneM);`;
+    let steepFragCode = `float steepM=texture(sandMask,vUvChannel).r*terrGrassW;d.rgb=mix(d.rgb,texture(stoneDiffuse,stoneUv).rgb,steepM);`;
     var tM = `#version 300 es
 precision highp float;precision highp int;out vec4 fragColor;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};in float vCameraDistance;in vec4 vWorldPos;uniform sampler2D diffuse;in vec2 vUv;in float vShine;void main(){if(vCameraDistance>fog[1][1]){fragColor=vec4(fog[0],1.0);return;}vec4 a=texture(diffuse,vUv);if(a.a<0.5)discard;a.rgb=mix(a.rgb*worldlight[1],a.rgb*1.1,smoothstep(-0.7,0.7,sin(time*6.0+vShine)));float b=clamp((fog[1][1]-vCameraDistance)/(fog[1][1]-fog[1][0]),0.0,1.0);a.rgb=mix(fog[0],a.rgb,b);fragColor=a;}`;
     var nM = `#version 300 es
@@ -13570,6 +13665,10 @@ void main(){
     fragColor = vec4(c, src.a);
 }`;
 
+    var pfxSplitFrag = `#version 300 es
+precision highp float;precision highp int;uniform sampler2D inputA;uniform sampler2D inputB;in vec2 vUv;out vec4 fragColor;void main(){vec4 s=texture(inputA,vUv);vec4 b=texture(inputB,vUv);fragColor=vec4(s.rgb*b.a+b.rgb,s.a);}`;
+
+
     var sharpenFrag = `#version 300 es
 precision highp float;precision highp int;
 
@@ -13810,7 +13909,7 @@ float linearZ(float depth){
 }
 
 void main(){
-    vec2 texel = 1.0 / resolution;
+    vec2 texel = 1.0 / vec2(textureSize(inputA, 0));
     float centerDepth = texture(depthTex, vUv).r;
 
     if(centerDepth >= 0.9999){
@@ -14055,6 +14154,7 @@ uniform float grContrast;
 uniform float grDust;
 uniform float grGate;
 uniform float grRain;
+uniform float grSplit;
 
 in vec2 vUv;
 out vec4 fragColor;
@@ -14129,7 +14229,7 @@ void main(){
 
     float rl = length(ray);
     if(rl < 1e-4){
-        fragColor = src;
+        fragColor = grSplit > 0.5 ? vec4(0.0, 0.0, 0.0, 1.0) : src;
         return;
     }
 
@@ -14150,7 +14250,8 @@ void main(){
         float t = stepLen * (float(i) + ign) + grNearSkip;
         vec3 sp = cameraPosition + rd * t;
         float d = grDensity(sp);
-        float s = sunlightAt(sp, t);
+        vec3 so = normalize(cross(worldlight[2], vec3(0.0, 1.0, 0.0)) + 1e-4) * (0.9 + 0.9 * ign);
+        float s = 0.5 * (sunlightAt(sp + so, t) + sunlightAt(sp - so + vec3(0.0, 0.9 * ign, 0.0), t));
         den += d;
         lit += d * s;
         litSq += d * s * s;
@@ -14176,11 +14277,13 @@ void main(){
     
     float reach = min(marchDist / grNormDist, 1.0);
 
-    float scatter = pow(litFrac, grContrast) * gate * avgDen * phase * grIntensity * reach;
+    float grNight = smoothstep(0.45, 0.9, clamp((1.0 - sin(daycycle * 6.28)) * 0.5, 0.0, 1.0));
+    float scatter = pow(litFrac, grContrast) * gate * avgDen * phase * grIntensity * reach * mix(0.5, 1.0, grNight);
 
     vec3 lumW = vec3(0.299, 0.587, 0.114);
     vec3 rainCol = fog[0] * (dot(worldlight[0], lumW) / max(dot(fog[0], lumW), 1e-4)) * 0.75;
-    fragColor = vec4(src.rgb + mix(worldlight[0], rainCol, grRain) * scatter, src.a);
+    vec3 grAdd = mix(worldlight[0], rainCol, grRain) * scatter;
+    fragColor = grSplit > 0.5 ? vec4(grAdd, 1.0) : vec4(src.rgb + grAdd, src.a);
 }`;
 
     var rainMistFrag = `#version 300 es
@@ -14203,6 +14306,7 @@ uniform sampler2D depthTex;
 uniform float mistAmount;
 uniform vec2 mistWind;
 uniform float mistShadows;
+uniform float mistSplit;
 
 in vec2 vUv;
 out vec4 fragColor;
@@ -14324,7 +14428,7 @@ void main(){
     vec3 ray = transpose(mat3(viewMatrix)) * getViewPos(vUv, depth);
     float rl = length(ray);
     if(rl < 1e-4 || mistAmount < 1e-4){
-        fragColor = src;
+        fragColor = mistSplit > 0.5 ? vec4(0.0, 0.0, 0.0, 1.0) : src;
         return;
     }
 
@@ -14335,7 +14439,7 @@ void main(){
     float t1 = rd.y > 1e-3 ? (mistCloudBase + mistCloudThick) / rd.y : rl;
     float hazeA = 1.0 - exp(-mistHaze * mistAmount * min(min(t0, rl), mistMaxDist + mistRestMax));
     if(t0 >= rl){
-        fragColor = vec4(mix(src.rgb, baseCol, hazeA), src.a);
+        fragColor = mistSplit > 0.5 ? vec4(baseCol * hazeA, 1.0 - hazeA) : vec4(mix(src.rgb, baseCol, hazeA), src.a);
         return;
     }
 
@@ -14382,7 +14486,7 @@ void main(){
         trans *= 1.0 - a;
     }
 
-    fragColor = vec4(src.rgb * trans + inscatter, src.a);
+    fragColor = mistSplit > 0.5 ? vec4(inscatter, trans) : vec4(src.rgb * trans + inscatter, src.a);
 }`;
 
     var MM = `#version 300 es
@@ -14415,9 +14519,9 @@ precision highp float;precision highp int;uniform Camera{mat4 projectionMatrix;m
 precision highp float;precision highp int;in vec2 vUv;uniform float seed;float a(in vec2 uv,float scale){uv*=scale;vec2 b=floor(uv),f=fract(uv),p;float c=3.,d;p=.5+.35*sin(11.*fract(sin((b+p+scale)*mat2(7,3,6,5))*5.))-f;d=length(p);c=min(d,c);return smoothstep(0.,c,sin(f.x+f.y)*0.003);}vec2 d(vec2 e){e=vec2(dot(e,vec2(127.1,311.7)),dot(e,vec2(269.5,183.3)));return-1.0+2.0*fract(sin(e)*43758.5453123);}float f(in vec2 e){const float g=0.366025404;const float h=0.211324865;vec2 i=floor(e+(e.x+e.y)*g);vec2 j=e-i+(i.x+i.y)*h;vec2 l=(j.x>j.y)?vec2(1.0,0.0):vec2(0.0,1.0);vec2 m=j-l+h;vec2 n=j-1.0+2.0*h;vec3 q=max(0.5-vec3(dot(j,j),dot(m,m),dot(n,n)),0.0);vec3 r=q*q*q*vec3(dot(j,d(i+0.0)),dot(m,d(i+l)),dot(n,d(i+1.0)));float t=dot(r,vec3(70.0));return smoothstep(-1.0,1.0,t);}out vec4 fragColor;void main(){vec2 u=vec2(vUv.x+seed,vUv.y);float r=a(vUv,10.0);r+=a(vUv,20.0)*0.5;r+=a(vUv,30.0)*0.2;r*=f(vUv*20.0);fragColor.rgb+=r*4.0;}`;
     var UM = `#version 300 es
 precision highp float;precision highp int;uniform Circle{vec4 circlePos;vec4 circleInfo;};precision highp sampler2DShadow;uniform Shadows{uniform mat4 shadowPVMatrix[2];uniform vec3 shadowRange;};const int a=
-#SHADOWS;uniform sampler2DShadow shadowMaps[2];uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};in float vCameraDistance;in vec4 vWorldPos;uniform MeshTerrain{mat4 modelMatrix;vec4 terrainInfo[4];vec4 layerShape[4];vec4 layerSuppress[4];int quadrant;};const float b=256.0;const float c=4.0;precision highp sampler2DArray;uniform sampler2DArray atlas;uniform sampler2D diffuse[4];in vec3 vLight;in vec3 vNormal;in vec3 vViewDir;in vec3 vUvChannel;in vec2 vUvTexture[4];uniform float u_wetness;vec4 d;float e;vec3 f(vec3 g,vec3 h,vec3 i,vec3 j,float k,vec3 l,float m){j=normalize(j);float n=clamp(dot(j,worldlight[2]),0.0,k);vec3 o=g;vec3 p=normalize(worldlight[2]+vViewDir);vec3 q=vec3(pow(max(0.0,dot(p,j)),8.5)*2.0)*m*0.15;vec3 r=o+h*n*0.75+l;return r*i+q;}void s(vec4 t,float u,vec4 v){float w=t.x+t.y+t.z;e+=v[3]*smoothstep(v[1],v[2],w)*u;t.a=u;t.rgb*=u;d+=t;}out vec4 fragColor;void main(){if(vCameraDistance>fog[1][1]){fragColor=vec4(fog[0],1.0);return;}vec4 x=texture(atlas,vUvChannel);x[3]=max(0.0,min(1.0,1.0-(x.r+x.g+x.b)));if(x[0]==1.0&&x[1]==1.0&&x[2]==1.0)discard;vec4 rw=max(x,vec4(0.0));vec4 nw;for(int bi=0;bi<4;++bi){float bw=rw[bi];float bs=layerShape[bi].y;if(bs!=1.0)bw=pow(bw,bs);bw*=layerShape[bi].x;bw*=max(0.0,1.0-dot(layerSuppress[bi],rw));nw[bi]=max(bw,0.0);}float bsum=nw[0]+nw[1]+nw[2]+nw[3];x=bsum>1e-5?nw/bsum:rw;s(texture(diffuse[0],vUvTexture[0]),x[0],terrainInfo[0]);s(texture(diffuse[1],vUvTexture[1]),x[1],terrainInfo[1]);s(texture(diffuse[2],vUvTexture[2]),x[2],terrainInfo[2]);s(texture(diffuse[3],vUvTexture[3]),x[3],terrainInfo[3]);d.rgb/=d.a;e/=d.a;d.a=1.0;float y=1.0;if(a==1&&vCameraDistance<shadowRange[2]){float az=smoothstep(shadowRange[1],shadowRange[2],vCameraDistance);if(vCameraDistance>shadowRange[0]){vec4 aa=shadowPVMatrix[1]*(vWorldPos);vec3 ab=(aa.xyz/aa.w)*0.5+0.5;y=texture(shadowMaps[1],ab);}else{vec4 aa=shadowPVMatrix[0]*(vWorldPos);vec3 ab=(aa.xyz/aa.w)*0.5+0.5;y=texture(shadowMaps[0],ab);}y=y;y=max(y,az);}d.rgb=f(worldlight[1],worldlight[0],d.rgb,vNormal,y,vLight,e);float ac=distance(vWorldPos.xz,circlePos.xz);float ad=min(1.0,max(0.0,4.0-abs(vWorldPos.y-circlePos.y)));if(ac<circlePos.w+0.1&&(circleInfo.a>1.0||ad>0.0)){float cfa=circleInfo.a;float ady=cfa>1.0?1.0:ad;;float blnd=cfa>1.0?(ac<circlePos.w?cfa-1.0:0.0):((ac<circlePos.w?ac/circlePos.w*0.5:0.0)+max(0.,(0.1-abs(circlePos.w-ac))/0.1));d.rgb=mix(d.rgb,circleInfo.rgb,ady*min(1.0,cfa)*blnd);}float ae=clamp((fog[1][1]-vCameraDistance)/(fog[1][1]-fog[1][0]),0.0,1.0);d.rgb=mix(fog[0],d.rgb,ae);fragColor=d;}`;
+#SHADOWS;uniform sampler2DShadow shadowMaps[2];uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};in float vCameraDistance;in vec4 vWorldPos;uniform MeshTerrain{mat4 modelMatrix;vec4 terrainInfo[4];vec4 layerShape[4];vec4 layerSuppress[4];vec4 layerFlags;int quadrant;};const float b=256.0;const float c=4.0;precision highp sampler2DArray;uniform sampler2DArray atlas;uniform sampler2D diffuse[4];in vec3 vLight;in vec3 vNormal;in vec3 vViewDir;in vec3 vUvChannel;in vec2 vUvTexture[4];uniform float u_wetness;vec4 d;float e;vec3 f(vec3 g,vec3 h,vec3 i,vec3 j,float k,vec3 l,float m){j=normalize(j);float n=clamp(dot(j,worldlight[2]),0.0,k);vec3 o=g;vec3 p=normalize(worldlight[2]+vViewDir);vec3 q=vec3(pow(max(0.0,dot(p,j)),8.5)*2.0)*m*0.15;vec3 r=o+h*n*0.75+l;return r*i+q;}void s(vec4 t,float u,vec4 v){float w=t.x+t.y+t.z;e+=v[3]*smoothstep(v[1],v[2],w)*u;t.a=u;t.rgb*=u;d+=t;}out vec4 fragColor;void main(){if(vCameraDistance>fog[1][1]){fragColor=vec4(fog[0],1.0);return;}vec4 x=texture(atlas,vUvChannel);x[3]=max(0.0,min(1.0,1.0-(x.r+x.g+x.b)));if(x[0]==1.0&&x[1]==1.0&&x[2]==1.0)discard;vec4 rw=max(x,vec4(0.0));vec4 nw;for(int bi=0;bi<4;++bi){float bw=rw[bi];float bs=layerShape[bi].y;if(bs!=1.0)bw=pow(bw,bs);bw*=layerShape[bi].x;bw*=max(0.0,1.0-dot(layerSuppress[bi],rw));nw[bi]=max(bw,0.0);}float bsum=nw[0]+nw[1]+nw[2]+nw[3];x=bsum>1e-5?nw/bsum:rw;x=mix(x,rw,layerShape[0].z);s(texture(diffuse[0],vUvTexture[0]),x[0],terrainInfo[0]);s(texture(diffuse[1],vUvTexture[1]),x[1],terrainInfo[1]);s(texture(diffuse[2],vUvTexture[2]),x[2],terrainInfo[2]);s(texture(diffuse[3],vUvTexture[3]),x[3],terrainInfo[3]);d.rgb/=d.a;e/=d.a;d.a=1.0;float y=1.0;if(a==1&&vCameraDistance<shadowRange[2]){float az=smoothstep(shadowRange[1],shadowRange[2],vCameraDistance);if(vCameraDistance>shadowRange[0]){vec4 aa=shadowPVMatrix[1]*(vWorldPos);vec3 ab=(aa.xyz/aa.w)*0.5+0.5;y=texture(shadowMaps[1],ab);}else{vec4 aa=shadowPVMatrix[0]*(vWorldPos);vec3 ab=(aa.xyz/aa.w)*0.5+0.5;y=texture(shadowMaps[0],ab);}y=y;y=max(y,az);}d.rgb=f(worldlight[1],worldlight[0],d.rgb,vNormal,y,vLight,e);float ac=distance(vWorldPos.xz,circlePos.xz);float ad=min(1.0,max(0.0,4.0-abs(vWorldPos.y-circlePos.y)));if(ac<circlePos.w+0.1&&(circleInfo.a>1.0||ad>0.0)){float cfa=circleInfo.a;float ady=cfa>1.0?1.0:ad;;float blnd=cfa>1.0?(ac<circlePos.w?cfa-1.0:0.0):((ac<circlePos.w?ac/circlePos.w*0.5:0.0)+max(0.,(0.1-abs(circlePos.w-ac))/0.1));d.rgb=mix(d.rgb,circleInfo.rgb,ady*min(1.0,cfa)*blnd);}float ae=clamp((fog[1][1]-vCameraDistance)/(fog[1][1]-fog[1][0]),0.0,1.0);d.rgb=mix(fog[0],d.rgb,ae);fragColor=d;}`;
     var OM = `#version 300 es
-precision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};out float vCameraDistance;out vec4 vWorldPos;uniform Pointlights{vec4 lightCols[16];vec3 lightPos[16];int lightCount;};out vec3 vLight;uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform MeshTerrain{mat4 modelMatrix;vec4 terrainInfo[4];vec4 layerShape[4];vec4 layerSuppress[4];int quadrant;};const float a=256.0;const float b=4.0;in vec3 position;in vec3 normal;out vec3 vNormal;out vec3 vUvChannel;out vec2 vUvTexture[4];out vec3 vViewDir;void main(){vNormal=normal;vWorldPos=modelMatrix*vec4(position,1.0);vUvChannel=vec3(position[0],position[2],0.0)/32.0;int c=quadrant%2;int d=int(quadrant%4);if(c==1)vUvChannel.x-=1.0;if(d>1)vUvChannel.y-=1.0;vUvChannel.z=float(quadrant);vec2 e=vec2(-vWorldPos[0],vWorldPos[2])/4.0;vUvTexture[0]=e*terrainInfo[0][0];vUvTexture[1]=e*terrainInfo[1][0];vUvTexture[2]=e*terrainInfo[2][0];vUvTexture[3]=e*terrainInfo[3][0];for(int f=0;f<lightCount;++f){vec3 g=lightPos[f]-vWorldPos.xyz;float h=lightCols[f].w-dot(g,g);if(h>0.0){h/=(lightCols[f].w);h=h*h;vLight+=0.2*lightCols[f].rgb*h;}}vViewDir=-normalize(vWorldPos.xyz-cameraPosition);vCameraDistance=length(cameraPosition-vWorldPos.xyz);gl_Position=projectionViewMatrix*vWorldPos;}`;
+precision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};out float vCameraDistance;out vec4 vWorldPos;uniform Pointlights{vec4 lightCols[16];vec3 lightPos[16];int lightCount;};out vec3 vLight;uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform MeshTerrain{mat4 modelMatrix;vec4 terrainInfo[4];vec4 layerShape[4];vec4 layerSuppress[4];vec4 layerFlags;int quadrant;};const float a=256.0;const float b=4.0;in vec3 position;in vec3 normal;out vec3 vNormal;out vec3 vUvChannel;out vec2 vUvTexture[4];out vec3 vViewDir;void main(){vNormal=normal;vWorldPos=modelMatrix*vec4(position,1.0);vUvChannel=vec3(position[0],position[2],0.0)/32.0;int c=quadrant%2;int d=int(quadrant%4);if(c==1)vUvChannel.x-=1.0;if(d>1)vUvChannel.y-=1.0;vUvChannel.z=float(quadrant);vec2 e=vec2(-vWorldPos[0],vWorldPos[2])/4.0;vUvTexture[0]=e*terrainInfo[0][0];vUvTexture[1]=e*terrainInfo[1][0];vUvTexture[2]=e*terrainInfo[2][0];vUvTexture[3]=e*terrainInfo[3][0];for(int f=0;f<lightCount;++f){vec3 g=lightPos[f]-vWorldPos.xyz;float h=lightCols[f].w-dot(g,g);if(h>0.0){h/=(lightCols[f].w);h=h*h;vLight+=0.2*lightCols[f].rgb*h;}}vViewDir=-normalize(vWorldPos.xyz-cameraPosition);vCameraDistance=length(cameraPosition-vWorldPos.xyz);gl_Position=projectionViewMatrix*vWorldPos;}`;
     var Zw_orig = `#version 300 es
 precision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};in float vCameraDistance;in vec4 vWorldPos;uniform Sky{vec3 skycolors[5];vec3 suncolor;};uniform sampler2D skyDiffuse;uniform sampler2D cloudDiffuse;in vec2 vUv;in vec3 vPos;out vec4 fragColor;void main(){gl_FragDepth=0.999999;vec3 a=vec3(0.0);float b=vPos.y/0.5;if(b>0.4){a=mix(skycolors[1],skycolors[0],smoothstep(0.4,1.0,b));}else if(b>0.25){a=mix(skycolors[2],skycolors[1],smoothstep(0.25,0.4,b));}else if(b>0.06){a=mix(skycolors[3],skycolors[2],smoothstep(0.06,0.25,b));}else{a=mix(fog[0],skycolors[3],smoothstep(0.0,0.06,b));}float c=1.0-sin(daycycle*6.28)+0.02;float d=smoothstep(0.1,0.5,b)*smoothstep(0.9,0.6,b);a+=texture(skyDiffuse,vUv*vec2(4.0,1.0)).rgb*c*d;float e=texture(cloudDiffuse,vec2(vUv.x+time/80.0,vUv.y*0.6+time/120.0)).r*texture(cloudDiffuse,vec2(vUv.x*2.0+time/300.0,vUv.y*0.6)).r;e=e*smoothstep(0.0,0.1,b)*smoothstep(1.0,0.85,b);e=smoothstep(0.25,0.7,e);a=mix(a,skycolors[4],e);fragColor=vec4(a,1.0);}`;
     var Kw_orig = `#version 300 es
@@ -14442,20 +14546,18 @@ fragColor=vec4(a,1.0);}`;
 
     var classicSunFrag = Kw_orig.replace("fragColor.rgba=vec4(suncolor,b);", "float sh=clamp(abs(sin(daycycle*6.282))+vUv.y*0.1-0.15,0.0,1.0);fragColor.rgba=vec4(mix(vec3(1.0),fog[0],min(1.0,pow(1.0-sh*sh,100.0))),b);");
     var classicWaterFrag = `#version 300 es
-precision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};in float vCameraDistance;in vec4 vWorldPos;uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform Screen{vec2 resolution;};uniform sampler2D waterLines;uniform sampler2D waterNoise;uniform sampler2D bufferPongDepth;in vec2 vUv;out vec4 fragColor;
-const float speed=0.05;const float LX=0.6;
+precision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};in float vCameraDistance;in vec4 vWorldPos;uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform Water{vec3 verts[4];};uniform highp sampler2D waterHeight;uniform sampler2D waterWave;uniform sampler2D waterLines;uniform float u_sunRefl;in vec2 vUv;out vec4 fragColor;
+float wTerr(vec2 p){vec2 g=clamp((p-verts[0].xz)/2.6666667,vec2(0.0),vec2(23.999));ivec2 i=ivec2(g);vec2 f=g-vec2(i);if(f.x+f.y<1.0)return texelFetch(waterHeight,i,0).r*(1.0-f.x-f.y)+texelFetch(waterHeight,i+ivec2(0,1),0).r*f.y+texelFetch(waterHeight,i+ivec2(1,0),0).r*f.x;return texelFetch(waterHeight,i+ivec2(1,0),0).r*(1.0-f.y)+texelFetch(waterHeight,i+ivec2(0,1),0).r*(1.0-f.x)+texelFetch(waterHeight,i+ivec2(1,1),0).r*(f.x+f.y-1.0);}
 void main(){float dist=length(cameraPosition-vWorldPos.xyz);if(dist>fog[1][1]){fragColor=vec4(fog[0],1.0);return;}
-float zw=gl_FragCoord.z*2.0-1.0;zw=projectionMatrix[3][2]/(zw+projectionMatrix[2][2]);float zs=texture(bufferPongDepth,gl_FragCoord.xy/resolution).r*2.0-1.0;zs=projectionMatrix[3][2]/(zs+projectionMatrix[2][2]);
-vec3 V=normalize(cameraPosition-vWorldPos.xyz);float BS=max(0.0,zs-zw)*max(abs(V.y),0.15)*0.25;
-vec3 Hd=watercolors[0];vec3 Rj=watercolors[1];vec3 Tp=watercolors[2];vec2 CR=vUv;vec2 wdir=vec2(0.98,0.196);float Lr=0.0;float Wm=1.0;
-for(int i=0;i<2;++i){float Jp=float(i)/3.0;float t=mod(time*0.2+Jp,1.0)*3.141;float gY=speed+0.2;vec2 shift=vec2(gY*wdir.y*t+Jp,gY*wdir.x*t+Jp);float curve=abs(sin(t));Lr+=texture(waterNoise,CR.yx*0.5+shift).r*curve;Wm+=(sin((CR.x+shift.y)*10.0)+cos((CR.y+shift.x)*10.0))*curve*(0.2+gY*0.6);}
-vec4 Jo=texture(waterLines,CR.yx+time*speed*2.0+Lr*0.1);
-vec4 Pp=vec4(Hd,0.0);vec4 AE=vec4(Hd,0.9);vec4 jS=vec4(mix(Hd,Rj,0.9)*0.8,0.5)+speed*0.1;vec4 aV=vec4(Rj,0.4)+Jo*0.05;vec4 Fm=vec4(mix(Rj,Tp,0.5),0.8-LX*0.4)+Jo*0.08;vec4 PN=vec4(Tp,1.4-LX*0.8)+Jo*0.12;
-float TW=0.03+0.01*Lr;float kZ=TW+0.02+speed*0.05+0.03*Lr+Wm*0.02;float SZ=kZ+(0.05+speed*0.5*Lr+Wm*0.05)*LX;float TV=SZ+(0.2+speed*0.2-Lr*0.1)*LX;float SG=TV+0.2*LX;
-vec4 r;if(BS<TW){r=mix(Pp,AE,smoothstep(0.0,TW,BS));}else if(BS<kZ){r=mix(AE,jS,smoothstep(TW,kZ,BS));}else if(BS<SZ){r=mix(jS,aV,smoothstep(kZ+(SZ-kZ)*0.3,SZ,BS));}else if(BS<TV){r=mix(aV,Fm,smoothstep(SZ+(TV-SZ)*0.4,TV,BS));}else{r=mix(Fm,PN,smoothstep(SG,1.0,BS));}
-r.rgb-=0.19;vec3 N=vec3(0.0,1.0,0.0);float Hf=max(dot(worldlight[2],N),0.0);float Xr=min(1.0,pow(max(dot(reflect(-worldlight[2],N),V),0.0),10.0))*0.6;
-r.rgb=r.rgb*worldlight[0]*Hf+r.rgb*worldlight[1]+Xr*worldlight[0];
-r.rgb=mix(fog[0],r.rgb,clamp((fog[1][1]-dist)/(fog[1][1]-fog[1][0]),0.0,1.0));fragColor=vec4(r.rgb,clamp(r.a,0.0,1.0));}`;
+float depth=max(0.0,vWorldPos.y-wTerr(vWorldPos.xz))*0.25;float speed=0.05;float vis=0.6;float wave=0.0;vec2 dir=vec2(1.0,0.0);float wiggle=1.0;
+for(int i=0;i<2;++i){float off=1.0/3.0*float(i);float t=mod(time*0.2+off,1.0)*3.141;float sppd=speed+0.2;vec2 shift=vec2(sppd*dir.y*t+off,sppd*dir.x*t+off);float curve=abs(sin(t));wave+=texture(waterWave,vUv.yx*0.5+shift).r*curve;wiggle+=((sin((vUv.x+shift.y)*10.0)+cos((vUv.y+shift.x)*10.0))*curve*(0.2+sppd*0.6));}
+vec3 colFoam=watercolors[0];vec3 colShallow=watercolors[1];vec3 colDeep=watercolors[2];vec4 bigwave=texture(waterLines,vUv.yx+time*speed*2.0+wave*0.1);
+vec4 wet_c=vec4(colFoam,0.0);vec4 foam_c=vec4(colFoam,0.9);vec4 blub_c=vec4(mix(colFoam,colShallow,0.9)*0.8,0.5)+speed*0.1;vec4 shallow_c=vec4(colShallow,0.4)+bigwave*0.05;vec4 water_c=vec4(mix(colShallow,colDeep,0.5),0.8-vis*0.4)+bigwave*0.08;vec4 deep_c=vec4(colDeep,1.4-vis*0.8)+bigwave*0.12;
+float wet_r=0.03+0.01*wave;float foam_r=wet_r+0.02+speed*0.05+0.03*wave+wiggle*0.02;float blub_r=foam_r+(0.05+speed*0.5*wave+wiggle*0.05)*vis;float shallow_r=blub_r+(0.2+speed*0.2-wave*0.1)*vis;float water_r=shallow_r+(0.2)*vis;
+vec4 result=vec4(0.0);if(depth<wet_r){result=mix(wet_c,foam_c,smoothstep(0.0,wet_r,depth));}else if(depth<foam_r){result=mix(foam_c,blub_c,smoothstep(wet_r,foam_r,depth));}else if(depth<blub_r){result=mix(blub_c,shallow_c,smoothstep(foam_r+(blub_r-foam_r)*0.3,blub_r,depth));}else if(depth<shallow_r){result=mix(shallow_c,water_c,smoothstep(blub_r+(shallow_r-blub_r)*0.4,shallow_r,depth));}else{result=mix(water_c,deep_c,smoothstep(water_r,1.0,depth));}
+result.rgb-=0.2;vec3 up=vec3(0.0,1.0,0.0);float lambertian=max(dot(worldlight[2],up),0.0);vec3 reflectDir=reflect(-worldlight[2],up);vec3 viewDir=-normalize(vWorldPos.xyz-cameraPosition);float specular=min(1.0,max(0.0,pow(max(dot(reflectDir,viewDir),0.0),10.0)))*0.6;result.rgb=result.rgb*worldlight[0]*lambertian+result.rgb*worldlight[1]+specular*worldlight[0];
+if(u_sunRefl>0.01){vec3 gV=normalize(cameraPosition-vWorldPos.xyz);float gA=pow(max(dot(reflect(-gV,vec3(0.0,1.0,0.0)),worldlight[2]),0.0),10.0);vec2 gP=vec2(texture(waterLines,vWorldPos.xz*0.42+time*0.05).r,texture(waterLines,vWorldPos.zx*0.31-time*0.04).r)+vec2(texture(waterLines,vWorldPos.zx*0.15+time*0.025).r,texture(waterLines,vWorldPos.xz*0.19-time*0.03).r)-1.0;vec3 gN=normalize(vec3(gP.x*0.7,1.0,gP.y*0.7));float gD=max(dot(reflect(-gV,gN),worldlight[2]),0.0);float gF=(0.4+0.6*pow(1.0-max(gV.y,0.0),2.0))*u_sunRefl*smoothstep(-0.05,0.15,worldlight[2].y);float gS=smoothstep(0.955,0.99,gD)*gA*3.5;result.rgb+=(worldlight[0]*1.3+vec3(0.1))*gS*gF;result.a=max(result.a,min(1.0,gS*gF));}
+result.rgb=mix(fog[0],result.rgb,clamp((fog[1][1]-dist)/(fog[1][1]-fog[1][0]),0.0,1.0));fragColor=vec4(result.rgb,clamp(result.a,0.0,1.0));}`;
     var classicWaveAt = (w, B) => {
 
         let t = nn.environment && nn.environment.data ? nn.environment.data.time[0] : 0;
@@ -14468,8 +14570,8 @@ r.rgb=mix(fog[0],r.rgb,clamp((fog[1][1]-dist)/(fog[1][1]-fog[1][0]),0.0,1.0));fr
 
 precision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};out float vCameraDistance;out vec4 vWorldPos;uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform Water{vec3 verts[4];};in vec3 position;out vec2 vUv;void main(){vec3 a=mix(verts[0],verts[1],position.x);vec3 b=mix(verts[2],verts[3],position.x);vWorldPos=vec4(mix(a,b,position.z),1.0);vWorldPos.y+=cos(vWorldPos.z*0.25)*sin(vWorldPos.x*0.1+vWorldPos.z*0.4+time*1.2)*0.2;vUv=vWorldPos.xz/2.0;vCameraDistance=length(cameraPosition-vWorldPos.xyz);gl_Position=projectionViewMatrix*vWorldPos;}`;
 
-    if (sandShaderEnabled) {
-        UM = UM.replace("uniform sampler2D diffuse[4];", "uniform sampler2D diffuse[4];uniform sampler2D sandDiffuse;uniform highp sampler2DArray sandMask;float sandHash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}float sandNoise(vec2 p){vec2 i=floor(p);vec2 f=fract(p);vec2 u=f*f*(3.0-2.0*f);return mix(mix(sandHash(i),sandHash(i+vec2(1.0,0.0)),u.x),mix(sandHash(i+vec2(0.0,1.0)),sandHash(i+vec2(1.0,1.0)),u.x),u.y);}").replace("d.rgb/=d.a;e/=d.a;d.a=1.0;", "d.rgb/=d.a;e/=d.a;d.a=1.0;" + sandFragCode);
+    if (shoreShaderEnabled) {
+        UM = UM.replace("uniform sampler2D diffuse[4];", "uniform sampler2D diffuse[4];uniform highp sampler2DArray sandMask;uniform sampler2D patchDiffuse;uniform sampler2D gloomGrass;uniform sampler2D stoneDiffuse;" + gloomNoiseGlsl + "vec4 gloomT;float gloomA;vec4 gloomMix(vec4 t,float f){return f>0.0?mix(t,gloomT,gloomA*f):t;}float mdwA;vec4 mdwMix(vec4 t,float w){return w>1.5?vec4(mix(t.rgb,t.rgb*vec3(" + meadowPatchTint.map(v => v.toFixed(4)).join(",") + "),mdwA),t.a):t;}" + "float sandHash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}float sandNoise(vec2 p){vec2 i=floor(p);vec2 f=fract(p);vec2 u=f*f*(3.0-2.0*f);return mix(mix(sandHash(i),sandHash(i+vec2(1.0,0.0)),u.x),mix(sandHash(i+vec2(0.0,1.0)),sandHash(i+vec2(1.0,1.0)),u.x),u.y);}").replace("x=mix(x,rw,layerShape[0].z);", "x=mix(x,rw,layerShape[0].z);" + gloomFragCode + "mdwA=texture(sandMask,vUvChannel).a*(1.0-gloomA);").replace("s(texture(diffuse[0],vUvTexture[0]),x[0],terrainInfo[0]);", "s(mdwMix(gloomMix(texture(diffuse[0],vUvTexture[0]),layerFlags.x),layerShape[0].w),x[0],terrainInfo[0]);").replace("s(texture(diffuse[1],vUvTexture[1]),x[1],terrainInfo[1]);", "s(mdwMix(gloomMix(texture(diffuse[1],vUvTexture[1]),layerFlags.y),layerShape[1].w),x[1],terrainInfo[1]);").replace("s(texture(diffuse[2],vUvTexture[2]),x[2],terrainInfo[2]);", "s(mdwMix(gloomMix(texture(diffuse[2],vUvTexture[2]),layerFlags.z),layerShape[2].w),x[2],terrainInfo[2]);").replace("s(texture(diffuse[3],vUvTexture[3]),x[3],terrainInfo[3]);", "s(mdwMix(gloomMix(texture(diffuse[3],vUvTexture[3]),layerFlags.w),layerShape[3].w),x[3],terrainInfo[3]);").replace("d.rgb/=d.a;e/=d.a;d.a=1.0;", "d.rgb/=d.a;e/=d.a;d.a=1.0;float terrGrassW=clamp(dot(x,min(vec4(layerShape[0].w,layerShape[1].w,layerShape[2].w,layerShape[3].w),vec4(1.0))),0.0,1.0);" + dirtPatchFragCode + stoneFragCode + steepFragCode);
     }
     var e4_orig = UM.replace('vec3 f(vec3 g,vec3 h,vec3 i,vec3 j,float k,vec3 l,float m){j=normalize(j);float n=clamp(dot(j,worldlight[2]),0.0,k);vec3 o=g;vec3 p=normalize(worldlight[2]+vViewDir);vec3 q=vec3(pow(max(0.0,dot(p,j)),8.5)*2.0)*m*0.15;vec3 r=o+h*n*0.75+l;return r*i+q;}', 'vec3 f(vec3 g,vec3 h,vec3 i,vec3 j,float k,vec3 l,float m){j=normalize(j);float n=clamp(dot(j,worldlight[2]),0.0,k);vec3 o=g*mix(0.7,1.1,0.5+(0.5*n));vec3 p=normalize(worldlight[2]+vViewDir);vec3 q=h*pow(max(0.0,dot(p,j)),20.0)*m*max(k*0.7+0.2,0.2)*20.0;vec3 r=o+h*n+l;return r*i+q;}');
     var $M = `#version 300 es
@@ -14480,16 +14582,16 @@ precision highp float;precision highp int;in vec3 vPos;in vec3 vNormal;out vec4 
 precision highp float;precision highp int;uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform mat4 modelMatrix;in vec3 normal;in vec3 position;out vec3 vPos;out vec3 vNormal;void main(){vNormal=normal;vPos=position;gl_Position=projectionViewMatrix*modelMatrix*vec4(position[0],position[1]+0.05,position[2],1.0);}`;
     var jM = `#version 300 es
 precision highp float;precision highp int;uniform Circle{vec4 circlePos;vec4 circleInfo;};precision highp sampler2DShadow;uniform Shadows{uniform mat4 shadowPVMatrix[2];uniform vec3 shadowRange;};const int a=
-#SHADOWS;uniform sampler2DShadow shadowMaps[2];uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};in float vCameraDistance;in vec4 vWorldPos;uniform MeshTerrain{mat4 modelMatrix;vec4 terrainInfo[4];vec4 layerShape[4];vec4 layerSuppress[4];int quadrant;};const float b=256.0;const float c=4.0;precision highp sampler2DArray;uniform sampler2DArray atlas;uniform sampler2D diffuse[4];in vec3 vLight;in vec3 vNormal;in vec3 vViewDir;in vec3 vUvChannel;in vec2 vUvTexture[4];vec4 d;float e;void f(vec4 g,float h,vec4 i){float j=g.x+g.y+g.z;e+=i[3]*smoothstep(i[1],i[2],j)*h;g.a=h;g.rgb*=h;d+=g;}out vec4 fragColor;void main(){vec4 k=texture(atlas,vUvChannel);k[3]=max(0.0,min(1.0,1.0-(k.r+k.g+k.b)));if(k[0]==1.0&&k[1]==1.0&&k[2]==1.0)discard;f(texture(diffuse[0],vUvTexture[0]),k[0],terrainInfo[0]);f(texture(diffuse[1],vUvTexture[1]),k[1],terrainInfo[1]);f(texture(diffuse[2],vUvTexture[2]),k[2],terrainInfo[2]);f(texture(diffuse[3],vUvTexture[3]),k[3],terrainInfo[3]);d.rgb/=d.a;e/=d.a;d.a=1.0;if(mod(vWorldPos.y,2.0)<0.2){d.rgb=mix(d.rgb,vec3(0.8),0.5);}else{d.rgb=mix(d.rgb,vec3(0.2),0.5);}vec3 l=worldlight[2];l.y*=0.5;l=normalize(l);d.rgb*=max(0.3,min(1.0,dot(l,vNormal)*0.5+0.5));float m=distance(vWorldPos.xz,circlePos.xz);float adm=min(1.0,max(0.0,4.0-abs(vWorldPos.y-circlePos.y)));float cfb=circleInfo.a;if(m<circlePos.w+0.1&&(adm>0.0||(cfb>1.0&&vWorldPos.y<=circlePos.y))){float fadym=cfb>1.0?(vWorldPos.y>circlePos.y?adm:1.0):1.0;float blndb=cfb>1.0?(m<circlePos.w?cfb-1.0:0.0):(max(0.,(0.3-abs(circlePos.w-m))/0.3));d.rgb=mix(d.rgb,circleInfo.rgb,fadym*min(1.0,cfb)*blndb);}float n=clamp((fog[1][1]-vCameraDistance)/(fog[1][1]-fog[1][0]),0.0,1.0);d.rgb=mix(fog[0],d.rgb,n);fragColor=d;}`;
+#SHADOWS;uniform sampler2DShadow shadowMaps[2];uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};in float vCameraDistance;in vec4 vWorldPos;uniform MeshTerrain{mat4 modelMatrix;vec4 terrainInfo[4];vec4 layerShape[4];vec4 layerSuppress[4];vec4 layerFlags;int quadrant;};const float b=256.0;const float c=4.0;precision highp sampler2DArray;uniform sampler2DArray atlas;uniform sampler2D diffuse[4];in vec3 vLight;in vec3 vNormal;in vec3 vViewDir;in vec3 vUvChannel;in vec2 vUvTexture[4];vec4 d;float e;void f(vec4 g,float h,vec4 i){float j=g.x+g.y+g.z;e+=i[3]*smoothstep(i[1],i[2],j)*h;g.a=h;g.rgb*=h;d+=g;}out vec4 fragColor;void main(){vec4 k=texture(atlas,vUvChannel);k[3]=max(0.0,min(1.0,1.0-(k.r+k.g+k.b)));if(k[0]==1.0&&k[1]==1.0&&k[2]==1.0)discard;f(texture(diffuse[0],vUvTexture[0]),k[0],terrainInfo[0]);f(texture(diffuse[1],vUvTexture[1]),k[1],terrainInfo[1]);f(texture(diffuse[2],vUvTexture[2]),k[2],terrainInfo[2]);f(texture(diffuse[3],vUvTexture[3]),k[3],terrainInfo[3]);d.rgb/=d.a;e/=d.a;d.a=1.0;if(mod(vWorldPos.y,2.0)<0.2){d.rgb=mix(d.rgb,vec3(0.8),0.5);}else{d.rgb=mix(d.rgb,vec3(0.2),0.5);}vec3 l=worldlight[2];l.y*=0.5;l=normalize(l);d.rgb*=max(0.3,min(1.0,dot(l,vNormal)*0.5+0.5));float m=distance(vWorldPos.xz,circlePos.xz);float adm=min(1.0,max(0.0,4.0-abs(vWorldPos.y-circlePos.y)));float cfb=circleInfo.a;if(m<circlePos.w+0.1&&(adm>0.0||(cfb>1.0&&vWorldPos.y<=circlePos.y))){float fadym=cfb>1.0?(vWorldPos.y>circlePos.y?adm:1.0):1.0;float blndb=cfb>1.0?(m<circlePos.w?cfb-1.0:0.0):(max(0.,(0.3-abs(circlePos.w-m))/0.3));d.rgb=mix(d.rgb,circleInfo.rgb,fadym*min(1.0,cfb)*blndb);}float n=clamp((fog[1][1]-vCameraDistance)/(fog[1][1]-fog[1][0]),0.0,1.0);d.rgb=mix(fog[0],d.rgb,n);fragColor=d;}`;
     var GM = `#version 300 es
 precision highp float;precision highp int;uniform Circle{vec4 circlePos;vec4 circleInfo;};precision highp sampler2DShadow;uniform Shadows{uniform mat4 shadowPVMatrix[2];uniform vec3 shadowRange;};const int a=
-#SHADOWS;uniform sampler2DShadow shadowMaps[2];uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};in float vCameraDistance;in vec4 vWorldPos;uniform MeshTerrain{mat4 modelMatrix;vec4 terrainInfo[4];vec4 layerShape[4];vec4 layerSuppress[4];int quadrant;};const float b=256.0;const float c=4.0;precision highp sampler2DArray;uniform sampler2DArray atlas;uniform sampler2D diffuse[4];in vec3 vLight;in vec3 vNormal;in vec3 vViewDir;in vec3 vUvChannel;in vec2 vUvTexture[4];vec4 d;float e;void f(vec4 g,float h,vec4 i){float j=g.x+g.y+g.z;e+=i[3]*smoothstep(i[1],i[2],j)*h;g.a=h;g.rgb*=h;d+=g;}out vec4 fragColor;void main(){vec4 k=texture(atlas,vUvChannel);k[3]=max(0.0,min(1.0,1.0-(k.r+k.g+k.b)));if(k[0]==1.0&&k[1]==1.0&&k[2]==1.0)discard;d.rgb=texture(diffuse[0],vUvTexture[0]).rgb;float l=64.0/12.0;float m=l/2.0;bool n=mod(vWorldPos.z,l)>m;if(mod(vWorldPos.x,l)<m){if(n){d.rgb=vec3(0.45);}else{d.rgb=vec3(0.55);}}else{if(n){d.rgb=vec3(0.55);}else{d.rgb=vec3(0.45);}}vec3 o=worldlight[2];o.y*=0.5;o=normalize(o);d.rgb*=max(0.3,min(1.0,dot(o,vNormal)*0.5+0.5));float p=distance(vWorldPos.xz,circlePos.xz);float adp=min(1.0,max(0.0,4.0-abs(vWorldPos.y-circlePos.y)));float cfc=circleInfo.a;if(p<circlePos.w+0.1&&(adp>0.0||(cfc>1.0&&vWorldPos.y<=circlePos.y))){float fadyp=cfc>1.0?(vWorldPos.y>circlePos.y?adp:1.0):1.0;float blndc=cfc>1.0?(p<circlePos.w?cfc-1.0:0.0):(max(0.,(0.3-abs(circlePos.w-p))/0.3));d.rgb=mix(d.rgb,circleInfo.rgb,fadyp*min(1.0,cfc)*blndc);}float q=clamp((fog[1][1]-vCameraDistance)/(fog[1][1]-fog[1][0]),0.0,1.0);d.rgb=mix(fog[0],d.rgb,q);fragColor=d;}`;
+#SHADOWS;uniform sampler2DShadow shadowMaps[2];uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};in float vCameraDistance;in vec4 vWorldPos;uniform MeshTerrain{mat4 modelMatrix;vec4 terrainInfo[4];vec4 layerShape[4];vec4 layerSuppress[4];vec4 layerFlags;int quadrant;};const float b=256.0;const float c=4.0;precision highp sampler2DArray;uniform sampler2DArray atlas;uniform sampler2D diffuse[4];in vec3 vLight;in vec3 vNormal;in vec3 vViewDir;in vec3 vUvChannel;in vec2 vUvTexture[4];vec4 d;float e;void f(vec4 g,float h,vec4 i){float j=g.x+g.y+g.z;e+=i[3]*smoothstep(i[1],i[2],j)*h;g.a=h;g.rgb*=h;d+=g;}out vec4 fragColor;void main(){vec4 k=texture(atlas,vUvChannel);k[3]=max(0.0,min(1.0,1.0-(k.r+k.g+k.b)));if(k[0]==1.0&&k[1]==1.0&&k[2]==1.0)discard;d.rgb=texture(diffuse[0],vUvTexture[0]).rgb;float l=64.0/12.0;float m=l/2.0;bool n=mod(vWorldPos.z,l)>m;if(mod(vWorldPos.x,l)<m){if(n){d.rgb=vec3(0.45);}else{d.rgb=vec3(0.55);}}else{if(n){d.rgb=vec3(0.55);}else{d.rgb=vec3(0.45);}}vec3 o=worldlight[2];o.y*=0.5;o=normalize(o);d.rgb*=max(0.3,min(1.0,dot(o,vNormal)*0.5+0.5));float p=distance(vWorldPos.xz,circlePos.xz);float adp=min(1.0,max(0.0,4.0-abs(vWorldPos.y-circlePos.y)));float cfc=circleInfo.a;if(p<circlePos.w+0.1&&(adp>0.0||(cfc>1.0&&vWorldPos.y<=circlePos.y))){float fadyp=cfc>1.0?(vWorldPos.y>circlePos.y?adp:1.0):1.0;float blndc=cfc>1.0?(p<circlePos.w?cfc-1.0:0.0):(max(0.,(0.3-abs(circlePos.w-p))/0.3));d.rgb=mix(d.rgb,circleInfo.rgb,fadyp*min(1.0,cfc)*blndc);}float q=clamp((fog[1][1]-vCameraDistance)/(fog[1][1]-fog[1][0]),0.0,1.0);d.rgb=mix(fog[0],d.rgb,q);fragColor=d;}`;
     var HM = `#version 300 es
 precision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};in float vCameraDistance;in vec4 vWorldPos;out vec4 fragColor;void main(){fragColor.rgb=fog[0];}`;
     var YM = `#version 300 es
-precision highp float;precision highp int;uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform MeshTerrain{mat4 modelMatrix;vec4 terrainInfo[4];vec4 layerShape[4];vec4 layerSuppress[4];int quadrant;};in vec3 position;void main(){vec4 a=modelMatrix*vec4(position,1.0);gl_Position=projectionViewMatrix*a;}`;
+precision highp float;precision highp int;uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform MeshTerrain{mat4 modelMatrix;vec4 terrainInfo[4];vec4 layerShape[4];vec4 layerSuppress[4];vec4 layerFlags;int quadrant;};in vec3 position;void main(){vec4 a=modelMatrix*vec4(position,1.0);gl_Position=projectionViewMatrix*a;}`;
     var QM = `#version 300 es
-precision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};in float vCameraDistance;in vec4 vWorldPos;uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform Screen{vec2 resolution;};uniform sampler2D waterLines;uniform sampler2D waterNoise;uniform sampler2D bufferPongColor;uniform sampler2D bufferPongDepth;in vec2 vUv;out vec4 fragColor;void main(){float a=length(cameraPosition-vWorldPos.xyz);float b=(texture(waterNoise,vUv.yx/4.0+time*0.1).r-0.5);float c=gl_FragCoord.z;c=c*2.0-1.0;c=projectionMatrix[3][2]/(c+projectionMatrix[2][2]);if(a>fog[1][1]){fragColor=vec4(fog[0],1.0);return;}vec2 d=gl_FragCoord.xy/resolution;float e=texture(bufferPongDepth,d.xy).r;e=e*2.0-1.0;e=projectionMatrix[3][2]/(e+projectionMatrix[2][2]);float f=e-c;vec2 g=vec2(b*0.05,0.0);float h=f;float i=1.0-clamp(h/0.1,0.0,1.0);float j=1.0-clamp(h/0.6,0.0,1.0);float k=1.0-clamp(h/2.0,0.0,1.0);float l=1.0-clamp(h/10.0,0.0,1.0);float m=1.0-clamp(h/100.0+0.5,0.0,1.0);float n=texture(waterLines,vUv.yx+b*0.15).r;vec3 o=mix(watercolors[2],watercolors[1],l);vec3 p=texture(bufferPongColor,d.xy+g).rgb;vec3 q=(worldlight[0]+worldlight[1]);vec3 r=mix(o,p*o,m)+n*watercolors[0]*(0.05+k*0.3);r=mix(r,watercolors[0],j)*q;vec4 s=vec4(r,1.0-i);float t=min(1.0,max(0.0,(n*(b+0.3)*0.5)));s.rgb+=t*worldlight[0];float u=clamp((fog[1][1]-a)/(fog[1][1]-fog[1][0]),0.0,1.0);s.rgb=mix(fog[0],s.rgb,u);fragColor=s;}`;
+precision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};in float vCameraDistance;in vec4 vWorldPos;uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform Screen{vec2 resolution;};uniform sampler2D waterLines;uniform sampler2D waterNoise;uniform sampler2D bufferPongColor;uniform sampler2D bufferPongDepth;uniform float u_sunRefl;in vec2 vUv;out vec4 fragColor;void main(){float a=length(cameraPosition-vWorldPos.xyz);float b=(texture(waterNoise,vUv.yx/4.0+time*0.1).r-0.5);float c=gl_FragCoord.z;c=c*2.0-1.0;c=projectionMatrix[3][2]/(c+projectionMatrix[2][2]);if(a>fog[1][1]){fragColor=vec4(fog[0],1.0);return;}vec2 d=gl_FragCoord.xy/resolution;float e=texture(bufferPongDepth,d.xy).r;e=e*2.0-1.0;e=projectionMatrix[3][2]/(e+projectionMatrix[2][2]);float f=e-c;vec2 g=vec2(b*0.05,0.0);float h=f;float i=1.0-clamp(h/0.1,0.0,1.0);float j=1.0-clamp(h/0.6,0.0,1.0);float k=1.0-clamp(h/2.0,0.0,1.0);float l=1.0-clamp(h/10.0,0.0,1.0);float m=1.0-clamp(h/100.0+0.5,0.0,1.0);float n=texture(waterLines,vUv.yx+b*0.15).r;vec3 o=mix(watercolors[2],watercolors[1],l);vec3 p=texture(bufferPongColor,d.xy+g).rgb;vec3 q=(worldlight[0]+worldlight[1]);vec3 r=mix(o,p*o,m)+n*watercolors[0]*(0.05+k*0.3);r=mix(r,watercolors[0],j)*q;vec4 s=vec4(r,1.0-i);float t=min(1.0,max(0.0,(n*(b+0.3)*0.5)));s.rgb+=t*worldlight[0];if(u_sunRefl>0.01){vec3 gV=normalize(cameraPosition-vWorldPos.xyz);float gA=pow(max(dot(reflect(-gV,vec3(0.0,1.0,0.0)),worldlight[2]),0.0),10.0);vec2 gP=vec2(texture(waterLines,vWorldPos.xz*0.42+time*0.05).r,texture(waterLines,vWorldPos.zx*0.31-time*0.04).r)+vec2(texture(waterLines,vWorldPos.zx*0.15+time*0.025).r,texture(waterLines,vWorldPos.xz*0.19-time*0.03).r)-1.0;vec3 gN=normalize(vec3(gP.x*0.7,1.0,gP.y*0.7));float gD=max(dot(reflect(-gV,gN),worldlight[2]),0.0);float gF=(0.4+0.6*pow(1.0-max(gV.y,0.0),2.0))*u_sunRefl*smoothstep(-0.05,0.15,worldlight[2].y);float gS=smoothstep(0.955,0.99,gD)*gA*3.5;s.rgb+=(worldlight[0]*1.3+vec3(0.1))*gS*gF;s.a=max(s.a,min(1.0,gS*gF));}float u=clamp((fog[1][1]-a)/(fog[1][1]-fog[1][0]),0.0,1.0);s.rgb=mix(fog[0],s.rgb,u);fragColor=s;}`;
     var XM = `#version 300 es
 precision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};out float vCameraDistance;out vec4 vWorldPos;uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform Water{vec3 verts[4];};in vec3 position;in vec3 color;in vec3 colorFoam;in vec3 colorShallow;out vec2 vUv;void main(){vWorldPos.xyz=verts[gl_VertexID];vWorldPos.w=1.0;vUv=vWorldPos.xz/2.0;gl_Position=projectionViewMatrix*vWorldPos;}`;
     var KM = `#version 300 es
@@ -14812,6 +14914,11 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 transparent: !0,
                 cullFace: !1,
                 globalUniforms: _n,
+                uniforms: {
+                    u_sunRefl: {
+                        value: 0
+                    }
+                },
                 attributeLocations: t.mesh
             }), ht[11] = vn({
                 vertex: Q0.vert,
@@ -15163,6 +15270,9 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     },
                     grRain: {
                         value: 0
+                    },
+                    grSplit: {
+                        value: 0
                     }
                 },
                 attributeLocations: t.post
@@ -15236,6 +15346,23 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     },
                     mistShadows: {
                         value: 0
+                    },
+                    mistSplit: {
+                        value: 0
+                    }
+                },
+                attributeLocations: t.post
+            }), ht[49] = vn({
+                vertex: rc,
+                fragment: pfxSplitFrag,
+                depthWrite: !1,
+                depthTest: !1,
+                uniforms: {
+                    inputA: {
+                        value: null
+                    },
+                    inputB: {
+                        value: null
                     }
                 },
                 attributeLocations: t.post
@@ -15436,8 +15563,8 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             let pl = ne.pointerlock;
             ne.pointerlock = !1;
             try {
-                let w = Math.round(Oc[0] / ne.resolutionScale),
-                    y = Math.round(Oc[1] / ne.resolutionScale);
+                let w = Oc[0],
+                    y = Oc[1];
                 mouseEvt(zo, "mousedown", w, y), mouseEvt(zo, "mouseup", w, y);
             } finally {
                 ne.pointerlock = pl;
@@ -21428,7 +21555,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             A, F, M, I, R, L, z, V, q, O = P.ui.settings.disableoffscreen + "",
             N, U, $, Q, _e, xe, fe, se, ce, ge, ye, Ie = P.ui.settings.shadows + "",
             le, Be, ke, qe, Oe, pe = P.ui.settings.shadowresolution + "",
-            Ye, ve, ue, We, ie, De, $e;
+            Ye, ve, ue, We, ie, De, $e, bsl;
         return L = new Ut({
             props: {
                 store: ed
@@ -21437,6 +21564,10 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             props: {
                 store: od
             }
+        }), bsl = makeSlider("Bloom strength", bloomStrength, {
+            min: 0,
+            max: 100,
+            suffix: "%"
         }), Q = new Ut({
             props: {
                 store: td
@@ -21457,10 +21588,10 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             }
         }), {
             c() {
-                e = g("div"), e.textContent = `${P.ui.settings.resolution}`, n = g("input"), o = g("div"), o.textContent = `${P.ui.settings.viewrange}`, s = g("input"), i = g("div"), l = E(r), a = He(), c = g("span"), f = E(t[7]), u = g("input"), p = g("div"), v = E(h), _ = g("br"), b = g("small"), b.textContent = `${P.ui.settings.reload}`, k = g("input"), y = g("div"), A = E(C), F = g("br"), M = g("small"), M.textContent = `${P.ui.settings.reload}`, I = g("input"), R = g("div"), R.textContent = `${P.ui.settings.fxaa}`, Z(L.$$.fragment), z = g("div"), z.textContent = `${P.ui.settings.bloom}`, Z(V.$$.fragment), q = g("div"), N = E(O), U = g("br"), $ = g("small"), $.textContent = `${P.ui.settings.offscreendesc}`, Z(Q.$$.fragment), _e = g("div"), _e.textContent = `${P.ui.settings.particles}`, Z(xe.$$.fragment), fe = g("div"), fe.textContent = `${P.ui.settings.fogpattern}`, Z(se.$$.fragment), ce = g("div"), ce.textContent = `${P.ui.settings.shadows}`, ge = g("div"), ye = g("div"), le = E(Ie), Be = g("br"), ke = g("small"), ke.textContent = `${P.ui.settings.reload}`, Z(qe.$$.fragment), Oe = g("div"), Ye = E(pe), ve = g("br"), ue = g("small"), ue.textContent = `${P.ui.settings.reload}`, We = g("input"), m(n, "type", "range"), m(n, "min", "30"), m(n, "step", "10"), m(s, "type", "range"), m(s, "min", "30"), m(c, "class", "textgrey"), m(u, "type", "range"), m(u, "min", "50"), m(u, "max", "100"), m(b, "class", "textgrey"), m(k, "type", "range"), m(k, "min", "0"), m(k, "max", "4"), m(M, "class", "textgrey"), m(I, "type", "range"), m(I, "min", "0"), m(I, "max", "100"), m($, "class", "textgrey"), m(ce, "class", "textprimary"), m(ke, "class", "textgrey"), m(ue, "class", "textgrey"), m(We, "type", "range"), m(We, "min", "0"), m(We, "max", "3")
+                e = g("div"), e.textContent = `${P.ui.settings.resolution}`, n = g("input"), o = g("div"), o.textContent = `${P.ui.settings.viewrange}`, s = g("input"), i = g("div"), l = E(r), a = He(), c = g("span"), f = E(t[7]), u = g("input"), p = g("div"), v = E(h), _ = g("br"), b = g("small"), b.textContent = `${P.ui.settings.reload}`, k = g("input"), y = g("div"), A = E(C), F = g("br"), M = g("small"), M.textContent = `${P.ui.settings.reload}`, I = g("input"), R = g("div"), R.textContent = `${P.ui.settings.fxaa}`, Z(L.$$.fragment), z = g("div"), z.textContent = `${P.ui.settings.bloom}`, Z(V.$$.fragment), q = g("div"), N = E(O), U = g("br"), $ = g("small"), $.textContent = `${P.ui.settings.offscreendesc}`, Z(Q.$$.fragment), _e = g("div"), _e.textContent = `${P.ui.settings.particles}`, Z(xe.$$.fragment), fe = g("div"), fe.textContent = `${P.ui.settings.fogpattern}`, Z(se.$$.fragment), ce = g("div"), ce.textContent = `${P.ui.settings.shadows}`, ge = g("div"), ye = g("div"), le = E(Ie), Be = g("br"), ke = g("small"), ke.textContent = `${P.ui.settings.reload}`, Z(qe.$$.fragment), Oe = g("div"), Ye = E(pe), ve = g("br"), ue = g("small"), ue.textContent = `${P.ui.settings.reload}`, We = g("input"), m(n, "type", "range"), m(n, "min", "30"), m(n, "max", "200"), m(n, "step", "10"), m(s, "type", "range"), m(s, "min", "30"), m(c, "class", "textgrey"), m(u, "type", "range"), m(u, "min", "50"), m(u, "max", "100"), m(b, "class", "textgrey"), m(k, "type", "range"), m(k, "min", "0"), m(k, "max", "4"), m(M, "class", "textgrey"), m(I, "type", "range"), m(I, "min", "0"), m(I, "max", "100"), m($, "class", "textgrey"), m(ce, "class", "textprimary"), m(ke, "class", "textgrey"), m(ue, "class", "textgrey"), m(We, "type", "range"), m(We, "min", "0"), m(We, "max", "3")
             },
             m(ee, G) {
-                x(ee, e, G), x(ee, n, G), je(n, t[5]), x(ee, o, G), x(ee, s, G), je(s, t[6]), x(ee, i, G), d(i, l), d(i, a), d(i, c), d(c, f), x(ee, u, G), je(u, t[7]), x(ee, p, G), d(p, v), d(p, _), d(p, b), x(ee, k, G), je(k, t[8]), x(ee, y, G), d(y, A), d(y, F), d(y, M), x(ee, I, G), je(I, t[9]), x(ee, R, G), X(L, ee, G), x(ee, z, G), X(V, ee, G), x(ee, q, G), d(q, N), d(q, U), d(q, $), X(Q, ee, G), x(ee, _e, G), X(xe, ee, G), x(ee, fe, G), X(se, ee, G), x(ee, ce, G), x(ee, ge, G), x(ee, ye, G), d(ye, le), d(ye, Be), d(ye, ke), X(qe, ee, G), x(ee, Oe, G), d(Oe, Ye), d(Oe, ve), d(Oe, ue), x(ee, We, G), je(We, t[10]), ie = !0, De || ($e = [H(n, "change", t[37]), H(n, "input", t[37]), H(s, "change", t[38]), H(s, "input", t[38]), H(u, "change", t[39]), H(u, "input", t[39]), H(k, "change", t[40]), H(k, "input", t[40]), H(k, "change", t[34]), H(I, "change", t[41]), H(I, "input", t[41]), H(I, "change", t[34]), H(We, "change", t[42]), H(We, "input", t[42]), H(We, "change", t[34])], De = !0)
+                x(ee, e, G), x(ee, n, G), je(n, t[5]), x(ee, o, G), x(ee, s, G), je(s, t[6]), x(ee, i, G), d(i, l), d(i, a), d(i, c), d(c, f), x(ee, u, G), je(u, t[7]), x(ee, p, G), d(p, v), d(p, _), d(p, b), x(ee, k, G), je(k, t[8]), x(ee, y, G), d(y, A), d(y, F), d(y, M), x(ee, I, G), je(I, t[9]), x(ee, R, G), X(L, ee, G), x(ee, z, G), X(V, ee, G), bsl.m(ee, G), x(ee, q, G), d(q, N), d(q, U), d(q, $), X(Q, ee, G), x(ee, _e, G), X(xe, ee, G), x(ee, fe, G), X(se, ee, G), x(ee, ce, G), x(ee, ge, G), x(ee, ye, G), d(ye, le), d(ye, Be), d(ye, ke), X(qe, ee, G), x(ee, Oe, G), d(Oe, Ye), d(Oe, ve), d(Oe, ue), x(ee, We, G), je(We, t[10]), ie = !0, De || ($e = [H(n, "change", t[37]), H(n, "input", t[37]), H(s, "change", t[38]), H(s, "input", t[38]), H(u, "change", t[39]), H(u, "input", t[39]), H(k, "change", t[40]), H(k, "input", t[40]), H(k, "change", t[34]), H(I, "change", t[41]), H(I, "input", t[41]), H(I, "change", t[34]), H(We, "change", t[42]), H(We, "input", t[42]), H(We, "change", t[34])], De = !0)
             },
             p(ee, G) {
                 G[0] & 32 && je(n, ee[5]), G[0] & 64 && je(s, ee[6]), (!ie || G[0] & 128) && j(f, ee[7]), G[0] & 128 && je(u, ee[7]), G[0] & 256 && je(k, ee[8]), G[0] & 512 && je(I, ee[9]), G[0] & 1024 && je(We, ee[10])
@@ -21472,7 +21603,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 D(L.$$.fragment, ee), D(V.$$.fragment, ee), D(Q.$$.fragment, ee), D(xe.$$.fragment, ee), D(se.$$.fragment, ee), D(qe.$$.fragment, ee), ie = !1
             },
             d(ee) {
-                ee && (w(e), w(n), w(o), w(s), w(i), w(u), w(p), w(k), w(y), w(I), w(R), w(z), w(q), w(_e), w(fe), w(ce), w(ge), w(ye), w(Oe), w(We)), K(L, ee), K(V, ee), K(Q, ee), K(xe, ee), K(se, ee), K(qe, ee), De = !1, ct($e)
+                ee && (w(e), w(n), w(o), w(s), w(i), w(u), w(p), w(k), w(y), w(I), w(R), w(z), w(q), w(_e), w(fe), w(ce), w(ge), w(ye), w(Oe), w(We)), K(L, ee), K(V, ee), bsl.d(ee), K(Q, ee), K(xe, ee), K(se, ee), K(qe, ee), De = !1, ct($e)
             }
         }
     }
@@ -23591,11 +23722,12 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 min: 1,
                 max: 20
             }),
-            makeToggle("SSAO on foliage / entities", ssaoIncludeFoliage, {
+            makeToggle("SSAO on foliage", ssaoIncludeFoliage, {
                 note: P.ui.settings.reload,
                 reload: true
             }),
             makeToggle("Light shafts", godRays),
+            makeToggle("Sun / moon reflections on water", waterReflections),
             makeLabel("-- Ambience tint: --", {
                 sep: true,
                 cls: "textgrey"
@@ -23664,7 +23796,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 note: P.ui.settings.reload,
                 reload: true
             }),
-            makeToggle("Fix water colors", classicWaterColors, {
+            makeToggle("Bluify water colors", classicWaterColors, {
                 note: "Enable if you prefer bluish water everywhere, rather than the server values"
             }
             ),
@@ -23676,10 +23808,6 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 max: 100,
                 showValue: true,
                 suffix: "%"
-            }),
-            makeToggle("Sand on water edges", sandOverlay, {
-                note: P.ui.settings.reload,
-                reload: true
             }),
             makeToggle("Cinematic lighting", cinematicLighting),
             makeToggle("Pre 0.5 retexture", faivelRetexture, {
@@ -35751,9 +35879,9 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         ]
     };
     var classicWaterCols = {
-        default: [0xffffff, 0x94eef8, 0x3a487e],
-        headless: [0xc0dccd, 0x52888b, 0x416f78],
-        faivel: [0xd7d7d7, 0xb0d9db, 0x4f6693],
+        headless: [0xd7d7d7, 0xb0d9db, 0x4f6693],
+        faivel: [0xc0dccd, 0x52888b, 0x416f78],
+        //headless: [0xd7d7d7, 0xb0d9db, 0x4f6693],
         guardstone: [0xffffff, 0x94d7f8, 0x324587]
     };
     var classicEnvWorlds = {
@@ -35814,7 +35942,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             let c = classicEnvCache.get(id);
             if (c) return c;
             c = ne.classicLighting ? buildClassicEnv(env) : Object.assign({}, env);
-            if (ne.classicWaterColors) c.water = (classicWaterCols[classicEnvWorlds[id]] || classicWaterCols.default).map(classicHex);
+            if (ne.classicWaterColors) c.water = (classicWaterCols[classicEnvWorlds[id]] || classicWaterCols.guardstone).map(classicHex);
             return classicEnvCache.set(id, c), c;
         };
     var f9 = (t, e, n, o) => {
@@ -36004,7 +36132,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             tint(l.worldlight, 0, 3, bi);
             ne.tintSunColor && tint(r.suncolor, 0, 3, bi);
         }
-        Pi(l.fog, 0, hn.fog[s], hn.fog[i], o), l.fog[3] = n > 0 ? -100 : Vb, l.fog[4] = n > 0 ? qb : xs, l.daycycle[0] = t, l.time[0] = (typeof rpv !== "undefined" && rpv.active ? performance.now() / 1e3 : e) % 3600, ht[31].uniforms.amount.value = xu(o, hn.bloom[s], hn.bloom[i]);
+        Pi(l.fog, 0, hn.fog[s], hn.fog[i], o), l.fog[3] = n > 0 ? -100 : Vb, l.fog[4] = n > 0 ? qb : xs, l.daycycle[0] = t, l.time[0] = (typeof rpv !== "undefined" && rpv.active ? performance.now() / 1e3 : e) % 3600, ht[31].uniforms.amount.value = xu(o, hn.bloom[s], hn.bloom[i]) * ne.bloomStrength / 100;
         if (_ra > 0) {
             l.fog[0] *= _dm;
             l.fog[1] *= _dm;
@@ -36013,11 +36141,12 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             for (let _ri = 0; _ri < 3; _ri++) r.skycolors[9 + _ri] += (l.fog[_ri] - r.skycolors[9 + _ri]) * _ra;
         } {
             let night = Math.min(1, Math.max(0, (1 - Math.sin(t * 6.28)) * 0.5));
-            bloomAmountVal = (bloomDayIntensity + (bloomNightIntensity - bloomDayIntensity) * night) / 100 * (gfx("bloomIntensity") / 100);
+            bloomAmountVal = (bloomDayIntensity + (bloomNightIntensity - bloomDayIntensity) * night) / 100 * (gfx("bloomIntensity") / 100) * (ne.bloomStrength / 100);
             let expo = gfx("tonemapExposure") + 50 * _ra;
             tonemapExposureVal = (tonemapDayExposure + (tonemapNightExposure - tonemapDayExposure) * night) / 100 * (expo / 100);
         }
         ht[11].uniforms.u_rain.value = _ra;
+        if (ht[20] && ht[20].uniforms.u_sunRefl) ht[20].uniforms.u_sunRefl.value = ne.waterReflections ? 1 - _ra * .85 : 0;
         if (ht[12] && ht[12].uniforms.u_rain) ht[12].uniforms.u_rain.value = _ra;
         if (ht[13] && ht[13].uniforms.u_rainAmount) ht[13].uniforms.u_rainAmount.value = _ra;
         if (ht[14] && ht[14].uniforms.u_rainAmount) ht[14].uniforms.u_rainAmount.value = _ra;
@@ -36491,130 +36620,266 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         q9.push(e)
     }
     for (let t = 0; t < RP; ++t) V9.push(new Float32Array(7 * L9)), i1.push([]);
-    var emptySandFol = new Uint8Array(64 * 64);
-    var buildSandData = t => {
+    var lakeCell = 4,
+        lakeGrid = 64 / lakeCell,
+        lakeWet = new Map,
+        lakeWetLoading = new Map,
+        lakeComp = new Map,
+        lakeOcean = [!1],
+        lakeQueue = Promise.resolve(),
+        lakeRebuildPending = new Set,
+        lakeWetFromData = data => {
+            if (!data || !data.terrain || !data.water || data.water.length === 0) return null;
+            let c = {
+                    data
+                },
+                w = new Uint8Array(lakeGrid * lakeGrid),
+                any = !1;
+            for (let j = 0; j < lakeGrid; ++j)
+                for (let i = 0; i < lakeGrid; ++i) {
+                    let lx = (i + .5) * lakeCell,
+                        lz = (j + .5) * lakeCell;
+                    jp(c, lx, lz) > Zs(c, lx, lz) && (w[i + j * lakeGrid] = 1, any = !0);
+                }
+            return any ? w : null;
+        },
+        lakeWetGet = (file, cx, cz) => {
+            let amount = T.chunkAmount;
+            if (T.file !== file || cx < 0 || cz < 0 || cx >= amount || cz >= amount) return Promise.resolve(null);
+            let id = cx + cz * amount,
+                key = file + ":" + id;
+            if (lakeWet.has(key)) return Promise.resolve(lakeWet.get(key));
+            if (lakeWetLoading.has(key)) return lakeWetLoading.get(key);
+            let loaded = T.getChunk(cx, cz);
+            if (loaded && loaded.id === id && loaded.state >= 3 && loaded.state !== 8 && loaded.data) {
+                let w = lakeWetFromData(loaded.data);
+                return lakeWet.set(key, w), Promise.resolve(w);
+            }
+            let p = fetch(`data/world/${file}/${id}?v=8926940`, {
+                cache: "default"
+            }).then(r => r.arrayBuffer()).then(b => lakeWetFromData(pc.chunk.decode(new Uint8Array(b)))).catch(() => null).then(w => (lakeWet.set(key, w), lakeWetLoading.delete(key), w));
+            return lakeWetLoading.set(key, p), p;
+        },
+        lakeCompGet = key => lakeComp.get(key) || (lakeComp.set(key, new Int32Array(lakeGrid * lakeGrid)), lakeComp.get(key)),
+        lakeClassify = (file, cx, cz) => lakeQueue = lakeQueue.then(async () => {
+            if (T.file !== file) return;
+            let amount = T.chunkAmount,
+                w0 = await lakeWetGet(file, cx, cz);
+            if (!w0) return;
+            let comp0 = lakeCompGet(file + ":" + (cx + cz * amount)),
+                step = [
+                    [1, 0],
+                    [-1, 0],
+                    [0, 1],
+                    [0, -1]
+                ];
+            for (let s = 0; s < w0.length; ++s) {
+                if (!w0[s] || comp0[s]) continue;
+                let cid = lakeOcean.length,
+                    area = 0,
+                    ocean = !1,
+                    queue = [cx, cz, s],
+                    head = 0;
+                lakeOcean.push(!1), comp0[s] = cid;
+                while (head < queue.length && !ocean) {
+                    let x = queue[head++],
+                        z = queue[head++],
+                        c = queue[head++];
+                    if ((area += lakeCell * lakeCell) > stoneMaxLakeArea) {
+                        ocean = !0;
+                        break;
+                    }
+                    let i = c % lakeGrid,
+                        j = c / lakeGrid | 0;
+                    for (let d = 0; d < 4 && !ocean; ++d) {
+                        let ni = i + step[d][0],
+                            nj = j + step[d][1],
+                            nx = x,
+                            nz = z;
+                        ni < 0 ? (ni += lakeGrid, nx--) : ni >= lakeGrid && (ni -= lakeGrid, nx++);
+                        nj < 0 ? (nj += lakeGrid, nz--) : nj >= lakeGrid && (nj -= lakeGrid, nz++);
+                        let w = await lakeWetGet(file, nx, nz);
+                        if (!w) continue;
+                        let nc = ni + nj * lakeGrid;
+                        if (!w[nc]) continue;
+                        let comp = lakeCompGet(file + ":" + (nx + nz * amount));
+                        comp[nc] ? comp[nc] !== cid && lakeOcean[comp[nc]] && (ocean = !0) : (comp[nc] = cid, queue.push(nx, nz, nc));
+                    }
+                }
+                lakeOcean[cid] = ocean;
+                if (ocean) {
+                    let local = [];
+                    for (let k = 0; k < comp0.length; ++k) comp0[k] === cid && local.push(k);
+                    while (local.length) {
+                        let c = local.pop(),
+                            i = c % lakeGrid,
+                            j = c / lakeGrid | 0;
+                        for (let d = 0; d < 4; ++d) {
+                            let ni = i + step[d][0],
+                                nj = j + step[d][1],
+                                nc = ni + nj * lakeGrid;
+                            ni >= 0 && nj >= 0 && ni < lakeGrid && nj < lakeGrid && w0[nc] && !comp0[nc] && (comp0[nc] = cid, local.push(nc));
+                        }
+                    }
+                }
+            }
+        }).catch(() => {}),
+        lakeCellAt = (wx, wz) => {
+            let amount = T.chunkAmount,
+                gx = Math.floor(wx / lakeCell),
+                gz = Math.floor(wz / lakeCell),
+                res = 0;
+            for (let dz = -1; dz <= 1; ++dz)
+                for (let dx = -1; dx <= 1; ++dx) {
+                    if ((dx || dz) && res === 1) continue;
+                    let x = gx + dx,
+                        z = gz + dz,
+                        cx = Math.floor(x / lakeGrid),
+                        cz = Math.floor(z / lakeGrid);
+                    if (cx < 0 || cz < 0 || cx >= amount || cz >= amount) continue;
+                    let key = T.file + ":" + (cx + cz * amount);
+                    if (!lakeWet.has(key)) {
+                        let ch = T.getChunk(cx, cz);
+                        ch && ch.state >= 3 && ch.state !== 8 && ch.data && lakeWet.set(key, lakeWetFromData(ch.data));
+                    }
+                    if (!lakeWet.has(key)) {
+                        res = res || -1;
+                        continue;
+                    }
+                    let w = lakeWet.get(key),
+                        c = x - cx * lakeGrid + (z - cz * lakeGrid) * lakeGrid;
+                    if (!w || !w[c]) continue;
+                    let comp = lakeComp.get(key),
+                        id = comp ? comp[c] : 0,
+                        v = id ? lakeOcean[id] ? 0 : 1 : -1;
+                    if (!dx && !dz) return v;
+                    v === 1 ? res = 1 : v < 0 && (res = res || -1);
+                }
+            return res;
+        },
+        lakeClassifyAround = t => {
+            let jobs = [];
+            for (let dz = -1; dz <= 1; ++dz)
+                for (let dx = -1; dx <= 1; ++dx) jobs.push(lakeClassify(T.file, t.x + dx, t.z + dz));
+            return Promise.all(jobs);
+        },
+        lakeRequestRebuild = t => {
+            if (lakeRebuildPending.has(t) || t.stoneLakeTry === t.id) return;
+            let id = t.id,
+                file = T.file;
+            t.stoneLakeTry = id, lakeRebuildPending.add(t);
+            lakeClassifyAround(t).then(() => {
+                lakeRebuildPending.delete(t);
+                if (T.file !== file || t.id !== id || t.state < 4 || t.state === 8 || !t.data) return;
+                s7(t, !1, !0), R9(t, !0);
+            });
+        };
+    var emptyStoneFol = new Uint8Array(64 * 64);
+    var buildStoneData = t => {
+        t.stoneFol = emptyStoneFol;
         {
             let cx0 = Math.floor(t.origin[0] / 64),
                 cz0 = Math.floor(t.origin[2] / 64),
                 hasWater = !1;
-            for (let h$ = -1; h$ <= 1 && !hasWater; ++h$)
+            for (let dz = -1; dz <= 1 && !hasWater; ++dz)
                 for (let dx = -1; dx <= 1; ++dx) {
-                    let B1 = T.getChunk(cx0 + dx, cz0 + h$);
+                    let B1 = T.getChunk(cx0 + dx, cz0 + dz);
                     if (B1 && B1.data && B1.data.water && B1.data.water.length > 0) {
                         hasWater = !0;
                         break;
                     }
                 }
-            if (!hasWater) return t.sandFol = emptySandFol, null;
+            if (!hasWater) return null;
         }
-        let sandCell = 2,
-            sandPad = Math.ceil(sandWaterDistance / sandCell) + 1,
-            inner = Math.round(64 / sandCell),
-            sandGw = inner + sandPad * 2,
-            nCells = sandGw * sandGw,
-            wet = new Uint8Array(nCells),
-            wlev = new Float32Array(nCells),
-            sandTerr = new Float32Array(nCells),
-            sandField = new Float32Array(nCells),
-            sandLevel = new Float32Array(nCells);
-        for (let gj = 0; gj < sandGw; ++gj)
-            for (let Vs = 0; Vs < sandGw; ++Vs) {
-                let k = gj * sandGw + Vs,
-                    wx = t.origin[0] + (Vs - sandPad + 0.5) * sandCell,
-                    M$ = t.origin[2] + (gj - sandPad + 0.5) * sandCell,
+        let cell = 2,
+            pad = Math.ceil(stoneWaterDistance / cell) + 1,
+            gw = Math.round(64 / cell) + pad * 2,
+            nCells = gw * gw,
+            terr = new Float32Array(nCells),
+            field = new Float32Array(nCells),
+            level = new Float32Array(nCells),
+            hasLake = !1,
+            unknown = !1;
+        for (let gj = 0; gj < gw; ++gj)
+            for (let gi = 0; gi < gw; ++gi) {
+                let k = gj * gw + gi,
+                    wx = t.origin[0] + (gi - pad + .5) * cell,
+                    wz = t.origin[2] + (gj - pad + .5) * cell,
                     cx = Math.floor(wx / 64),
-                    f$ = Math.floor(M$ / 64),
-                    B1 = T.getChunk(cx, f$);
+                    cz = Math.floor(wz / 64),
+                    B1 = T.getChunk(cx, cz);
+                field[k] = 1e9;
                 if (!B1 || !B1.data || !B1.data.terrain) {
-                    sandTerr[k] = 1e9, wlev[k] = -1e9, wet[k] = 0;
+                    terr[k] = 1e9;
                     continue;
                 }
                 let lx = wx - cx * 64,
-                    lz = M$ - f$ * 64,
+                    lz = wz - cz * 64,
                     E1 = Zs(B1, lx, lz),
                     J1 = B1.data.water && B1.data.water.length > 0 ? jp(B1, lx, lz) : -1e9;
-                sandTerr[k] = E1, wlev[k] = J1, wet[k] = J1 > E1 ? 1 : 0;
-            }
-        for (let k = 0; k < nCells; ++k) sandField[k] = 1e9;
-        let hasBoundary = !1;
-        for (let gj = 0; gj < sandGw; ++gj)
-            for (let Vs = 0; Vs < sandGw; ++Vs) {
-                let k = gj * sandGw + Vs,
-                    x = wet[k];
-                if ((Vs > 0 && wet[k - 1] !== x) || (Vs < sandGw - 1 && wet[k + 1] !== x) || (gj > 0 && wet[k - sandGw] !== x) || (gj < sandGw - 1 && wet[k + sandGw] !== x)) {
-                    sandField[k] = 0, hasBoundary = !0;
-                    let lvl = wet[k] ? wlev[k] : -1e9;
-                    if (Vs > 0 && wet[k - 1]) lvl = Math.max(lvl, wlev[k - 1]);
-                    if (Vs < sandGw - 1 && wet[k + 1]) lvl = Math.max(lvl, wlev[k + 1]);
-                    if (gj > 0 && wet[k - sandGw]) lvl = Math.max(lvl, wlev[k - sandGw]);
-                    if (gj < sandGw - 1 && wet[k + sandGw]) lvl = Math.max(lvl, wlev[k + sandGw]);
-                    sandLevel[k] = lvl;
+                terr[k] = E1;
+                if (J1 > E1) {
+                    let lake = lakeCellAt(wx, wz);
+                    lake < 0 ? unknown = !0 : lake && (field[k] = 0, level[k] = J1, hasLake = !0);
                 }
             }
-        if (!hasBoundary) return t.sandFol = emptySandFol, null;
-        let zy = 1.4142135623730951;
-        for (let gj = 0; gj < sandGw; ++gj)
-            for (let Vs = 0; Vs < sandGw; ++Vs) {
-                let k = gj * sandGw + Vs,
-                    best = sandField[k],
-                    bl = sandLevel[k],
+        if (unknown) lakeRequestRebuild(t);
+        if (!hasLake) return null;
+        let diag = Math.SQRT2;
+        for (let gj = 0; gj < gw; ++gj)
+            for (let gi = 0; gi < gw; ++gi) {
+                let k = gj * gw + gi,
+                    best = field[k],
+                    bl = level[k],
                     a2;
-                if (Vs > 0 && (a2 = sandField[k - 1] + 1) < best) best = a2, bl = sandLevel[k - 1];
-                if (gj > 0 && (a2 = sandField[k - sandGw] + 1) < best) best = a2, bl = sandLevel[k - sandGw];
-                if (Vs > 0 && gj > 0 && (a2 = sandField[k - sandGw - 1] + zy) < best) best = a2, bl = sandLevel[k - sandGw - 1];
-                if (Vs < sandGw - 1 && gj > 0 && (a2 = sandField[k - sandGw + 1] + zy) < best) best = a2, bl = sandLevel[k - sandGw + 1];
-                sandField[k] = best, sandLevel[k] = bl;
+                if (gi > 0 && (a2 = field[k - 1] + 1) < best) best = a2, bl = level[k - 1];
+                if (gj > 0 && (a2 = field[k - gw] + 1) < best) best = a2, bl = level[k - gw];
+                if (gi > 0 && gj > 0 && (a2 = field[k - gw - 1] + diag) < best) best = a2, bl = level[k - gw - 1];
+                if (gi < gw - 1 && gj > 0 && (a2 = field[k - gw + 1] + diag) < best) best = a2, bl = level[k - gw + 1];
+                field[k] = best, level[k] = bl;
             }
-        for (let gj = sandGw - 1; gj >= 0; --gj)
-            for (let Vs = sandGw - 1; Vs >= 0; --Vs) {
-                let k = gj * sandGw + Vs,
-                    best = sandField[k],
-                    bl = sandLevel[k],
+        for (let gj = gw - 1; gj >= 0; --gj)
+            for (let gi = gw - 1; gi >= 0; --gi) {
+                let k = gj * gw + gi,
+                    best = field[k],
+                    bl = level[k],
                     a2;
-                if (Vs < sandGw - 1 && (a2 = sandField[k + 1] + 1) < best) best = a2, bl = sandLevel[k + 1];
-                if (gj < sandGw - 1 && (a2 = sandField[k + sandGw] + 1) < best) best = a2, bl = sandLevel[k + sandGw];
-                if (Vs < sandGw - 1 && gj < sandGw - 1 && (a2 = sandField[k + sandGw + 1] + zy) < best) best = a2, bl = sandLevel[k + sandGw + 1];
-                if (Vs > 0 && gj < sandGw - 1 && (a2 = sandField[k + sandGw - 1] + zy) < best) best = a2, bl = sandLevel[k + sandGw - 1];
-                sandField[k] = best, sandLevel[k] = bl;
+                if (gi < gw - 1 && (a2 = field[k + 1] + 1) < best) best = a2, bl = level[k + 1];
+                if (gj < gw - 1 && (a2 = field[k + gw] + 1) < best) best = a2, bl = level[k + gw];
+                if (gi < gw - 1 && gj < gw - 1 && (a2 = field[k + gw + 1] + diag) < best) best = a2, bl = level[k + gw + 1];
+                if (gi > 0 && gj < gw - 1 && (a2 = field[k + gw - 1] + diag) < best) best = a2, bl = level[k + gw - 1];
+                field[k] = best, level[k] = bl;
             }
-        for (let pass = 0; pass < sandSmooth; ++pass) {
-            let tmp = sandField.slice();
-            for (let gj = 1; gj < sandGw - 1; ++gj)
-                for (let Vs = 1; Vs < sandGw - 1; ++Vs) {
-                    let k = gj * sandGw + Vs;
-                    sandField[k] = (tmp[k] + tmp[k - 1] + tmp[k + 1] + tmp[k - sandGw] + tmp[k + sandGw] + tmp[k - sandGw - 1] + tmp[k - sandGw + 1] + tmp[k + sandGw - 1] + tmp[k + sandGw + 1]) / 9;
-                }
-        }
-        let sampleSand = (lx, lz) => {
-            let Vs = lx / sandCell + sandPad - 0.5,
-                gj = lz / sandCell + sandPad - 0.5,
-                Fs = Vs < 0 ? 0 : Vs > sandGw - 2 ? sandGw - 2 : Math.floor(Vs),
-                cj = gj < 0 ? 0 : gj > sandGw - 2 ? sandGw - 2 : Math.floor(gj),
-                fx = Vs - Fs,
-                fz = gj - cj,
-                k = cj * sandGw + Fs,
+        let sampleStone = (lx, lz) => {
+            let gi = lx / cell + pad - .5,
+                gj = lz / cell + pad - .5,
+                fi = gi < 0 ? 0 : gi > gw - 2 ? gw - 2 : Math.floor(gi),
+                fj = gj < 0 ? 0 : gj > gw - 2 ? gw - 2 : Math.floor(gj),
+                fx = gi - fi,
+                fz = gj - fj,
+                k = fj * gw + fi,
                 w00 = (1 - fx) * (1 - fz),
                 w10 = fx * (1 - fz),
                 w01 = (1 - fx) * fz,
                 w11 = fx * fz,
-                dist = sandField[k] * w00 + sandField[k + 1] * w10 + sandField[k + sandGw] * w01 + sandField[k + sandGw + 1] * w11,
-                lvl = sandLevel[k] * w00 + sandLevel[k + 1] * w10 + sandLevel[k + sandGw] * w01 + sandLevel[k + sandGw + 1] * w11,
-                terr = sandTerr[k] * w00 + sandTerr[k + 1] * w10 + sandTerr[k + sandGw] * w01 + sandTerr[k + sandGw + 1] * w11,
-                u2 = (sandWaterDistance - dist * sandCell) / sandFade,
-                cap = (sandMaxHeight - (terr - lvl)) / sandFade;
-            u2 = u2 < cap ? u2 : cap;
-            return u2 < 0 ? 0 : u2 > 1 ? 1 : u2;
+                dist = field[k] * w00 + field[k + 1] * w10 + field[k + gw] * w01 + field[k + gw + 1] * w11,
+                lvl = level[k] * w00 + level[k + 1] * w10 + level[k + gw] * w01 + level[k + gw + 1] * w11,
+                ter = terr[k] * w00 + terr[k + 1] * w10 + terr[k + gw] * w01 + terr[k + gw + 1] * w11,
+                u = (stoneWaterDistance - dist * cell) / stoneFade,
+                cap = (stoneMaxHeight - (ter - lvl)) / stoneFade;
+            u = u < cap ? u : cap;
+            return u < 0 ? 0 : u > 1 ? 1 : u;
         };
-        let folThresh = sandFoliageCutoff * Math.min(sandWaterDistance / sandFade, 1);
-        let Hf = t.sandFol && t.sandFol !== emptySandFol ? t.sandFol : (t.sandFol = new Uint8Array(64 * 64));
+        let fol = t.stoneFol = new Uint8Array(64 * 64);
         for (let fz = 0; fz < 64; ++fz)
-            for (let fx = 0; fx < 64; ++fx) Hf[fx + fz * 64] = sampleSand(fx + 0.5, fz + 0.5) > folThresh ? 1 : 0;
-        return sampleSand;
+            for (let fx = 0; fx < 64; ++fx) fol[fx + fz * 64] = sampleStone(fx + .5, fz + .5) > stoneFoliageCutoff ? 1 : 0;
+        return sampleStone;
     };
     var R9 = (t, e) => {
             if (ne.foliage === 0 || !e) return;
-            if (sandShaderEnabled && !t.sandFol) buildSandData(t);
+            if (stoneShaderEnabled && !t.stoneFol) buildStoneData(t);
             O$(t, W), e1(t.id + 1e3);
+            let gw = gloomFolIds && gloomNear(t);
             let n = t.geometry.foliage.folIds,
                 o = [],
                 s = t.geometry.foliage.instances,
@@ -36647,9 +36912,16 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                         M = 3;
                     F < k ? M = 0 : F < k + y ? M = 1 : F < k + y + C && (M = 2);
                     let I = t.data.textureid[v][M];
-                    if (sandShaderEnabled && t.sandFol && t.sandFol[c + f * 64]) I = sandTextureId;
-                    let R = yc.get(I).foliage,
-                        L = q9[u % 64 + p % 64 * 64];
+                    t.stoneStrip && t.stoneStrip[v * 9216 + _] && t.stoneStripLayer[v] >= 0 && (I = t.data.textureid[v][t.stoneStripLayer[v]]);
+                    t.topGrass && (I = topGrassFoliage(t, v, _, I));
+                    if (dirtPatchEnabled && dirtPatchCovers(t, v, _, I)) continue;
+                    let R = yc.get(I).foliage;
+                    if (shoreShaderEnabled && isGrassTerrain(I)) {
+                        if (t.stoneFol && t.stoneFol[c + f * 64] || t.steepMask && t.steepMask[v * 9216 + _] > 127) continue;
+                        gw && Hp() < gloomWeight(u, p) && (R = gloomFoliageFor(I));
+                        if (t.meadowMask && Hp() < t.meadowMask[v * 9216 + _] / 850 && topGrassShown(I) === 1227) continue;
+                    }
+                    let L = q9[u % 64 + p % 64 * 64];
                     for (let z = 0; z < R.length; ++z) {
                         let V = R[z],
                             q = V[1];
@@ -36690,18 +36962,6 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     instances: [],
                     folIds: []
                 };
-                if (sandShaderEnabled && t.sandFol && yc.has(sandTextureId)) {
-                    let hasSand = !1;
-                    for (let k = 0; k < t.sandFol.length; ++k)
-                        if (t.sandFol[k]) {
-                            hasSand = !0;
-                            break;
-                        }
-                    if (hasSand) {
-                        let r = yc.get(sandTextureId).foliage;
-                        for (let l = 0; l < r.length; ++l) !hiddenFoliage.has(r[l][0]) && n.folIds.indexOf(r[l][0]) < 0 && n.folIds.push(r[l][0]);
-                    }
-                }
                 for (let o = 0; o < 4; ++o) {
                     let s = t.data.textureid[o];
                     for (let i = 0; i < 4; ++i) {
@@ -36709,7 +36969,8 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                         for (let l = 0; l < r.length; ++l) !hiddenFoliage.has(r[l][0]) && n.folIds.indexOf(r[l][0]) < 0 && n.folIds.push(r[l][0]);
                     }
                 }
-                n.folIds.length > 8 && (n.folIds.length = 8);
+                gloomFolIds && gloomNear(t) && gloomFolIds.forEach(id => n.folIds.indexOf(id) < 0 && n.folIds.push(id));
+                n.folIds.length > 12 && (n.folIds.length = 12);
                 for (let o = 0; o < n.folIds.length; ++o) {
                     let s = n.folIds[o];
                     n.instances.push(B$(o));
@@ -36870,7 +37131,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         J9 = 96 / 12,
         hf = 8,
         Qp = new Uint8Array(3 * rl ** 2),
-        sandBuf = new Uint8Array(3 * rl ** 2),
+        sandBuf = new Uint8Array(4 * rl ** 2),
         ry = new Map,
         f1 = u1 / 2,
         e7 = 3,
@@ -37076,10 +37337,15 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 let o = t.x * 2 % hf * 2 + t.z * 2 % hf * hf;
                 t.meshes.atlas = K$(t), t.meshes.texSet = t.data.textureid.map(Z$);
                 let s = t.data.holes.length > 0;
-                let sampleSand;
-                if (sandShaderEnabled) {
+                ne.faivelRetexture ? buildStoneStrips(t) : t.stoneStrip = null;
+                t.topGrass = ne.faivelRetexture ? topGrassLookup(t) : null;
+                t.dirtMask = dirtPatchEnabled ? terrainDeferred(t, "dirtmask", buildDirtMask) : null;
+                t.meadowMask = dirtPatchEnabled ? terrainDeferred(t, "meadowmask", buildMeadowMask) : null;
+                t.steepMask = shoreShaderEnabled ? buildSteepMask(t) : null;
+                let sampleStone;
+                if (shoreShaderEnabled) {
                     t.meshes.sandAtlas = Qsand(t);
-                    sampleSand = buildSandData(t);
+                    sampleStone = stoneShaderEnabled ? buildStoneData(t) : null;
                 }
                 for (let i = 0; i < 2; ++i)
                     for (let r = 0; r < 2; ++r) {
@@ -37094,23 +37360,31 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                                     t.data.holes.indexOf(v) >= 0 && (Qp[h + 0] = 255, Qp[h + 1] = 255, Qp[h + 2] = 255)
                                 }
                             }
+                        t.stoneStrip && applyStoneStrips(t, l, Qp);
+                        t.topGrass && applyTopGrass(t, l, Qp);
                         W4(t.meshes.atlas, o + l, rl, rl, Qp);
-                        if (sandShaderEnabled) {
-                            if (sampleSand) {
+                        if (shoreShaderEnabled) {
+                            if (sampleStone) {
                                 for (let f = 0; f < rl; ++f)
                                     for (let u = 0; u < rl; ++u) {
                                         let lx = (i * rl + u + 0.5) / (2 * rl) * 64,
                                             lz = (r * rl + f + 0.5) / (2 * rl) * 64,
-                                            b = sampleSand(lx, lz) * 255 | 0,
-                                            h = (f * rl + u) * 3;
-                                        sandBuf[h] = b, sandBuf[h + 1] = b, sandBuf[h + 2] = b;
+                                            g = sampleStone(lx, lz) * 255 | 0,
+                                            h = (f * rl + u) * 4;
+                                        sandBuf[h] = 0, sandBuf[h + 1] = g, sandBuf[h + 2] = 0, sandBuf[h + 3] = 0;
                                     }
                             } else sandBuf.fill(0);
+                            if (t.dirtMask)
+                                for (let p = 0, off = l * 9216; p < 9216; ++p) sandBuf[p * 4 + 2] = t.dirtMask[off + p];
+                            if (t.steepMask)
+                                for (let p = 0, off = l * 9216; p < 9216; ++p) sandBuf[p * 4] = t.steepMask[off + p];
+                            if (t.meadowMask)
+                                for (let p = 0, off = l * 9216; p < 9216; ++p) sandBuf[p * 4 + 3] = t.meadowMask[off + p];
                             W4(t.meshes.sandAtlas, o + l, rl, rl, sandBuf);
                         }
                         let c = t.meshes.quadrantUbos[l];
                         let blend = terrainBlendParams(t.data.textureid[l]);
-                        c.data.quadrant[0] = o + l, c.data.terrainInfo = t.meshes.texSet[l].info, c.data.layerShape = blend.shape, c.data.layerSuppress = blend.suppress;
+                        c.data.quadrant[0] = o + l, c.data.terrainInfo = t.meshes.texSet[l].info, c.data.layerShape = blend.shape, c.data.layerSuppress = blend.suppress, c.data.layerFlags = gloomFlags(t, l);
                         I0(c), _o(c);
                     }
             }
@@ -37172,8 +37446,8 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     width: rl,
                     height: rl,
                     target: W.TEXTURE_2D_ARRAY,
-                    format: W.RGB,
-                    internalFormat: W.RGB565,
+                    format: W.RGBA,
+                    internalFormat: W.RGBA8,
                     depth: hf ** 2,
                     flipY: !1,
                     generateMipmaps: !1
@@ -37192,35 +37466,825 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 };
                 t.forEach((o, s) => {
                     let i = yc.get(o);
-                    n.info[s * 4 + 0] = i.scale / 127, n.info[s * 4 + 1] = i.darkest / 255 * 3, n.info[s * 4 + 2] = i.brightest / 255 * 3, n.info[s * 4 + 3] = i.spec / 255, Co(i.texture, r => {
+                    n.info[s * 4 + 0] = i.scale / 127 / (ne.faivelRetexture && topGrassShown(o) === stoneTextureId ? stoneStretch : 1), n.info[s * 4 + 1] = i.darkest / 255 * 3, n.info[s * 4 + 2] = i.brightest / 255 * 3, n.info[s * 4 + 3] = i.spec / 255, Co(i.texture, r => {
                         n.diffuse[s] = r, n.loaded++
                     })
                 }), ry.set(e, n)
             }
             return ry.get(e)
         },
-        // Per-layer blend weights for the terrain shader's MeshTerrain block: layerShape[i] = (weight, sharpness, 0, 0),
-        // layerSuppress[i][j] = how much layer j fades layer i out. Always full 16-float arrays: the UBO upload packs
-        // values in order and writes array.length of them, so a short array would shift quadrant out of place.
         terrainBlendParams = ids => {
             let tex = [0, 1, 2, 3].map(i => {
                     let terrain = ids && ids[i] != null ? yc.get(ids[i]) : void 0;
-                    return terrain ? terrain.texture : null;
+                    if (!terrain) return null;
+                    let ovr = textureOverrides.get(terrain.texture),
+                        mapped = ovr == null ? null : typeof ovr == "object" ? ovr.id : ovr;
+                    return [terrain.texture, mapped != null && mapped !== terrain.texture ? mapped : null];
                 }),
+                rule = [0, 1, 2, 3].map(i => tex[i] && (terrainBlendOverrides.get(tex[i][0]) || tex[i][1] != null && terrainBlendOverrides.get(tex[i][1]))),
+                amountFor = (map, t) => {
+                    if (!map || !t) return 0;
+                    let a = map[t[0]];
+                    return a != null ? a : t[1] != null && map[t[1]] != null ? map[t[1]] : 0;
+                },
                 shape = [],
                 suppress = [];
+            let keep = 1;
+            for (let i = 0; i < 4; ++i) rule[i] && rule[i].suppresses && (keep = Math.min(keep, rule[i].blend != null ? Math.max(0, Math.min(1, rule[i].blend)) : 0));
+            keep === 1 && !rule.some(o => o && o.suppresses) && (keep = 0);
             for (let i = 0; i < 4; ++i) {
-                let o = tex[i] != null ? terrainBlendOverrides.get(tex[i]) : void 0;
-                shape.push(o && o.weight != null ? Math.max(0, o.weight) : 1, o && o.sharpness != null ? Math.max(.1, o.sharpness) : 1, 0, 0);
+                let o = rule[i];
+                shape.push(o && o.weight != null ? Math.max(0, o.weight) : 1, o && o.sharpness != null ? Math.max(.1, o.sharpness) : 1, i === 0 ? keep : 0, !tex[i] ? 0 : (tex[i][1] != null ? tex[i][1] : tex[i][0]) === 1227 ? 2 : dirtPatchTextures.indexOf(tex[i][0]) >= 0 || tex[i][1] != null && dirtPatchTextures.indexOf(tex[i][1]) >= 0 ? 1 : 0);
                 for (let j = 0; j < 4; ++j) {
-                    let by = o && o.suppressedBy && i !== j && tex[j] != null ? o.suppressedBy[tex[j]] : 0;
-                    suppress.push(by ? Math.max(0, Math.min(1, by)) : 0);
+                    let by = 0;
+                    if (i !== j && tex[j]) {
+                        by = amountFor(o && o.suppressedBy, tex[j]);
+                        let d = rule[j] && rule[j].suppresses;
+                        d && !(o && o.suppresses) && (by = Math.max(by, d));
+                    }
+                    suppress.push(by > 0 ? by : 0);
                 }
             }
             return {
                 shape,
                 suppress
             };
+        },
+        stoneStripTextures = [2120, 2126],
+        stoneStripWidth = 17.6,
+        stoneStripSurround = 8,
+        stoneStripMinStone = .2,
+        stoneStripThreshold = .55,
+        stoneStripMaxNy = .85,
+        terrainPackW = (() => {
+            let w = new Float32Array(32768 * 4);
+            for (let v = 0; v < 32768; ++v) {
+                let c0 = (v & 31) * 8 / 255,
+                    c1 = (v >> 5 & 31) * 8 / 255,
+                    c2 = (v >> 10 & 31) * 8 / 255;
+                w[v * 4] = c0, w[v * 4 + 1] = c1, w[v * 4 + 2] = c2, w[v * 4 + 3] = Math.max(0, 1 - c0 - c1 - c2);
+            }
+            return w;
+        })(),
+        stoneLutCache = new Map,
+        stoneLut = bits => {
+            let lut = stoneLutCache.get(bits);
+            if (lut) return lut;
+            lut = new Float32Array(32768);
+            for (let v = 0; v < 32768; ++v) {
+                let w = 0;
+                for (let k = 0; k < 4; ++k) bits >> k & 1 && (w += terrainPackW[v * 4 + k]);
+                lut[v] = w;
+            }
+            return stoneLutCache.set(bits, lut), lut;
+        },
+        isStoneTerrain = id => {
+            let terrain = yc.get(id);
+            return !!terrain && stoneStripTextures.indexOf(terrain.texture) >= 0;
+        },
+        roadBitsOf = ch => {
+            let d = ch.data;
+            if (d.__roadBits) return d.__roadBits;
+            return d.__roadBits = [0, 1, 2, 3].map(q => {
+                let b = 0;
+                for (let k = 0; k < 4; ++k) yc.get(d.textureid[q][k]) && !isStoneTerrain(d.textureid[q][k]) && !isGrassTerrain(d.textureid[q][k]) && (b |= 1 << k);
+                return b;
+            });
+        },
+        stoneBitsOf = ch => {
+            let d = ch.data;
+            if (d.__stoneBits) return d.__stoneBits;
+            let bits = [0, 1, 2, 3].map(q => {
+                let b = 0;
+                for (let k = 0; k < 4; ++k) isStoneTerrain(d.textureid[q][k]) && (b |= 1 << k);
+                return b;
+            });
+            return d.__stoneBits = bits;
+        },
+        chunkLayerTotals = ch => {
+            let d = ch.data;
+            if (d.__layerW) return d.__layerW;
+            let out = new Float32Array(16);
+            for (let q = 0; q < 4; ++q) {
+                let a = d.texture[q];
+                for (let p = 0; p < 9216; p += 13) {
+                    let v = (a[p] & 32767) * 4;
+                    for (let k = 0; k < 4; ++k) {
+                        let x = terrainPackW[v + k];
+                        x > .1 && (out[q * 4 + k] += x);
+                    }
+                }
+            }
+            return d.__layerW = out;
+        },
+        terrainChunkUsable = (ch, cx, cz, t) => !!ch && !!ch.data && !!ch.data.texture && !!ch.data.textureid && (ch === t || ch.x === cx && ch.z === cz && ch.state >= 3 && ch.state !== 8),
+        terrainChamfer = (d, G) => {
+            let D = Math.SQRT2;
+            for (let z = 0; z < G; ++z)
+                for (let x = 0, k = z * G; x < G; ++x, ++k) {
+                    let v = d[k];
+                    x > 0 && d[k - 1] + 1 < v && (v = d[k - 1] + 1);
+                    if (z > 0) {
+                        d[k - G] + 1 < v && (v = d[k - G] + 1);
+                        x > 0 && d[k - G - 1] + D < v && (v = d[k - G - 1] + D);
+                        x < G - 1 && d[k - G + 1] + D < v && (v = d[k - G + 1] + D);
+                    }
+                    d[k] = v;
+                }
+            for (let z = G - 1; z >= 0; --z)
+                for (let x = G - 1, k = z * G + G - 1; x >= 0; --x, --k) {
+                    let v = d[k];
+                    x < G - 1 && d[k + 1] + 1 < v && (v = d[k + 1] + 1);
+                    if (z < G - 1) {
+                        d[k + G] + 1 < v && (v = d[k + G] + 1);
+                        x < G - 1 && d[k + G + 1] + D < v && (v = d[k + G + 1] + D);
+                        x > 0 && d[k + G - 1] + D < v && (v = d[k + G - 1] + D);
+                    }
+                    d[k] = v;
+                }
+            return d;
+        },
+        terrainPassCache = new Map,
+        terrainCacheKey = (t, kind) => kind + ":" + T.file + ":" + t.id,
+        terrainCacheTrim = () => {
+            let n = terrainPassCache.size - 1e3;
+            for (let k of terrainPassCache.keys()) {
+                if (n <= 0) break;
+                let a = k.indexOf(":"),
+                    b = k.lastIndexOf(":"),
+                    ch = k.slice(a + 1, b) === T.file && T.chunksMap ? T.chunksMap.get(+k.slice(b + 1)) : null;
+                ch && ch.state >= 3 && ch.state !== 8 || (terrainPassCache.delete(k), n--);
+            }
+        },
+        terrainCacheSet = (t, kind, v) => (terrainPassCache.size >= 1200 && terrainCacheTrim(), terrainPassCache.set(terrainCacheKey(t, kind), v), v),
+        buildStoneStrips = t => {
+            t.stoneStrip = null;
+            let key = terrainCacheKey(t, "strip"),
+                res = terrainPassCache.has(key) ? terrainPassCache.get(key) : terrainCacheSet(t, "strip", buildStoneStripsNow(t));
+            return res ? (t.stoneStrip = res.mask, t.stoneStripLayer = res.layer, res.mask) : null;
+        },
+        buildStoneStripsNow = t => {
+            let own = stoneBitsOf(t);
+            if (!(own[0] | own[1] | own[2] | own[3])) return null;
+            let TX = 96,
+                QN = TX * TX,
+                r = stoneStripWidth / 2,
+                R2 = Math.max(1, Math.round(stoneStripSurround)),
+                P = Math.ceil(Math.max(2 * r, R2)) + 2,
+                G = 64 + 2 * P,
+                N = G * G,
+                span = Math.ceil(P / 64),
+                stone = new Uint8Array(N),
+                road = new Uint8Array(N),
+                thr = stoneStripThreshold;
+            for (let dz = -span; dz <= span; ++dz)
+                for (let dx = -span; dx <= span; ++dx) {
+                    let cx = t.x + dx,
+                        cz = t.z + dz,
+                        ch = dx || dz ? T.getChunk(cx, cz) : t;
+                    if (!terrainChunkUsable(ch, cx, cz, t)) continue;
+                    let bits = stoneBitsOf(ch),
+                        rb = roadBitsOf(ch);
+                    for (let q = 0; q < 4; ++q) {
+                        if (rb[q]) {
+                            let lut = stoneLut(rb[q]),
+                                a = ch.data.texture[q],
+                                gx0 = dx * 64 + (q & 1) * 32 + P,
+                                gz0 = dz * 64 + (q >> 1) * 32 + P;
+                            for (let f = Math.max(0, -gz0); f < Math.min(32, G - gz0); ++f)
+                                for (let u = Math.max(0, -gx0); u < Math.min(32, G - gx0); ++u) {
+                                    let p = f * 3 * TX + u * 3;
+                                    lut[a[p] & 32767] + lut[a[p + 1] & 32767] + lut[a[p + 2] & 32767] + lut[a[p + TX] & 32767] + lut[a[p + TX + 1] & 32767] + lut[a[p + TX + 2] & 32767] + lut[a[p + 2 * TX] & 32767] + lut[a[p + 2 * TX + 1] & 32767] + lut[a[p + 2 * TX + 2] & 32767] >= 2.7 && (road[(gz0 + f) * G + gx0 + u] = 1);
+                                }
+                        }
+                        if (!bits[q]) continue;
+                        let lut = stoneLut(bits[q]),
+                            a = ch.data.texture[q],
+                            gx0 = dx * 64 + (q & 1) * 32 + P,
+                            gz0 = dz * 64 + (q >> 1) * 32 + P,
+                            u0 = Math.max(0, -gx0),
+                            u1 = Math.min(32, G - gx0),
+                            f0 = Math.max(0, -gz0),
+                            f1 = Math.min(32, G - gz0);
+                        for (let f = f0; f < f1; ++f)
+                            for (let u = u0; u < u1; ++u) {
+                                let p = f * 3 * TX + u * 3,
+                                    w = lut[a[p] & 32767] + lut[a[p + 1] & 32767] + lut[a[p + 2] & 32767] + lut[a[p + TX] & 32767] + lut[a[p + TX + 1] & 32767] + lut[a[p + TX + 2] & 32767] + lut[a[p + 2 * TX] & 32767] + lut[a[p + 2 * TX + 1] & 32767] + lut[a[p + 2 * TX + 2] & 32767];
+                                w >= thr * 9 && (stone[(gz0 + f) * G + gx0 + u] = 1);
+                            }
+                    }
+                }
+            let hasStone = !1,
+                hasGap = !1;
+            for (let z = P; z < P + 64 && !(hasStone && hasGap); ++z)
+                for (let x = P, k = z * G + P; x < P + 64; ++x, ++k) stone[k] ? hasStone = !0 : hasGap = !0;
+            if (!hasStone || !hasGap) return null;
+            let toStone = new Float32Array(N);
+            for (let k = 0; k < N; ++k) toStone[k] = stone[k] ? 0 : 1e9;
+            terrainChamfer(toStone, G);
+            let toOpen = new Float32Array(N);
+            for (let k = 0; k < N; ++k) toOpen[k] = toStone[k] > r ? 0 : 1e9;
+            terrainChamfer(toOpen, G);
+            let sum = new Uint32Array((G + 1) * (G + 1));
+            for (let z = 0; z < G; ++z)
+                for (let x = 0, row = 0; x < G; ++x) row += stone[z * G + x], sum[(z + 1) * (G + 1) + x + 1] = sum[z * (G + 1) + x + 1] + row;
+            let toFilled = toStone,
+                any = !1;
+            toFilled.fill(1e9);
+            for (let z = P; z < G - P; ++z)
+                for (let x = P; x < G - P; ++x) {
+                    let k = z * G + x;
+                    if (stone[k] || toOpen[k] <= r || road[k]) continue;
+                    let wx = t.origin[0] + x - P + .5,
+                        wz = t.origin[2] + z - P + .5,
+                        gx = (T.getHeight(wx + 1, wz) - T.getHeight(wx - 1, wz)) / 2,
+                        gz = (T.getHeight(wx, wz + 1) - T.getHeight(wx, wz - 1)) / 2;
+                    if (1 / Math.sqrt(1 + gx * gx + gz * gz) > stoneStripMaxNy) continue;
+                    let x0 = x - R2,
+                        z0 = z - R2,
+                        x1 = x + R2 + 1,
+                        z1 = z + R2 + 1,
+                        n = sum[z1 * (G + 1) + x1] - sum[z0 * (G + 1) + x1] - sum[z1 * (G + 1) + x0] + sum[z0 * (G + 1) + x0];
+                    n >= stoneStripMinStone * (x1 - x0) * (z1 - z0) && (toFilled[k] = 0, any = !0);
+                }
+            if (!any) return null;
+            terrainChamfer(toFilled, G);
+            let mask = new Uint8Array(4 * QN),
+                totals = chunkLayerTotals(t),
+                layer = [-1, -1, -1, -1];
+            for (let q = 0; q < 4; ++q) {
+                let best = -1,
+                    bestW = -1;
+                for (let k = 0; k < 4; ++k) own[q] >> k & 1 && totals[q * 4 + k] > bestW && (bestW = totals[q * 4 + k], best = k);
+                layer[q] = best;
+            }
+            any = !1;
+            for (let q = 0; q < 4; ++q) {
+                if (layer[q] < 0) continue;
+                let lut = stoneLut(own[q]),
+                    a = t.data.texture[q],
+                    cx0 = (q & 1) * 32 + P,
+                    cz0 = (q >> 1) * 32 + P;
+                for (let f = 0; f < TX; ++f)
+                    for (let u = 0, p = f * TX, row = (cz0 + (f / 3 | 0)) * G + cx0; u < TX; ++u, ++p) {
+                        let c = row + (u / 3 | 0);
+                        if (toFilled[c] > r + 1) continue;
+                        (lut[a[p] & 32767] >= thr ? !0 : toOpen[c] > r && toFilled[c] <= 1 && !road[c]) && (mask[q * QN + p] = 1, any = !0);
+                    }
+            }
+            return any ? {
+                mask,
+                layer
+            } : null;
+        },
+        topGrassStoneTextures = [2120, 2126],
+        topGrassGrassTextures = [1227],
+        topGrassSteepStart = .85,
+        topGrassSteepFull = .72,
+        topGrassSpeckRadius = 3,
+        topGrassSpeckMax = .35,
+        topGrassSpeckFade = .15,
+        topGrassNoiseAmount = .12,
+        topGrassNoiseScale = 2.5,
+        topGrassShown = id => {
+            let terrain = yc.get(id);
+            if (!terrain) return null;
+            let o = textureOverrides.get(terrain.texture),
+                mapped = o == null ? null : typeof o == "object" ? o.id : o;
+            return mapped != null ? mapped : terrain.texture;
+        },
+        topGrassBitsOf = ch => {
+            let d = ch.data;
+            if (d.__topBits) return d.__topBits;
+            let out = [0, 1, 2, 3].map(q => {
+                let stone = 0,
+                    other = 0,
+                    road = 0,
+                    grass = topGrassGrassTextures.map(() => 0);
+                for (let k = 0; k < 4; ++k) {
+                    let terrain = yc.get(d.textureid[q][k]),
+                        g = topGrassGrassTextures.indexOf(topGrassShown(d.textureid[q][k]));
+                    terrain && topGrassStoneTextures.indexOf(terrain.texture) >= 0 ? stone |= 1 << k : g >= 0 ? grass[g] |= 1 << k : terrain && (other |= 1 << k, isGrassTerrain(d.textureid[q][k]) || (road |= 1 << k));
+                }
+                return {
+                    stone,
+                    other,
+                    road,
+                    grass
+                };
+            });
+            return d.__topBits = out;
+        },
+        terrainJobs = [],
+        terrainJobKeys = new Set,
+        terrainJobsTick = () => {
+            if (!terrainJobs.length) return;
+            let end = performance.now() + 3;
+            do {
+                try {
+                    terrainJobs.shift()();
+                } catch (e) {}
+            } while (terrainJobs.length && performance.now() < end);
+        },
+        terrainDeferred = (t, kind, build) => {
+            let key = terrainCacheKey(t, kind);
+            if (terrainPassCache.has(key)) return terrainPassCache.get(key);
+            if (terrainJobKeys.has(key)) return null;
+            let id = t.id,
+                file = T.file,
+                ck = terrainCacheKey(t, "rebuild"),
+                live = () => T.file === file && t.id === id && t.data && t.state >= 5 && t.state !== 8;
+            terrainJobKeys.add(key);
+            terrainJobs.push(() => {
+                terrainJobKeys.delete(key);
+                if (!live() || terrainPassCache.has(key) || !build(t) || terrainJobKeys.has(ck)) return;
+                terrainJobKeys.add(ck);
+                terrainJobs.push(() => {
+                    terrainJobKeys.delete(ck);
+                    live() && (s7(t, !1, !0), terrainJobs.push(() => live() && R9(t, !0)));
+                });
+            });
+            return null;
+        },
+        topGrassLookup = t => terrainDeferred(t, "topgrass3", t => terrainCacheSet(t, "topgrass3", buildTopGrassNow(t))),
+        buildTopGrassNow = t => {
+            let own = topGrassBitsOf(t);
+            if (!own.some(b => b.stone && b.grass.some(Boolean))) return null;
+            let nearGloom = gloomNear(t);
+            let NG = topGrassGrassTextures.length,
+                R = Math.max(1, Math.round(topGrassSpeckRadius)),
+                RO = R,
+                P = RO + 2,
+                G = 64 + 2 * P,
+                N = G * G,
+                stone = new Float32Array(N),
+                other = new Float32Array(N),
+                grass = topGrassGrassTextures.map(() => new Float32Array(N));
+            for (let dz = -1; dz <= 1; ++dz)
+                for (let dx = -1; dx <= 1; ++dx) {
+                    let cx = t.x + dx,
+                        cz = t.z + dz,
+                        ch = dx || dz ? T.getChunk(cx, cz) : t;
+                    if (!terrainChunkUsable(ch, cx, cz, t)) continue;
+                    let bits = topGrassBitsOf(ch);
+                    for (let q = 0; q < 4; ++q) {
+                        let b = bits[q],
+                            luts = [b.stone ? stoneLut(b.stone) : null].concat(b.grass.map(g => g ? stoneLut(g) : null), [b.road ? stoneLut(b.road) : null]);
+                        if (!luts.some(Boolean)) continue;
+                        let a = ch.data.texture[q],
+                            gx0 = dx * 64 + (q & 1) * 32 + P,
+                            gz0 = dz * 64 + (q >> 1) * 32 + P,
+                            u0 = Math.max(0, -gx0),
+                            u1 = Math.min(32, G - gx0),
+                            f0 = Math.max(0, -gz0),
+                            f1 = Math.min(32, G - gz0);
+                        for (let f = f0; f < f1; ++f)
+                            for (let u = u0; u < u1; ++u) {
+                                let p = f * 288 + u * 3,
+                                    n = (gz0 + f) * G + gx0 + u;
+                                for (let L = 0; L < luts.length; ++L) {
+                                    let lut = luts[L];
+                                    if (!lut) continue;
+                                    let w = (lut[a[p] & 32767] + lut[a[p + 1] & 32767] + lut[a[p + 2] & 32767] + lut[a[p + 96] & 32767] + lut[a[p + 97] & 32767] + lut[a[p + 98] & 32767] + lut[a[p + 192] & 32767] + lut[a[p + 193] & 32767] + lut[a[p + 194] & 32767]) / 9;
+                                    L === 0 ? stone[n] = w : L <= NG ? grass[L - 1][n] = w : other[n] = w;
+                                }
+                            }
+                    }
+                }
+            let boxSum = (src, R = topGrassSpeckRadius | 0 || 1) => {
+                    let sum = new Float64Array((G + 1) * (G + 1));
+                    for (let z = 0; z < G; ++z)
+                        for (let x = 0, row = 0; x < G; ++x) row += src[z * G + x], sum[(z + 1) * (G + 1) + x + 1] = sum[z * (G + 1) + x + 1] + row;
+                    return (x, z) => {
+                        let x0 = Math.max(0, x - R),
+                            z0 = Math.max(0, z - R),
+                            x1 = Math.min(G, x + R + 1),
+                            z1 = Math.min(G, z + R + 1);
+                        return (sum[z1 * (G + 1) + x1] - sum[z0 * (G + 1) + x1] - sum[z1 * (G + 1) + x0] + sum[z0 * (G + 1) + x0]) / ((x1 - x0) * (z1 - z0));
+                    };
+                },
+                stoneBox = boxSum(stone, R),
+                otherBox = boxSum(other, RO),
+                grassBox = grass.map(g => boxSum(g, R)),
+                H = G + 1,
+                hgt = new Float32Array(H * H),
+                ox = t.origin[0] - P,
+                oz = t.origin[2] - P;
+            for (let z = 0; z < H; ++z)
+                for (let x = 0; x < H; ++x) hgt[z * H + x] = T.getHeight(ox + x, oz + z);
+            let smooth = (v, a, b) => {
+                    let u = (v - a) / (b - a || 1e-6);
+                    return u = u < 0 ? 0 : u > 1 ? 1 : u, u * u * (3 - 2 * u);
+                },
+                val = new Float32Array(N),
+                pick = new Uint8Array(N),
+                ns = topGrassNoiseScale,
+                amt = topGrassNoiseAmount * 2;
+            for (let z = 0; z < G; ++z)
+                for (let x = 0; x < G; ++x) {
+                    let n = z * G + x,
+                        k = z * H + x,
+                        sx = (hgt[k + 1] - hgt[k] + hgt[k + H + 1] - hgt[k + H]) / 2,
+                        sz = (hgt[k + H] - hgt[k] + hgt[k + H + 1] - hgt[k + 1]) / 2,
+                        ny = 1 / Math.sqrt(1 + sx * sx + sz * sz),
+                        wx = ox + x + .5,
+                        wz = oz + z + .5,
+                        nz = (.65 * dirtN(wx / ns + 31.3, wz / ns + 7.9) + .35 * dirtN(wx / (ns * .4) + 3.1, wz / (ns * .4) + 17.7) - .5) * amt,
+                        flat = smooth(ny + nz, topGrassSteepFull, topGrassSteepStart),
+                        speck = 1 - smooth(stoneBox(x, z) + nz, topGrassSpeckMax - topGrassSpeckFade, topGrassSpeckMax + topGrassSpeckFade);
+                    val[n] = (flat > speck ? flat : speck) * (nearGloom ? 1 - gloomWeight(wx, wz) : 1) * (1 - smooth(otherBox(x, z), .25, .5));
+                    let best = 0,
+                        bw = -1;
+                    for (let g = 0; g < NG; ++g) {
+                        let w = grassBox[g](x, z);
+                        w > bw && (bw = w, best = g);
+                    }
+                    pick[n] = best;
+                }
+            let mask = new Uint8Array(4 * 9216),
+                pickT = new Uint8Array(4 * 9216),
+                any = !1;
+            for (let q = 0; q < 4; ++q) {
+                if (!own[q].stone || !own[q].grass.some(Boolean)) continue;
+                for (let f = 0; f < 96; ++f) {
+                    let cz = ((q >> 1) * 96 + f + .5) / 3 + P - .5,
+                        j = Math.floor(cz),
+                        fz = cz - j;
+                    for (let u = 0; u < 96; ++u) {
+                        let cx = ((q & 1) * 96 + u + .5) / 3 + P - .5,
+                            i = Math.floor(cx),
+                            fx = cx - i,
+                            n = j * G + i,
+                            v = (val[n] * (1 - fx) + val[n + 1] * fx) * (1 - fz) + (val[n + G] * (1 - fx) + val[n + G + 1] * fx) * fz,
+                            b = v * 255 + .5 | 0,
+                            p = q * 9216 + f * 96 + u;
+                        mask[p] = b, pickT[p] = pick[Math.round(cz) * G + Math.round(cx)], b && (any = !0);
+                    }
+                }
+            }
+            return any ? {
+                mask,
+                pick: pickT
+            } : null;
+        },
+        applyTopGrass = (t, q, buf) => {
+            let tg = t.topGrass,
+                b = topGrassBitsOf(t)[q];
+            if (!tg || !b.stone) return;
+            let grassLayers = b.grass.map(bits => {
+                    for (let k = 0; k < 4; ++k)
+                        if (bits >> k & 1) return k;
+                    return -1;
+                }),
+                fallback = grassLayers.find(k => k >= 0),
+                grassAll = b.grass.reduce((a, g) => a | g, 0);
+            if (fallback == null) return;
+            let w = [0, 0, 0, 0],
+                off = q * 9216;
+            for (let p = 0; p < 9216; ++p) {
+                let m = tg.mask[off + p];
+                if (!m) continue;
+                let h = p * 3;
+                if (buf[h] === 255 && buf[h + 1] === 255 && buf[h + 2] === 255) continue;
+                w[0] = buf[h] / 255, w[1] = buf[h + 1] / 255, w[2] = buf[h + 2] / 255, w[3] = Math.max(0, 1 - w[0] - w[1] - w[2]);
+                let other = 0;
+                for (let k = 0; k < 4; ++k)(b.stone | grassAll) >> k & 1 || (other += w[k]);
+                if (other > .15) continue;
+                let share = m / 255,
+                    moved = 0;
+                for (let k = 0; k < 4; ++k)
+                    if (b.stone >> k & 1) moved += w[k] * share, w[k] *= 1 - share;
+                if (moved <= 0) continue;
+                let g = grassLayers[tg.pick[off + p]];
+                w[g >= 0 ? g : fallback] += moved;
+                for (let k = 0; k < 3; ++k) buf[h + k] = Math.min(255, w[k] * 255 + .5 | 0);
+            }
+        },
+        topGrassFoliage = (t, q, p, id) => {
+            let tg = t.topGrass;
+            let terrain = yc.get(id);
+            if (!tg || tg.mask[q * 9216 + p] < 128 || !terrain || topGrassStoneTextures.indexOf(terrain.texture) < 0) return id;
+            let b = topGrassBitsOf(t)[q],
+                bits = b.grass[tg.pick[q * 9216 + p]] || b.grass.find(Boolean);
+            if (!bits) return id;
+            for (let k = 0; k < 4; ++k)
+                if (bits >> k & 1) return t.data.textureid[q][k];
+            return id;
+        },
+        grassBitsOf = ch => {
+            let d = ch.data;
+            if (d.__grassBits) return d.__grassBits;
+            return d.__grassBits = [0, 1, 2, 3].map(q => {
+                let b = 0;
+                for (let k = 0; k < 4; ++k) isGrassTerrain(d.textureid[q][k]) && (b |= 1 << k);
+                return b;
+            });
+        },
+        buildSteepMask = t => {
+            let key = terrainCacheKey(t, "steep2");
+            if (terrainPassCache.has(key)) return terrainPassCache.get(key);
+            let own = grassBitsOf(t);
+            if (!(own[0] | own[1] | own[2] | own[3])) return terrainCacheSet(t, "steep2", null);
+            let RF = Math.max(1, Math.round(steepFillRadius)),
+                P = RF + 3,
+                G = 64 + 2 * P,
+                N = G * G,
+                H = G + 1,
+                ox = t.origin[0] - P,
+                oz = t.origin[2] - P,
+                hgt = new Float32Array(H * H),
+                ny = new Float32Array(N),
+                steep = new Uint8Array(N),
+                ns = topGrassNoiseScale,
+                amt = topGrassNoiseAmount * 2,
+                thr = (steepStoneStart + steepStoneFull) / 2,
+                any = !1;
+            for (let z = 0; z < H; ++z)
+                for (let x = 0; x < H; ++x) hgt[z * H + x] = T.getHeight(ox + x, oz + z);
+            for (let z = 0; z < G; ++z)
+                for (let x = 0; x < G; ++x) {
+                    let k = z * H + x,
+                        sx = (hgt[k + 1] - hgt[k] + hgt[k + H + 1] - hgt[k + H]) / 2,
+                        sz = (hgt[k + H] - hgt[k] + hgt[k + H + 1] - hgt[k + 1]) / 2;
+                    ny[z * G + x] = 1 / Math.sqrt(1 + sx * sx + sz * sz);
+                }
+            for (let z = 1; z < G - 1; ++z)
+                for (let x = 1; x < G - 1; ++x) {
+                    let n = z * G + x,
+                        sum = ny[n - G - 1] + ny[n - G] + ny[n - G + 1] + ny[n - 1] + ny[n] + ny[n + 1] + ny[n + G - 1] + ny[n + G] + ny[n + G + 1],
+                        wx = ox + x + .5,
+                        wz = oz + z + .5,
+                        nz = (.65 * dirtN(wx / ns + 11.7, wz / ns + 27.3) + .35 * dirtN(wx / (ns * .4) + 5.9, wz / (ns * .4) + 2.1) - .5) * amt;
+                    sum / 9 + nz < thr && (steep[n] = 1, any = !0);
+                }
+            if (!any) return terrainCacheSet(t, "steep2", null);
+            let sum = new Uint32Array((G + 1) * (G + 1));
+            for (let z = 0; z < G; ++z)
+                for (let x = 0, row = 0; x < G; ++x) row += steep[z * G + x], sum[(z + 1) * (G + 1) + x + 1] = sum[z * (G + 1) + x + 1] + row;
+            let fill = new Float32Array(N);
+            for (let z = 0; z < G; ++z)
+                for (let x = 0; x < G; ++x) {
+                    let k = z * G + x,
+                        x0 = Math.max(0, x - RF),
+                        z0 = Math.max(0, z - RF),
+                        x1 = Math.min(G, x + RF + 1),
+                        z1 = Math.min(G, z + RF + 1),
+                        n = sum[z1 * (G + 1) + x1] - sum[z0 * (G + 1) + x1] - sum[z1 * (G + 1) + x0] + sum[z0 * (G + 1) + x0];
+                    fill[k] = steep[k] || n >= steepFillShare * (x1 - x0) * (z1 - z0) ? 1 : 0;
+                }
+            let mask = new Uint8Array(4 * 9216);
+            any = !1;
+            for (let q = 0; q < 4; ++q) {
+                if (!own[q]) continue;
+                for (let f = 0; f < 96; ++f) {
+                    let cz = ((q >> 1) * 96 + f + .5) / 3 + P - .5,
+                        j = Math.floor(cz),
+                        fz = cz - j;
+                    for (let u = 0; u < 96; ++u) {
+                        let cx = ((q & 1) * 96 + u + .5) / 3 + P - .5,
+                            i = Math.floor(cx),
+                            fx = cx - i,
+                            n = j * G + i,
+                            v = (fill[n] * (1 - fx) + fill[n + 1] * fx) * (1 - fz) + (fill[n + G] * (1 - fx) + fill[n + G + 1] * fx) * fz;
+                        v = v <= .25 ? 0 : v >= .75 ? 1 : (v - .25) * 2;
+                        let b = v * 255 + .5 | 0;
+                        mask[q * 9216 + f * 96 + u] = b, b && (any = !0);
+                    }
+                }
+            }
+            return terrainCacheSet(t, "steep2", any ? mask : null);
+        },
+        dirtH = (x, z) => {
+            let h = Math.imul(x, 374761393) + Math.imul(z, 668265263) | 0;
+            return h = Math.imul(h ^ h >>> 13, 1274126177), h ^= h >>> 16, (h >>> 0) / 4294967296;
+        },
+        dirtN = (x, z) => {
+            let ix = Math.floor(x),
+                iz = Math.floor(z),
+                fx = x - ix,
+                fz = z - iz,
+                ux = fx * fx * (3 - 2 * fx),
+                uz = fz * fz * (3 - 2 * fz),
+                a = dirtH(ix, iz),
+                b = dirtH(ix + 1, iz),
+                c = dirtH(ix, iz + 1),
+                d = dirtH(ix + 1, iz + 1),
+                top = a + (b - a) * ux;
+            return top + (c + (d - c) * ux - top) * uz;
+        },
+        dirtHash = (x, z, k) => {
+            let h = Math.imul(x, 374761393) + Math.imul(z, 668265263) + Math.imul(k, 1442695041) | 0;
+            return h = Math.imul(h ^ h >>> 13, 1274126177), h ^= h >>> 16, (h >>> 0) / 4294967296;
+        },
+        dirtPatchCovers = (t, q, p, id) => {
+            let mask = t.dirtMask,
+                terrain = yc.get(id);
+            if (!mask || mask[q * 9216 + p] < 128 || !terrain) return !1;
+            let ovr = textureOverrides.get(terrain.texture),
+                mapped = ovr == null ? null : typeof ovr == "object" ? ovr.id : ovr;
+            return dirtPatchTextures.indexOf(terrain.texture) >= 0 || mapped != null && dirtPatchTextures.indexOf(mapped) >= 0;
+        },
+        buildPatchMask = (t, o) => {
+            let key = terrainCacheKey(t, o.key);
+            if (terrainPassCache.has(key)) return terrainPassCache.get(key);
+            let S = o.spacing,
+                sn = Math.max(0, o.shapeNoise),
+                bl = o.blend,
+                pull = Math.min(1, Math.max(0, o.propPull)),
+                reach = o.maxRadius * (1 + sn) + o.propRange * pull,
+                x0 = t.origin[0] - reach - S,
+                z0 = t.origin[2] - reach - S,
+                x1 = t.origin[0] + 64 + reach + S,
+                z1 = t.origin[2] + 64 + reach + S,
+                props = [];
+            for (let dz = -1; dz <= 1; ++dz)
+                for (let dx = -1; dx <= 1; ++dx) {
+                    let cx = t.x + dx,
+                        cz = t.z + dz,
+                        ch = dx || dz ? T.getChunk(cx, cz) : t;
+                    if (!terrainChunkUsable(ch, cx, cz, t) || !ch.data.props) continue;
+                    for (let p of ch.data.props) {
+                        let wx = cx * 64 + p.x / 1024,
+                            wz = cz * 64 + p.z / 1024;
+                        wx > x0 - o.propRange && wx < x1 + o.propRange && wz > z0 - o.propRange && wz < z1 + o.propRange && props.push(wx, wz);
+                    }
+                }
+            let patches = [];
+            for (let gz = Math.floor(z0 / S); gz * S < z1; ++gz)
+                for (let gx = Math.floor(x0 / S); gx * S < x1; ++gx) {
+                    let px = (gx + .15 + .7 * dirtHash(gx, gz, 2 + o.salt)) * S,
+                        pz = (gz + .15 + .7 * dirtHash(gx, gz, 3 + o.salt)) * S,
+                        near = -1,
+                        best = o.propRange * o.propRange;
+                    for (let i = 0; i < props.length; i += 2) {
+                        let ddx = props[i] - px,
+                            ddz = props[i + 1] - pz,
+                            d2 = ddx * ddx + ddz * ddz;
+                        d2 < best && (best = d2, near = i);
+                    }
+                    if (dirtHash(gx, gz, 1 + o.salt) >= (near >= 0 ? o.propChance : o.chance)) continue;
+                    near >= 0 && (px += (props[near] - px) * pull, pz += (props[near + 1] - pz) * pull);
+                    if (o.keep && !o.keep(px, pz)) continue;
+                    patches.push(px, pz, o.minRadius + (o.maxRadius - o.minRadius) * dirtHash(gx, gz, 4 + o.salt));
+                }
+            if (!patches.length) return terrainCacheSet(t, o.key, null);
+            let h = 2 / 3,
+                NN = 98,
+                ox = t.origin[0] - .5 * h,
+                oz = t.origin[2] - .5 * h,
+                ns = o.noiseScale,
+                pn = new Float32Array(NN * NN),
+                m = new Float32Array(NN * NN),
+                any = !1;
+            for (let j = 0; j < NN; ++j)
+                for (let i = 0; i < NN; ++i) {
+                    let wx = ox + i * h,
+                        wz = oz + j * h;
+                    pn[j * NN + i] = .65 * dirtN(wx / (2.2 * ns) + o.salt * 1.7, wz / (2.2 * ns) + o.salt * .9) + .35 * dirtN(wx / (.8 * ns) + 13.7 + o.salt * 2.3, wz / (.8 * ns) + 4.1 + o.salt * 1.3);
+                }
+            for (let k = 0; k < patches.length; k += 3) {
+                let px = patches[k],
+                    pz = patches[k + 1],
+                    r = patches[k + 2],
+                    R = r * (1 + sn),
+                    i0 = Math.max(0, Math.ceil((px - R - ox) / h)),
+                    i1 = Math.min(NN - 1, Math.floor((px + R - ox) / h)),
+                    j0 = Math.max(0, Math.ceil((pz - R - oz) / h)),
+                    j1 = Math.min(NN - 1, Math.floor((pz + R - oz) / h)),
+                    a = r - bl;
+                for (let j = j0; j <= j1; ++j)
+                    for (let i = i0; i <= i1; ++i) {
+                        let dx = ox + i * h - px,
+                            dz = oz + j * h - pz,
+                            dist = Math.sqrt(dx * dx + dz * dz);
+                        if (dist >= R) continue;
+                        let n = j * NN + i,
+                            dd = dist + (pn[n] - .5) * 2 * sn * r;
+                        if (dd >= r) continue;
+                        let u = (dd - a) / (r - a || 1e-6);
+                        u = u < 0 ? 0 : u > 1 ? 1 : u;
+                        let v = 1 - u * u * (3 - 2 * u);
+                        v > m[n] && (m[n] = v, any = !0);
+                    }
+            }
+            if (!any) return terrainCacheSet(t, o.key, null);
+            let out = new Uint8Array(4 * 9216);
+            for (let q = 0; q < 4; ++q)
+                for (let f = 0; f < 96; ++f) {
+                    let nz = ((q >> 1) * 96 + f) / 2 + .75,
+                        j = Math.floor(nz),
+                        fz = nz - j;
+                    for (let u = 0; u < 96; ++u) {
+                        let nx = ((q & 1) * 96 + u) / 2 + .75,
+                            i = Math.floor(nx),
+                            fx = nx - i,
+                            n = j * NN + i,
+                            v = (m[n] * (1 - fx) + m[n + 1] * fx) * (1 - fz) + (m[n + NN] * (1 - fx) + m[n + NN + 1] * fx) * fz;
+                        out[q * 9216 + f * 96 + u] = v * 255 + .5 | 0;
+                    }
+                }
+            return terrainCacheSet(t, o.key, out);
+        },
+        buildDirtMask = t => buildPatchMask(t, {
+            key: "dirtmask",
+            salt: 0,
+            spacing: dirtPatchSpacing,
+            chance: dirtPatchChance,
+            propChance: dirtPatchPropChance,
+            propRange: dirtPatchPropRange,
+            propPull: dirtPatchPropPull,
+            minRadius: dirtPatchMinRadius,
+            maxRadius: dirtPatchMaxRadius,
+            blend: dirtPatchBlend,
+            shapeNoise: dirtPatchShapeNoise,
+            noiseScale: dirtPatchNoiseScale,
+            keep: gloomNear(t) ? (x, z) => dirtHash(Math.floor(x * 64), Math.floor(z * 64), 11) < 1 - (1 - gloomDirtFactor) * gloomWeight(x, z) : null
+        }),
+        buildMeadowMask = t => buildPatchMask(t, {
+            key: "meadowmask",
+            salt: 7,
+            spacing: meadowPatchSpacing,
+            chance: meadowPatchChance,
+            propChance: meadowPatchChance,
+            propRange: 0,
+            propPull: 0,
+            minRadius: meadowPatchMinRadius,
+            maxRadius: meadowPatchMaxRadius,
+            blend: meadowPatchBlend,
+            shapeNoise: meadowPatchShapeNoise,
+            noiseScale: meadowPatchNoiseScale,
+            keep: gloomNear(t) ? (x, z) => gloomWeight(x, z) <= 0 && gloomField(x, z) > gloomRadius + meadowPatchMaxRadius * (1 + meadowPatchShapeNoise) : null
+        }),
+        gloomReach = () => gloomShapeNoise + gloomEdgeNoise + gloomDetailNoise,
+        gloomField = (x, z) => Math.hypot(x - gloomX, z - gloomZ) + (dirtN(x / gloomShapeNoiseScale + 41.3, z / gloomShapeNoiseScale + 17.9) - .5) * 2 * gloomShapeNoise + (dirtN(x / gloomEdgeNoiseScale + 5.3, z / gloomEdgeNoiseScale + 31.7) - .5) * 2 * gloomEdgeNoise + (dirtN(x / gloomDetailNoiseScale + 23.1, z / gloomDetailNoiseScale + 8.9) - .5) * 2 * gloomDetailNoise,
+        gloomNear = t => gloomEnabled && T.file === gloomWorld && Math.hypot(Math.max(t.origin[0] - gloomX, 0, gloomX - t.origin[0] - 64), Math.max(t.origin[2] - gloomZ, 0, gloomZ - t.origin[2] - 64)) < gloomRadius + gloomReach(),
+        gloomWeight = (x, z) => {
+            if (!gloomEnabled || T.file !== gloomWorld || Math.hypot(x - gloomX, z - gloomZ) > gloomRadius + gloomReach()) return 0;
+            let u = (gloomRadius - gloomField(x, z)) / gloomFade;
+            return u <= 0 ? 0 : u >= 1 ? 1 : u * u * (3 - 2 * u);
+        },
+        isGrassTerrain = id => dirtPatchTextures.indexOf(topGrassShown(id)) >= 0,
+        gloomFoliageFor = id => {
+            let c = gloomFolCache.get(id);
+            if (c) return c;
+            let sum = 0;
+            yc.get(id).foliage.forEach(v => sum += v[1]);
+            sum = Math.min(255, sum || 80);
+            c = gloomFolIds.map((f, i) => [f, sum * gloomFolShare[i] | 0, 0]);
+            return gloomFolCache.set(id, c), c;
+        },
+        retextureTerrains = () => {
+            let byTexture = tex => {
+                    for (let r of yc.values())
+                        if (r.texture === tex) return r;
+                },
+                grass = byTexture(2118),
+                stone = byTexture(2120);
+            yc.forEach(r => {
+                grass && (r.texture === 2119 || r.texture === 2125) && (r.foliage = grass.foliage.map(v => [v[0], v[1] * .5 | 0, v[2]]));
+                stone && r !== stone && r.texture === 2126 && (r.texture = stone.texture, r.scale = stone.scale, r.darkest = stone.darkest, r.brightest = stone.brightest, r.spec = stone.spec, r.foliage = stone.foliage);
+            });
+            let base = gloomFolBase;
+            if (!base || !bc.has(1213)) return;
+            let used = new Set(kc.keys());
+            gloomFolIds = gloomFolCells.map(cell => {
+                let id = 255;
+                while (used.has(id) && id > 0) id--;
+                used.add(id);
+                let f = foliageExtras(gridCellFoliage(base, {
+                    texture: 1213,
+                    cell
+                }), {
+                    coverage: 3,
+                    spread: 1.1,
+                    scale: 1
+                });
+                return f.id = id, kc.set(id, f), id;
+            });
+        },
+        gloomFlags = (t, q) => {
+            if (!gloomEnabled || T.file !== gloomWorld) return [0, 0, 0, 0];
+            let qx = t.origin[0] + (q & 1) * 32,
+                qz = t.origin[2] + (q >> 1) * 32;
+            if (Math.hypot(Math.max(qx - gloomX, 0, gloomX - qx - 32), Math.max(qz - gloomZ, 0, gloomZ - qz - 32)) > gloomRadius + gloomReach()) return [0, 0, 0, 0];
+            return Array.from(t.data.textureid[q], id => {
+                let terrain = yc.get(id);
+                if (!terrain) return 0;
+                let ov = textureOverrides.get(terrain.texture),
+                    shown = ov == null ? terrain.texture : typeof ov == "object" ? ov.id != null ? ov.id : terrain.texture : ov;
+                return gloomGrassTextures.indexOf(shown) >= 0 ? 1 : 0;
+            });
+        },
+        applyStoneStrips = (t, q, buf) => {
+            let mask = t.stoneStrip,
+                k = t.stoneStripLayer[q];
+            if (!mask || k < 0) return;
+            for (let p = 0, off = q * 9216; p < 9216; ++p) {
+                if (!mask[off + p]) continue;
+                let h = p * 3;
+                if (buf[h] === 255 && buf[h + 1] === 255 && buf[h + 2] === 255) continue;
+                buf[h] = buf[h + 1] = buf[h + 2] = 0, k < 3 && (buf[h + k] = 255);
+            }
         },
         i7 = t => {},
         r7 = (t, e) => {},
@@ -37229,19 +38293,24 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             let e = ht[8];
             if (!e.active) return;
             W.useProgram(e.program), it.currentProgram = e.id, Dc(e), Ic(e);
-            if (sandShaderEnabled) {
-                if (!sandShaderTex && yc.has(sandTextureId)) {
-                    let Hf = yc.get(sandTextureId).texture;
-                    bc.has(Hf) && Co(Hf, tx => sandShaderTex = tx);
-                }
-                sandShaderTex && jn("sandDiffuse", sandShaderTex, 0, e);
+            if (gloomEnabled) {
+                gloomTexRequested || (gloomTexRequested = !0, bc.has(gloomGrassTexture) && Co(gloomGrassTexture, tx => gloomGrassTex = tx));
+                gloomGrassTex && jn("gloomGrass", gloomGrassTex, 0, e);
+            }
+            if (dirtPatchEnabled) {
+                if (!dirtPatchTexRequested && bc.has(dirtPatchTexture)) dirtPatchTexRequested = !0, Co(dirtPatchTexture, tx => dirtPatchTex = tx);
+                dirtPatchTex && jn("patchDiffuse", dirtPatchTex, 0, e);
+            }
+            if (stoneShaderEnabled) {
+                if (!stoneShaderTexRequested && bc.has(stoneTextureId)) stoneShaderTexRequested = !0, Co(stoneTextureId, tx => stoneShaderTex = tx);
+                stoneShaderTex && jn("stoneDiffuse", stoneShaderTex, 0, e);
             }
             let n, o, s = 1;
             for (let r = 0; r < t.length; ++r) {
                 let l = t[r],
                     a = l.meshes.terrain,
                     c = a.geometry;
-                n !== l.meshes.atlas && (jn("atlas", l.meshes.atlas, 0, e), sandShaderEnabled && l.meshes.sandAtlas && jn("sandMask", l.meshes.sandAtlas, 0, e), n = l.meshes.atlas), Ac(c, e);
+                n !== l.meshes.atlas && (jn("atlas", l.meshes.atlas, 0, e), shoreShaderEnabled && l.meshes.sandAtlas && jn("sandMask", l.meshes.sandAtlas, 0, e), n = l.meshes.atlas), Ac(c, e);
                 for (let f = 0; f < 4; ++f)
                     if (l.quadrantlod[f] <= s) {
                         let u = l.meshes.texSet[f];
@@ -37308,7 +38377,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     type: W.UNSIGNED_INT,
                     data: new Uint32Array([0, 2, 1, 2, 3, 1])
                 }
-            }), Co(1748, t => jn("waterNoise", t, 0, ht[20])), Co(1243, t => jn("waterLines", t, 0, ht[20])), jn("bufferPongColor", rr.colorTexture, 0, ht[20]), jn("bufferPongDepth", rr.depthTexture, 0, ht[20])
+            }), Co(1748, t => jn("waterNoise", t, 0, ht[20])), Co(bc.has(1242) ? 1242 : 1748, t => jn("waterWave", t, 0, ht[20])), Co(1243, t => jn("waterLines", t, 0, ht[20])), jn("bufferPongColor", rr.colorTexture, 0, ht[20]), jn("bufferPongDepth", rr.depthTexture, 0, ht[20])
         },
         u7 = (t, e) => {
             if (!e || t.data.water.length === 0) return;
@@ -37320,7 +38389,21 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 let r = t.data.water[i] * .030517578125;
                 s[i * 3] = n + i % 2 * 64, s[i * 3 + 1] = r, s[i * 3 + 2] = o + Math.floor(i / 2) * 64
             }
-            I0(t.meshes.waterubo), _o(t.meshes.waterubo)
+            I0(t.meshes.waterubo), _o(t.meshes.waterubo);
+            if (ne.classicWaterLook) {
+                let tx = t.meshes.waterHeight || (t.meshes.waterHeight = {
+                        id: HL++,
+                        target: W.TEXTURE_2D,
+                        texture: W.createTexture()
+                    }),
+                    d = new Float32Array(625);
+                for (let i = 0; i < 625; ++i) d[i] = t.data.terrain[i] * .030517578125;
+                Xf(0), W.bindTexture(W.TEXTURE_2D, tx.texture), it.textureUnits[0] = tx.id;
+                it.flipY && (W.pixelStorei(W.UNPACK_FLIP_Y_WEBGL, !1), it.flipY = !1);
+                W.texImage2D(W.TEXTURE_2D, 0, W.R32F, 25, 25, 0, W.RED, W.FLOAT, d);
+                W.texParameteri(W.TEXTURE_2D, W.TEXTURE_MIN_FILTER, W.NEAREST), W.texParameteri(W.TEXTURE_2D, W.TEXTURE_MAG_FILTER, W.NEAREST);
+                W.texParameteri(W.TEXTURE_2D, W.TEXTURE_WRAP_S, W.CLAMP_TO_EDGE), W.texParameteri(W.TEXTURE_2D, W.TEXTURE_WRAP_T, W.CLAMP_TO_EDGE);
+            }
         },
         p7 = t => {},
         m7 = t => {
@@ -37328,7 +38411,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             Ec(e, it.currentProgram === e.id);
             for (let n = 0, o = t.length; n < o; ++n) {
                 let s = t[n];
-                s.data.water.length !== 0 && (Kl(s.meshes.waterubo), Pc(c7, e, W.TRIANGLES))
+                s.data.water.length !== 0 && (Kl(s.meshes.waterubo), s.meshes.waterHeight && (jn("waterHeight", s.meshes.waterHeight, 0, e), Qu(e)), Pc(c7, e, W.TRIANGLES))
             }
         };
     var d7 = t => {
@@ -37413,7 +38496,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 t.state === 2 && t.reloadAttempts++ < 5 ? (t.state = 2 - 1, C7(t)) : console.log(`failed to load chunk ${t.id}, giving up`, e)
             }
         }, nN = (t, e) => {
-            e.state = 3, F9(e, pc.chunk.decode(t)), fy(e)
+            e.state = 3, F9(e, pc.chunk.decode(t)), fy(e), stoneShaderEnabled && e.data.water && e.data.water.length > 0 && lakeClassify(T.file, e.x, e.z)
         }, fy = t => {
             if (t.inRange = $b(t.x * 2, t.z * 2) < 3, t.inRange)
                 for (let e = 0; e < 2; ++e)
@@ -37446,7 +38529,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 for (let o = 0; o < t.props.length; ++o) t.props[o].setEffectVisible(e)
             }
         }, oN = (t, e, n, o, s, i, r) => {
-            w7(t, e, n, o, s, i, r)
+            w7(t, e, n, o, s, i, r);
         }, uy = t => {
             S9(t);
             let e = t.state === 2;
@@ -37559,12 +38642,15 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             e.uniforms.ffColor.value = [i[0] / 255, i[1] / 255, i[2] / 255];
             _s(fireflyMesh, e);
         },
-        rN = t => {
-            y7(t);
+        drawCutoutMeshes = () => {
             for (let e = 0, n = Bh.length; e < n; ++e) {
                 let o = Bh[e];
                 nf(o, ht[o.program], !0, vt)
             }
+        },
+        rN = (t, cutoutDone) => {
+            y7(t);
+            cutoutDone || drawCutoutMeshes();
             p1(Hs, rr, W.DEPTH_BUFFER_BIT), p1(Hs, rr, W.COLOR_BUFFER_BIT), Kp(Hs), k7(t);
             for (let e = 0, n = Uh.length; e < n; ++e) {
                 let o = Uh[e];
@@ -37611,7 +38697,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 n = Hs;
             if (t.has(32) && (t.delete(32), vf(32, e, n, null, []), [e, n] = [n, e]), t.has(33) && (t.delete(33), vf(33, e, n, null, []), [e, n] = [n, e]), t.has(30)) {
                 t.delete(30);
-                if (ne.bloomHQ) {
+                if (ne.bloomHQ && !ne.bloom) {
                     vf(42, null, n, bloomHQChain(n), pfxToneArgs().concat([
                         ["bloomAmount", bloomAmountVal],
                         ["tonemapEnabled", ne.tonemap ? 1 : 0]
@@ -37649,16 +38735,19 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         ssaoHistIdx = 0,
         ssaoFirstFrame = true,
         ssaoPrevPVMat = new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]),
-        pfxFullscreen = (t, e) => {
+        pfxFullscreen = (t, e, s) => {
             jn("inputA", Hs.colorTexture, 0, ht[t]);
             jn("depthTex", Hs.depthTexture, 0, ht[t]);
             for (let n = 0; n < e.length; ++n) ht[t].uniforms[e[n][0]].value = e[n][1];
-            Kp(rr), _s(Ju, ht[t]), p1(rr, Hs, W.COLOR_BUFFER_BIT);
+            let split = s && _f > 1;
+            s && (ht[t].uniforms[s].value = split ? 1 : 0);
+            split ? (Kp(pfxTemp), _s(Ju, ht[t]), jn("inputA", Hs.colorTexture, 0, ht[49]), jn("inputB", pfxTemp.colorTexture, 0, ht[49]), Kp(rr), _s(Ju, ht[49])) : (Kp(rr), _s(Ju, ht[t]));
+            p1(rr, Hs, W.COLOR_BUFFER_BIT);
         },
         E7 = t => {
             sN();
             let e = A7(gf, vt, !1);
-            iN(e), ssaoDefersFoliage() || rN(e);
+            iN(e), ssaoDefersFoliage() ? drawCutoutMeshes() : rN(e);
             if (ne.ssao) {
                 jn("depthTex", Hs.depthTexture, 0, ht[35]);
                 jn("inputA", Hs.colorTexture, 0, ht[35]);
@@ -37700,14 +38789,14 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             } else {
                 ssaoFirstFrame = true;
             }
-            if (ssaoDefersFoliage()) Kp(Hs), U9(e), rN(e);
+            if (ssaoDefersFoliage()) Kp(Hs), U9(e), rN(e, !0);
             let mistRain = window.rainAmount || 0,
                 mistPl = T && T.player;
             if (mistRain > 0.002 && mistPl && mistPl.pos) {
                 pfxFullscreen(48, [
                     ["mistAmount", mistRain],
                     ["mistShadows", ne.shadows ? 1 : 0]
-                ]);
+                ], "mistSplit");
             }
             if (ne.godRays && ne.shadows) pfxFullscreen(45, [
                 ["grRain", window.rainAmount || 0],
@@ -37718,7 +38807,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 ["grContrast", gfx("godRaysContrast") / 100],
                 ["grDust", gfx("godRaysDust") / 100],
                 ["grGate", gfx("godRaysGate") / 100]
-            ]);
+            ], "grSplit");
             if (ne.sharpenAmount > 0) pfxFullscreen(47, [
                 ["texelSize", [1 / Hs.width, 1 / Hs.height]],
                 ["sharpAmount", ne.sharpenAmount / 100]
@@ -38474,6 +39563,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             ky(!1)
         }, mE = (t, e) => {
             if (typeof rpTick === "function") rpTick(t);
+            terrainJobsTick();
             dw(e), fE(e), T && T.player ? (Q5(t), eE(t), T.tick(t), tE(t), z7(t, T), nE(t, T)) : T && T.tick(t)
         };
     var d1 = class {
