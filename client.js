@@ -14278,7 +14278,7 @@ void main(){
     
     float reach = min(marchDist / grNormDist, 1.0);
 
-    float grNight = smoothstep(0.45, 0.9, clamp((1.0 - sin(daycycle * 12.28)) * 0.5, 0.0, 1.0));
+    float grNight = smoothstep(0.45, 0.9, clamp((1.0 - sin(daycycle * 2.28)) * 0.5, 0.0, 1.0));
     float scatter = pow(litFrac, grContrast) * gate * avgDen * phase * grIntensity * reach * mix(0.5, 1.0, grNight);
 
     vec3 lumW = vec3(0.299, 0.587, 0.114);
