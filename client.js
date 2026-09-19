@@ -2898,7 +2898,7 @@ void main() {
         classicWaterLook = te(false),
         classicWaterColors = te(false),
         classicLighting = te(false),
-        classicDayBrightness = te(25),
+        classicDayBrightness = te(100),
         spoofPlayerName = te(""),
         customCape = te("#000000"),
         customCrown = te("#000000"),
@@ -35903,7 +35903,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 pal = classicPalettes[classicEnvWorlds[env.id]],
                 phases = [0, 1, 2];
             if (pal) {
-                let db = classicClamp01(1 - ne.classicDayBrightness / 100),
+                let db = 1 - classicClamp01(1 - ne.classicDayBrightness / 100),
                     scale = [db, 1 - (1 - db) * .5, 1],
                     col = (p, i) => classicHex(pal[p][i]).map(v => v * scale[p]);
                 out.ambient = phases.map(p => col(p, 0));
