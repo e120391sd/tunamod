@@ -4030,7 +4030,7 @@ void main(){
 
     let meshViewerEnt = null;
 
-     var menuTrackKeys = () => ne.menuTrack && Array.isArray(ne.menuTrack.keys) ? ne.menuTrack.keys : [],
+    var menuTrackKeys = () => ne.menuTrack && Array.isArray(ne.menuTrack.keys) ? ne.menuTrack.keys : [],
         menuKeyframeRecord = () => {
             if (!T || !T.id || !Jt) return;
             let world = {
@@ -9079,7 +9079,11 @@ void main(){
             })
             applyMeshOverrides();
             gloomFolBase = kc.get(56);
-            setFoliageSheet([56, 57, 58, 59, 60, 61, 62, 63], 1213, [0, 4, 15, 5, 6, 13], { coverage: 1.5, spread: 1.5, scale: 1.5 });
+            setFoliageSheet([56, 57, 58, 59, 60, 61, 62, 63], 1213, [0, 4, 15, 5, 6, 13], {
+                coverage: 1.5,
+                spread: 1.5,
+                scale: 1.5
+            });
             applyFoliageOverrides();
 
         }
@@ -23799,8 +23803,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             }),
             makeToggle("Bluify water colors", classicWaterColors, {
                 note: "Enable if you prefer bluish water everywhere, rather than the server values"
-            }
-            ),
+            }),
             makeToggle("Pre 0.5 lighting colors", classicLighting),
             makeSlider("Lighting colors (night) brightness", classicDayBrightness, {
                 min: 50,
@@ -35903,7 +35906,10 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 pal = classicPalettes[classicEnvWorlds[env.id]],
                 phases = [0, 1, 2];
             if (pal) {
-                let db = 1 - classicClamp01(1 - ne.classicDayBrightness / 100),
+                let db = Math.max(
+                        0.5,
+                        classicClamp01(ne.classicDayBrightness / 100)
+                    ),
                     scale = [db, 1 - (1 - db) * .5, 1],
                     col = (p, i) => classicHex(pal[p][i]).map(v => v * scale[p]);
                 out.ambient = phases.map(p => col(p, 0));
