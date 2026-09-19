@@ -35744,8 +35744,8 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
     };
     var classicWaterCols = {
         default: [0xffffff, 0x94eef8, 0x3a487e],
-        faivel: [0xc0dccd, 0x52888b, 0x416f78],
-        headless: [0xd7d7d7, 0xb0d9db, 0x4f6693],
+        headless: [0xc0dccd, 0x52888b, 0x416f78],
+        faivel: [0xd7d7d7, 0xb0d9db, 0x4f6693],
         guardstone: [0xffffff, 0x94d7f8, 0x324587]
     };
     var classicEnvWorlds = {
