@@ -2991,7 +2991,7 @@ void main() {
         ssaoRadius: 9,
         ssaoBias: 9,
         ssaoFadeDist: 300,
-        godRaysIntensity: 120,
+        godRaysIntensity: 70,
         godRaysDistance: 250,
         godRaysPhase: 50,
         godRaysHeight: 50,
