@@ -2898,7 +2898,7 @@ void main() {
         classicWaterLook = te(false),
         classicWaterColors = te(false),
         classicLighting = te(false),
-        classicDayBrightness = te(70),
+        classicDayBrightness = te(25),
         spoofPlayerName = te(""),
         customCape = te("#000000"),
         customCrown = te("#000000"),
@@ -23801,10 +23801,8 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 note: "Enable if you prefer bluish water everywhere, rather than the server values"
             }
             ),
-            makeToggle("Pre 0.5 lighting colors", classicLighting, {
-                note: "Some colors will be very bright, change the slider below to adjust to your liking"
-            }),
-            makeSlider("Lighting colors brightness", classicDayBrightness, {
+            makeToggle("Pre 0.5 lighting colors", classicLighting),
+            makeSlider("Lighting colors (night) brightness", classicDayBrightness, {
                 min: 50,
                 max: 100,
                 showValue: true,
@@ -35905,7 +35903,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 pal = classicPalettes[classicEnvWorlds[env.id]],
                 phases = [0, 1, 2];
             if (pal) {
-                let db = Math.max(.5, classicClamp01(ne.classicDayBrightness / 100)),
+                let db = classicClamp01(1 - ne.classicDayBrightness / 100),
                     scale = [db, 1 - (1 - db) * .5, 1],
                     col = (p, i) => classicHex(pal[p][i]).map(v => v * scale[p]);
                 out.ambient = phases.map(p => col(p, 0));
