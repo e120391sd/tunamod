@@ -38603,7 +38603,8 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             return fireflyInDesert;
         },
         fireflyDraw = () => {
-            if (!ne.cinematicLighting) return;
+            return
+            //if (!ne.cinematicLighting) return;
             let e = ht[46];
             if (!e || !e.active) return;
 
