@@ -6674,6 +6674,8 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         } catch (e) {}
         gfe[k] = val;
     }
+    if (gfe.faivelRetexture)
+        for (let k of ["classicSky", "classicWater", "tonemap"]) gfe[k] = true;
     var cinematicOverrides = {
         shadowAlpha: 20,
         ssaoRadius: 9,
@@ -6697,7 +6699,8 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         bloomRadius: 100,
         bloomSky: 25
     };
-    var gfx = k => gfe.cinematicLighting && cinematicOverrides[k] !== undefined ? cinematicOverrides[k] : gfe[k];
+    var cinematicTonemapKeys = ["tonemapMode", "tonemapExposure", "tonemapContrast", "tonemapSaturation", "tonemapDither"];
+    var gfx = k => (gfe.cinematicLighting || gfe.faivelRetexture && cinematicTonemapKeys.indexOf(k) >= 0) && cinematicOverrides[k] !== undefined ? cinematicOverrides[k] : gfe[k];
     var shadowAlphaVal = gfx("shadowAlpha") / 100,
         ssaoRadiusVal = gfx("ssaoRadius") / 100,
         ssaoBiasVal = gfx("ssaoBias") / 10,
@@ -7318,11 +7321,12 @@ uniform Camera{
 };
 uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};
 
+uniform vec3 ffCenter;
 uniform float ffRange;
-uniform float ffBaseY;
 uniform float ffHeight;
 uniform float ffSize;
 uniform float ffDrift;
+uniform float ffVDrift;
 
 in vec2 corner;
 in float fid;
@@ -7341,34 +7345,25 @@ void main(){
     vec3 h = hash31(fid);
     vec3 h2 = hash31(fid + 71.3);
 
-    vec2 rel = h.xz * ffRange - cameraPosition.xz;
-    rel = mod(rel + ffRange * 0.5, ffRange) - ffRange * 0.5;
-
-    float vh = ffHeight * 2.0;
-    float relY = mod(h2.y * vh - ffBaseY + vh * 0.5, vh) - vh * 0.5;
-    float heightFade = 1.0 - smoothstep(ffHeight * 0.45, ffHeight * 0.95, abs(relY));
-
-    vec3 pos = vec3(cameraPosition.x + rel.x, ffBaseY + relY, cameraPosition.z + rel.y);
+    float ang = h.x * 6.2831;
+    float ct = h.y * 2.0 - 1.0;
+    float st = sqrt(max(0.0, 1.0 - ct * ct));
+    float rad = pow(h.z, 0.33333333);
+    vec3 ball = vec3(st * cos(ang), ct, st * sin(ang)) * rad;
+    vec3 pos = ffCenter + vec3(ball.x * ffRange, ffHeight * (0.5 + ball.y * 0.5), ball.z * ffRange);
 
     float t = time;
     pos += vec3(
-        sin(t * 0.41 + h2.x * 6.2831),
-        sin(t * 0.29 + h2.y * 6.2831) * 0.6,
-        cos(t * 0.35 + h2.z * 6.2831)
+        sin(t * 0.13 + h2.x * 6.2831) + sin(t * 0.37 + h.z * 6.2831) * 0.45,
+        0.0,
+        cos(t * 0.11 + h2.z * 6.2831) + cos(t * 0.41 + h2.y * 6.2831) * 0.45
     ) * ffDrift;
-
-    float rate = 0.35 + h2.z * 0.5;
-    float blink = sin(t * rate * 6.2831 + h.z * 6.2831) * 0.5 + 0.5;
-    blink = pow(blink, 4.0);
-
-    float night = clamp((1.0 - sin(daycycle * 6.28)) * 0.5, 0.0, 1.0);
-    night = smoothstep(0.45, 0.9, night);
+    pos.y += (sin(t * 0.07 + h2.y * 6.2831) * 0.65 + sin(t * 0.031 + h.y * 6.2831) * 0.35) * ffVDrift;
 
     vDist = length(pos - cameraPosition);
-    float nearFade = smoothstep(1.0, 4.0, vDist);
-    float farFade = 1.0 - smoothstep(ffRange * 0.32, ffRange * 0.5, vDist);
+    float nearFade = smoothstep(0.4, 1.6, vDist);
 
-    vGlow = blink * night * nearFade * farFade * heightFade * (0.55 + h.x * 0.45);
+    vGlow = nearFade * (0.75 + h.x * 0.25);
 
     if(vGlow <= 0.002){
         gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
@@ -7441,8 +7436,8 @@ uniform float grSplit;
 in vec2 vUv;
 out vec4 fragColor;
 
-const int grSteps = 48;
-const int grStepsFar = 24;
+const int grSteps = 18;
+const int grStepsFar = 8;
 const float grFarStart = 100.0;
 const float grNormDist = 90.0;
 const float grGateFloor = 0.55;
@@ -7525,6 +7520,8 @@ void main(){
     float ign = fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715))));
 
     const float grNearSkip = 6.0;
+    vec3 grSideOff = normalize(cross(worldlight[2], vec3(0.0, 1.0, 0.0)) + 1e-4) * (0.9 + 0.9 * ign) * (ign > 0.5 ? 1.0 : -1.0);
+    grSideOff.y += 0.45 * ign;
     float lit = 0.0;
     float litSq = 0.0;
     float den = 0.0;
@@ -7532,8 +7529,7 @@ void main(){
         float t = stepLen * (float(i) + ign) + grNearSkip;
         vec3 sp = cameraPosition + rd * t;
         float d = grDensity(sp);
-        vec3 so = normalize(cross(worldlight[2], vec3(0.0, 1.0, 0.0)) + 1e-4) * (0.9 + 0.9 * ign);
-        float s = 0.5 * (sunlightAt(sp + so, t) + sunlightAt(sp - so + vec3(0.0, 0.9 * ign, 0.0), t));
+        float s = sunlightAt(sp + grSideOff, t);
         den += d;
         lit += d * s;
         litSq += d * s * s;
@@ -7559,7 +7555,7 @@ void main(){
     
     float reach = min(marchDist / grNormDist, 1.0);
 
-    float grNight = smoothstep(0.45, 0.9, clamp((1.0 - sin(daycycle * 6.28)) * 0.5, 0.0, 1.0));
+    float grNight = smoothstep(0.45, 0.9, clamp((1.0 - sin(daycycle * 2.28)) * 0.5, 0.0, 1.0));
     float scatter = pow(litFrac, grContrast) * gate * avgDen * phase * grIntensity * reach * mix(0.5, 1.0, grNight);
 
     vec3 lumW = vec3(0.299, 0.587, 0.114);
@@ -7951,15 +7947,16 @@ precision highp float;precision highp int;uniform Environment{vec3 worldlight[3]
         fireflyMax = 3e3,
         fireflyPreset = {
             color: "#b6ff5e",
-            count: 50,
+            count: 25,
             range: 160,
             height: 30,
             size: 40,
             drift: 150,
+            vdrift: 8,
             brightness: 150
         },
         fireflyDraw = () => {
-            if (!gfe.cinematicLighting) return;
+            if (!gfe.faivelRetexture) return;
             let e = K[46];
             if (!e || !e.active) return;
             if (!fireflyMesh) {
@@ -7984,10 +7981,11 @@ precision highp float;precision highp int;uniform Environment{vec3 worldlight[3]
             } catch (i) {}
             fireflyMesh.geometry.instancedCount = Math.max(1, Math.min(fireflyMax, fireflyPreset.count));
             e.uniforms.ffRange.value = fireflyPreset.range;
-            e.uniforms.ffBaseY.value = o;
+            e.uniforms.ffCenter.value = n ? [n.cameraPosition[0], o, n.cameraPosition[2]] : [0, o, 0];
             e.uniforms.ffHeight.value = fireflyPreset.height;
             e.uniforms.ffSize.value = fireflyPreset.size / 100;
             e.uniforms.ffDrift.value = fireflyPreset.drift / 100;
+            e.uniforms.ffVDrift.value = fireflyPreset.vdrift;
             e.uniforms.ffBrightness.value = fireflyPreset.brightness / 100;
             let s = hexParts(fireflyPreset.color);
             e.uniforms.ffColor.value = [s[0] / 255, s[1] / 255, s[2] / 255];
@@ -8312,17 +8310,28 @@ precision highp float;precision highp int;uniform Environment{vec3 worldlight[3]
         },
         applyFaivel = () => {
         if (gfe.faivelRetexture) {
+            textureOverrides.set(1867, {
+                id: 1226
+            });
             textureOverrides.set(2118, {
                 id: 1227,
-                contrast: 1.15
+                contrast: 1.1,
+                exposure: .15
             })
-            textureOverrides.set(2124, 1227)
-            textureOverrides.set(2125, 1227)
+            textureOverrides.set(2124, {
+                id: 1227,
+                contrast: 1.1,
+                exposure: .15
+            }
+            )
+            textureOverrides.set(2125, {
+                id: 1227,
+                exposure: -0.1
+            })
             textureOverrides.set(2119, {
                 id: 1227,
                 exposure: -0.1
             })
-            textureOverrides.set(2060, 1229)
             textureOverrides.set(1846, {
                 id: 1224,
                 light: [1, 1, 1],
@@ -8330,24 +8339,29 @@ precision highp float;precision highp int;uniform Environment{vec3 worldlight[3]
             })
             textureOverrides.set(2126, {
                 id: 1233,
-                contrast: 1.15
+                exposure: .15,
+                hue: -7
             })
             textureOverrides.set(2120, {
                 id: 1233,
-                contrast: 1.15
+                exposure: .15,
+                hue: -7
             })
             textureOverrides.set(1233, {
                 id: 1233,
-                contrast: 1.15
+                exposure: .15,
+                hue: -7
             })
-            /*             textureOverrides.set(2119, {
-                            id: 2119,
-                            hue: 5,
-                        })  */
+            textureOverrides.set(gsPathKey, 1229)
+            textureOverrides.set(1227, {
+                id: 1227,
+                contrast: 1.05,
+                light: [1.072, 1.02, 1.2]
+            })
             meshOverrides.set(1616, {
                 model: 1482,
                 texture: 1846,
-                scale: [1.5, 1.8],
+                scale: [1.25, 1.5],
                 offset: {
                     y: -3
                 },
@@ -8380,6 +8394,14 @@ precision highp float;precision highp int;uniform Environment{vec3 worldlight[3]
                 },
                 ground: true
             })
+            meshOverrides.set(1652, {
+                scale: [1.6,1.6],
+                mesh: 1480,
+                ground: true,
+                offset: {
+                    y: 1
+                },
+            })
             meshOverrides.set(1662, {
                 model: 1482,
                 texture: 1224,
@@ -8410,17 +8432,366 @@ precision highp float;precision highp int;uniform Environment{vec3 worldlight[3]
             meshOverrides.set(1661, {
                 model: 1482,
                 texture: 1224,
-                scale: [4.2, 4.3],
+                scale: [4.5, 5.0],
+                offset: {
+                    y: -3
+                },
+                ground: true
+            })
+            meshOverrides.set(1660, {
+                model: 1481,
+                texture: 1218,
+                scale: [1.7,1.7],
                 ground: true
             })
             textureOverrides.set(2060, {
                 id: 1233,
+                exposure: .15,
+                hue: -7
+            })
+            textureOverrides.set(2054, {
+                id: gsStoneTextureId,
                 contrast: 1.15
             })
+            textureOverrides.set(gsStoneTextureId, {
+                id: gsStoneTextureId,
+                contrast: 1.15
+            })
+            textureOverrides.set(pathBandTextureId, {
+                id: pathBandTextureId,
+                contrast: 1.05,
+                exposure: 0.05
+            })
+            textureOverrides.set(1862, 1226)
+            textureOverrides.set(1869, 1226)
+            textureOverrides.set(1871, 1226)
+            
+            textureOverrides.set(2101, 1228)
+            textureOverrides.set(1872, 1227)
+            textureOverrides.set(2102, 1228)
+            textureOverrides.set(2103, 1238)
+            textureOverrides.set(2104, 1228)
+            textureOverrides.set(2105, 1228)
+            textureOverrides.set(2106, 1238)
+            textureOverrides.set(2108, 1228)
+            textureOverrides.set(2111, 1228)
+            textureOverrides.set(2112, 1238)
+            textureOverrides.set(1865, stoneTextureId)
+            textureOverrides.set(1845, stoneTextureId)
+            textureOverrides.set(1858, stoneTextureId)
+            for (let terr of yc.values())
+                if (headlessSpecTextures.indexOf(terr.texture) >= 0) terr.spec = Math.round(terr.spec * headlessSpecScale);
+            meshOverrides.set(1636, {
+                model: 1554,
+                texture: 1222,
+                scale: [1.48, 1.36],
+                groundSink: !0,
+                offset: {
+                    y: -2
+                },
+                ground: true
+            })
+            meshOverrides.set(1637, {
+                model: 1554,
+                texture: 1222,
+                scale: [1.60, 1.12],
+                groundSink: !0,
+                offset: {
+                    y: -2
+                },
+                ground: true
+            })
+            meshOverrides.set(1638, {
+                model: 1554,
+                texture: 1222,
+                scale: [1.60, 1.04],
+                groundSink: !0,
+                offset: {
+                    y: -2
+                },
+                ground: true
+            })
+            meshOverrides.set(1639, {
+                model: 1553,
+                texture: 1221,
+                scale: [1.60, 1.60],
+                groundSink: !0,
+                ground: true
+            })
+            meshOverrides.set(1640, {
+                model: 1553,
+                texture: 1221,
+                scale: [1.04, 1.23],
+                groundSink: !0,
+                ground: true
+            })
+            meshOverrides.set(1641, {
+                model: 1554,
+                texture: 1222,
+                scale: [1.60, 1.35],
+                groundSink: !0,
+                offset: {
+                    y: -2
+                },
+                ground: true
+            })
+            meshOverrides.set(1642, {
+                hideChance: .5,
+                model: 1555,
+                texture: 1223,
+                scale: [0.66, 1.00],
+                groundSink: !0,
+                offset: {
+                    y: -2
+                },
+                ground: true
+            })
+            meshOverrides.set(1643, {
+                hideChance: .5,
+                model: 1555,
+                texture: 1223,
+                scale: [1.20, 0.97],
+                groundSink: !0,
+                offset: {
+                    y: -2
+                },
+                ground: true
+            })
+            meshOverrides.set(1644, {
+                hideChance: .5,
+                model: 1555,
+                texture: 1223,
+                scale: [0.90, 0.90],
+                groundSink: !0,
+                offset: {
+                    y: -2
+                },
+                ground: true
+            })
+            meshOverrides.set(1645, {
+                model: 1555,
+                texture: 1223,
+                scale: [1.49, 1.60],
+                groundSink: !0,
+                offset: {
+                    y: -2
+                },
+                ground: true
+            })
+            meshOverrides.set(1646, {
+                model: 1555,
+                texture: 1223,
+                scale: [1.60, 1.60],
+                groundSink: !0,
+                offset: {
+                    y: -2
+                },
+                ground: true
+            })
+            meshOverrides.set(1647, {
+                hideChance: .5,
+                model: 1555,
+                texture: 1223,
+                scale: [0.96, 0.84],
+                groundSink: !0,
+                offset: {
+                    y: -2
+                },
+                ground: true
+            })
+            meshOverrides.set(1648, {
+                hideChance: .5,
+                model: 1555,
+                texture: 1223,
+                scale: [0.96, 0.80],
+                groundSink: !0,
+                offset: {
+                    y: -2
+                },
+                ground: true
+            })
+            meshOverrides.set(1649, {
+                hideChance: .5,
+                model: 1555,
+                texture: 1223,
+                scale: [0.72, 0.83],
+                groundSink: !0,
+                offset: {
+                    y: -2
+                },
+                ground: true
+            })
+            meshOverrides.set(1650, {
+                model: 1479,
+                texture: 1220,
+                ground: true,
+                groundSink: !0,
+                offset: {
+                    y: -1
+                },
+                scale: [3, 3]
+            })
+            meshOverrides.set(1651, {
+                model: 1479,
+                texture: 1220,
+                ground: true,
+                groundSink: !0,
+                scale: [5, 5],
+                offset: {
+                    y: -1
+                },
+            })
+            if (bc.has(1224)) {
+                bc.set(shrubTextureKey, Object.assign({}, bc.get(1224), {
+                    id: shrubTextureKey
+                }));
+                textureOverrides.set(shrubTextureKey, {
+                    id: 1224,
+                    light: shrubTextureTint
+                });
+                meshOverrides.set(shrubMesh, {
+                    texture: shrubTextureKey
+                });
+            }
             applyMeshOverrides();
+            Os.has(shrubMesh) && Os.set(shrubPlainKey, Object.assign({}, Os.get(shrubMesh), {
+                id: shrubPlainKey,
+                texture: 1224
+            }));
             gloomFolBase = kc.get(56);
-            setFoliageSheet([56, 57, 58, 59, 60, 61, 62, 63], 1213, [0, 4, 15, 5, 6, 13], { coverage: 1.5, spread: 1.5, scale: 1.5 });
+            setFoliageSheet([56, 57, 58, 59, 60, 61, 62, 63], 1213, [0, 4, 10, 5, 6, 13], {
+                coverage: 1.3,
+                spread: 1.5,
+                scale: 1.5
+            });
+            
+            let gsFolBase = kc.get(63);
+            if (gsFolBase) {
+                let gsFolClone = id => Object.assign({}, gsFolBase, {
+                    id: id
+                });
+                kc.set(941, gsFolClone(941)), kc.set(942, gsFolClone(942));
+                setFoliageSheet([35, 36], 1213, [12, 0], {
+                    coverage: 0.5,
+                    spread: 1.5,
+                    scale: 2.5
+                });
+                setFoliageSheet([941, 942], 1213, [15,11], {
+                    coverage: 0.5,
+                    spread: 1.5,
+                    scale: 2.5
+                });
+                kc.set(943, gsFolClone(943)), kc.set(944, gsFolClone(944)), kc.set(945, gsFolClone(945));
+                setFoliageSheet([943, 944, 945], 1213, [9, 1, 2], {
+                    coverage: 0.8,
+                    spread: 1.5,
+                    scale: 2.5
+                });
+                gsFlowerIds = [943, 944, 945];
+                gsFlowerLists = gsFlowerIds.map(id => [
+                    [id, gsFlowerDensity, 0]
+                ]);
+            }
+            if (bc.has(1213)) {
+                bc.set(headlessFoliageKey, Object.assign({}, bc.get(1213), {
+                    id: headlessFoliageKey
+                }));
+                textureOverrides.set(headlessFoliageKey, {
+                    id: 1213,
+                    light: headlessFoliageTint
+                });
+                bc.set(oasisFoliageKey, Object.assign({}, bc.get(1213), {
+                    id: oasisFoliageKey
+                }));
+                textureOverrides.set(oasisFoliageKey, {
+                    id: 1213,
+                    light: oasisFoliageTint
+                });
+            }
+            if (bc.has(1233)) {
+                bc.set(hlStoneKey, Object.assign({}, bc.get(1233), {
+                    id: hlStoneKey
+                }));
+                textureOverrides.set(hlStoneKey, hlStoneTint);
+            }
+            if (bc.has(1227)) {
+                bc.set(hlBankKey, Object.assign({}, bc.get(1227), {
+                    id: hlBankKey
+                }));
+                textureOverrides.set(hlBankKey, hlBankTint);
+            }
+            let headlessSheet = bc.has(headlessFoliageKey) ? headlessFoliageKey : 1213;
+            headlessFoliage.forEach(([id, size]) => foliageOverrides.set(id, {
+                texture: headlessSheet,
+                cell: 0,
+                size: size,
+                coverage: headlessFoliageClump,
+                spread: headlessFoliageSpread
+            }));
+            if (bc.has(oasisFoliageKey)) {
+                let clones = [];
+                for (let i = 0; i < oasisFolSlots; ++i) {
+                    let base = kc.get(headlessFoliage[i % headlessFoliage.length][0]),
+                        clone = oasisFoliageBase + i;
+                    if (!base || kc.has(clone)) continue;
+                    kc.set(clone, Object.assign({}, base, {
+                        id: clone
+                    }));
+                    foliageOverrides.set(clone, {
+                        texture: oasisFoliageKey,
+                        cell: 0,
+                        scale: oasisFoliageScale,
+                        coverage: oasisFoliageCoverage,
+                        spread: oasisFoliageSpread
+                    });
+                    clones.push(clone);
+                }
+                clones.length && (oasisFolClones = clones);
+                if (bc.has(oasisExtraSheet)) {
+                    bc.set(oasisExtraKey, Object.assign({}, bc.get(oasisExtraSheet), {
+                        id: oasisExtraKey
+                    }));
+                    textureOverrides.set(oasisExtraKey, {
+                        id: oasisExtraSheet,
+                        light: oasisFoliageTint
+                    });
+                }
+                let donor = kc.get(headlessFoliage[0][0]);
+                if (donor && bc.has(oasisExtraKey)) {
+                    oasisExtraIds = [];
+                    oasisExtraCells.forEach((cell, i) => {
+                        let id = oasisExtraBase + i;
+                        if (kc.has(id)) return;
+                        kc.set(id, Object.assign({}, donor, {
+                            id: id
+                        }));
+                        foliageOverrides.set(id, {
+                            texture: oasisExtraKey,
+                            cell: cell,
+                            scale: oasisFoliageScale,
+                            coverage: oasisFoliageCoverage,
+                            spread: oasisFoliageSpread
+                        });
+                        oasisExtraIds.push(id);
+                    });
+                    oasisExtraList = oasisExtraIds.map(id => [id, oasisExtraDensity, 0]);
+                }
+            }
             applyFoliageOverrides();
+            for (let tid of headlessFoliageTerrains) {
+                let terr = yc.get(tid);
+                if (terr && terr.foliage)
+                    for (let f of terr.foliage) f[1] = Math.max(1, Math.min(255, Math.round(f[1] * headlessFoliageDensity)));
+            }
+            if (gsFolBase)
+                for (let tid of [33, 34]) {
+                    let terr = yc.get(tid);
+                    if (!terr || !terr.foliage) continue;
+                    let next = terr.foliage.map(f => f[0] === 63 ? [941, f[1], f[2]] : f);
+                    tid === 34 && next.push([942, 6, 0]);
+                    terr.foliage.length = 0;
+                    for (let f of next) terr.foliage.push(f);
+                }
 
         }
         };
@@ -9701,8 +10072,8 @@ void main(){
                     ffRange: {
                         value: 70
                     },
-                    ffBaseY: {
-                        value: 0
+                    ffCenter: {
+                        value: [0, 0, 0]
                     },
                     ffHeight: {
                         value: 8
@@ -9712,6 +10083,9 @@ void main(){
                     },
                     ffDrift: {
                         value: 1.5
+                    },
+                    ffVDrift: {
+                        value: 1
                     },
                     ffColor: {
                         value: [.71, 1, .37]

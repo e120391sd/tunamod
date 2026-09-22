@@ -1172,7 +1172,7 @@
         let e, n, o, s, i, r;
         return n = new r3({}), {
             c() {
-                e = g("div"), Z(n.$$.fragment), o = g("h2"), s = E(t[0]), i = g("small"), i.innerHTML = '<img alt="Hordes.io" class="svgicon" src="/data/ui/icon.svg?v=8926940"/> 0.51.8926 Live', Te(o, "margin-top", "100px"), m(i, "class", "version textgrey textcenter svelte-aoht7k"), m(e, "class", "l-ui container svelte-aoht7k")
+                e = g("div"), Z(n.$$.fragment), o = g("h2"), s = E(t[0]), i = g("small"), i.innerHTML = '<img alt="Hordes.io" class="svgicon" src="/data/ui/icon.svg?v=8971923"/> 0.51.8971 Live', Te(o, "margin-top", "100px"), m(i, "class", "version textgrey textcenter svelte-aoht7k"), m(e, "class", "l-ui container svelte-aoht7k")
             },
             m(l, a) {
                 x(l, e, a), X(n, e, null), d(e, o), d(o, s), d(e, i), r = !0
@@ -2183,7 +2183,6 @@ void main() {
         playerTransformColPrim: () => playerTransformColPrim,
         playerTransformColSec: () => playerTransformColSec,
         customMountID: () => customMountID,
-        meshViewerID: () => meshViewerID,
         prestigeSimulate: () => prestigeSimulate,
         timeSlider: () => timeSlider,
         timeToIngame: () => timeToIngame,
@@ -2384,7 +2383,6 @@ void main() {
         hideChat: () => hideChat,
         swapHostility: () => swapHostility,
         revStackNameplate: () => revStackNameplate,
-        // aoeCircleEnabled: () => aoeCircleEnabled,
         nextFriendlyIgnoreBots: () => nextFriendlyIgnoreBots,
         losTarget: () => losTarget,
         nextFriendlyClassSelectorEnabled: () => nextFriendlyClassSelectorEnabled,
@@ -2439,9 +2437,6 @@ void main() {
         blindColor: () => blindColor,
         radar: () => radar,
         radarSound: () => radarSound,
-        // aoeCircleSize: () => aoeCircleSize,
-        // aoeCircleAlpha: () => aoeCircleAlpha,
-        // aoeCircleColor: () => aoeCircleColor,
         fxAlphaOverride: () => fxAlphaOverride,
         fxAlphaSprite: () => fxAlphaSprite,
         fxAlphaRibbon: () => fxAlphaRibbon,
@@ -2450,7 +2445,6 @@ void main() {
         playerTransformColPrim: () => playerTransformColPrim,
         playerTransformColSec: () => playerTransformColSec,
         customMountID: () => customMountID,
-        meshViewerID: () => meshViewerID,
         prestigeSimulate: () => prestigeSimulate,
         timeSlider: () => timeSlider,
         timeToIngame: () => timeToIngame,
@@ -2541,7 +2535,6 @@ void main() {
         bloomRadius: () => bloomRadius,
         bloomSky: () => bloomSky,
         godRays: () => godRays,
-        waterReflections: () => waterReflections,
         bloomStrength: () => bloomStrength,
         godRaysIntensity: () => godRaysIntensity,
         godRaysDistance: () => godRaysDistance,
@@ -2557,7 +2550,6 @@ void main() {
         classicWaterLook: () => classicWaterLook,
         classicWaterColors: () => classicWaterColors,
         classicLighting: () => classicLighting,
-        classicDayBrightness: () => classicDayBrightness,
         spoofPlayerName: () => spoofPlayerName,
         sharpen: () => sharpen,
         sharpenAmount: () => sharpenAmount,
@@ -2717,7 +2709,6 @@ void main() {
         hideChat = te(false),
         swapHostility = te(false),
         revStackNameplate = te(false),
-        // aoeCircleEnabled = ne(false),
         nextFriendlyIgnoreBots = te(false),
         losTarget = te(false),
         nextFriendlyClassSelectorEnabled = te(false),
@@ -2772,9 +2763,6 @@ void main() {
         blindColor = te("#ffed2d"),
         radar = te(false),
         radarSound = te(false),
-        // aoeCircleSize = ne(0),
-        // aoeCircleAlpha = ne(100),
-        // aoeCircleColor = ne("#000000"),
         fxAlphaOverride = te(false),
         fxAlphaSprite = te(100),
         fxAlphaRibbon = te(100),
@@ -2783,7 +2771,6 @@ void main() {
         playerTransformColPrim = te("#000000"),
         playerTransformColSec = te("#000000"),
         customMountID = te(0),
-        meshViewerID = te(0),
         prestigeSimulate = te(0),
         timeSlider = te(0),
         timeToIngame = te(false),
@@ -2859,7 +2846,6 @@ void main() {
         ssaoBlur = te(true),
         ssaoIGN = te(true),
         godRays = te(false),
-        waterReflections = te(true),
         bloomStrength = te(100),
         godRaysIntensity = te(19),
         godRaysDistance = te(70),
@@ -2898,7 +2884,6 @@ void main() {
         classicWaterLook = te(false),
         classicWaterColors = te(false),
         classicLighting = te(false),
-        classicDayBrightness = te(100),
         spoofPlayerName = te(""),
         customCape = te("#000000"),
         customCrown = te("#000000"),
@@ -2986,6 +2971,10 @@ void main() {
         ne = {};
     for (let t in Ug) Ik(t, Ug[t]);
 
+    var retextureForced = ["classicSky", "classicWater", "classicWaterLook", "classicWaterColors", "tonemap"];
+    if (ne.faivelRetexture)
+        for (let t of retextureForced) ne[t] = !0;
+
     var cinematicOverrides = {
         shadowAlpha: 20,
         ssaoRadius: 9,
@@ -3009,7 +2998,8 @@ void main() {
         bloomRadius: 100,
         bloomSky: 25
     };
-    var gfx = k => ne.cinematicLighting && cinematicOverrides[k] !== undefined ? cinematicOverrides[k] : ne[k];
+    var cinematicTonemapKeys = ["tonemapMode", "tonemapExposure", "tonemapContrast", "tonemapSaturation", "tonemapDither"];
+    var gfx = k => (ne.cinematicLighting || ne.faivelRetexture && cinematicTonemapKeys.indexOf(k) >= 0) && cinematicOverrides[k] !== undefined ? cinematicOverrides[k] : ne[k];
 
 
     shadowAlphaVal = gfx("shadowAlpha") / 100;
@@ -4004,7 +3994,6 @@ void main(){
             if (!ne.enablePrestigeOverrides) return;
             if (color === "#000000") return;
             if (!T.player.visual.body[10 + s]) return;
-            console.log(store, color)
             T.player.visual.changeMeshBaseColor(
                 T.player.visual.body[10 + s],
                 hexParts(color).map(v => v / 255)
@@ -4076,7 +4065,7 @@ void main(){
 
     var P;
     Sl.subscribe(async t => {
-        await fetch(`/data/loc/${t}.json?v=8926940`).then(async e => {
+        await fetch(`/data/loc/${t}.json?v=8971923`).then(async e => {
             P = await e.json(), Pm.set(!0)
         })
     });
@@ -4143,13 +4132,13 @@ void main(){
         let e, n;
         return {
             c() {
-                e = g("img"), m(e, "class", "svgicon"), pt(e.src, n = "/data/ui/icons/" + t[8].icon + ".svg?v=8926940") || m(e, "src", n)
+                e = g("img"), m(e, "class", "svgicon"), pt(e.src, n = "/data/ui/icons/" + t[8].icon + ".svg?v=8971923") || m(e, "src", n)
             },
             m(o, s) {
                 x(o, e, s)
             },
             p(o, s) {
-                s & 2 && !pt(e.src, n = "/data/ui/icons/" + o[8].icon + ".svg?v=8926940") && m(e, "src", n)
+                s & 2 && !pt(e.src, n = "/data/ui/icons/" + o[8].icon + ".svg?v=8971923") && m(e, "src", n)
             },
             d(o) {
                 o && w(e)
@@ -7704,17 +7693,17 @@ void main(){
     fv();
     var ED = [0, 0, 1, 1, 2, 3],
         uv = (t, e) => "book" + (e !== void 0 ? e : "") + ED[t % 5],
-        Er = (t, e, n, o) => `/data/items/${t}/${t=="book"?uv(e,n):t+e}_q${o}.${Mo}?v=8926940`,
-        Eu = t => `/data/ui/skills/${t}.${Mo}?v=8926940`,
-        Qx = t => `/data/ui/slotbg/${t}.${Xn}?v=8926940`,
-        Xx = (t, e, n) => `/data/world/${t}/map/${e}/${n}.${Mo}?v=8926940`,
-        yi = t => `/data/ui/classes/${t}.${Xn}?v=8926940`,
-        pv = t => `/data/ui/factions/${t}.${Xn}?v=8926940`,
-        Kx = t => `/data/ui/elo/${vc(t)}.svg?v=8926940`,
-        Zx = "/data/ui/currency/medal.svg?v=8926940",
-        _c = "/data/ui/currency/prestige.svg?v=8926940",
-        Ir = "/data/ui/currency/fame.svg?v=8926940",
-        Jx = t => `/data/ui/rank/rank${t}.svg?v=8926940`;
+        Er = (t, e, n, o) => `/data/items/${t}/${t=="book"?uv(e,n):t+e}_q${o}.${Mo}?v=8971923`,
+        Eu = t => `/data/ui/skills/${t}.${Mo}?v=8971923`,
+        Qx = t => `/data/ui/slotbg/${t}.${Xn}?v=8971923`,
+        Xx = (t, e, n) => `/data/world/${t}/map/${e}/${n}.${Mo}?v=8971923`,
+        yi = t => `/data/ui/classes/${t}.${Xn}?v=8971923`,
+        pv = t => `/data/ui/factions/${t}.${Xn}?v=8971923`,
+        Kx = t => `/data/ui/elo/${vc(t)}.svg?v=8971923`,
+        Zx = "/data/ui/currency/medal.svg?v=8971923",
+        _c = "/data/ui/currency/prestige.svg?v=8971923",
+        Ir = "/data/ui/currency/fame.svg?v=8971923",
+        Jx = t => `/data/ui/rank/rank${t}.svg?v=8971923`;
     var e4 = t => {
         Bt.forEach(e => {
             if (!e.engineOnly)
@@ -8070,9 +8059,14 @@ void main(){
         Ru = [],
         yv = new Map,
         e0 = new Map,
+        texWatch = [1233, 1225, 1229, 1236, 1227],
+        texWatchSeen = {},
         textureOverrides = new Map,
         terrainBlendOverrides = new Map,
+        grassMainTextures = [1227, 1235],
         meshOverrides = new Map,
+        meshGroundSink = new Map,
+        meshHideChance = new Map,
         foliageOverrides = new Map,
         hiddenFoliage = new Set;
     var gridCellFoliage = (base, o) => {
@@ -8158,27 +8152,44 @@ void main(){
         hideFoliage = (...ids) => ids.forEach(V0 => foliageOverrides.set(V0, {
             hide: !0
         }));
-    var meshGeometryId = (v, V0) => bc.has(v) && bc.get(v).ext === 0 ? v : Os.has(v) ? Os.get(v).geometry : (console.log("mesh override " + V0 + ": model " + v + " is neither a geometry file nor a mesh id"), null),
+    var meshUsingGeometry = geo => {
+            for (let m of Os.values())
+                if (m.geometry === geo && m.texture) return m;
+            return null;
+        },
+        meshGeometryId = (v, V0) => bc.has(v) && bc.get(v).ext === 0 ? v : Os.has(v) ? Os.get(v).geometry : (console.log("mesh override " + V0 + ": model " + v + " is neither a geometry file nor a mesh id"), null),
         applyMeshOverrides = () => {
             derivedGeometryId = 7800;
             meshOverrides.forEach((o, V0) => {
                 let base = Os.get(V0);
                 if (!base) return console.log("mesh override " + V0 + ": unknown mesh id");
-                let next = Object.assign({}, base);
+                let next = Object.assign({}, base),
+                    modelKind = "none",
+                    texFrom = "base " + V0;
                 if (o.mesh != null) {
                     let donor = Os.get(o.mesh);
                     if (!donor) return console.log("mesh override " + V0 + ": unknown donor mesh " + o.mesh);
                     next.geometry = donor.geometry, next.texture = donor.texture, next.shader = donor.shader, next.cull = donor.cull, next.shadow = donor.shadow;
+                    texFrom = "donor mesh " + o.mesh;
                 }
                 if (o.model != null) {
-                    let h = meshGeometryId(o.model, V0);
+                    let h = meshGeometryId(o.model, V0),
+                        asFile = bc.has(o.model) && bc.get(o.model).ext === 0,
+                        from = "base " + V0;
                     h !== null && (next.geometry = h);
+                    if (o.texture == null && h !== null) {
+                        let owner = asFile ? meshUsingGeometry(h) : Os.get(o.model);
+                        owner && (next.texture = owner.texture, next.shader = owner.shader, next.cull = owner.cull, next.shadow = owner.shadow, from = "mesh " + owner.id);
+                    }
+                    modelKind = o.model + " as " + (asFile ? "geometry file" : Os.has(o.model) ? "mesh id" : "unknown"), texFrom = from;
                 }
                 if (o.texture != null) next.texture = !o.texture || bc.has(o.texture) ? o.texture : (console.log("mesh override " + V0 + ": unknown texture file " + o.texture + ", keeping " + next.texture), next.texture);
                 o.shader != null && (next.shader = o.shader), o.cull != null && (next.cull = o.cull), o.shadow != null && (next.shadow = o.shadow);
                 (o.scale != null || o.offset != null || o.ground) && next.geometry && (next.geometry = addDerivedGeometry(next.geometry, o));
                 G_.length && G_[next.shader] === void 0 && console.log("mesh override " + V0 + ": shader " + next.shader + " has no material");
                 next.geometry !== base.geometry && (next.collisionGeometry = base.collisionGeometry == null ? base.geometry : base.collisionGeometry);
+                o.groundSink != null && meshGroundSink.set(V0, o.groundSink);
+                o.hideChance != null && meshHideChance.set(V0, o.hideChance);
                 Os.set(V0, next);
             });
         };
@@ -8969,20 +8980,29 @@ void main(){
         vv.set(23, shadowstrider);
         vv.set(31, scarab);
 
-        //faivel retexture:
         if (ne.faivelRetexture) {
-            textureOverrides.set(1867, 1226);
+            textureOverrides.set(1867, {
+                id: 1226
+            });
             textureOverrides.set(2118, {
                 id: 1227,
-                contrast: 1.15
+                contrast: 1.1,
+                exposure: .15
             })
-            textureOverrides.set(2124, 1227)
-            textureOverrides.set(2125, 1227)
+            textureOverrides.set(2124, {
+                id: 1227,
+                contrast: 1.1,
+                exposure: .15
+            }
+            )
+            textureOverrides.set(2125, {
+                id: 1227,
+                exposure: -0.1
+            })
             textureOverrides.set(2119, {
                 id: 1227,
                 exposure: -0.1
             })
-            textureOverrides.set(2060, 1229)
             textureOverrides.set(1846, {
                 id: 1224,
                 light: [1, 1, 1],
@@ -8990,24 +9010,29 @@ void main(){
             })
             textureOverrides.set(2126, {
                 id: 1233,
-                contrast: 1.15
+                exposure: .15,
+                hue: -7
             })
             textureOverrides.set(2120, {
                 id: 1233,
-                contrast: 1.15
+                exposure: .15,
+                hue: -7
             })
             textureOverrides.set(1233, {
                 id: 1233,
-                contrast: 1.15
+                exposure: .15,
+                hue: -7
             })
-            /*             textureOverrides.set(2119, {
-                            id: 2119,
-                            hue: 5,
-                        })  */
+            textureOverrides.set(gsPathKey, 1229)
+            textureOverrides.set(1227, {
+                id: 1227,
+                contrast: 1.05,
+                light: [1.072, 1.02, 1.2]
+            })
             meshOverrides.set(1616, {
                 model: 1482,
                 texture: 1846,
-                scale: [1.5, 1.8],
+                scale: [1.25, 1.5],
                 offset: {
                     y: -3
                 },
@@ -9040,6 +9065,14 @@ void main(){
                 },
                 ground: true
             })
+            meshOverrides.set(1652, {
+                scale: [1.6,1.6],
+                mesh: 1480,
+                ground: true,
+                offset: {
+                    y: 1
+                },
+            })
             meshOverrides.set(1662, {
                 model: 1482,
                 texture: 1224,
@@ -9070,21 +9103,366 @@ void main(){
             meshOverrides.set(1661, {
                 model: 1482,
                 texture: 1224,
-                scale: [4.2, 4.3],
+                scale: [4.5, 5.0],
+                offset: {
+                    y: -3
+                },
+                ground: true
+            })
+            meshOverrides.set(1660, {
+                model: 1481,
+                texture: 1218,
+                scale: [1.7,1.7],
                 ground: true
             })
             textureOverrides.set(2060, {
                 id: 1233,
+                exposure: .15,
+                hue: -7
+            })
+            textureOverrides.set(2054, {
+                id: gsStoneTextureId,
                 contrast: 1.15
             })
+            textureOverrides.set(gsStoneTextureId, {
+                id: gsStoneTextureId,
+                contrast: 1.15
+            })
+            textureOverrides.set(pathBandTextureId, {
+                id: pathBandTextureId,
+                contrast: 1.05,
+                exposure: 0.05
+            })
+            textureOverrides.set(1862, 1226)
+            textureOverrides.set(1869, 1226)
+            textureOverrides.set(1871, 1226)
+            
+            textureOverrides.set(2101, 1228)
+            textureOverrides.set(1872, 1227)
+            textureOverrides.set(2102, 1228)
+            textureOverrides.set(2103, 1238)
+            textureOverrides.set(2104, 1228)
+            textureOverrides.set(2105, 1228)
+            textureOverrides.set(2106, 1238)
+            textureOverrides.set(2108, 1228)
+            textureOverrides.set(2111, 1228)
+            textureOverrides.set(2112, 1238)
+            textureOverrides.set(1865, stoneTextureId)
+            textureOverrides.set(1845, stoneTextureId)
+            textureOverrides.set(1858, stoneTextureId)
+            for (let terr of yc.values())
+                if (headlessSpecTextures.indexOf(terr.texture) >= 0) terr.spec = Math.round(terr.spec * headlessSpecScale);
+            meshOverrides.set(1636, {
+                model: 1554,
+                texture: 1222,
+                scale: [1.48, 1.36],
+                groundSink: !0,
+                offset: {
+                    y: -2
+                },
+                ground: true
+            })
+            meshOverrides.set(1637, {
+                model: 1554,
+                texture: 1222,
+                scale: [1.60, 1.12],
+                groundSink: !0,
+                offset: {
+                    y: -2
+                },
+                ground: true
+            })
+            meshOverrides.set(1638, {
+                model: 1554,
+                texture: 1222,
+                scale: [1.60, 1.04],
+                groundSink: !0,
+                offset: {
+                    y: -2
+                },
+                ground: true
+            })
+            meshOverrides.set(1639, {
+                model: 1553,
+                texture: 1221,
+                scale: [1.60, 1.60],
+                groundSink: !0,
+                ground: true
+            })
+            meshOverrides.set(1640, {
+                model: 1553,
+                texture: 1221,
+                scale: [1.04, 1.23],
+                groundSink: !0,
+                ground: true
+            })
+            meshOverrides.set(1641, {
+                model: 1554,
+                texture: 1222,
+                scale: [1.60, 1.35],
+                groundSink: !0,
+                offset: {
+                    y: -2
+                },
+                ground: true
+            })
+            meshOverrides.set(1642, {
+                hideChance: .5,
+                model: 1555,
+                texture: 1223,
+                scale: [0.66, 1.00],
+                groundSink: !0,
+                offset: {
+                    y: -2
+                },
+                ground: true
+            })
+            meshOverrides.set(1643, {
+                hideChance: .5,
+                model: 1555,
+                texture: 1223,
+                scale: [1.20, 0.97],
+                groundSink: !0,
+                offset: {
+                    y: -2
+                },
+                ground: true
+            })
+            meshOverrides.set(1644, {
+                hideChance: .5,
+                model: 1555,
+                texture: 1223,
+                scale: [0.90, 0.90],
+                groundSink: !0,
+                offset: {
+                    y: -2
+                },
+                ground: true
+            })
+            meshOverrides.set(1645, {
+                model: 1555,
+                texture: 1223,
+                scale: [1.49, 1.60],
+                groundSink: !0,
+                offset: {
+                    y: -2
+                },
+                ground: true
+            })
+            meshOverrides.set(1646, {
+                model: 1555,
+                texture: 1223,
+                scale: [1.60, 1.60],
+                groundSink: !0,
+                offset: {
+                    y: -2
+                },
+                ground: true
+            })
+            meshOverrides.set(1647, {
+                hideChance: .5,
+                model: 1555,
+                texture: 1223,
+                scale: [0.96, 0.84],
+                groundSink: !0,
+                offset: {
+                    y: -2
+                },
+                ground: true
+            })
+            meshOverrides.set(1648, {
+                hideChance: .5,
+                model: 1555,
+                texture: 1223,
+                scale: [0.96, 0.80],
+                groundSink: !0,
+                offset: {
+                    y: -2
+                },
+                ground: true
+            })
+            meshOverrides.set(1649, {
+                hideChance: .5,
+                model: 1555,
+                texture: 1223,
+                scale: [0.72, 0.83],
+                groundSink: !0,
+                offset: {
+                    y: -2
+                },
+                ground: true
+            })
+            meshOverrides.set(1650, {
+                model: 1479,
+                texture: 1220,
+                ground: true,
+                groundSink: !0,
+                offset: {
+                    y: -1
+                },
+                scale: [3, 3]
+            })
+            meshOverrides.set(1651, {
+                model: 1479,
+                texture: 1220,
+                ground: true,
+                groundSink: !0,
+                scale: [5, 5],
+                offset: {
+                    y: -1
+                },
+            })
+            if (bc.has(1224)) {
+                bc.set(shrubTextureKey, Object.assign({}, bc.get(1224), {
+                    id: shrubTextureKey
+                }));
+                textureOverrides.set(shrubTextureKey, {
+                    id: 1224,
+                    light: shrubTextureTint
+                });
+                meshOverrides.set(shrubMesh, {
+                    texture: shrubTextureKey
+                });
+            }
             applyMeshOverrides();
+            Os.has(shrubMesh) && Os.set(shrubPlainKey, Object.assign({}, Os.get(shrubMesh), {
+                id: shrubPlainKey,
+                texture: 1224
+            }));
             gloomFolBase = kc.get(56);
-            setFoliageSheet([56, 57, 58, 59, 60, 61, 62, 63], 1213, [0, 4, 15, 5, 6, 13], {
-                coverage: 1.5,
+            setFoliageSheet([56, 57, 58, 59, 60, 61, 62, 63], 1213, [0, 4, 10, 5, 6, 13], {
+                coverage: 1.3,
                 spread: 1.5,
                 scale: 1.5
             });
+            
+            let gsFolBase = kc.get(63);
+            if (gsFolBase) {
+                let gsFolClone = id => Object.assign({}, gsFolBase, {
+                    id: id
+                });
+                kc.set(941, gsFolClone(941)), kc.set(942, gsFolClone(942));
+                setFoliageSheet([35, 36], 1213, [12, 0], {
+                    coverage: 0.5,
+                    spread: 1.5,
+                    scale: 2.5
+                });
+                setFoliageSheet([941, 942], 1213, [15,11], {
+                    coverage: 0.5,
+                    spread: 1.5,
+                    scale: 2.5
+                });
+                kc.set(943, gsFolClone(943)), kc.set(944, gsFolClone(944)), kc.set(945, gsFolClone(945));
+                setFoliageSheet([943, 944, 945], 1213, [9, 1, 2], {
+                    coverage: 0.8,
+                    spread: 1.5,
+                    scale: 2.5
+                });
+                gsFlowerIds = [943, 944, 945];
+                gsFlowerLists = gsFlowerIds.map(id => [
+                    [id, gsFlowerDensity, 0]
+                ]);
+            }
+            if (bc.has(1213)) {
+                bc.set(headlessFoliageKey, Object.assign({}, bc.get(1213), {
+                    id: headlessFoliageKey
+                }));
+                textureOverrides.set(headlessFoliageKey, {
+                    id: 1213,
+                    light: headlessFoliageTint
+                });
+                bc.set(oasisFoliageKey, Object.assign({}, bc.get(1213), {
+                    id: oasisFoliageKey
+                }));
+                textureOverrides.set(oasisFoliageKey, {
+                    id: 1213,
+                    light: oasisFoliageTint
+                });
+            }
+            if (bc.has(1233)) {
+                bc.set(hlStoneKey, Object.assign({}, bc.get(1233), {
+                    id: hlStoneKey
+                }));
+                textureOverrides.set(hlStoneKey, hlStoneTint);
+            }
+            if (bc.has(1227)) {
+                bc.set(hlBankKey, Object.assign({}, bc.get(1227), {
+                    id: hlBankKey
+                }));
+                textureOverrides.set(hlBankKey, hlBankTint);
+            }
+            let headlessSheet = bc.has(headlessFoliageKey) ? headlessFoliageKey : 1213;
+            headlessFoliage.forEach(([id, size]) => foliageOverrides.set(id, {
+                texture: headlessSheet,
+                cell: 0,
+                size: size,
+                coverage: headlessFoliageClump,
+                spread: headlessFoliageSpread
+            }));
+            if (bc.has(oasisFoliageKey)) {
+                let clones = [];
+                for (let i = 0; i < oasisFolSlots; ++i) {
+                    let base = kc.get(headlessFoliage[i % headlessFoliage.length][0]),
+                        clone = oasisFoliageBase + i;
+                    if (!base || kc.has(clone)) continue;
+                    kc.set(clone, Object.assign({}, base, {
+                        id: clone
+                    }));
+                    foliageOverrides.set(clone, {
+                        texture: oasisFoliageKey,
+                        cell: 0,
+                        scale: oasisFoliageScale,
+                        coverage: oasisFoliageCoverage,
+                        spread: oasisFoliageSpread
+                    });
+                    clones.push(clone);
+                }
+                clones.length && (oasisFolClones = clones);
+                if (bc.has(oasisExtraSheet)) {
+                    bc.set(oasisExtraKey, Object.assign({}, bc.get(oasisExtraSheet), {
+                        id: oasisExtraKey
+                    }));
+                    textureOverrides.set(oasisExtraKey, {
+                        id: oasisExtraSheet,
+                        light: oasisFoliageTint
+                    });
+                }
+                let donor = kc.get(headlessFoliage[0][0]);
+                if (donor && bc.has(oasisExtraKey)) {
+                    oasisExtraIds = [];
+                    oasisExtraCells.forEach((cell, i) => {
+                        let id = oasisExtraBase + i;
+                        if (kc.has(id)) return;
+                        kc.set(id, Object.assign({}, donor, {
+                            id: id
+                        }));
+                        foliageOverrides.set(id, {
+                            texture: oasisExtraKey,
+                            cell: cell,
+                            scale: oasisFoliageScale,
+                            coverage: oasisFoliageCoverage,
+                            spread: oasisFoliageSpread
+                        });
+                        oasisExtraIds.push(id);
+                    });
+                    oasisExtraList = oasisExtraIds.map(id => [id, oasisExtraDensity, 0]);
+                }
+            }
             applyFoliageOverrides();
+            for (let tid of headlessFoliageTerrains) {
+                let terr = yc.get(tid);
+                if (terr && terr.foliage)
+                    for (let f of terr.foliage) f[1] = Math.max(1, Math.min(255, Math.round(f[1] * headlessFoliageDensity)));
+            }
+            if (gsFolBase)
+                for (let tid of [33, 34]) {
+                    let terr = yc.get(tid);
+                    if (!terr || !terr.foliage) continue;
+                    let next = terr.foliage.map(f => f[0] === 63 ? [941, f[1], f[2]] : f);
+                    tid === 34 && next.push([942, 6, 0]);
+                    terr.foliage.length = 0;
+                    for (let f of next) terr.foliage.push(f);
+                }
 
         }
         ne.faivelRetexture && retextureTerrains();
@@ -9372,7 +9750,7 @@ void main(){
         _0 = t => {
             !io.active || t !== void 0 && io.key !== t || (io.active = !1, (!J || J.step >= $o) && mi.set())
         },
-        Rv = (t, e = !0) => t !== void 0 && t.type === 1 && t.level <= T.player.level + 3 && (!e || t.stats.alive),
+        Rv = (t, e = !0) => t !== void 0 && t.type === 1 && t.level <= T.player.level + 3 && T.player.hostility(t) > 0 && (!e || t.stats.alive),
         b0 = t => t?.id !== J.defeatedTargetId && Rv(t),
         GD = () => {
             let t, e = 1 / 0,
@@ -9397,7 +9775,7 @@ void main(){
                 i = T.entities.type[3];
             for (let r = 0; r < i.length; ++r) {
                 let l = i[r];
-                if (!l.hasInfo || !l.canBePickedUpBy(T.player)) continue;
+                if (!l.hasInfo || !l.canBePickedUpBy(T.player, 15 ** 2)) continue;
                 if (t !== "") {
                     if (l.droptype !== t) continue
                 } else {
@@ -10079,7 +10457,7 @@ void main(){
         let e, n;
         return {
             c() {
-                e = g("img"), m(e, "class", "icon svelte-erbdzy"), pt(e.src, n = "/data/ui/icons/gem.svg?v=8926940") || m(e, "src", n)
+                e = g("img"), m(e, "class", "icon svelte-erbdzy"), pt(e.src, n = "/data/ui/icons/gem.svg?v=8971923") || m(e, "src", n)
             },
             m(o, s) {
                 x(o, e, s)
@@ -10184,19 +10562,19 @@ void main(){
     var dL = t => t.replace(/\$c(\d)/g, (e, n) => `<img class=texticon src='${yi(n)}'>`),
         hL = t => t.replace(/\$l(\d+)/g, (e, n) => `<span class=textwhite>${n}</span>`),
         gL = t => t.replace(/\$f(\d)(\w*)/g, (e, n, o) => `<span class=textf${n}>${o}</span>`),
-        vL = t => t.replace(/\$gt/g, (e, n) => '<img class="svgicon" src="/data/ui/icons/check.svg?v=8926940">'),
+        vL = t => t.replace(/\$gt/g, (e, n) => '<img class="svgicon" src="/data/ui/icons/check.svg?v=8971923">'),
         _L = t => t.replace(/\$e(\d+)/g, (e, n) => Hu(n, !1)),
         bL = t => t.replace(/\$g(\d+)/g, (e, n) => t_(n, !1)),
         yL = t => t.replace(/\$m(\d+)/g, (e, n) => n_(n, !1)),
-        kL = t => t.replace(/\$sp(\d+)/g, (e, n) => "<img class=texticon src=/data/ui/icons/gem.svg?v=8926940/>" + n),
-        wL = t => t.replace(/\$fm(\d+)/g, (e, n) => `<span class=textfame><img class=svgicon src='/data/ui/currency/fame.svg?v=8926940'> ${n}</span>`),
+        kL = t => t.replace(/\$sp(\d+)/g, (e, n) => "<img class=texticon src=/data/ui/icons/gem.svg?v=8971923/>" + n),
+        wL = t => t.replace(/\$fm(\d+)/g, (e, n) => `<span class=textfame><img class=svgicon src='/data/ui/currency/fame.svg?v=8971923'> ${n}</span>`),
         t_ = (t, e = !1) => {
             let {
                 c: n,
                 s: o,
                 g: s
             } = T4(t), i = "<span/>";
-            return s != "" && (i += `<span class=${e?"textred":"textgold"}>${s}</span> <img class=texticon src='/data/ui/currency/gold.${Xn}?v=8926940'/>`), o != "" && (i += `<span class=${e?"textred":"textsilver"}>${o}</span> <img class=texticon src='/data/ui/currency/silver.${Xn}?v=8926940'/>`), n != "" && (i += `<span class=${e?"textred":"textcopper"}>${n}</span> <img class=texticon src='/data/ui/currency/copper.${Xn}?v=8926940'/>`), i + "</span>"
+            return s != "" && (i += `<span class=${e?"textred":"textgold"}>${s}</span> <img class=texticon src='/data/ui/currency/gold.${Xn}?v=8971923'/>`), o != "" && (i += `<span class=${e?"textred":"textsilver"}>${o}</span> <img class=texticon src='/data/ui/currency/silver.${Xn}?v=8971923'/>`), n != "" && (i += `<span class=${e?"textred":"textcopper"}>${n}</span> <img class=texticon src='/data/ui/currency/copper.${Xn}?v=8971923'/>`), i + "</span>"
         };
     var n_ = (t, e = !1) => `<span class='${e?"textred":"textgold"}'><img class='svgicon' src='${Zx}'> ${yt(t)}</span>`,
         Hu = t => `<span class='bold textpvp'><img class='svgicon' src='${Kx(t)}'> ${yt(t)}</span>`,
@@ -10343,7 +10721,11 @@ void main(){
             let v = V4(t, W.VERTEX_SHADER),
                 _ = V4(e, W.FRAGMENT_SHADER);
             for (let b = 0; b < p.length; ++b) W.bindAttribLocation(h.program, b, p[b]);
-            return W.attachShader(h.program, v), W.attachShader(h.program, _), W.linkProgram(h.program), W.deleteShader(v), W.deleteShader(_), h
+            if (W.attachShader(h.program, v), W.attachShader(h.program, _), W.linkProgram(h.program), !W.getProgramParameter(h.program, W.LINK_STATUS)) {
+                let y = "Shader program link failed: " + W.getProgramInfoLog(h.program);
+                console.warn(y), window.reportClientError && window.reportClientError("webgl", y, "", "")
+            }
+            return W.deleteShader(v), W.deleteShader(_), h
         },
         q4 = (t, e) => {
             W.useProgram(t.program), it.currentProgram = t.id;
@@ -10425,6 +10807,11 @@ void main(){
             let n = s_[t] = W.createShader(e);
             W.shaderSource(n, t), W.compileShader(n);
 
+            if (!W.getShaderParameter(n, W.COMPILE_STATUS)) {
+                let o = W.getShaderInfoLog(n),
+                    i = (e === W.VERTEX_SHADER ? "Vertex" : "Fragment") + " shader compile failed: " + o;
+                console.warn(i), window.reportClientError && window.reportClientError("webgl", i, "", "")
+            }
             if (window.gfxDebugShaders && !W.getShaderParameter(n, W.COMPILE_STATUS)) {
                 console.error("shader compile failed:\n" + W.getShaderInfoLog(n) + "\n" +
                     t.split("\n").map((l, i) => (i + 1) + ": " + l).join("\n"));
@@ -10745,11 +11132,11 @@ void main(){
                 let r = new Image;
                 r.onload = () => {
                     n[e] = o(r), s(n[e], t + e), r.onload = void 0
-                }, r.src = t + e + "?v=8926940";
+                }, r.src = t + e + "?v=8971923";
                 break
             }
             default: {
-                fetch(t + e + "?v=8926940").then(r => {
+                fetch(t + e + "?v=8971923").then(r => {
                     if (!r.ok) throw new Error;
                     r.arrayBuffer().then(async l => {
                         n[e] = await o(l, e), s(n[e], t + e)
@@ -10871,7 +11258,7 @@ void main(){
                     size: 2,
                     data: new Float32Array([0, 0, 2, 0, 0, 2])
                 }
-            }), 0, W.TRIANGLES), fetch("/data/items/atlas.json?v=8926940").then(async t => {
+            }), 0, W.TRIANGLES), fetch("/data/items/atlas.json?v=8971923").then(async t => {
                 or = await t.json();
                 for (let e in or) e != "s" && (or[e] = or[e].map(n => n / or.s))
             })
@@ -11012,8 +11399,8 @@ void main(){
                 e(...(litTextures[key] = tV(hn ? tintImage(img, hn) : img))), URL.revokeObjectURL(img.src), img.onload = void 0;
             }, img.src = URL.createObjectURL(new Blob([buf]));
         },
-        Co = (t, e) => {
-            let ovr = textureOverrides.get(t),
+        Co = (t, e, raw) => {
+            let ovr = raw ? void 0 : textureOverrides.get(t),
                 hn = null,
                 fkey = "",
                 src = null,
@@ -11036,14 +11423,14 @@ void main(){
             if (!hn) return void(dds ? Zu("data/assets/", name, c_, nV, e) : Zu("data/assets/", name, c_, tV, e));
             let key = name + "|" + fkey;
             if (litTextures[key]) return void e(...litTextures[key]);
-            if (dds) fetch("data/assets/" + name + "?v=8926940").then(r => r.arrayBuffer()).then(r => {
+            if (dds) fetch("data/assets/" + name + "?v=8971923").then(r => r.arrayBuffer()).then(r => {
                 e(...(litTextures[key] = nV(applyDxtFilter(r, hn))));
             });
             else {
                 let img = new Image;
                 img.onload = () => {
                     e(...(litTextures[key] = tV(tintImage(img, hn)))), img.onload = void 0;
-                }, img.src = "data/assets/" + name + "?v=8926940";
+                }, img.src = "data/assets/" + name + "?v=8971923";
             }
         },
         Y4, Q4 = (t, e, n) => {
@@ -12105,13 +12492,13 @@ void main(){
         let e, n;
         return {
             c() {
-                e = g("img"), pt(e.src, n = "/data/ui/icons/" + t[1] + ".svg?v=8926940") || m(e, "src", n), m(e, "class", "titleicon svgicon svelte-1f1v3u3")
+                e = g("img"), pt(e.src, n = "/data/ui/icons/" + t[1] + ".svg?v=8971923") || m(e, "src", n), m(e, "class", "titleicon svgicon svelte-1f1v3u3")
             },
             m(o, s) {
                 x(o, e, s)
             },
             p(o, s) {
-                s[0] & 2 && !pt(e.src, n = "/data/ui/icons/" + o[1] + ".svg?v=8926940") && m(e, "src", n)
+                s[0] & 2 && !pt(e.src, n = "/data/ui/icons/" + o[1] + ".svg?v=8971923") && m(e, "src", n)
             },
             d(o) {
                 o && w(e)
@@ -12123,7 +12510,7 @@ void main(){
         let e, n, o, s;
         return {
             c() {
-                e = g("img"), pt(e.src, n = "/data/ui/icons/cog.svg?v=8926940") || m(e, "src", n), m(e, "class", "btn black svgicon")
+                e = g("img"), pt(e.src, n = "/data/ui/icons/cog.svg?v=8971923") || m(e, "src", n), m(e, "class", "btn black svgicon")
             },
             m(i, r) {
                 x(i, e, r), o || (s = H(e, "click", t[13]), o = !0)
@@ -12139,7 +12526,7 @@ void main(){
         let e, n, o, s;
         return {
             c() {
-                e = g("img"), pt(e.src, n = "/data/ui/icons/cross.svg?v=8926940") || m(e, "src", n), m(e, "class", "btn black svgicon")
+                e = g("img"), pt(e.src, n = "/data/ui/icons/cross.svg?v=8971923") || m(e, "src", n), m(e, "class", "btn black svgicon")
             },
             m(i, r) {
                 x(i, e, r), o || (s = H(e, "click", t[20]), o = !0)
@@ -12348,22 +12735,68 @@ void main(){
         }
     }
 
+    function Ob5(t) {
+        let e;
+        return {
+            c() {
+                e = g("div"), e.textContent = `${P.ui.objectives}`, m(e, "class", "textprimary subtitle svelte-f9tlew")
+            },
+            m(n, o) {
+                x(n, e, o)
+            },
+            d(n) {
+                n && w(e)
+            }
+        }
+    }
+
+    function Rw5(t) {
+        let e, n, o, s, i = t[0].rewardExp + "",
+            r, l, a, c, f;
+        return c = new Fn({
+            props: {
+                amount: t[0].rewardGold
+            }
+        }), {
+            c() {
+                e = g("div"), e.textContent = `${P.ui.rewards}`, n = g("div"), o = g("span"), o.textContent = `${P.ui.experience}:`, s = g("span"), r = E(i), l = g("span"), l.textContent = `${P.ui.gold}:`, a = g("span"), Z(c.$$.fragment), m(e, "class", "textprimary subtitle svelte-f9tlew"), m(o, "class", "textwhite"), m(s, "class", "textexp"), m(l, "class", "textwhite"), m(n, "class", "rewards svelte-f9tlew")
+            },
+            m(u, q) {
+                x(u, e, q), x(u, n, q), d(n, o), d(n, s), d(s, r), d(n, l), d(n, a), X(c, a, null), f = !0
+            },
+            p(u, q) {
+                (!f || q & 1) && i !== (i = u[0].rewardExp + "") && j(r, i);
+                let gp = {};
+                q & 1 && (gp.amount = u[0].rewardGold), c.$set(gp)
+            },
+            i(u) {
+                f || (S(c.$$.fragment, u), f = !0)
+            },
+            o(u) {
+                D(c.$$.fragment, u), f = !1
+            },
+            d(u) {
+                u && (w(e), w(n)), K(c)
+            }
+        }
+    }
+
     function P5(t) {
         let e, n, o = Yu(t[4]) + "",
-            s, i, r, l;
+            s, i, r, l, cls;
 
         function a(...c) {
             return t[2](t[6], ...c)
         }
         return {
             c() {
-                e = g("div"), n = g("span"), m(e, "id", s = "interactionchoice" + t[6]), m(e, "class", "btn border black textgreen"), m(e, "value", i = t[6])
+                e = g("div"), n = g("span"), m(e, "id", s = "interactionchoice" + t[6]), m(e, "class", cls = "btn " + (t[0].questid >= 0 ? "black border black textprimary formatted textcenter" : "border black textgreen")), m(e, "value", i = t[6])
             },
             m(c, f) {
                 x(c, e, f), d(e, n), n.innerHTML = o, r || (l = H(e, "click", a), r = !0)
             },
             p(c, f) {
-                t = c, f & 1 && o !== (o = Yu(t[4]) + "") && (n.innerHTML = o)
+                t = c, f & 1 && o !== (o = Yu(t[4]) + "") && (n.innerHTML = o), f & 1 && cls !== (cls = "btn " + (t[0].questid >= 0 ? "black border black textprimary formatted textcenter" : "border black textgreen")) && m(e, "class", cls)
             },
             d(c) {
                 c && w(e), r = !1, l()
@@ -12374,26 +12807,31 @@ void main(){
     function xV(t) {
         let e, n, o = t[0].title + "",
             s, i, r = t[0].text + "",
-            l, a, c = me(t[0].objectives || []),
+            l, a, anch, cur, objHdr = (t[0].objectives || []).length > 0 && Ob5(t),
+            c = me(t[0].objectives || []),
             f = [];
         for (let h = 0; h < c.length; h += 1) f[h] = A5(S5(t, c, h));
-        let u = me(t[0].choices),
+        let rw = t[0].questid >= 0 && Rw5(t),
+            u = me(t[0].choices),
             p = [];
         for (let h = 0; h < u.length; h += 1) p[h] = P5(C5(t, u, h));
         return {
             c() {
-                e = g("div"), n = g("h3"), s = E(o), i = g("p"), l = E(r), a = g("p");
+                e = g("div"), n = g("h3"), s = E(o), i = g("p"), l = E(r), objHdr && objHdr.c(), a = g("div");
                 for (let h = 0; h < f.length; h += 1) f[h].c();
+                rw && rw.c(), anch = he();
                 for (let h = 0; h < p.length; h += 1) p[h].c();
-                m(n, "class", "textprimary name svelte-k1vie9"), m(e, "class", "container svelte-k1vie9")
+                m(n, "class", "textprimary name svelte-f9tlew"), m(a, "class", "objectives"), m(e, "class", "container svelte-f9tlew")
             },
             m(h, v) {
-                x(h, e, v), d(e, n), d(n, s), d(e, i), d(i, l), d(e, a);
+                x(h, e, v), d(e, n), d(n, s), d(e, i), d(i, l), objHdr && objHdr.m(e, null), d(e, a);
                 for (let _ = 0; _ < f.length; _ += 1) f[_] && f[_].m(a, null);
-                for (let _ = 0; _ < p.length; _ += 1) p[_] && p[_].m(e, null)
+                rw && rw.m(e, null), d(e, anch);
+                for (let _ = 0; _ < p.length; _ += 1) p[_] && p[_].m(e, null);
+                cur = !0
             },
             p(h, v) {
-                if (v & 1 && o !== (o = h[0].title + "") && j(s, o), v & 1 && r !== (r = h[0].text + "") && j(l, r), v & 1) {
+                if ((!cur || v & 1) && o !== (o = h[0].title + "") && j(s, o), (!cur || v & 1) && r !== (r = h[0].text + "") && j(l, r), (h[0].objectives || []).length > 0 ? objHdr || (objHdr = Ob5(h), objHdr.c(), objHdr.m(e, a)) : objHdr && (objHdr.d(1), objHdr = null), v & 1) {
                     c = me(h[0].objectives || []);
                     let _;
                     for (_ = 0; _ < c.length; _ += 1) {
@@ -12403,7 +12841,9 @@ void main(){
                     for (; _ < f.length; _ += 1) f[_].d(1);
                     f.length = c.length
                 }
-                if (v & 3) {
+                if (h[0].questid >= 0 ? rw ? (rw.p(h, v), v & 1 && S(rw, 1)) : (rw = Rw5(h), rw.c(), S(rw, 1), rw.m(e, anch)) : rw && (Ce(), D(rw, 1, 1, () => {
+                        rw = null
+                    }), Se()), v & 3) {
                     u = me(h[0].choices);
                     let _;
                     for (_ = 0; _ < u.length; _ += 1) {
@@ -12414,8 +12854,14 @@ void main(){
                     p.length = u.length
                 }
             },
+            i(h) {
+                cur || (S(rw), cur = !0)
+            },
+            o(h) {
+                D(rw), cur = !1
+            },
             d(h) {
-                h && w(e), rt(f, h), rt(p, h)
+                h && w(e), objHdr && objHdr.d(), rt(f, h), rw && rw.d(), rt(p, h)
             }
         }
     }
@@ -12535,7 +12981,7 @@ void main(){
         TV = () => {
             if (ne.disableCircleCooldowns) return;
 
-            fetch("/data/ui/circlecooldowns/circlecooldowns.txt?v=8926940").then(async t => {
+            fetch("/data/ui/circlecooldowns/circlecooldowns.txt?v=8971923").then(async t => {
                 let e = (await t.text()).split(`
 `);
                 for (let n = 0; n < 3; ++n) {
@@ -12936,7 +13382,7 @@ void main(){
         },
         lp = 0,
         VV = t => {
-            if (So(B0, 2 * (t.x * ne.resolutionScale / zo.width) - 1, 2 * (1 - t.y * ne.resolutionScale / zo.height) - 1), So(Oc, ~~t.x, ~~t.y), mt.rmb.down || mt.lmb.down) {
+            if (So(B0, 2 * (t.x * ne.resolutionScale / zo.width) - 1, 2 * (1 - t.y * ne.resolutionScale / zo.height) - 1), So(Oc, ~~(t.x * ne.resolutionScale), ~~(t.y * ne.resolutionScale)), mt.rmb.down || mt.lmb.down) {
                 let e = xt(t.movementX, -100, 100),
                     n = xt(t.movementY, -100, 100);
                 bo[1] = xt(bo[1] + n * .0028 * (ne.invertMouseY ? -ne.mouseSensitivity : ne.mouseSensitivity), -Math.PI / 2, Math.PI / 2), bo[0] = zc(bo[0] - e * .005 * (ne.invertMouseX ? -ne.mouseSensitivity : ne.mouseSensitivity)), lp += Math.abs(n) + Math.abs(e)
@@ -12948,13 +13394,18 @@ void main(){
     });
     var U0 = !1,
         D_ = !1,
+        plNoop = () => {},
+        blurFocused = () => {
+            let a = document.activeElement;
+            a && a !== document.body && a.blur && a.blur();
+        },
         qV = t => {
-            (t.target == zo || t.target.id == "chat") && (ne.pointerlock && (U0 = !0, zo.requestPointerLock()), $r("m" + t.button, !0), X5 && Ln.update(e => {
+            (t.target == zo || t.target.id == "chat") && (t.target == zo && blurFocused(), ne.pointerlock && (U0 = !0, zo.requestPointerLock().catch(plNoop)), $r("m" + t.button, !0, t.target == zo ? t : void 0), X5 && Ln.update(e => {
                 e && e.discard && e.discard()
             }))
         },
         RV = t => {
-            $r("m" + t.button, !1), lp = 0, D_ = !0
+            $r("m" + t.button, !1, t.target == zo ? t : void 0), lp = 0, D_ = !0
         },
         zV = t => {
             t.target == zo && rd.update(e => xt(e + (t.deltaY > 0 ? 1 : -1), 2, 18))
@@ -13037,7 +13488,7 @@ void main(){
         waterEditorGrid: () => Gq
     });
     let stoneTextureId = 1233,
-        stoneStretch = 1.6,
+        stoneStretch = 2.05,
         stoneShaderUvScale = 1 / stoneStretch,
         stoneOverlayStrength = 1,
         stoneWaterDistance = 4.9,
@@ -13046,25 +13497,334 @@ void main(){
         stoneNoiseAmount = 1.2,
         stoneNoiseScale = 0.1,
         stoneFoliageCutoff = 0.2,
+        stoneUnderwaterDepth = .5,
+        stoneUnderwaterFade = .5,
         stoneMaxLakeArea = 12 * 64 * 64,
+        stoneShaderSkipWorlds = ["headless"],
         stoneShaderTex = null,
-        stoneShaderTexRequested = !1;
+        stoneShaderTexRequested = !1,
+        stoneRawTex = null,
+        stoneRawTexRequested = !1,
+        gsPathKey = 20601,
+        gsPathUvScale = 1.2,
+        stoneSpecScale = .35;
+    let pathTextures = [2060],
+        pathThreshold = .5,
+        pathPad = 96,
+        pathMinLength = 24,
+        pathMinArea = 260,
+        pathBandWidth = 0,
+        pathBandFade = 3.6,
+        pathBandNoise = 1.5,
+        pathBandNoiseScale = 3.5,
+        pathBandGateScale = 11,
+        pathBandGateCut = .35,
+        pathBandGateFade = .22,
+        pathBandGateWidth = .35,
+        pathBandTextureId = 1236,
+        pathBandFoliageCutoff = 64,
+        pathBandTex = null,
+        pathBandTexRequested = !1;
+    let hlStoneDirtShown = [1228],
+        hlIsDirt = (id, world) => !!yc.get(id) && hlStoneDirtShown.indexOf(topGrassShown(id, world)) >= 0,
+        hlStoneSandShown = [1226, 1238],
+        hlStoneDirtMin = .5,
+        hlStoneSandMax = .12,
+        hlStoneMaxNy = .93,
+        hlStoneFillRadius = 2,
+        hlStoneFillShare = .35,
+        hlStoneEdgeKeep = 1,
+        hlStoneFade = 2,
+        hlStoneStrength = 1,
+        hlBareDirtCut = .85;
+    let hlBankKey = 21227,
+        hlBankTint = {
+            id: 1227,
+            contrast: 1.05,
+            light: [.62, .643, .439]
+        };
+    let hlBankFrom = 1238,
+        hlBankTexture = hlBankKey,
+        hlBankUvScale = 1,
+        hlBankOcean = 1867,
+        hlBankOceanReach = 40,
+        hlBankOceanFade = 12,
+        hlBankOceanMin = .3,
+        hlBankDistance = 28,
+        hlBankSandBlend = .85,
+        hlBankNoise = 8,
+        hlBankNoiseScale = 16,
+        hlBankRoundStart = .6,
+        hlBankRoundFull = .85,
+        hlBankDryFade = .3,
+        hlBankFade = 2.5,
+        hlBankEdgeNoise = 4,
+        hlBankPondMax = 5,
+        hlBankMaxHeight = 14,
+        hlBankHeightTaper = .3,
+        hlBankTex = null,
+        hlBankTexRequested = !1,
+        hlBankKeep = [2060],
+        hlBankDirtShown = 1228,
+        hlBankDirtStrength = .85,
+        hlBankDirtGrass = !1,
+        hlBankFlatStart = .8,
+        hlBankFlatFull = .62;
+    let worldRetexture = {
+        guardstone: {
+            1235: 1227
+        },
+        headless: {
+            2060: 1238
+        }
+    };
+    let gsDirtSpacing = 3.5,
+        gsDirtChance = .027,
+        gsDirtMinRadius = .58,
+        gsDirtMaxRadius = .85,
+        gsDirtBlend = 1.4,
+        gsDirtFlow = .25,
+        gsDirtStoneReach = 2,
+        gsDirtOffStoneChance = .25,
+        gsDirtHillRadius = 5,
+        gsDirtHillRise = 1.5,
+        gsDirtHillFactor = .7,
+        gsDirtShapeNoise = .7,
+        gsDirtFoliageCut = .7,
+        gsBigDirtSpacing = 6,
+        gsBigDirtChance = .4,
+        gsBigDirtMinRadius = 2.5,
+        gsBigDirtMaxRadius = 4.5,
+        gsBigDirtBlend = 3.5,
+        gsBigDirtShapeNoise = 3,
+        gsBigDirtNoiseScale = 3,
+        gsBigDirtFlow = 1.4,
+        gsBigDirtRiseRadius = 7,
+        gsBigDirtMinRise = 2.2,
+        gsBigDirtStrayChance = .12,
+        lakePlantMesh = 1480,
+        lakePlantTries = 48,
+        lakePlantChance = .4,
+        lakePlantMinAbove = 0,
+        lakePlantMaxAbove = .9,
+        lakePlantLift = .08,
+        lakePlantMinNormal = .7,
+        lakePlantTiltMax = .55,
+        lakePlantScaleMin = 520,
+        lakePlantScaleMax = 820,
+        ridgePlantMesh = 1480,
+        ridgePlantWorld = "headless",
+        ridgePlantTries = 56,
+        ridgePlantChance = .3,
+        ridgePlantMinNormal = .74,
+        ridgePlantDropRadius = 4,
+        ridgePlantMinDrop = 2.4,
+        ridgePlantLift = .05,
+        ridgePlantTiltMax = .45,
+        ridgePlantScaleMin = 460,
+        ridgePlantScaleMax = 780,
+        pathPlantMesh = 1480,
+        pathPlantWorld = "headless",
+        pathPlantTries = 320,
+        pathPlantChance = .012,
+        pathPlantRadius = 10,
+        pathPlantEdgeMax = .26,
+        pathPlantPathWeight = .5,
+        pathPlantMinNormal = .74,
+        pathPlantLift = .05,
+        pathPlantTiltMax = .45,
+        pathPlantScaleMin = 430,
+        pathPlantScaleMax = 730,
+        gsGrassTexture = 1227,
+        gsSwapFoliageTexture = 1235,
+        gsGrassFoliage = null,
+        gsFlowerIds = null,
+        gsFlowerLists = null,
+        gsFlowerCell = 4,
+        gsFlowerPathChance = .08,
+        gsFlowerStoneChance = .07,
+        gsFlowerHillChance = .006,
+        gsFlowerHillRadius = 6,
+        gsFlowerHillRise = 2,
+        gsFlowerStoneFringe = 127,
+        gsFlowerDensity = 120,
+        dirtSpecShown = 1228,
+        dirtSpecScale = .25,
+        headlessSpecScale = .3,
+        headlessSpecTextures = [1860, 1862, 1865, 1869, 1871, 1872, 1845, 1858,
+            2101, 2102, 2103, 2104, 2105, 2106, 2107, 2108, 2109, 2110, 2111, 2112,
+            2113, 2114, 2115, 2116
+        ],
+        headlessFoliageDensity = .45,
+        headlessFoliageClump = 3,
+        headlessFoliageSpread = 1.2,
+        headlessFoliageKey = 21213,
+        headlessFoliageTint = [1.55, .97, 1.2],
+        oasisFoliageKey = 21215,
+        oasisFoliageTint = [.52, .56, .455],
+        oasisFoliageBase = 960,
+        oasisFolSlots = 3,
+        oasisFoliageName = "Oasis",
+        oasisBankFoliageCut = 0,
+        oasisFoliageTexture = 2107,
+        oasisGrassTexture = 2109,
+        oasisFoliageScale = 2.0,
+        oasisFoliageCoverage = 2.5,
+        oasisFoliageSpread = 1.5,
+        oasisExtraSheet = 1214,
+        oasisExtraKey = 21214,
+        oasisExtraCells = [0, 3],
+        oasisExtraBase = 972,
+        oasisExtraDensity = 14,
+        oasisExtraIds = null,
+        oasisExtraList = null,
+        oasisFoliageLayerMin = .15,
+        oasisFoliageGrassMin = .2,
+        oasisLayerShare = (b, k) => {
+            let w0 = b & 31,
+                w1 = b >> 5 & 31,
+                w2 = b >> 10 & 31,
+                w3 = Math.max(0, 31 - w0 - w1 - w2);
+            return [w0, w1, w2, w3][k] / Math.max(31, w0 + w1 + w2);
+        },
+        oasisFolClones = null,
+        oasisAreaIds = null,
+        headlessFoliageTerrains = [50, 51, 53, 54, 56, 57, 59, 60],
+        headlessFoliage = [
+            [34, 3.57],
+            [42, 4.11],
+            [45, 4.57],
+            [46, 7.21],
+            [47, 5.83],
+            [48, 6.79],
+            [49, 4.43],
+            [50, 6.57],
+            [51, 5.52],
+            [52, 7.87],
+            [53, 7],
+            [54, 6.79]
+        ],
+        gsMeadowSpacing = 16,
+        gsMeadowChance = .025,
+        gsMeadowBright = .06,
+        gsMeadowContrast = .82,
+        gsMeadowMinRadius = 1.6,
+        gsMeadowMaxRadius = 2.9,
+        gsMeadowBlend = 3.4,
+        gsStoneFlow = 1.8,
+        gsStonePathClear = 10,
+        gsStonePathWeight = .5,
+        gsStoneValleyProbe = 30,
+        gsStoneValleyRise = 6,
+        gsStoneValleyMin = .45,
+        gsStoneFillRange = 46,
+        gsStoneFillChance = .55,
+        gsStoneFillScale = .45,
+        gsStoneSpacing = 26,
+        gsStoneChance = .5,
+        gsStoneRegionScale = 150,
+        gsStoneRegionCut = .52,
+        gsStoneRegionFade = .1,
+        gsStoneMinRadius = 6,
+        gsStoneMaxRadius = 13,
+        gsStoneBlend = 0,
+        gsStoneShapeNoise = 1.8,
+        gsStoneShapeDirs = 6,
+        gsStoneShapeProbe = 26,
+        gsStoneShapeSteps = 8,
+        gsStoneShapeRise = 4,
+        gsStoneShapeMinRatio = 1.35,
+        gsStoneStretchGain = .9,
+        gsStoneStretchMax = 2.6,
+        gsStoneNoiseScale = 5.4,
+        gsStoneSeed = 57,
+        gsStoneFlatNormal = .93,
+        gsStoneRiseRadius = 6,
+        gsStoneMaxRise = 4.5,
+        gsStoneGrassWeight = .5,
+        gsStoneCoalArea = 10,
+        gsCoalSite = [2003, 1728, 110],
+        gsStoneCoalBoost = 3.4,
+        gsStoneCoalFlatNormal = .84,
+        gsStoneCoalMaxRise = 9,
+        gsStoneCoalGrassWeight = .15,
+        pathBandBaseScale = .5,
+        gsBaseSites = [
+            [3214, 1236, 100],
+            [2872, 1304, 100]
+        ];
+    let gsRockSourceTexture = 2054,
+        fvStoneSourceTexture = 2120,
+        gsRockLight = [0, 0, 0],
+        fvStoneLight = [0, 0, 0];
+    let gsStoneTextureId = 1225,
+        gsSpUvScale = .6,
+        gsStoneTex = null,
+        gsStoneTexRequested = !1;
+    let shrubTextureKey = 21224,
+        shrubTextureTint = [1.48, 1.23, 1.73],
+        shrubMesh = 1480,
+        shrubPlainKey = 21480,
+        shrubTintWorlds = ["headless", "guardstone"];
+    let hlStoneKey = 21233,
+        hlStoneTint = {
+            id: 1233,
+            exposure: -.1,
+            hue: -7,
+            light: [0.92, 0.84, 0.92]
+        },
+        hlStoneTex = null,
+        hlStoneTexRequested = !1;
+    let gsPatchHardLo = .3,
+        gsPatchHardHi = .6,
+        gsPatchNoiseAmount = 1.2,
+        gsPatchNoiseScale = .1;
     let dirtPatchTexture = 1228,
         dirtPatchTextures = [1227, 1235],
         dirtPatchSpacing = .5,
-        dirtPatchChance = .2,
+        dirtPatchChance = .07,
         dirtPatchMinRadius = .45,
         dirtPatchMaxRadius = .65,
         dirtPatchBlend = 3.9,
+        dirtPatchFlow = 2.6,
         dirtPatchShapeNoise = 4.5,
         dirtPatchNoiseScale = 3.1,
-        dirtPatchPropChance = .2,
+        dirtPatchPropChance = .14,
         dirtPatchPropRange = 1,
         dirtPatchPropPull = 1,
         dirtPatchUvScale = 1,
         dirtPatchStrength = 1,
         dirtPatchTex = null,
         dirtPatchTexRequested = !1;
+    var areaWorlds = {
+        0: "guardstone",
+        1: "guardstone",
+        2: "guardstone",
+        3: "guardstone",
+        4: "guardstone",
+        5: "guardstone",
+        6: "guardstone",
+        9: "guardstone",
+        10: "guardstone",
+        7: "water",
+        8: "water",
+        11: "headless",
+        12: "headless",
+        13: "headless",
+        14: "headless",
+        25: "headless",
+        15: "gloomfury",
+        16: "faivel",
+        17: "faivel",
+        18: "faivel",
+        19: "faivel",
+        20: "faivel",
+        21: "faivel",
+        22: "faivel",
+        23: "faivel",
+        24: "faivel"
+    };
+    let guardstoneAreas = Object.keys(areaWorlds).filter(k => areaWorlds[k] === "guardstone").map(Number);
     let gloomWorld = "main",
         gloomX = 3935,
         gloomZ = 4498,
@@ -13072,10 +13832,14 @@ void main(){
         gloomFade = 15,
         gloomShapeNoise = 45,
         gloomShapeNoiseScale = 55,
-        gloomEdgeNoise = 14,
+        gloomEdgeNoise = 22,
         gloomEdgeNoiseScale = 9,
-        gloomDetailNoise = 4,
+        gloomDetailNoise = 7,
         gloomDetailNoiseScale = 2.2,
+        gloomOutNoise = 11,
+        gloomOutNoiseScale = 17,
+        gloomConeReach = 60,
+        gloomConeExp = 3,
         gloomGrassTextures = [1227, 1235],
         gloomGrassTexture = 1232,
         gloomUvScale = 1,
@@ -13100,10 +13864,16 @@ void main(){
         meadowPatchShapeNoise = .45,
         meadowPatchNoiseScale = 2.4;
     let gloomNoiseGlsl = "float gloomH(ivec2 c){uint h=uint(c.x)*374761393u+uint(c.y)*668265263u;h=(h^(h>>13u))*1274126177u;h^=h>>16u;return float(h)/4294967296.0;}float gloomN(vec2 p){vec2 i=floor(p);vec2 f=p-i;vec2 u=f*f*(3.0-2.0*f);ivec2 c=ivec2(i);return mix(mix(gloomH(c),gloomH(c+ivec2(1,0)),u.x),mix(gloomH(c+ivec2(0,1)),gloomH(c+ivec2(1,1)),u.x),u.y);}";
-    let gloomFragCode = `gloomT=vec4(0.0);gloomA=0.0;if(layerFlags!=vec4(0.0)){vec2 gq=vWorldPos.xz;float gd=length(gq-vec2(${gloomX.toFixed(2)},${gloomZ.toFixed(2)}))+(gloomN(gq/${gloomShapeNoiseScale.toFixed(4)}+vec2(41.3,17.9))-0.5)*${(2 * gloomShapeNoise).toFixed(4)}+(gloomN(gq/${gloomEdgeNoiseScale.toFixed(4)}+vec2(5.3,31.7))-0.5)*${(2 * gloomEdgeNoise).toFixed(4)}+(gloomN(gq/${gloomDetailNoiseScale.toFixed(4)}+vec2(23.1,8.9))-0.5)*${(2 * gloomDetailNoise).toFixed(4)};gloomA=1.0-smoothstep(${(gloomRadius - gloomFade).toFixed(2)},${gloomRadius.toFixed(2)},gd);gloomT=texture(gloomGrass,vec2(-gq.x,gq.y)/4.0*${gloomUvScale.toFixed(4)});}`;
-    let dirtPatchFragCode = `float patchM=texture(sandMask,vUvChannel).b*terrGrassW*${dirtPatchStrength.toFixed(4)};d.rgb=mix(d.rgb,texture(patchDiffuse,vec2(-vWorldPos.x,vWorldPos.z)/4.0*${dirtPatchUvScale.toFixed(4)}).rgb,patchM);`;
-    let stoneFragCode = `float stoneM=texture(sandMask,vUvChannel).g;float stoneN=0.5*sandNoise(vWorldPos.xz/${(3.2 * stoneNoiseScale).toFixed(4)})+0.3*sandNoise(vWorldPos.xz/${(1.1 * stoneNoiseScale).toFixed(4)}+vec2(17.3,5.1))+0.2*sandNoise(vWorldPos.xz/${(0.4 * stoneNoiseScale).toFixed(4)}+vec2(41.7,23.9));stoneM=smoothstep(0.3,0.6,stoneM*${(1 + stoneNoiseAmount * 0.5).toFixed(4)}+(stoneN-0.5)*${stoneNoiseAmount.toFixed(4)}*min(1.0,stoneM*3.0))*${stoneOverlayStrength.toFixed(4)}*terrGrassW;vec2 stoneUv=vec2(-vWorldPos.x,vWorldPos.z)/4.0*${stoneShaderUvScale.toFixed(4)};d.rgb=mix(d.rgb,texture(stoneDiffuse,stoneUv).rgb,stoneM);`;
-    let steepFragCode = `float steepM=texture(sandMask,vUvChannel).r*terrGrassW;d.rgb=mix(d.rgb,texture(stoneDiffuse,stoneUv).rgb,steepM);`;
+    let gloomFragCode = `gloomT=vec4(0.0);gloomA=0.0;if(layerFlags!=vec4(0.0)){vec2 gq=vWorldPos.xz;vec2 gv=gq-vec2(${gloomX.toFixed(2)},${gloomZ.toFixed(2)});float glen=length(gv);float gcone=${gloomConeReach.toFixed(2)}*pow(max(0.0,gv.x/max(glen,0.0001)),${gloomConeExp.toFixed(2)});float gd=glen+(gloomN(gq/${gloomShapeNoiseScale.toFixed(4)}+vec2(41.3,17.9))-0.5)*${(2 * gloomShapeNoise).toFixed(4)}+(gloomN(gq/${gloomEdgeNoiseScale.toFixed(4)}+vec2(5.3,31.7))-0.5)*${(2 * gloomEdgeNoise).toFixed(4)}+(gloomN(gq/${gloomDetailNoiseScale.toFixed(4)}+vec2(23.1,8.9))-0.5)*${(2 * gloomDetailNoise).toFixed(4)}+(gloomN(gq/${gloomOutNoiseScale.toFixed(4)}+vec2(7.7,53.1))-0.5)*${(2 * gloomOutNoise).toFixed(4)}-gcone;gloomA=1.0-smoothstep(${(gloomRadius - gloomFade).toFixed(2)},${gloomRadius.toFixed(2)},gd);gloomT=texture(gloomGrass,vec2(-gq.x,gq.y)/4.0*${gloomUvScale.toFixed(4)});}`;
+    let gsHardGlsl = `float gsHard(float m,vec2 s1,vec2 s2){if(m<=0.0)return 0.0;float hn=0.6*sandNoise(vWorldPos.xz/${(3.2*gsPatchNoiseScale).toFixed(4)}+s1)+0.4*sandNoise(vWorldPos.xz/${(1.1*gsPatchNoiseScale).toFixed(4)}+s2);return smoothstep(${gsPatchHardLo.toFixed(4)},${gsPatchHardHi.toFixed(4)},m*${(1+gsPatchNoiseAmount*.5).toFixed(4)}+(hn-0.5)*${gsPatchNoiseAmount.toFixed(4)}*min(1.0,m*3.0));}`;
+    let gsHardenSetup = "if(gsHere){patchA=gsHard(patchA,vec2(3.7,9.1),vec2(21.7,2.3));bigA=gsHard(bigA,vec2(11.3,4.7),vec2(29.1,13.9));spA=gsHard(spA,vec2(5.9,27.3),vec2(8.1,19.7));bandA=gsHard(bandA,vec2(31.1,12.7),vec2(2.9,24.3));}";
+    let dirtPatchFragCode = ``;
+    let dirtPatchSetupCode = `patchA=clamp(sandM.b*${dirtPatchStrength.toFixed(4)},0.0,1.0);patchT=patchA>0.0?texture(patchDiffuse,vec2(-vWorldPos.x,vWorldPos.z)/4.0*${dirtPatchUvScale.toFixed(4)}):vec4(0.0);`;
+    let hlBankFragCode = `if(hlBank>0.0){vec4 bankT=texture(bankDiffuse,vec2(-vWorldPos.x,vWorldPos.z)/4.0*${hlBankUvScale.toFixed(4)});d.rgb=mix(d.rgb,bankT.rgb,hlBank);}`;
+    let stoneFragCode = `float stoneM=sandM.g;float stoneN=0.6*sandNoise(vWorldPos.xz/${(3.2 * stoneNoiseScale).toFixed(4)})+0.4*sandNoise(vWorldPos.xz/${(1.1 * stoneNoiseScale).toFixed(4)}+vec2(17.3,5.1));stoneM=smoothstep(0.3,0.6,stoneM*${(1 + stoneNoiseAmount * 0.5).toFixed(4)}+(stoneN-0.5)*${stoneNoiseAmount.toFixed(4)}*min(1.0,stoneM*3.0))*${stoneOverlayStrength.toFixed(4)}*terrGrassW;d.rgb=mix(d.rgb,shoreTex.rgb,stoneM);`;
+    let stoneLightFragCode = `float ovCov=clamp(max(max(stoneM,steepA*terrGrassW),max(max(max(patchA,spA),bigA),bandA)*terrGrassW),0.0,1.0);if(litB>0.0&&ovCov>0.0){float sLum=d.r+d.g+d.b;e=mix(e,layerShape[3].z*smoothstep(layerShape[1].z,litB,sLum),ovCov);}e*=mix(1.0,${stoneSpecScale.toFixed(3)},ovCov);`;
+    let steepFragCode = ``;
+    let steepSetupCode = `vec4 sandM=texture(sandMask,vUvChannel);vec2 stoneUv=vec2(-vWorldPos.x,vWorldPos.z)/4.0*${stoneShaderUvScale.toFixed(4)};vec4 stoneTex=texture(stoneDiffuse,stoneUv);steepA=sandM.r;steepT=stoneTex;`;
     var tM = `#version 300 es
 precision highp float;precision highp int;out vec4 fragColor;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};in float vCameraDistance;in vec4 vWorldPos;uniform sampler2D diffuse;in vec2 vUv;in float vShine;void main(){if(vCameraDistance>fog[1][1]){fragColor=vec4(fog[0],1.0);return;}vec4 a=texture(diffuse,vUv);if(a.a<0.5)discard;a.rgb=mix(a.rgb*worldlight[1],a.rgb*1.1,smoothstep(-0.7,0.7,sin(time*6.0+vShine)));float b=clamp((fog[1][1]-vCameraDistance)/(fog[1][1]-fog[1][0]),0.0,1.0);a.rgb=mix(fog[0],a.rgb,b);fragColor=a;}`;
     var nM = `#version 300 es
@@ -14041,11 +14811,12 @@ uniform Camera{
 };
 uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};
 
+uniform vec3 ffCenter;
 uniform float ffRange;
-uniform float ffBaseY;
 uniform float ffHeight;
 uniform float ffSize;
 uniform float ffDrift;
+uniform float ffVDrift;
 
 in vec2 corner;
 in float fid;
@@ -14064,34 +14835,25 @@ void main(){
     vec3 h = hash31(fid);
     vec3 h2 = hash31(fid + 71.3);
 
-    vec2 rel = h.xz * ffRange - cameraPosition.xz;
-    rel = mod(rel + ffRange * 0.5, ffRange) - ffRange * 0.5;
-
-    float vh = ffHeight * 2.0;
-    float relY = mod(h2.y * vh - ffBaseY + vh * 0.5, vh) - vh * 0.5;
-    float heightFade = 1.0 - smoothstep(ffHeight * 0.45, ffHeight * 0.95, abs(relY));
-
-    vec3 pos = vec3(cameraPosition.x + rel.x, ffBaseY + relY, cameraPosition.z + rel.y);
+    float ang = h.x * 6.2831;
+    float ct = h.y * 2.0 - 1.0;
+    float st = sqrt(max(0.0, 1.0 - ct * ct));
+    float rad = pow(h.z, 0.33333333);
+    vec3 ball = vec3(st * cos(ang), ct, st * sin(ang)) * rad;
+    vec3 pos = ffCenter + vec3(ball.x * ffRange, ffHeight * (0.5 + ball.y * 0.5), ball.z * ffRange);
 
     float t = time;
     pos += vec3(
-        sin(t * 0.41 + h2.x * 6.2831),
-        sin(t * 0.29 + h2.y * 6.2831) * 0.6,
-        cos(t * 0.35 + h2.z * 6.2831)
+        sin(t * 0.13 + h2.x * 6.2831) + sin(t * 0.37 + h.z * 6.2831) * 0.45,
+        0.0,
+        cos(t * 0.11 + h2.z * 6.2831) + cos(t * 0.41 + h2.y * 6.2831) * 0.45
     ) * ffDrift;
-
-    float rate = 0.35 + h2.z * 0.5;
-    float blink = sin(t * rate * 6.2831 + h.z * 6.2831) * 0.5 + 0.5;
-    blink = pow(blink, 4.0);
-
-    float night = clamp((1.0 - sin(daycycle * 6.28)) * 0.5, 0.0, 1.0);
-    night = smoothstep(0.45, 0.9, night);
+    pos.y += (sin(t * 0.07 + h2.y * 6.2831) * 0.65 + sin(t * 0.031 + h.y * 6.2831) * 0.35) * ffVDrift;
 
     vDist = length(pos - cameraPosition);
-    float nearFade = smoothstep(1.0, 4.0, vDist);
-    float farFade = 1.0 - smoothstep(ffRange * 0.32, ffRange * 0.5, vDist);
+    float nearFade = smoothstep(0.4, 1.6, vDist);
 
-    vGlow = blink * night * nearFade * farFade * heightFade * (0.55 + h.x * 0.45);
+    vGlow = nearFade * (0.75 + h.x * 0.25);
 
     if(vGlow <= 0.002){
         gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
@@ -14164,8 +14926,8 @@ uniform float grSplit;
 in vec2 vUv;
 out vec4 fragColor;
 
-const int grSteps = 48;
-const int grStepsFar = 24;
+const int grSteps = 18;
+const int grStepsFar = 8;
 const float grFarStart = 100.0;
 const float grNormDist = 90.0;
 const float grGateFloor = 0.55;
@@ -14248,6 +15010,8 @@ void main(){
     float ign = fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715))));
 
     const float grNearSkip = 6.0;
+    vec3 grSideOff = normalize(cross(worldlight[2], vec3(0.0, 1.0, 0.0)) + 1e-4) * (0.9 + 0.9 * ign) * (ign > 0.5 ? 1.0 : -1.0);
+    grSideOff.y += 0.45 * ign;
     float lit = 0.0;
     float litSq = 0.0;
     float den = 0.0;
@@ -14255,8 +15019,7 @@ void main(){
         float t = stepLen * (float(i) + ign) + grNearSkip;
         vec3 sp = cameraPosition + rd * t;
         float d = grDensity(sp);
-        vec3 so = normalize(cross(worldlight[2], vec3(0.0, 1.0, 0.0)) + 1e-4) * (0.9 + 0.9 * ign);
-        float s = 0.5 * (sunlightAt(sp + so, t) + sunlightAt(sp - so + vec3(0.0, 0.9 * ign, 0.0), t));
+        float s = sunlightAt(sp + grSideOff, t);
         den += d;
         lit += d * s;
         litSq += d * s * s;
@@ -14557,11 +15320,11 @@ void main(){float dist=length(cameraPosition-vWorldPos.xyz);if(dist>fog[1][1]){f
 float depth=max(0.0,vWorldPos.y-wTerr(vWorldPos.xz))*0.25;float speed=0.05;float vis=0.6;float wave=0.0;vec2 dir=vec2(1.0,0.0);float wiggle=1.0;
 for(int i=0;i<2;++i){float off=1.0/3.0*float(i);float t=mod(time*0.2+off,1.0)*3.141;float sppd=speed+0.2;vec2 shift=vec2(sppd*dir.y*t+off,sppd*dir.x*t+off);float curve=abs(sin(t));wave+=texture(waterWave,vUv.yx*0.5+shift).r*curve;wiggle+=((sin((vUv.x+shift.y)*10.0)+cos((vUv.y+shift.x)*10.0))*curve*(0.2+sppd*0.6));}
 vec3 colFoam=watercolors[0];vec3 colShallow=watercolors[1];vec3 colDeep=watercolors[2];vec4 bigwave=texture(waterLines,vUv.yx+time*speed*2.0+wave*0.1);
-vec4 wet_c=vec4(colFoam,0.0);vec4 foam_c=vec4(colFoam,0.9);vec4 blub_c=vec4(mix(colFoam,colShallow,0.9)*0.8,0.5)+speed*0.1;vec4 shallow_c=vec4(colShallow,0.4)+bigwave*0.05;vec4 water_c=vec4(mix(colShallow,colDeep,0.5),0.8-vis*0.4)+bigwave*0.08;vec4 deep_c=vec4(colDeep,1.4-vis*0.8)+bigwave*0.12;
+vec4 wet_c=vec4(colFoam,0.0);vec4 foam_c=vec4(colFoam,0.9);vec4 blub_c=vec4(mix(colFoam,colShallow,0.9)*0.8,0.5)+speed*0.1;vec4 shallow_c=vec4(colShallow,0.4)+bigwave*0.05;vec4 water_c=vec4(mix(colShallow,colDeep,0.5),0.8-vis*0.4)+bigwave*0.08;vec4 deep_c=vec4(colDeep,0.75)+vec4(bigwave.rgb*0.12,0.0);
 float wet_r=0.03+0.01*wave;float foam_r=wet_r+0.02+speed*0.05+0.03*wave+wiggle*0.02;float blub_r=foam_r+(0.05+speed*0.5*wave+wiggle*0.05)*vis;float shallow_r=blub_r+(0.2+speed*0.2-wave*0.1)*vis;float water_r=shallow_r+(0.2)*vis;
 vec4 result=vec4(0.0);if(depth<wet_r){result=mix(wet_c,foam_c,smoothstep(0.0,wet_r,depth));}else if(depth<foam_r){result=mix(foam_c,blub_c,smoothstep(wet_r,foam_r,depth));}else if(depth<blub_r){result=mix(blub_c,shallow_c,smoothstep(foam_r+(blub_r-foam_r)*0.3,blub_r,depth));}else if(depth<shallow_r){result=mix(shallow_c,water_c,smoothstep(blub_r+(shallow_r-blub_r)*0.4,shallow_r,depth));}else{result=mix(water_c,deep_c,smoothstep(water_r,1.0,depth));}
 result.rgb-=0.2;vec3 up=vec3(0.0,1.0,0.0);float lambertian=max(dot(worldlight[2],up),0.0);vec3 reflectDir=reflect(-worldlight[2],up);vec3 viewDir=-normalize(vWorldPos.xyz-cameraPosition);float specular=min(1.0,max(0.0,pow(max(dot(reflectDir,viewDir),0.0),10.0)))*0.6;result.rgb=result.rgb*worldlight[0]*lambertian+result.rgb*worldlight[1]+specular*worldlight[0];
-if(u_sunRefl>0.01){vec3 gV=normalize(cameraPosition-vWorldPos.xyz);float gA=pow(max(dot(reflect(-gV,vec3(0.0,1.0,0.0)),worldlight[2]),0.0),10.0);vec2 gP=vec2(texture(waterLines,vWorldPos.xz*0.42+time*0.05).r,texture(waterLines,vWorldPos.zx*0.31-time*0.04).r)+vec2(texture(waterLines,vWorldPos.zx*0.15+time*0.025).r,texture(waterLines,vWorldPos.xz*0.19-time*0.03).r)-1.0;vec3 gN=normalize(vec3(gP.x*0.7,1.0,gP.y*0.7));float gD=max(dot(reflect(-gV,gN),worldlight[2]),0.0);float gF=(0.4+0.6*pow(1.0-max(gV.y,0.0),2.0))*u_sunRefl*smoothstep(-0.05,0.15,worldlight[2].y);float gS=smoothstep(0.955,0.99,gD)*gA*3.5;result.rgb+=(worldlight[0]*1.3+vec3(0.1))*gS*gF;result.a=max(result.a,min(1.0,gS*gF));}
+if(u_sunRefl>0.01){vec3 gV=normalize(cameraPosition-vWorldPos.xyz);float gF=(0.4+0.6*pow(1.0-max(gV.y,0.0),2.0))*u_sunRefl*smoothstep(-0.05,0.15,worldlight[2].y);float gA=gF>0.002?pow(max(dot(reflect(-gV,vec3(0.0,1.0,0.0)),worldlight[2]),0.0),10.0):0.0;float gS=0.0;if(gA>0.002){vec2 gP=vec2(texture(waterWave,vWorldPos.xz*0.42+time*0.05).r,texture(waterWave,vWorldPos.zx*0.31-time*0.04).r)*2.0-1.0;vec3 gN=normalize(vec3(gP.x*0.6,1.0,gP.y*0.6));float gD=max(dot(reflect(-gV,gN),worldlight[2]),0.0);gS=smoothstep(0.955,0.99,gD)*gA*3.5;}result.rgb+=(worldlight[0]*1.3+vec3(0.1))*gS*gF;result.a=max(result.a,min(1.0,gS*gF));}
 result.rgb=mix(fog[0],result.rgb,clamp((fog[1][1]-dist)/(fog[1][1]-fog[1][0]),0.0,1.0));fragColor=vec4(result.rgb,clamp(result.a,0.0,1.0));}`;
     var classicWaveAt = (w, B) => {
 
@@ -14576,7 +15339,7 @@ result.rgb=mix(fog[0],result.rgb,clamp((fog[1][1]-dist)/(fog[1][1]-fog[1][0]),0.
 precision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};out float vCameraDistance;out vec4 vWorldPos;uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform Water{vec3 verts[4];};in vec3 position;out vec2 vUv;void main(){vec3 a=mix(verts[0],verts[1],position.x);vec3 b=mix(verts[2],verts[3],position.x);vWorldPos=vec4(mix(a,b,position.z),1.0);vWorldPos.y+=cos(vWorldPos.z*0.25)*sin(vWorldPos.x*0.1+vWorldPos.z*0.4+time*1.2)*0.2;vUv=vWorldPos.xz/2.0;vCameraDistance=length(cameraPosition-vWorldPos.xyz);gl_Position=projectionViewMatrix*vWorldPos;}`;
 
     if (shoreShaderEnabled) {
-        UM = UM.replace("uniform sampler2D diffuse[4];", "uniform sampler2D diffuse[4];uniform highp sampler2DArray sandMask;uniform sampler2D patchDiffuse;uniform sampler2D gloomGrass;uniform sampler2D stoneDiffuse;" + gloomNoiseGlsl + "vec4 gloomT;float gloomA;vec4 gloomMix(vec4 t,float f){return f>0.0?mix(t,gloomT,gloomA*f):t;}float mdwA;vec4 mdwMix(vec4 t,float w){return w>1.5?vec4(mix(t.rgb,t.rgb*vec3(" + meadowPatchTint.map(v => v.toFixed(4)).join(",") + "),mdwA),t.a):t;}" + "float sandHash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}float sandNoise(vec2 p){vec2 i=floor(p);vec2 f=fract(p);vec2 u=f*f*(3.0-2.0*f);return mix(mix(sandHash(i),sandHash(i+vec2(1.0,0.0)),u.x),mix(sandHash(i+vec2(0.0,1.0)),sandHash(i+vec2(1.0,1.0)),u.x),u.y);}").replace("x=mix(x,rw,layerShape[0].z);", "x=mix(x,rw,layerShape[0].z);" + gloomFragCode + "mdwA=texture(sandMask,vUvChannel).a*(1.0-gloomA);").replace("s(texture(diffuse[0],vUvTexture[0]),x[0],terrainInfo[0]);", "s(mdwMix(gloomMix(texture(diffuse[0],vUvTexture[0]),layerFlags.x),layerShape[0].w),x[0],terrainInfo[0]);").replace("s(texture(diffuse[1],vUvTexture[1]),x[1],terrainInfo[1]);", "s(mdwMix(gloomMix(texture(diffuse[1],vUvTexture[1]),layerFlags.y),layerShape[1].w),x[1],terrainInfo[1]);").replace("s(texture(diffuse[2],vUvTexture[2]),x[2],terrainInfo[2]);", "s(mdwMix(gloomMix(texture(diffuse[2],vUvTexture[2]),layerFlags.z),layerShape[2].w),x[2],terrainInfo[2]);").replace("s(texture(diffuse[3],vUvTexture[3]),x[3],terrainInfo[3]);", "s(mdwMix(gloomMix(texture(diffuse[3],vUvTexture[3]),layerFlags.w),layerShape[3].w),x[3],terrainInfo[3]);").replace("d.rgb/=d.a;e/=d.a;d.a=1.0;", "d.rgb/=d.a;e/=d.a;d.a=1.0;float terrGrassW=clamp(dot(x,min(vec4(layerShape[0].w,layerShape[1].w,layerShape[2].w,layerShape[3].w),vec4(1.0))),0.0,1.0);" + dirtPatchFragCode + stoneFragCode + steepFragCode);
+        UM = UM.replace("uniform sampler2D diffuse[4];", "uniform sampler2D diffuse[4];uniform highp sampler2DArray sandMask;uniform highp sampler2DArray spMask;uniform sampler2D patchDiffuse;uniform sampler2D gloomGrass;uniform sampler2D stoneDiffuse;uniform sampler2D bandDiffuse;uniform sampler2D spDiffuse;uniform sampler2D bankDiffuse;" + gloomNoiseGlsl + "vec4 gloomT;float gloomA;vec4 gloomMix(vec4 t,float f){return f>0.0?mix(t,gloomT,gloomA*f):t;}vec4 steepT;float steepA;vec4 steepMix(vec4 t,float w){return (w>0.0&&steepA>0.0)?vec4(mix(t.rgb,steepT.rgb,steepA),t.a):t;}vec4 patchT;float patchA;vec4 patchMix(vec4 t,float w){return (w>0.0&&patchA>0.0)?vec4(mix(t.rgb,patchT.rgb,patchA),t.a):t;}vec4 bigT;float bigA;vec4 bigMix(vec4 t,float w){return (w>0.0&&bigA>0.0)?vec4(mix(t.rgb,bigT.rgb,bigA),t.a):t;}vec4 bandT;float bandA;vec4 bandMix(vec4 t,float w){return (w>0.0&&bandA>0.0)?vec4(mix(t.rgb,bandT.rgb,bandA),t.a):t;}float gmA;vec4 gmMix(vec4 t,float w){return (w>0.0&&gmA>0.0)?vec4(mix(t.rgb,clamp((t.rgb-0.5)*" + gsMeadowContrast.toFixed(4) + "+0.5+" + gsMeadowBright.toFixed(4) + ",0.0,1.0),gmA),t.a):t;}vec4 spT;float spA;vec4 spMix(vec4 t,float w){return (w>0.0&&spA>0.0)?vec4(mix(t.rgb,spT.rgb,spA),t.a):t;}float mdwA;vec4 mdwMix(vec4 t,float w){return w>1.5?vec4(mix(t.rgb,t.rgb*vec3(" + meadowPatchTint.map(v => v.toFixed(4)).join(",") + "),mdwA),t.a):t;}" + "float sandHash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}float sandNoise(vec2 p){vec2 i=floor(p);vec2 f=fract(p);vec2 u=f*f*(3.0-2.0*f);return mix(mix(sandHash(i),sandHash(i+vec2(1.0,0.0)),u.x),mix(sandHash(i+vec2(0.0,1.0)),sandHash(i+vec2(1.0,1.0)),u.x),u.y);}" + gsHardGlsl).replace("x=mix(x,rw,layerShape[0].z);", "x=mix(x,rw,layerShape[0].z);" + gloomFragCode + steepSetupCode + dirtPatchSetupCode + "bool gsHere=layerShape[2].z>0.0;float litB=abs(layerShape[2].z);spT=texture(spDiffuse,stoneUv*" + gsSpUvScale.toFixed(4) + ");vec3 spM=gsHere?texture(spMask,vUvChannel).rgb:vec3(0.0);float hlBank=gsHere?0.0:texture(spMask,vUvChannel).r;spA=spM.x;gmA=spM.y;bandA=spM.z;bandT=bandA>0.0?texture(patchDiffuse,stoneUv):vec4(0.0);vec4 shoreTex=gsHere?texture(bandDiffuse,stoneUv):spT;mdwA=gsHere?0.0:sandM.a*(1.0-gloomA);bigA=gsHere?sandM.a:0.0;bigT=bigA>0.0?texture(patchDiffuse,stoneUv):vec4(0.0);" + gsHardenSetup).replace("s(texture(diffuse[0],vUvTexture[0]),x[0],terrainInfo[0]);", "s(steepMix(bandMix(spMix(bigMix(patchMix(gmMix(mdwMix(gloomMix(texture(diffuse[0],vUvTexture[0]),layerFlags.x),layerShape[0].w),layerShape[0].w),layerShape[0].w),layerShape[0].w),layerShape[0].w),layerShape[0].w),layerShape[0].w),x[0],terrainInfo[0]);").replace("s(texture(diffuse[1],vUvTexture[1]),x[1],terrainInfo[1]);", "s(steepMix(bandMix(spMix(bigMix(patchMix(gmMix(mdwMix(gloomMix(texture(diffuse[1],vUvTexture[1]),layerFlags.y),layerShape[1].w),layerShape[1].w),layerShape[1].w),layerShape[1].w),layerShape[1].w),layerShape[1].w),layerShape[1].w),x[1],terrainInfo[1]);").replace("s(texture(diffuse[2],vUvTexture[2]),x[2],terrainInfo[2]);", "s(steepMix(bandMix(spMix(bigMix(patchMix(gmMix(mdwMix(gloomMix(texture(diffuse[2],vUvTexture[2]),layerFlags.z),layerShape[2].w),layerShape[2].w),layerShape[2].w),layerShape[2].w),layerShape[2].w),layerShape[2].w),layerShape[2].w),x[2],terrainInfo[2]);").replace("s(texture(diffuse[3],vUvTexture[3]),x[3],terrainInfo[3]);", "s(steepMix(bandMix(spMix(bigMix(patchMix(gmMix(mdwMix(gloomMix(texture(diffuse[3],vUvTexture[3]),layerFlags.w),layerShape[3].w),layerShape[3].w),layerShape[3].w),layerShape[3].w),layerShape[3].w),layerShape[3].w),layerShape[3].w),x[3],terrainInfo[3]);").replace("d.rgb/=d.a;e/=d.a;d.a=1.0;", "d.rgb/=d.a;e/=d.a;d.a=1.0;float terrGrassW=clamp(dot(x,min(vec4(layerShape[0].w,layerShape[1].w,layerShape[2].w,layerShape[3].w),vec4(1.0))),0.0,1.0);" + hlBankFragCode + dirtPatchFragCode + stoneFragCode + stoneLightFragCode + steepFragCode);
     }
     var e4_orig = UM.replace('vec3 f(vec3 g,vec3 h,vec3 i,vec3 j,float k,vec3 l,float m){j=normalize(j);float n=clamp(dot(j,worldlight[2]),0.0,k);vec3 o=g;vec3 p=normalize(worldlight[2]+vViewDir);vec3 q=vec3(pow(max(0.0,dot(p,j)),8.5)*2.0)*m*0.15;vec3 r=o+h*n*0.75+l;return r*i+q;}', 'vec3 f(vec3 g,vec3 h,vec3 i,vec3 j,float k,vec3 l,float m){j=normalize(j);float n=clamp(dot(j,worldlight[2]),0.0,k);vec3 o=g*mix(0.7,1.1,0.5+(0.5*n));vec3 p=normalize(worldlight[2]+vViewDir);vec3 q=h*pow(max(0.0,dot(p,j)),20.0)*m*max(k*0.7+0.2,0.2)*20.0;vec3 r=o+h*n+l;return r*i+q;}');
     var $M = `#version 300 es
@@ -14596,7 +15359,7 @@ precision highp float;precision highp int;uniform Environment{vec3 worldlight[3]
     var YM = `#version 300 es
 precision highp float;precision highp int;uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform MeshTerrain{mat4 modelMatrix;vec4 terrainInfo[4];vec4 layerShape[4];vec4 layerSuppress[4];vec4 layerFlags;int quadrant;};in vec3 position;void main(){vec4 a=modelMatrix*vec4(position,1.0);gl_Position=projectionViewMatrix*a;}`;
     var QM = `#version 300 es
-precision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};in float vCameraDistance;in vec4 vWorldPos;uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform Screen{vec2 resolution;};uniform sampler2D waterLines;uniform sampler2D waterNoise;uniform sampler2D bufferPongColor;uniform sampler2D bufferPongDepth;uniform float u_sunRefl;in vec2 vUv;out vec4 fragColor;void main(){float a=length(cameraPosition-vWorldPos.xyz);float b=(texture(waterNoise,vUv.yx/4.0+time*0.1).r-0.5);float c=gl_FragCoord.z;c=c*2.0-1.0;c=projectionMatrix[3][2]/(c+projectionMatrix[2][2]);if(a>fog[1][1]){fragColor=vec4(fog[0],1.0);return;}vec2 d=gl_FragCoord.xy/resolution;float e=texture(bufferPongDepth,d.xy).r;e=e*2.0-1.0;e=projectionMatrix[3][2]/(e+projectionMatrix[2][2]);float f=e-c;vec2 g=vec2(b*0.05,0.0);float h=f;float i=1.0-clamp(h/0.1,0.0,1.0);float j=1.0-clamp(h/0.6,0.0,1.0);float k=1.0-clamp(h/2.0,0.0,1.0);float l=1.0-clamp(h/10.0,0.0,1.0);float m=1.0-clamp(h/100.0+0.5,0.0,1.0);float n=texture(waterLines,vUv.yx+b*0.15).r;vec3 o=mix(watercolors[2],watercolors[1],l);vec3 p=texture(bufferPongColor,d.xy+g).rgb;vec3 q=(worldlight[0]+worldlight[1]);vec3 r=mix(o,p*o,m)+n*watercolors[0]*(0.05+k*0.3);r=mix(r,watercolors[0],j)*q;vec4 s=vec4(r,1.0-i);float t=min(1.0,max(0.0,(n*(b+0.3)*0.5)));s.rgb+=t*worldlight[0];if(u_sunRefl>0.01){vec3 gV=normalize(cameraPosition-vWorldPos.xyz);float gA=pow(max(dot(reflect(-gV,vec3(0.0,1.0,0.0)),worldlight[2]),0.0),10.0);vec2 gP=vec2(texture(waterLines,vWorldPos.xz*0.42+time*0.05).r,texture(waterLines,vWorldPos.zx*0.31-time*0.04).r)+vec2(texture(waterLines,vWorldPos.zx*0.15+time*0.025).r,texture(waterLines,vWorldPos.xz*0.19-time*0.03).r)-1.0;vec3 gN=normalize(vec3(gP.x*0.7,1.0,gP.y*0.7));float gD=max(dot(reflect(-gV,gN),worldlight[2]),0.0);float gF=(0.4+0.6*pow(1.0-max(gV.y,0.0),2.0))*u_sunRefl*smoothstep(-0.05,0.15,worldlight[2].y);float gS=smoothstep(0.955,0.99,gD)*gA*3.5;s.rgb+=(worldlight[0]*1.3+vec3(0.1))*gS*gF;s.a=max(s.a,min(1.0,gS*gF));}float u=clamp((fog[1][1]-a)/(fog[1][1]-fog[1][0]),0.0,1.0);s.rgb=mix(fog[0],s.rgb,u);fragColor=s;}`;
+precision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};in float vCameraDistance;in vec4 vWorldPos;uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform Screen{vec2 resolution;};uniform sampler2D waterLines;uniform sampler2D waterNoise;uniform sampler2D bufferPongColor;uniform sampler2D bufferPongDepth;uniform float u_sunRefl;in vec2 vUv;out vec4 fragColor;void main(){float a=length(cameraPosition-vWorldPos.xyz);float b=(texture(waterNoise,vUv.yx/4.0+time*0.1).r-0.5);float c=gl_FragCoord.z;c=c*2.0-1.0;c=projectionMatrix[3][2]/(c+projectionMatrix[2][2]);if(a>fog[1][1]){fragColor=vec4(fog[0],1.0);return;}vec2 d=gl_FragCoord.xy/resolution;float e=texture(bufferPongDepth,d.xy).r;e=e*2.0-1.0;e=projectionMatrix[3][2]/(e+projectionMatrix[2][2]);float f=e-c;vec2 g=vec2(b*0.05,0.0);float h=f;float i=1.0-clamp(h/0.1,0.0,1.0);float j=1.0-clamp(h/0.6,0.0,1.0);float k=1.0-clamp(h/2.0,0.0,1.0);float l=1.0-clamp(h/10.0,0.0,1.0);float m=1.0-clamp(h/100.0+0.5,0.0,1.0);float n=texture(waterLines,vUv.yx+b*0.15).r;vec3 o=mix(watercolors[2],watercolors[1],l);vec3 p=texture(bufferPongColor,d.xy+g).rgb;vec3 q=(worldlight[0]+worldlight[1]);vec3 r=mix(o,p*o,m)+n*watercolors[0]*(0.05+k*0.3);r=mix(r,watercolors[0],j)*q;vec4 s=vec4(r,1.0-i);float t=min(1.0,max(0.0,(n*(b+0.3)*0.5)));s.rgb+=t*worldlight[0];if(u_sunRefl>0.01){vec3 gV=normalize(cameraPosition-vWorldPos.xyz);float gF=(0.4+0.6*pow(1.0-max(gV.y,0.0),2.0))*u_sunRefl*smoothstep(-0.05,0.15,worldlight[2].y);float gA=gF>0.002?pow(max(dot(reflect(-gV,vec3(0.0,1.0,0.0)),worldlight[2]),0.0),10.0):0.0;float gS=0.0;if(gA>0.002){vec2 gP=vec2(texture(waterLines,vWorldPos.xz*0.42+time*0.05).r,texture(waterLines,vWorldPos.zx*0.31-time*0.04).r)*2.0-1.0;vec3 gN=normalize(vec3(gP.x*0.6,1.0,gP.y*0.6));float gD=max(dot(reflect(-gV,gN),worldlight[2]),0.0);gS=smoothstep(0.955,0.99,gD)*gA*3.5;}s.rgb+=(worldlight[0]*1.3+vec3(0.1))*gS*gF;s.a=max(s.a,min(1.0,gS*gF));}float u=clamp((fog[1][1]-a)/(fog[1][1]-fog[1][0]),0.0,1.0);s.rgb=mix(fog[0],s.rgb,u);fragColor=s;}`;
     var XM = `#version 300 es
 precision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};out float vCameraDistance;out vec4 vWorldPos;uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform Water{vec3 verts[4];};in vec3 position;in vec3 color;in vec3 colorFoam;in vec3 colorShallow;out vec2 vUv;void main(){vWorldPos.xyz=verts[gl_VertexID];vWorldPos.w=1.0;vUv=vWorldPos.xz/2.0;gl_Position=projectionViewMatrix*vWorldPos;}`;
     var KM = `#version 300 es
@@ -15293,8 +16056,8 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     ffRange: {
                         value: 70
                     },
-                    ffBaseY: {
-                        value: 0
+                    ffCenter: {
+                        value: [0, 0, 0]
                     },
                     ffHeight: {
                         value: 8
@@ -15304,6 +16067,9 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     },
                     ffDrift: {
                         value: 1.5
+                    },
+                    ffVDrift: {
+                        value: 1
                     },
                     ffColor: {
                         value: [.71, 1, .37]
@@ -15595,17 +16361,8 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             if (jr > 0) {
                 let s = T.player ? n6(!0, T.player.pos) : void 0;
                 go(o.circleInfo, ...th.friendly, 1), go(o.circlePos, s[0], s[1], s[2], o6);
-                /*} else if (fe.aoeCircleEnabled && I && I.player) {
-                    e !== jg ? (jg = e, sc = 1) : sc = Math.max(sc * (1 - t * 10), 0);
 
-                    let player = I.player,
-                        color = fe.aoeCircleColor || "#ffffff";
-                    let red = parseInt(color.slice(1, 3), 16) / 255,
-                        green = parseInt(color.slice(3, 5), 16) / 255,
-                        blue = parseInt(color.slice(5, 7), 16) / 255;
 
-                    io(o.circlePos, player.pos[0], player.pos[1] - player.radius, player.pos[2], fe.aoeCircleSize);
-                    io(o.circleInfo, red, green, blue, 1.0 + fe.aoeCircleAlpha / 100); */
             } else if (e !== K_ ? (K_ = e, Wc = 1) : Wc = Math.max(Wc * (1 - t * 10), 0), e > 0) {
                 let s = T.getEntityById(e);
                 if (s !== void 0) {
@@ -15775,7 +16532,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             c() {
                 e = g("div"), n = g("div"), A && A.c(), o = g("img"), r = g("div"), l = g("div"), Z(a.$$.fragment), F && F.c(), R.c(), f = he(), L && L.c(), u = g("div");
                 for (let q = 0; q < p.length; q += 1) p[q].c();
-                m(o, "class", s = "pclass icon border black bgc" + t[5].class + " svelte-g292qg"), Te(o, "background", bgcStyle("bgc" + t[5].class)), pt(o.src, i = (t[5].rarity !== !1 ? "/data/ui/mobpower/" + t[5].rarity : "/data/ui/classes/" + t[5].class) + "." + Xn + "?v=8926940") || m(o, "src", i), m(n, "class", "iconcontainer svelte-g292qg"), m(l, "class", c = "panel-black barsInner " + (t[5].id && t[5].range ? "targetable" : "") + " svelte-g292qg"), m(u, "class", v = "buffarray " + t[2] + " svelte-g292qg"), m(r, "class", _ = "bars " + (t[17] && t[5].id == t[17].id && t[2] == "party" ? "target" : "") + " svelte-g292qg"), m(e, "id", t[4]), m(e, "class", b = "grid " + (t[3] ? "right" : "left") + " svelte-g292qg"), Te(e, "font-size", plateFontSize(t[15])), Te(e, "opacity", plateOpacity(t[2], t[5].range, t[5].id));
+                m(o, "class", s = "pclass icon border black bgc" + t[5].class + " svelte-g292qg"), Te(o, "background", bgcStyle("bgc" + t[5].class)), pt(o.src, i = (t[5].rarity !== !1 ? "/data/ui/mobpower/" + t[5].rarity : "/data/ui/classes/" + t[5].class) + "." + Xn + "?v=8971923") || m(o, "src", i), m(n, "class", "iconcontainer svelte-g292qg"), m(l, "class", c = "panel-black barsInner " + (t[5].id && t[5].range ? "targetable" : "") + " svelte-g292qg"), m(u, "class", v = "buffarray " + t[2] + " svelte-g292qg"), m(r, "class", _ = "bars " + (t[17] && t[5].id == t[17].id && t[2] == "party" ? "target" : "") + " svelte-g292qg"), m(e, "id", t[4]), m(e, "class", b = "grid " + (t[3] ? "right" : "left") + " svelte-g292qg"), Te(e, "font-size", plateFontSize(t[15])), Te(e, "opacity", plateOpacity(t[2], t[5].range, t[5].id));
             },
             m(q, O) {
                 x(q, e, O), d(e, n), A && A.m(n, null), d(n, o), d(e, r), d(r, l), X(a, l, null), F && F.m(l, null), R.m(r, null), d(r, f), L && L.m(r, null), d(r, u);
@@ -15851,7 +16608,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                         Te(flashDiv, "display", "none");
                     }
                 }
-                q[2] == "default" ? A || (A = r6(q), A.c(), A.m(n, o)) : A && (A.d(1), A = null), (!k || O & 32 && s !== (s = "pclass icon border black bgc" + q[5].class + " svelte-g292qg")) && (m(o, "class", s), Te(o, "background", bgcStyle("bgc" + q[5].class))), (!k || O & 32 && !pt(o.src, i = (q[5].rarity !== !1 ? "/data/ui/mobpower/" + q[5].rarity : "/data/ui/classes/" + q[5].class) + "." + Xn + "?v=8926940")) && m(o, "src", i);
+                q[2] == "default" ? A || (A = r6(q), A.c(), A.m(n, o)) : A && (A.d(1), A = null), (!k || O & 32 && s !== (s = "pclass icon border black bgc" + q[5].class + " svelte-g292qg")) && (m(o, "class", s), Te(o, "background", bgcStyle("bgc" + q[5].class))), (!k || O & 32 && !pt(o.src, i = (q[5].rarity !== !1 ? "/data/ui/mobpower/" + q[5].rarity : "/data/ui/classes/" + q[5].class) + "." + Xn + "?v=8971923")) && m(o, "src", i);
                 let N = {};
                 O & 256 && (N.fract = q[8]), O & 8192 && (N.barcol = q[13]), O & 1024 && (N.left = q[10]), O & 64 && (N.right = q[6]), O & 536895748 && (N.$$scope = {
                     dirty: O,
@@ -15996,13 +16753,13 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         let e, n, o;
         return {
             c() {
-                e = g("img"), m(e, "class", n = "tag icon border black bgf" + t[5].faction + " round svelte-g292qg"), pt(e.src, o = "/data/ui/factions/" + t[5].faction + "." + Xn + "?v=8926940") || m(e, "src", o)
+                e = g("img"), m(e, "class", n = "tag icon border black bgf" + t[5].faction + " round svelte-g292qg"), pt(e.src, o = "/data/ui/factions/" + t[5].faction + "." + Xn + "?v=8971923") || m(e, "src", o)
             },
             m(s, i) {
                 x(s, e, i)
             },
             p(s, i) {
-                i & 32 && n !== (n = "tag icon border black bgf" + s[5].faction + " round svelte-g292qg") && m(e, "class", n), i & 32 && !pt(e.src, o = "/data/ui/factions/" + s[5].faction + "." + Xn + "?v=8926940") && m(e, "src", o)
+                i & 32 && n !== (n = "tag icon border black bgf" + s[5].faction + " round svelte-g292qg") && m(e, "class", n), i & 32 && !pt(e.src, o = "/data/ui/factions/" + s[5].faction + "." + Xn + "?v=8971923") && m(e, "src", o)
             },
             d(s) {
                 s && w(e)
@@ -16014,13 +16771,13 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         let e, n;
         return {
             c() {
-                e = g("img"), m(e, "class", "tag icon border black bgblack round svelte-g292qg"), pt(e.src, n = "/data/ui/icons/" + (t[5].role == 2 ? "star" : "starsilver") + "." + Xn + "?v=8926940") || m(e, "src", n)
+                e = g("img"), m(e, "class", "tag icon border black bgblack round svelte-g292qg"), pt(e.src, n = "/data/ui/icons/" + (t[5].role == 2 ? "star" : "starsilver") + "." + Xn + "?v=8971923") || m(e, "src", n)
             },
             m(o, s) {
                 x(o, e, s)
             },
             p(o, s) {
-                s & 32 && !pt(e.src, n = "/data/ui/icons/" + (o[5].role == 2 ? "star" : "starsilver") + "." + Xn + "?v=8926940") && m(e, "src", n)
+                s & 32 && !pt(e.src, n = "/data/ui/icons/" + (o[5].role == 2 ? "star" : "starsilver") + "." + Xn + "?v=8971923") && m(e, "src", n)
             },
             d(o) {
                 o && w(e)
@@ -16436,7 +17193,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         return t.$$set = le => {
             "data" in le && n(0, c = le.data), "key" in le && n(1, f = le.key), "stacks" in le && n(2, u = le.stacks), "cd" in le && n(3, p = le.cd), "remaining" in le && n(4, h = le.remaining), "border" in le && n(5, v = le.border), "img" in le && n(22, _ = le.img), "meta" in le && n(23, b = le.meta), "css" in le && n(6, k = le.css), "id" in le && n(7, y = le.id), "describe" in le && n(8, C = le.describe), "queued" in le && n(24, A = le.queued), "pickable" in le && n(25, F = le.pickable), "descRoot" in le && n(26, M = le.descRoot), "descPos" in le && n(9, I = le.descPos), "auto" in le && n(10, R = le.auto), "status" in le && n(27, L = le.status), "clickToUse" in le && n(28, z = le.clickToUse), "shift" in le && n(29, V = le.shift), "$$scope" in le && n(30, a = le.$$scope)
         }, t.$$.update = () => {
-            t.$$.dirty[0] & 16392 && n(14, o = o || p > 0), t.$$.dirty[0] & 138446856 && n(17, s = _ ? r && q || p > 0 || L == -1 ? _.replace(".", "_grey.").replace(/_q[0-9]/g, "") : _ : `/data/ui/slotbg/bg.${Mo}?v=8926940`), t.$$.dirty[0] & 150995968 && n(16, i = N(R || A, L)), t.$$.dirty[0] & 67112960 && U && M && M.appendChild(U), t.$$.dirty[0] & 8200 && sp(Math.floor(p || 0), ge, 40)
+            t.$$.dirty[0] & 16392 && n(14, o = o || p > 0), t.$$.dirty[0] & 138446856 && n(17, s = _ ? r && q || p > 0 || L == -1 ? _.replace(".", "_grey.").replace(/_q[0-9]/g, "") : _ : `/data/ui/slotbg/bg.${Mo}?v=8971923`), t.$$.dirty[0] & 150995968 && n(16, i = N(R || A, L)), t.$$.dirty[0] & 67112960 && U && M && M.appendChild(U), t.$$.dirty[0] & 8200 && sp(Math.floor(p || 0), ge, 40)
         }, [c, f, u, p, h, v, k, y, C, I, R, q, U, ge, o, r, i, s, $, Q, _e, fe, _, b, A, F, M, L, z, V, a, l, ye, Ie]
     }
     var o2 = class extends Me {
@@ -18571,7 +19328,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         let e, n, o, s, i, r;
         return {
             c() {
-                e = g("span"), n = g("img"), s = g("span"), i = E(t[0]), m(n, "class", "svgicon texticon"), pt(n.src, o = "/data/ui/icons/gem.svg?v=8926940") || m(n, "src", o), m(s, "class", r = !t[1] || t[0] < t[2] ? "textprimary" : "textred")
+                e = g("span"), n = g("img"), s = g("span"), i = E(t[0]), m(n, "class", "svgicon texticon"), pt(n.src, o = "/data/ui/icons/gem.svg?v=8971923") || m(n, "src", o), m(s, "class", r = !t[1] || t[0] < t[2] ? "textprimary" : "textred")
             },
             m(l, a) {
                 x(l, e, a), d(e, n), d(e, s), d(s, i)
@@ -19669,7 +20426,6 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                         } else return
                     }
                     let ge = Bt.get(y.id);
-                    console.log(`Sent skill id ${y.id} ${y.info}`);
                     ge.envCast > 0 ? jr > 0 ? mp(0, 0, 0) : mp(y.id, ge.range, ge.envCast) : Uo(Et.clientPlayerSkill.packData({
                         id: y.id,
                         info: y.info
@@ -21024,7 +21780,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         }
         return {
             c() {
-                e = g("div"), n = g("img"), m(n, "class", "svgicon"), pt(n.src, o = "/data/ui/icons/" + t[5].img + ".svg?v=8926940") || m(n, "src", o), m(e, "id", s = "sys" + t[5].img), m(e, "class", "btn border black")
+                e = g("div"), n = g("img"), m(n, "class", "svgicon"), pt(n.src, o = "/data/ui/icons/" + t[5].img + ".svg?v=8971923") || m(n, "src", o), m(e, "id", s = "sys" + t[5].img), m(e, "class", "btn border black")
             },
             m(c, f) {
                 x(c, e, f), d(e, n), i || (r = [H(e, "mouseenter", l), H(e, "mouseleave", t[3]), H(e, "click", a)], i = !0)
@@ -21738,6 +22494,12 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
 
     function makeSlider(label, store, opts = {}) {
         if (store) registeredStores.push(getStoreKey(store));
+        {
+            let lo = opts.min != null ? opts.min : 0,
+                hi = opts.max != null ? opts.max : 1000,
+                key = store ? getStoreKey(store) : "?",
+                cur = ne[key];
+        }
 
         let Al = g("div"),
             inp = g("input"),
@@ -23426,6 +24188,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
     function modSettings(t) {
         let importVal = "";
         let simSlotVal = "";
+        const hideForRetexture = store => ne.faivelRetexture ? (registeredStores.push(getStoreKey(store)), !0) : !1;
         const settings = [
             makeCategory("Target Next Friendly Mods", {
                 marginTop: "10px"
@@ -23560,22 +24323,22 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 cls: "textgrey"
             }),
             makeColor("Chilling Radiance", chillColor, {
-                imgSrc: "https://hordes.io/data/ui/skills/14.avif?v=8926940"
+                imgSrc: "https://hordes.io/data/ui/skills/14.avif?v=8971923"
             }),
             makeColor("Deep Frozen", deepFreezeColor, {
-                imgSrc: "https://hordes.io/data/ui/skills/deepFrozen.avif?v=8926940"
+                imgSrc: "https://hordes.io/data/ui/skills/deepFrozen.avif?v=8971923"
             }),
             makeColor("Agonize", agonizeColor, {
-                imgSrc: "https://hordes.io/data/ui/skills/37.avif?v=8926940"
+                imgSrc: "https://hordes.io/data/ui/skills/37.avif?v=8971923"
             }),
             makeColor("Charge", stunColor, {
-                imgSrc: "https://hordes.io/data/ui/skills/stunBuff.avif?v=8926940"
+                imgSrc: "https://hordes.io/data/ui/skills/stunBuff.avif?v=8971923"
             }),
             makeColor("Relentless Cry", relColor, {
-                imgSrc: "https://hordes.io/data/ui/skills/50.avif?v=8926940"
+                imgSrc: "https://hordes.io/data/ui/skills/50.avif?v=8971923"
             }),
             makeColor("Blinding Shot", blindColor, {
-                imgSrc: "https://hordes.io/data/ui/skills/49.avif?v=8926940"
+                imgSrc: "https://hordes.io/data/ui/skills/49.avif?v=8971923"
             }),
             makeCategory("Uncategorized", {
                 marginTop: "10px"
@@ -23590,10 +24353,6 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 showValue: true,
                 note: "Rise/fall runs at 1.35x this"
             }),
-            //makeTrackStatus(),
-            /* makeButton("Add keyframe at camera", menuKeyframeRecord),
-            makeButton("Remove last keyframe", menuKeyframeRemoveLast),
-            makeButton("Clear keyframes", menuKeyframeClear), */
             makeText("Never filter items", alwaysPickup, {
                 note: "Does not change pet behavior"
             }),
@@ -23608,12 +24367,6 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 note: P.ui.settings.reload,
                 reload: true
             }),
-            /*             makeSlider("Skillbar size", skillbarSize, {
-                            min: 50,
-                            max: 150,
-                            showValue: true,
-                            suffix: "%"
-                        }), */
             makeToggle("Enable mage cape-swing", enableMageCapeswing, {
                 note: P.ui.settings.reload,
                 reload: true
@@ -23732,7 +24485,6 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 reload: true
             }),
             makeToggle("Light shafts", godRays),
-            makeToggle("Sun / moon reflections on water", waterReflections),
             makeLabel("-- Ambience tint: --", {
                 sep: true,
                 cls: "textgrey"
@@ -23789,31 +24541,24 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 cls: "textgrey"
             }),
             makeToggle("Simple sky", simpleSky),
-            makeToggle("Pre 0.5 sky", classicSky, {
+            hideForRetexture(classicSky) || makeToggle("Pre 0.5 sky", classicSky, {
                 note: P.ui.settings.reload,
                 reload: true
             }),
-            makeToggle("Pre 0.5 water movement", classicWater, {
+            hideForRetexture(classicWater) || makeToggle("Pre 0.5 water movement", classicWater, {
                 note: P.ui.settings.reload,
                 reload: true
             }),
-            makeToggle("Pre 0.5 water shader", classicWaterLook, {
+            hideForRetexture(classicWaterLook) || makeToggle("Pre 0.5 water shader", classicWaterLook, {
                 note: P.ui.settings.reload,
                 reload: true
             }),
-            makeToggle("Bluify water colors", classicWaterColors, {
+            hideForRetexture(classicWaterColors) || makeToggle("Bluify water colors", classicWaterColors, {
                 note: "Enable if you prefer bluish water everywhere, rather than the server values"
             }),
             makeToggle("Pre 0.5 lighting colors", classicLighting),
-            makeSlider("Lighting colors (night) brightness", classicDayBrightness, {
-                min: 50,
-                max: 100,
-                showValue: true,
-                suffix: "%"
-            }),
-            makeToggle("Cinematic lighting", cinematicLighting),
             makeToggle("Pre 0.5 retexture", faivelRetexture, {
-                note: P.ui.settings.reload + ", unfinished, only includes innaccurate faivel changes atm",
+                note: P.ui.settings.reload + ", turn off ssao and light shafts after enabling if you dont want them",
                 reload: true,
                 color: "#3ed363"
             }),
@@ -23867,7 +24612,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             makeButton("Reorganize UI", () => uiEditStart("move"), {
                 marginTop: "6px"
             })
-        ];
+        ].filter(i => i !== !0);
         let wrapper = null,
             scaleUnsub = null;
 
@@ -24665,7 +25410,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     skill: Bt.get(t[39].id)
                 },
                 css: "slotskill",
-                img: `/data/ui/skills/${t[39].id}.${Mo}?v=8926940`,
+                img: `/data/ui/skills/${t[39].id}.${Mo}?v=8971923`,
                 $$slots: {
                     default: [yz]
                 },
@@ -24699,7 +25444,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 C[0] & 8 && (A.id = "learnedskill" + y[39].id), C[0] & 4 && (A.descRoot = y[2]), C[0] & 8 && (A.pickable = y[39].pickable), C[0] & 8 && (A.meta = {
                     type: "skill",
                     skill: Bt.get(y[39].id)
-                }), C[0] & 8 && (A.img = `/data/ui/skills/${y[39].id}.${Mo}?v=8926940`), C[0] & 8 | C[1] & 524288 && (A.$$scope = {
+                }), C[0] & 8 && (A.img = `/data/ui/skills/${y[39].id}.${Mo}?v=8971923`), C[0] & 8 | C[1] & 524288 && (A.$$scope = {
                     dirty: C,
                     ctx: y
                 }), n.$set(A), (!f || C[0] & 8) && i !== (i = P.items.book[y[39].id].name + "") && j(r, i), p === (p = u(y, C)) && h ? h.p(y, C) : (h.d(1), h = p(y), h && (h.c(), h.m(o, null))), _ === (_ = v(y, C)) && b ? b.p(y, C) : (b.d(1), b = _(y), b && (b.c(), b.m(a, c))), y[39].engineOnly ? k && (k.d(1), k = null) : k ? k.p(y, C) : (k = r8(y), k.c(), k.m(a, null))
@@ -24763,7 +25508,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     skill: t[39]
                 },
                 css: "slotskill",
-                img: `/data/ui/skills/${t[39].id}.${Mo}?v=8926940`,
+                img: `/data/ui/skills/${t[39].id}.${Mo}?v=8971923`,
                 $$slots: {
                     default: [Pz]
                 },
@@ -24783,7 +25528,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 _[0] & 4 && (b.descRoot = v[2]), _[0] & 1 && (b.meta = {
                     type: "skill",
                     skill: v[39]
-                }), _[0] & 1 && (b.img = `/data/ui/skills/${v[39].id}.${Mo}?v=8926940`), _[0] & 1 | _[1] & 524288 && (b.$$scope = {
+                }), _[0] & 1 && (b.img = `/data/ui/skills/${v[39].id}.${Mo}?v=8971923`), _[0] & 1 | _[1] & 524288 && (b.$$scope = {
                     dirty: _,
                     ctx: v
                 }), n.$set(b), (!h || _[0] & 1) && i !== (i = P.items.book[v[39].id].name + "") && j(r, i), (!h || _[0] & 1) && u !== (u = v[39].minlevel + "") && j(p, u)
@@ -26207,7 +26952,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         let e, n, o;
         return {
             c() {
-                e = g("span"), e.innerHTML = 'Upgrade <img class="svgicon texticon" src="/data/ui/icons/gem.svg?v=8926940"/>', m(e, "class", "btn textwhite")
+                e = g("span"), e.innerHTML = 'Upgrade <img class="svgicon texticon" src="/data/ui/icons/gem.svg?v=8971923"/>', m(e, "class", "btn textwhite")
             },
             m(s, i) {
                 x(s, e, i), n || (o = H(e, "click", t[29]), n = !0)
@@ -26285,7 +27030,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             c() {
                 L && L.c(), e = g("div");
                 for (let U = 0; U < V.length; U += 1) V[U].c();
-                n = g("div"), o = g("div"), s = g("span"), r = E(i), l = E(" / "), c = E(a), O && O.c(), u = g("div"), Z(p.$$.fragment), h = g("div"), v = g("img"), k = g("div"), y = g("img"), N && N.c(), F = he(), m(e, "class", "panel-black scrollbar marg-top marg-bot slotparent svelte-gou6xs"), Te(e, "max-height", t[13] + "px"), m(s, "class", f = t[8].length < (t[10].subscribed_until ? Kn[1].stash : Kn[0].stash) ? "textgreen" : "textred"), m(o, "class", "navbtn panel-black border black gold svelte-gou6xs"), Te(o, "margin-right", "auto"), m(u, "class", "navbtn panel-black border black gold svelte-gou6xs"), m(v, "class", "svgicon"), pt(v.src, _ = "/data/ui/icons/deposit.svg?v=8926940") || m(v, "src", _), m(h, "class", b = "navbtn btn grey gold " + (t[0] === 1 ? "active" : "") + " svelte-gou6xs"), m(y, "class", "svgicon"), pt(y.src, C = "/data/ui/icons/withdraw.svg?v=8926940") || m(y, "src", C), m(k, "class", A = "navbtn btn grey gold " + (t[0] === 2 ? "active" : "") + " svelte-gou6xs"), m(n, "class", "formelements svelte-gou6xs")
+                n = g("div"), o = g("div"), s = g("span"), r = E(i), l = E(" / "), c = E(a), O && O.c(), u = g("div"), Z(p.$$.fragment), h = g("div"), v = g("img"), k = g("div"), y = g("img"), N && N.c(), F = he(), m(e, "class", "panel-black scrollbar marg-top marg-bot slotparent svelte-gou6xs"), Te(e, "max-height", t[13] + "px"), m(s, "class", f = t[8].length < (t[10].subscribed_until ? Kn[1].stash : Kn[0].stash) ? "textgreen" : "textred"), m(o, "class", "navbtn panel-black border black gold svelte-gou6xs"), Te(o, "margin-right", "auto"), m(u, "class", "navbtn panel-black border black gold svelte-gou6xs"), m(v, "class", "svgicon"), pt(v.src, _ = "/data/ui/icons/deposit.svg?v=8971923") || m(v, "src", _), m(h, "class", b = "navbtn btn grey gold " + (t[0] === 1 ? "active" : "") + " svelte-gou6xs"), m(y, "class", "svgicon"), pt(y.src, C = "/data/ui/icons/withdraw.svg?v=8971923") || m(y, "src", C), m(k, "class", A = "navbtn btn grey gold " + (t[0] === 2 ? "active" : "") + " svelte-gou6xs"), m(n, "class", "formelements svelte-gou6xs")
             },
             m(U, $) {
                 L && L.m(U, $), x(U, e, $);
@@ -28423,7 +29168,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         }
         return {
             c() {
-                Z(e.$$.fragment), n = g("img"), pt(n.src, o = "/data/ui/icons/arrow.svg?v=8926940") || m(n, "src", o), m(n, "id", s = "statbtn" + t[15]), m(n, "class", i = "btn " + (t[0][22] > 0 ? "green" : "disabled") + " svgicon statbtn svelte-rbq5ku")
+                Z(e.$$.fragment), n = g("img"), pt(n.src, o = "/data/ui/icons/arrow.svg?v=8971923") || m(n, "src", o), m(n, "id", s = "statbtn" + t[15]), m(n, "class", i = "btn " + (t[0][22] > 0 ? "green" : "disabled") + " svgicon statbtn svelte-rbq5ku")
             },
             m(u, p) {
                 X(e, u, p), x(u, n, p), r = !0, l || (a = [H(n, "pointerenter", c), H(n, "pointerleave", t[9]), H(n, "click", f)], l = !0)
@@ -28928,7 +29673,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             if (!clusterInfoEl) return;
             if (storeVal.clusterSize > 0 && storeVal.clusterStacks !== -1) {
                 let clusterEnemyColor = _t("enemy") || "#ff6060";
-                clusterInfoEl.innerHTML = "<span style=\"color:#888888\">" + storeVal.clusterSize + "x</span><img src=\"/data/ui/skills/hellspawn." + Xn + "?v=8926940\" class=\"svgicon texticon\" style=\"margin-left:5px;margin-right:0px;\"><span style=\"color:" + clusterEnemyColor + "\">" + storeVal.clusterStacks + "</span>";
+                clusterInfoEl.innerHTML = "<span style=\"color:#888888\">" + storeVal.clusterSize + "x</span><img src=\"/data/ui/skills/hellspawn." + Xn + "?v=8971923\" class=\"svgicon texticon\" style=\"margin-left:5px;margin-right:0px;\"><span style=\"color:" + clusterEnemyColor + "\">" + storeVal.clusterStacks + "</span>";
                 Te(clusterInfoEl, "display", "inline-flex");
             } else {
                 Te(clusterInfoEl, "display", "none");
@@ -30158,13 +30903,13 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         }
         return ~(St = Po(t, -1)) && ($t = eo[St] = Tt[St](t)), {
             c() {
-                e = g("div"), n = g("div"), o = g("div"), s = g("img"), r = g("div"), l = g("div"), a = g("h1"), f = E(c), u = g("h3"), h = E(p), _ = g("p"), k = E(b), y = He(), A = E(C), F = g("div"), Z(M.$$.fragment), I = g("div"), R = g("div"), L = g("div"), z = g("span"), z.textContent = `${P.ui.clan.level}`, V = g("span"), O = E(q), N = g("span"), N.textContent = `${P.ui.clan.capacity}`, U = g("span"), Q = E($), _e = g("span"), _e.textContent = `${P.ui.clan.nextlevel}`, xe = g("span"), fe = E("+"), ce = E(se), ge = He(), Ie = E(ye), le = g("span"), le.textContent = `${P.ui.clan.taxrate}`, Be = g("span"), qe = E(ke), Oe = E("%"), pe = g("div"), Ye = g("div"), ve = g("span"), ve.textContent = `${P.ui.clan.members}`, ue = g("span"), ie = E(We), De = g("span"), De.textContent = `${P.ui.clan.online}`, $e = g("span"), G = E(ee), Ge = g("span"), Ge.textContent = `${P.ui.stats.array[20]}`, Le = g("span"), Re = g("img"), ot = He(), nt = E(ut), It = g("span"), It.textContent = `${P.ui.clan.treasury}`, Z(we.$$.fragment), tt && tt.c(), Je = he(), Rt && Rt.c(), et = he(), Xe && Xe.c(), Mt = he(), kt && kt.c(), Qe = g("div"), Pe = g("div"), lt = g("div"), lt.textContent = `${P.ui.clan.members}`, wt && wt.c(), $t && $t.c(), m(s, "class", "helmet absCentered svelte-6t8hqd"), pt(s.src, i = "/data/ui/factions/" + t[0].faction + ".svg?v=8926940") || m(s, "src", i), m(l, "class", v = "textf" + t[0].faction + " svelte-6t8hqd"), m(r, "class", "textcenter"), m(o, "class", "hero svelte-6t8hqd"), m(F, "class", "panel-black svelte-6t8hqd"), m(z, "class", "textprimary"), m(N, "class", "textprimary"), m(_e, "class", "textprimary"), m(le, "class", "textprimary"), m(L, "class", "panel-black grid two svelte-6t8hqd"), m(ve, "class", "textprimary"), m(De, "class", "textprimary"), m(Ge, "class", "textprimary"), m(Re, "class", "svgicon"), pt(Re.src, Ne = _c) || m(Re, "src", Ne), m(Le, "class", "textprestige"), m(It, "class", "textprimary"), m(Ye, "class", "panel-black grid two svelte-6t8hqd"), m(I, "class", "marg-top grid two"), m(n, "class", "row slim"), m(e, "class", "fold fadeIn"), m(lt, "class", "btn navbtn grey"), m(Pe, "class", "subnav marg-top"), m(Qe, "class", "row slim fadeIn")
+                e = g("div"), n = g("div"), o = g("div"), s = g("img"), r = g("div"), l = g("div"), a = g("h1"), f = E(c), u = g("h3"), h = E(p), _ = g("p"), k = E(b), y = He(), A = E(C), F = g("div"), Z(M.$$.fragment), I = g("div"), R = g("div"), L = g("div"), z = g("span"), z.textContent = `${P.ui.clan.level}`, V = g("span"), O = E(q), N = g("span"), N.textContent = `${P.ui.clan.capacity}`, U = g("span"), Q = E($), _e = g("span"), _e.textContent = `${P.ui.clan.nextlevel}`, xe = g("span"), fe = E("+"), ce = E(se), ge = He(), Ie = E(ye), le = g("span"), le.textContent = `${P.ui.clan.taxrate}`, Be = g("span"), qe = E(ke), Oe = E("%"), pe = g("div"), Ye = g("div"), ve = g("span"), ve.textContent = `${P.ui.clan.members}`, ue = g("span"), ie = E(We), De = g("span"), De.textContent = `${P.ui.clan.online}`, $e = g("span"), G = E(ee), Ge = g("span"), Ge.textContent = `${P.ui.stats.array[20]}`, Le = g("span"), Re = g("img"), ot = He(), nt = E(ut), It = g("span"), It.textContent = `${P.ui.clan.treasury}`, Z(we.$$.fragment), tt && tt.c(), Je = he(), Rt && Rt.c(), et = he(), Xe && Xe.c(), Mt = he(), kt && kt.c(), Qe = g("div"), Pe = g("div"), lt = g("div"), lt.textContent = `${P.ui.clan.members}`, wt && wt.c(), $t && $t.c(), m(s, "class", "helmet absCentered svelte-6t8hqd"), pt(s.src, i = "/data/ui/factions/" + t[0].faction + ".svg?v=8971923") || m(s, "src", i), m(l, "class", v = "textf" + t[0].faction + " svelte-6t8hqd"), m(r, "class", "textcenter"), m(o, "class", "hero svelte-6t8hqd"), m(F, "class", "panel-black svelte-6t8hqd"), m(z, "class", "textprimary"), m(N, "class", "textprimary"), m(_e, "class", "textprimary"), m(le, "class", "textprimary"), m(L, "class", "panel-black grid two svelte-6t8hqd"), m(ve, "class", "textprimary"), m(De, "class", "textprimary"), m(Ge, "class", "textprimary"), m(Re, "class", "svgicon"), pt(Re.src, Ne = _c) || m(Re, "src", Ne), m(Le, "class", "textprestige"), m(It, "class", "textprimary"), m(Ye, "class", "panel-black grid two svelte-6t8hqd"), m(I, "class", "marg-top grid two"), m(n, "class", "row slim"), m(e, "class", "fold fadeIn"), m(lt, "class", "btn navbtn grey"), m(Pe, "class", "subnav marg-top"), m(Qe, "class", "row slim fadeIn")
             },
             m(gt, Wt) {
                 x(gt, e, Wt), d(e, n), d(n, o), d(o, s), d(o, r), d(r, l), d(l, a), d(a, f), d(l, u), d(u, h), d(r, _), d(_, k), d(_, y), d(_, A), d(n, F), X(M, F, null), d(n, I), d(I, R), d(R, L), d(L, z), d(L, V), d(V, O), d(L, N), d(L, U), d(U, Q), d(L, _e), d(L, xe), d(xe, fe), d(xe, ce), d(xe, ge), d(xe, Ie), d(L, le), d(L, Be), d(Be, qe), d(Be, Oe), d(I, pe), d(pe, Ye), d(Ye, ve), d(Ye, ue), d(ue, ie), d(Ye, De), d(Ye, $e), d($e, G), d(Ye, Ge), d(Ye, Le), d(Le, Re), d(Le, ot), d(Le, nt), d(Ye, It), X(we, Ye, null), tt && tt.m(n, null), d(n, Je), Rt && Rt.m(n, null), d(n, et), Xe && Xe.m(n, null), d(n, Mt), kt && kt.m(n, null), x(gt, Qe, Wt), d(Qe, Pe), d(Pe, lt), wt && wt.m(Pe, null), ~St && eo[St].m(Qe, null), qt = !0, Ke || (st = H(lt, "click", t[14]), Ke = !0)
             },
             p(gt, Wt) {
-                (!qt || Wt & 1 && !pt(s.src, i = "/data/ui/factions/" + gt[0].faction + ".svg?v=8926940")) && m(s, "src", i), (!qt || Wt & 1) && c !== (c = gt[0].tag + "") && j(f, c), (!qt || Wt & 1) && p !== (p = gt[0].name + "") && j(h, p), (!qt || Wt & 1 && v !== (v = "textf" + gt[0].faction + " svelte-6t8hqd")) && m(l, "class", v), (!qt || Wt & 1) && b !== (b = P.factions[gt[0].faction].name + "") && j(k, b);
+                (!qt || Wt & 1 && !pt(s.src, i = "/data/ui/factions/" + gt[0].faction + ".svg?v=8971923")) && m(s, "src", i), (!qt || Wt & 1) && c !== (c = gt[0].tag + "") && j(f, c), (!qt || Wt & 1) && p !== (p = gt[0].name + "") && j(h, p), (!qt || Wt & 1 && v !== (v = "textf" + gt[0].faction + " svelte-6t8hqd")) && m(l, "class", v), (!qt || Wt & 1) && b !== (b = P.factions[gt[0].faction].name + "") && j(k, b);
                 let Eo = {};
                 Wt & 1 && (Eo.fract = Math.ceil(gt[0].exp / la(gt[0].level) * 100)), Wt & 1 && (Eo.left = `${yt(gt[0].exp)} / ${yt(la(gt[0].level))} EXP`), Wt & 1 && (Eo.right = `${Math.ceil(gt[0].exp/la(gt[0].level)*100)}% `), M.$set(Eo), (!qt || Wt & 1) && q !== (q = gt[0].level + "") && j(O, q), (!qt || Wt & 1) && $ !== ($ = aa(gt[0].level) + "") && j(Q, $), (!qt || Wt & 1) && se !== (se = aa(gt[0].level + 1) - aa(gt[0].level) + "") && j(ce, se), (!qt || Wt & 1) && ke !== (ke = gt[0].tax + "") && j(qe, ke), (!qt || Wt & 1) && We !== (We = gt[0].members.length + "") && j(ie, We), (!qt || Wt & 1) && ee !== (ee = `${gt[0].online} (+${gt[0].online*60} EXP/h)`) && j(G, ee), (!qt || Wt & 1) && ut !== (ut = yt(gt[0].prestige) + "") && j(nt, ut);
                 let al = {};
@@ -31992,7 +32737,6 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
     }
 
     function RU(t) {
-        console.log(t);
         let vgStatRow, blStatRow, vg1, vg2, vg3, vg4, bl1, bl2, bl3, bl4, vgWarriorImage, vgMageImage, vgArcherImage, vgShamanImage, blWarriorImage, blMageImage, blArcherImage, blShamanImage, vgWarriorText, vgMageText, vgArcherText, vgShamanText, blWarriorText, blMageText, blArcherText, blShamanText, totalText, vgTotalNum, vsTotalText, blTotalNum;
         let e, n, o, s, i, r, l, a, c, f = t[2].kills[0] + "",
             u, p, h, v, _, b, k = yt(t[2].reward) + "",
@@ -32118,7 +32862,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 Te(blTotalNum, "position", "relative");
                 e = g("div"), n = g("div"), o = g("div"), s = g("div"), i = g("span"), i.textContent = `${P.factions[0].name}`, r = g("span"), l = g("img"), c = He(), u = E(f), p = g("div"), h = g("span"), v = g("img"), b = He(), y = E(k), C = g("span"), F = E(A), M = E(": "), I = g("span"), L = E(R), V = g("span"), O = E(q), N = E(": "), U = g("span"), Q = E($), _e = He(), xe = g("div"), fe = g("span"), fe.textContent = `${P.factions[1].name}`, se = g("span"), ce = g("img"), ye = He(), le = E(Ie), Z(Be.$$.fragment), ke = g("div"), qe = g("table"), Oe = g("thead"), pe = g("tr"), Ye = g("th"), Ye.textContent = `${P.ui.war.player}`, ve = g("th"), We = E(ue), De = g("th"), ee = E($e), Ge = g("th"), Re = E(Le), ot = g("th"), ut = g("img"), It = He(), Je = E(we), Mt = g("tbody");
                 for (let st = 0; st < Qe.length; st += 1) Qe[st].c();
-                m(i, "class", "infosmall textf0 svelte-19s383j"), Te(i, "margin-top", "30px"), m(l, "class", "svgicon"), pt(l.src, a = "/data/ui/icons/pvp.svg?v=8926940") || m(l, "src", a), m(r, "class", "infobig textprimary svelte-19s383j"), Te(r, "margin-top", "10px"), m(v, "class", "svgicon"), pt(v.src, _ = Ir) || m(v, "src", _), m(h, "class", "infobig textfame svelte-19s383j"), Te(h, "margin-top", "20px"), m(I, "class", z = "text" + ["red", "orange", "green"][t[2].status] + " svelte-19s383j"), m(C, "class", "infosmall svelte-19s383j"), Te(C, "margin-top", "10px"), m(U, "class", "textprimary"), m(V, "class", "infosmall svelte-19s383j"), Te(V, "margin-bottom", "20px"), m(fe, "class", "infosmall textf1 svelte-19s383j"), Te(fe, "margin-top", "30px"), m(ce, "class", "svgicon"), pt(ce.src, ge = "/data/ui/icons/pvp.svg?v=8926940") || m(ce, "src", ge), m(se, "class", "infobig textprimary svelte-19s383j"), Te(se, "margin-top", "10px"), m(o, "class", "grid three"), m(n, "class", "panel-black border grey"), m(Ye, "width", "30%"), m(ve, "class", ie = "textcenter " + (t[0] == 1 ? "textwhite" : "")), m(De, "class", G = "textcenter " + (t[0] == 2 ? "textwhite" : "")), m(Ge, "class", Ne = "textcenter " + (t[0] == 0 ? "textwhite" : "")), m(ut, "class", "svgicon"), pt(ut.src, nt = Ir) || m(ut, "src", nt), m(ot, "class", et = "textcenter " + (t[0] == 3 ? "textwhite" : "")), m(pe, "class", "textprimary"), m(qe, "class", "dense panel-black"), m(ke, "class", "scrollbar"), m(e, "class", "layout svelte-19s383j")
+                m(i, "class", "infosmall textf0 svelte-19s383j"), Te(i, "margin-top", "30px"), m(l, "class", "svgicon"), pt(l.src, a = "/data/ui/icons/pvp.svg?v=8971923") || m(l, "src", a), m(r, "class", "infobig textprimary svelte-19s383j"), Te(r, "margin-top", "10px"), m(v, "class", "svgicon"), pt(v.src, _ = Ir) || m(v, "src", _), m(h, "class", "infobig textfame svelte-19s383j"), Te(h, "margin-top", "20px"), m(I, "class", z = "text" + ["red", "orange", "green"][t[2].status] + " svelte-19s383j"), m(C, "class", "infosmall svelte-19s383j"), Te(C, "margin-top", "10px"), m(U, "class", "textprimary"), m(V, "class", "infosmall svelte-19s383j"), Te(V, "margin-bottom", "20px"), m(fe, "class", "infosmall textf1 svelte-19s383j"), Te(fe, "margin-top", "30px"), m(ce, "class", "svgicon"), pt(ce.src, ge = "/data/ui/icons/pvp.svg?v=8971923") || m(ce, "src", ge), m(se, "class", "infobig textprimary svelte-19s383j"), Te(se, "margin-top", "10px"), m(o, "class", "grid three"), m(n, "class", "panel-black border grey"), m(Ye, "width", "30%"), m(ve, "class", ie = "textcenter " + (t[0] == 1 ? "textwhite" : "")), m(De, "class", G = "textcenter " + (t[0] == 2 ? "textwhite" : "")), m(Ge, "class", Ne = "textcenter " + (t[0] == 0 ? "textwhite" : "")), m(ut, "class", "svgicon"), pt(ut.src, nt = Ir) || m(ut, "src", nt), m(ot, "class", et = "textcenter " + (t[0] == 3 ? "textwhite" : "")), m(pe, "class", "textprimary"), m(qe, "class", "dense panel-black"), m(ke, "class", "scrollbar"), m(e, "class", "layout svelte-19s383j")
             },
             m(st, tt) {
                 x(st, e, tt), d(e, n), d(n, o), d(o, s), d(s, i), d(s, r), d(s, vgStatRow), d(vgStatRow, vg1), d(vg1, vgWarriorImage), d(vg1, vgWarriorText), d(vgStatRow, vg2), d(vg2, vgMageImage), d(vg2, vgMageText), d(vgStatRow, vg3), d(vg3, vgArcherImage), d(vg3, vgArcherText), d(vgStatRow, vg4), d(vg4, vgShamanImage), d(vg4, vgShamanText), d(r, l), d(r, c), d(r, u), d(o, p), d(p, h), d(h, v), d(h, b), d(h, y), d(p, C), d(C, F), d(C, M), d(C, I), d(I, L), d(p, V), d(V, O), d(V, N), d(V, U), d(U, Q), d(p, _e), d(p, totalText), d(totalText, vgTotalNum), d(totalText, vsTotalText), d(totalText, blTotalNum), d(o, xe), d(xe, fe), d(xe, se), d(se, ce), d(se, ye), d(se, le), d(xe, blStatRow), d(blStatRow, bl1), d(bl1, blWarriorImage), d(bl1, blWarriorText), d(blStatRow, bl2), d(bl2, blMageImage), d(bl2, blMageText), d(blStatRow, bl3), d(bl3, blArcherImage), d(bl3, blArcherText), d(blStatRow, bl4), d(bl4, blShamanImage), d(bl4, blShamanText), X(Be, n, null), d(e, ke), d(ke, qe), d(qe, Oe), d(Oe, pe), d(pe, Ye), d(pe, ve), d(ve, We), d(pe, De), d(De, ee), d(pe, Ge), d(Ge, Re), d(pe, ot), d(ot, ut), d(ot, It), d(ot, Je), d(qe, Mt);
@@ -32665,7 +33409,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             G;
         return {
             c() {
-                e = g("div"), n = g("div"), n.innerHTML = '<img class="artwork svelte-cbx1m" src="/data/ui/elixir.svg?v=8926940"/><div class="sparkle svelte-cbx1m" style="font-size:35px; left:30%; top:30%; animation-delay: -1s;">+</div><div class="sparkle svelte-cbx1m" style="font-size:50px; left:40%; top:60%; animation-delay: -2s;">+</div><div class="sparkle svelte-cbx1m" style="font-size:80px; left:60%; top:20%; animation-delay: -3s;">+</div>', o = g("div"), s = g("h1"), s.innerHTML = 'Hordes <span class="textsub">Elixir</span>', i = g("div"), r = g("img"), a = He(), f = E(c), u = g("div"), p = g("img"), v = He(), b = E(_), k = g("div"), y = g("img"), A = He(), F = g("span"), F.textContent = `${Kn[0].inventory}`, M = He(), I = g("span"), I.textContent = `${Kn[1].inventory}`, R = He(), z = E(L), V = g("div"), q = g("img"), N = He(), U = g("span"), U.textContent = `${Kn[0].stash}`, $ = He(), Q = g("span"), Q.textContent = `${Kn[1].stash}`, _e = He(), fe = E(xe), se = g("div"), ce = g("img"), ye = He(), Ie = g("span"), Ie.textContent = `${Kn[0].auction}`, le = He(), Be = g("span"), Be.textContent = `${Kn[1].auction}`, ke = He(), Oe = E(qe), pe = g("div"), Ye = g("img"), ue = He(), We = g("span"), We.textContent = `${Kn[0].auctionHours}h`, ie = He(), De = g("span"), De.textContent = `${Kn[1].auctionHours}h`, $e = He(), G = E(ee), m(n, "class", "artcontainer svelte-cbx1m"), m(s, "class", "textprimary"), m(r, "class", "svgicon"), pt(r.src, l = "/data/ui/icons/gem.svg?v=8926940") || m(r, "src", l), m(i, "class", "textwhite"), m(p, "class", "svgicon"), pt(p.src, h = "/data/ui/icons/check.svg?v=8926940") || m(p, "src", h), m(u, "class", "textwhite"), m(y, "class", "svgicon"), pt(y.src, C = "/data/ui/icons/check.svg?v=8926940") || m(y, "src", C), m(F, "class", "old svelte-cbx1m"), m(I, "class", "textsub"), m(k, "class", "textwhite"), m(q, "class", "svgicon"), pt(q.src, O = "/data/ui/icons/check.svg?v=8926940") || m(q, "src", O), m(U, "class", "old svelte-cbx1m"), m(Q, "class", "textsub"), m(V, "class", "textwhite"), m(ce, "class", "svgicon"), pt(ce.src, ge = "/data/ui/icons/check.svg?v=8926940") || m(ce, "src", ge), m(Ie, "class", "old svelte-cbx1m"), m(Be, "class", "textsub"), m(se, "class", "textwhite"), m(Ye, "class", "svgicon"), pt(Ye.src, ve = "/data/ui/icons/check.svg?v=8926940") || m(Ye, "src", ve), m(We, "class", "old svelte-cbx1m"), m(De, "class", "textsub"), m(pe, "class", "textwhite"), m(e, "class", "split svelte-cbx1m")
+                e = g("div"), n = g("div"), n.innerHTML = '<img class="artwork svelte-cbx1m" src="/data/ui/elixir.svg?v=8971923"/><div class="sparkle svelte-cbx1m" style="font-size:35px; left:30%; top:30%; animation-delay: -1s;">+</div><div class="sparkle svelte-cbx1m" style="font-size:50px; left:40%; top:60%; animation-delay: -2s;">+</div><div class="sparkle svelte-cbx1m" style="font-size:80px; left:60%; top:20%; animation-delay: -3s;">+</div>', o = g("div"), s = g("h1"), s.innerHTML = 'Hordes <span class="textsub">Elixir</span>', i = g("div"), r = g("img"), a = He(), f = E(c), u = g("div"), p = g("img"), v = He(), b = E(_), k = g("div"), y = g("img"), A = He(), F = g("span"), F.textContent = `${Kn[0].inventory}`, M = He(), I = g("span"), I.textContent = `${Kn[1].inventory}`, R = He(), z = E(L), V = g("div"), q = g("img"), N = He(), U = g("span"), U.textContent = `${Kn[0].stash}`, $ = He(), Q = g("span"), Q.textContent = `${Kn[1].stash}`, _e = He(), fe = E(xe), se = g("div"), ce = g("img"), ye = He(), Ie = g("span"), Ie.textContent = `${Kn[0].auction}`, le = He(), Be = g("span"), Be.textContent = `${Kn[1].auction}`, ke = He(), Oe = E(qe), pe = g("div"), Ye = g("img"), ue = He(), We = g("span"), We.textContent = `${Kn[0].auctionHours}h`, ie = He(), De = g("span"), De.textContent = `${Kn[1].auctionHours}h`, $e = He(), G = E(ee), m(n, "class", "artcontainer svelte-cbx1m"), m(s, "class", "textprimary"), m(r, "class", "svgicon"), pt(r.src, l = "/data/ui/icons/gem.svg?v=8971923") || m(r, "src", l), m(i, "class", "textwhite"), m(p, "class", "svgicon"), pt(p.src, h = "/data/ui/icons/check.svg?v=8971923") || m(p, "src", h), m(u, "class", "textwhite"), m(y, "class", "svgicon"), pt(y.src, C = "/data/ui/icons/check.svg?v=8971923") || m(y, "src", C), m(F, "class", "old svelte-cbx1m"), m(I, "class", "textsub"), m(k, "class", "textwhite"), m(q, "class", "svgicon"), pt(q.src, O = "/data/ui/icons/check.svg?v=8971923") || m(q, "src", O), m(U, "class", "old svelte-cbx1m"), m(Q, "class", "textsub"), m(V, "class", "textwhite"), m(ce, "class", "svgicon"), pt(ce.src, ge = "/data/ui/icons/check.svg?v=8971923") || m(ce, "src", ge), m(Ie, "class", "old svelte-cbx1m"), m(Be, "class", "textsub"), m(se, "class", "textwhite"), m(Ye, "class", "svgicon"), pt(Ye.src, ve = "/data/ui/icons/check.svg?v=8971923") || m(Ye, "src", ve), m(We, "class", "old svelte-cbx1m"), m(De, "class", "textsub"), m(pe, "class", "textwhite"), m(e, "class", "split svelte-cbx1m")
             },
             m(Ge, Le) {
                 x(Ge, e, Le), d(e, n), d(e, o), d(o, s), d(o, i), d(i, r), d(i, a), d(i, f), d(o, u), d(u, p), d(u, v), d(u, b), d(o, k), d(k, y), d(k, A), d(k, F), d(k, M), d(k, I), d(k, R), d(k, z), d(o, V), d(V, q), d(V, N), d(V, U), d(V, $), d(V, Q), d(V, _e), d(V, fe), d(o, se), d(se, ce), d(se, ye), d(se, Ie), d(se, le), d(se, Be), d(se, ke), d(se, Oe), d(o, pe), d(pe, Ye), d(pe, ue), d(pe, We), d(pe, ie), d(pe, De), d(pe, $e), d(pe, G)
@@ -33086,7 +33830,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             i;
         return {
             c() {
-                e = g("img"), o = He(), i = E(s), m(e, "class", "svgicon"), pt(e.src, n = "/data/ui/icons/check.svg?v=8926940") || m(e, "src", n)
+                e = g("img"), o = He(), i = E(s), m(e, "class", "svgicon"), pt(e.src, n = "/data/ui/icons/check.svg?v=8971923") || m(e, "src", n)
             },
             m(r, l) {
                 x(r, e, l), x(r, o, l), x(r, i, l)
@@ -33596,7 +34340,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         return {
             c() {
                 e = g("div"), n = g("h3"), o = E("Hordes.io is free!"), s = g("br"), i = E(`
-    Buy `), r = g("span"), r.innerHTML = '<span class="textwhite">Hordes</span> <img class="svgicon texticon" src="/data/ui/icons/gem.svg?v=8926940"/>  Elixir', l = E(`
+    Buy `), r = g("span"), r.innerHTML = '<span class="textwhite">Hordes</span> <img class="svgicon texticon" src="/data/ui/icons/gem.svg?v=8971923"/>  Elixir', l = E(`
      to hide ads & unlock extra features!`), m(r, "class", "btn black textsub"), m(n, "class", "textgrey textcenter"), m(e, "class", "container panel-black svelte-um60d1")
             },
             m(f, u) {
@@ -34009,7 +34753,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     }
                 }
             }
-            if (T !== void 0 && T.player !== void 0) {
+            if (t.size === 0 && T !== void 0 && T.player !== void 0) {
                 a4(xp, KA, T.player.faction, T.player.class);
                 for (let o = 0; o < xp.length; ++o) ar.push(xp[o]), Zc.push(!1)
             }
@@ -34129,9 +34873,11 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 title: cr(e),
                 text: JA(e, t[2]),
                 objectives: o,
-                choices: [t[2] === 0 ? P.ui.accept : P.ui.ok],
+                choices: [t[2] === 0 ? P.ui.acceptQuest : P.ui.completeQuest],
                 questid: t[1],
-                action: t[2]
+                action: t[2],
+                rewardExp: e.rewardExp,
+                rewardGold: e.rewardGold
             })
         };
     var Si = {
@@ -34218,7 +34964,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             t.appendChild(os), os.className = `border black minimap${e?" enlarged":""}`, Cp = os.width = e ? ~~Math.min(Math.max(200, window.innerWidth * .7), 1e3) : 200, Sp = os.height = e ? ~~Math.min(Math.max(200, window.innerHeight * .7), 800) : 200, Cp % 2 !== 0 && (Cp = os.width += 1), Sp % 2 !== 0 && (Sp = os.height += 1)
         };
     Hi.subscribe(t => {
-        Cb = Sb = 0, Xr = t, t && T.player && (Ap = T.player.pos[0], Pp = T.player.pos[2])
+        Cb = Sb = 0, Xr = t, t && T && T.player && (Ap = T.player.pos[0], Pp = T.player.pos[2])
     });
     var Sh = t => {
             Ep(!0), Ap = t[0], Pp = t[2]
@@ -34338,13 +35084,13 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 }
             } else {
                 let o = document.createElement("img");
-                o.src = "data/assets/" + t0(e) + "?v=8926940", o.onload = oP, wb.set(e, o)
+                o.src = "data/assets/" + t0(e) + "?v=8971923", o.onload = oP, wb.set(e, o)
             }
         },
         tP = (t, e, n, o, s = !1, entity) => {
             function drawMob(name, id, type, entityId) {
                 let icon = new Image();
-                icon.src = `/data/items/${type}/${type}${id}_q3.avif?v=8926940`;
+                icon.src = `/data/items/${type}/${type}${id}_q3.avif?v=8971923`;
                 Un.drawImage(icon, ...t, 17, 17);
                 Un.strokeRect(...t, 17, 17);
             }
@@ -34398,7 +35144,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         let e, n, o, s;
         return {
             c() {
-                e = g("img"), m(e, "class", "btn border black bgblack round warIcon svelte-1khf45q"), pt(e.src, n = "/data/ui/icons/war0." + Xn + "?v=8926940") || m(e, "src", n)
+                e = g("img"), m(e, "class", "btn border black bgblack round warIcon svelte-1khf45q"), pt(e.src, n = "/data/ui/icons/war0." + Xn + "?v=8971923") || m(e, "src", n)
             },
             m(i, r) {
                 x(i, e, r), o || (s = H(e, "click", t[4]), o = !0)
@@ -35387,7 +36133,23 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         qh, zp, YP, QP = () => {
             zp = nn.pointlights.data.lightCols, qh = nn.pointlights.data.lightPos, YP = nn.pointlights.data.lightCount
         },
+        ensureFireflyLights = () => {
+            for (let i = 0; i < fireflyAreas.length; ++i) {
+                let f = fireflyAreas[i];
+                if (f.light && Bp.indexOf(f.light) >= 0) continue;
+                let m = new Float32Array(16);
+                m[0] = m[5] = m[10] = m[15] = 1;
+                m[12] = f.pos[0], m[13] = f.pos[1] + fireflyLightLift, m[14] = f.pos[2];
+                let c = f.rgb || (f.rgb = hexParts(f.color).map(v => v / 255));
+                let lr = f.radius || fireflyLightRadius;
+                f.light = KP([c[0] * fireflyLightPower, c[1] * fireflyLightPower, c[2] * fireflyLightPower], lr * lr, {
+                    visible: !0,
+                    worldMatrix: m
+                });
+            }
+        },
         XP = t => {
+            ensureFireflyLights();
             let e = [0, 0, 0],
                 n = [];
             for (let s = 0, i = Bp.length; s < i; ++s) {
@@ -35881,19 +36643,38 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         ]
     };
     var classicWaterCols = {
+        default: [0xc0dccd, 0x52888b, 0x416f78],
         headless: [0xd7d7d7, 0xb0d9db, 0x4f6693],
         faivel: [0xc0dccd, 0x52888b, 0x416f78],
-        //headless: [0xd7d7d7, 0xb0d9db, 0x4f6693],
-        guardstone: [0xffffff, 0x94d7f8, 0x324587]
+        guardstone: [0xd7d7d7, 0xb0d9db, 0x4f6693]
     };
     var classicEnvWorlds = {
         2: "guardstone",
         13: "faivel",
         3: "headless"
     };
-    var classicSoftness = .65;
+    var classicLearnedWorlds = new Map,
+        envNameWorld = id => {
+            let e = wc.get(id),
+                n = e && e.name && e.name.toLowerCase();
+            if (!n) return void 0;
+            for (let w in classicPalettes)
+                if (n.indexOf(w) >= 0) return w;
+            return n.indexOf("gloomfury") >= 0 ? "gloomfury" : void 0;
+        },
+        classicWorldFor = id => classicEnvWorlds[id] || classicLearnedWorlds.get(id) || envNameWorld(id),
+        classicLearnWorld = (envId, areaId) => {
+            if (!(envId > 0) || !(areaId > 0) || classicEnvWorlds[envId] || classicLearnedWorlds.has(envId)) return;
+            let world = areaWorlds[areaId];
+            world && classicPalettes[world] && (classicLearnedWorlds.set(envId, world), classicEnvCache.delete(envId));
+        };
+    var classicSoftness = .65,
+        classicHeadlessNight = 1.15;
+    var worldAmbientTint = {
+        guardstone: [.94, 1.08, .98]
+    };
     var classicEnvCache = new Map;
-    [classicLighting, classicDayBrightness, classicWaterColors].forEach(pt => pt.subscribe(() => classicEnvCache.clear()));
+    [classicLighting, classicWaterColors].forEach(pt => pt.subscribe(() => classicEnvCache.clear()));
     var classicClamp01 = v => Math.max(0, Math.min(1, v)),
         classicHex = n => [(n >> 16 & 255) / 255, (n >> 8 & 255) / 255, (n & 255) / 255],
         classicLum = c => c[0] * .299 + c[1] * .587 + c[2] * .114,
@@ -35903,14 +36684,11 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         },
         buildClassicEnv = env => {
             let out = Object.assign({}, env),
-                pal = classicPalettes[classicEnvWorlds[env.id]],
+                pal = classicPalettes[classicWorldFor(env.id)],
                 phases = [0, 1, 2];
             if (pal) {
-                let db = Math.max(
-                        0.5,
-                        classicClamp01(ne.classicDayBrightness / 100)
-                    ),
-                    scale = [db, 1 - (1 - db) * .5, 1],
+                let db = classicWorldFor(env.id) === "headless" ? classicHeadlessNight : 1,
+                    scale = [1, 1, db],
                     col = (p, i) => classicHex(pal[p][i]).map(v => v * scale[p]);
                 out.ambient = phases.map(p => col(p, 0));
                 out.direct = phases.map(p => col(p, 1));
@@ -35942,12 +36720,14 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             return out;
         },
         envAt = id => {
-            let env = wc.get(id);
-            if (!env || !ne.classicLighting && !ne.classicWaterColors) return env;
+            let env = wc.get(id),
+                tint = env && worldAmbientTint[classicWorldFor(id)];
+            if (!env || !ne.classicLighting && !ne.classicWaterColors && !tint) return env;
             let c = classicEnvCache.get(id);
             if (c) return c;
             c = ne.classicLighting ? buildClassicEnv(env) : Object.assign({}, env);
-            if (ne.classicWaterColors) c.water = (classicWaterCols[classicEnvWorlds[id]] || classicWaterCols.guardstone).map(classicHex);
+            if (ne.classicWaterColors) c.water = (classicWaterCols[classicWorldFor(id)] || classicWaterCols.guardstone).map(classicHex);
+            if (tint && c.ambient) c.ambient = c.ambient.map(ph => [ph[0] * tint[0], ph[1] * tint[1], ph[2] * tint[2]]);
             return classicEnvCache.set(id, c), c;
         };
     var f9 = (t, e, n, o) => {
@@ -35977,10 +36757,15 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 o = e,
                 s = t + 32,
                 i = e + 32,
-                r = envAt(T.getEnvironmentId(n, o)),
-                l = envAt(T.getEnvironmentId(s, o)),
-                a = envAt(T.getEnvironmentId(n, i)),
-                c = envAt(T.getEnvironmentId(s, i));
+                e0_ = T.getEnvironmentId(n, o),
+                e1_ = T.getEnvironmentId(s, o),
+                e2_ = T.getEnvironmentId(n, i),
+                e3_ = T.getEnvironmentId(s, i);
+            if (ne.classicLighting || ne.classicWaterColors) classicLearnWorld(e0_, T.getAreaId(n, o)), classicLearnWorld(e1_, T.getAreaId(s, o)), classicLearnWorld(e2_, T.getAreaId(n, i)), classicLearnWorld(e3_, T.getAreaId(s, i));
+            let r = envAt(e0_),
+                l = envAt(e1_),
+                a = envAt(e2_),
+                c = envAt(e3_);
             if (!r || !l || !a || !c) return;
             let f = t / 32 % 1,
                 u = e / 32 % 1;
@@ -36151,7 +36936,6 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             tonemapExposureVal = (tonemapDayExposure + (tonemapNightExposure - tonemapDayExposure) * night) / 100 * (expo / 100);
         }
         ht[11].uniforms.u_rain.value = _ra;
-        if (ht[20] && ht[20].uniforms.u_sunRefl) ht[20].uniforms.u_sunRefl.value = ne.waterReflections ? 1 - _ra * .85 : 0;
         if (ht[12] && ht[12].uniforms.u_rain) ht[12].uniforms.u_rain.value = _ra;
         if (ht[13] && ht[13].uniforms.u_rainAmount) ht[13].uniforms.u_rainAmount.value = _ra;
         if (ht[14] && ht[14].uniforms.u_rainAmount) ht[14].uniforms.u_rainAmount.value = _ra;
@@ -36278,15 +37062,70 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         }
         return !0
     };
+    var treeSinkFactor = .85,
+        treeSinkSamples = 8,
+        treeSinkRings = 2,
+        treeSinkMaxRadius = 2.5,
+        treeSinkMax = 1.5,
+        treeSinkRadiusScale = .3,
+        geometryExtent = new WeakMap,
+        geometryExtentOf = geo => {
+            if (!geo) return 0;
+            let cached = geometryExtent.get(geo);
+            if (cached !== void 0) return cached;
+            let d = geo.position && geo.position.data,
+                ext = 0;
+            if (d) {
+                let minX = 1 / 0,
+                    maxX = -1 / 0,
+                    minZ = 1 / 0,
+                    maxZ = -1 / 0;
+                for (let i = 0; i < d.length; i += 3) {
+                    let x = d[i],
+                        z = d[i + 2];
+                    x < minX && (minX = x), x > maxX && (maxX = x);
+                    z < minZ && (minZ = z), z > maxZ && (maxZ = z);
+                }
+                maxX >= minX && (ext = Math.max(maxX - minX, maxZ - minZ));
+            }
+            return geometryExtent.set(geo, ext), ext;
+        },
+        groundAt = (x, z) => {
+            let c = T.getChunk(Math.floor(x / 64), Math.floor(z / 64));
+            return c && c.deserialized ? T.getHeight(x, z) : null;
+        };
     var Zh = class {
             constructor() {
-                this.id = 0, this.pos = [-0, -0, -0], this.rot = [-0, -0, -0], this.scale = 1, this.matrix = void 0, this.loaded = !1
+                this.id = 0, this.pos = [-0, -0, -0], this.rot = [-0, -0, -0], this.scale = 1, this.matrix = void 0, this.loaded = !1, this.sink = 0
             }
             setWorldMatrix(e, n) {
-                this.matrix = e, Hn(Ct, n, this.pos), xo(In, this.scale), Hm(Qi, this.rot), Wm(this.matrix, Qi, Ct, In)
+                this.matrix = e, Hn(Ct, n, this.pos), this.sink && (Ct[1] -= this.sink), xo(In, this.scale), Hm(Qi, this.rot), Wm(this.matrix, Qi, Ct, In)
+            }
+            computeGroundSink(e) {
+                if (!meshGroundSink.get(this.id) || !this.geoExtent) return;
+                let r = this.geoExtent * this.scale * .5 * treeSinkRadiusScale;
+                if (r > treeSinkMaxRadius) r = treeSinkMaxRadius;
+                if (!(r > 0)) return;
+                let x = e.origin[0] + this.pos[0],
+                    z = e.origin[2] + this.pos[2],
+                    h0 = groundAt(x, z);
+                if (h0 === null) return;
+                let low = h0;
+                for (let ring = 1; ring <= treeSinkRings; ++ring) {
+                    let rr = r * ring / treeSinkRings;
+                    for (let a = 0; a < treeSinkSamples; ++a) {
+                        let ang = a * Math.PI * 2 / treeSinkSamples,
+                            h = groundAt(x + Math.cos(ang) * rr, z + Math.sin(ang) * rr);
+                        h !== null && h < low && (low = h);
+                    }
+                }
+                let drop = (h0 - low) * treeSinkFactor;
+                this.sink = drop <= 0 ? 0 : drop > treeSinkMax ? treeSinkMax : drop;
             }
             loadGeometry(e, n) {
                 if (!this.loaded) {
+                    let hide = this.noThin ? 0 : meshHideChance.get(this.id);
+                    if (hide > 0 && dirtHash(Math.round((n.origin[0] + this.pos[0]) * 16), Math.round((n.origin[2] + this.pos[2]) * 16), 173) < hide) return this.loaded = !0, this.postGeometryLoad(e, n);
                     let o = Os.get(this.id),
                         c = o.collisionGeometry == null ? o.geometry : o.collisionGeometry,
                         collide = () => {
@@ -36297,6 +37136,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                         };
                     this.loaded = !0, o.geometry === 0 ? collide() : qr(o.geometry, (s, i) => {
                         let r = !e.finishedLoadingChunks.has(n.id);
+                        this.geoExtent = geometryExtentOf(s);
                         this.addMesh(e, n), r && c === o.geometry ? (this.addCollider(e, n, s, i), this.postGeometryLoad(e, n)) : collide();
                     })
                 }
@@ -36330,8 +37170,11 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 }
             }
             addCollider(e, n, o, s) {
+                let sink = this.sink;
+                sink && this.matrix && (this.sink = 0, this.setWorldMatrix(this.matrix, n.origin));
                 let i = new Map;
-                this.handleColliderGeometry(e, s.index, s, i), this.handleColliderGeometry(e, s.indexInvisible, s, i)
+                this.handleColliderGeometry(e, s.index, s, i), this.handleColliderGeometry(e, s.indexInvisible, s, i);
+                sink && this.matrix && (this.sink = sink, this.setWorldMatrix(this.matrix, n.origin));
             }
             onRemove() {}
         },
@@ -36358,10 +37201,15 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         addMesh(e, n) {
             if (this.mesh === void 0) {
                 let o = Os.get(this.id);
-                this.mesh = Ai(this.id, o.shadow, !1, !0), this.mesh.visible = !1, this.updateMesh(n.origin), o.effects.length && (this.isEffectProp = !0)
+                this.computeGroundSink(n), this.mesh = Ai(this.id, o.shadow, !1, !0), this.mesh.visible = !1, this.updateMesh(n.origin), o.effects.length && (this.isEffectProp = !0)
             }
         }
         onChunkRebuild(e) {
+            if (this.mesh && meshGroundSink.has(this.id)) {
+                
+                let was = this.sink;
+                this.computeGroundSink(e), this.sink !== was && this.updateMesh(e.origin)
+            }
             this.mesh && this.mesh.data && this.mesh.data.interiorlight && T.getInteriorLight(this.mesh.data.interiorlight, Kh(Ei, this.mesh.position, 3, 3, 3))
         }
         createEffects() {
@@ -36384,7 +37232,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             }
         }
         setVisible(e) {
-            this.mesh.visible !== e && (this.mesh.visible = !0, this.mesh.data.multi.needsUpdate = !0)
+            this.mesh && this.mesh.visible !== e && (this.mesh.visible = !0, this.mesh.data.multi.needsUpdate = !0)
         }
         setEffectVisible(e) {
             this.isEffectProp && this.effectsCreated !== e && (e ? this.createEffects() : this.deleteEffects())
@@ -36399,10 +37247,10 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         L$ = 65536 / 100;
     var x9 = (t, e) => (t.id = e.id, Y(t.pos, e.x / k9, e.y / D$, e.z / k9), Y(t.rot, e.rx / Zb, e.ry / Zb, e.rz / Zb), t.scale = Math.max(e.scale, 100) / L$, t);
     var M9 = (t, e, n, o) => {
-            t.id = e, t.x = n, t.z = o, t.origin[0] = n * 64, t.origin[2] = o * 64, t.deserialized = !1, t.props.length = 0, t.data = void 0, t.loadingProps = 0
+            t.id = e, t.x = n, t.z = o, t.origin[0] = n * 64, t.origin[2] = o * 64, t.deserialized = !1, t.props.length = 0, t.data = void 0, t.loadingProps = 0, t.__world = void 0, t.gsStoneMask = null, t.gsMeadowMask = null, t.gsBigDirtMask = null, t.pathBand = null
         },
         F9 = (t, e) => {
-            t.data = e, C9(t), V$(t, !0), t.deserialized = !0
+            t.data = e, C9(t), scatterLakePlants(t), scatterRidgePlants(t), scatterPathPlants(t), V$(t, !0), t.deserialized = !0
         },
         Zs = (t, e, n) => {
             e /= 2.6666666666666665, n /= 2.6666666666666665;
@@ -36468,10 +37316,11 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 }
         };
     var V$ = (t, e) => {
+            let plain = Os.has(shrubPlainKey) && shrubTintWorlds.indexOf(chunkWorldOf(t)) < 0;
             for (let n = 0, o = t.data.props.length; n < o; ++n) {
                 let s = t.data.props[n],
                     i = x9(new Jh, s);
-                t.props.push(i), e && t.loadingProps++
+                plain && i.id === shrubMesh && (i.id = shrubPlainKey), t.props.push(i), e && t.loadingProps++
             }
             for (let n = 0; n < t.props.length; ++n) {
                 let o = t.props[n];
@@ -36660,7 +37509,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 let w = lakeWetFromData(loaded.data);
                 return lakeWet.set(key, w), Promise.resolve(w);
             }
-            let p = fetch(`data/world/${file}/${id}?v=8926940`, {
+            let p = fetch(`data/world/${file}/${id}?v=8971923`, {
                 cache: "default"
             }).then(r => r.arrayBuffer()).then(b => lakeWetFromData(pc.chunk.decode(new Uint8Array(b)))).catch(() => null).then(w => (lakeWet.set(key, w), lakeWetLoading.delete(key), w));
             return lakeWetLoading.set(key, p), p;
@@ -36782,6 +37631,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
     var emptyStoneFol = new Uint8Array(64 * 64);
     var buildStoneData = t => {
         t.stoneFol = emptyStoneFol;
+        if (stoneShaderSkipWorlds.indexOf(chunkWorldOf(t)) >= 0) return null;
         {
             let cx0 = Math.floor(t.origin[0] / 64),
                 cz0 = Math.floor(t.origin[2] / 64),
@@ -36796,7 +37646,8 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 }
             if (!hasWater) return null;
         }
-        let cell = 2,
+        let gsChunk = chunkIsGuardstone(t),
+            cell = 2,
             pad = Math.ceil(stoneWaterDistance / cell) + 1,
             gw = Math.round(64 / cell) + pad * 2,
             nCells = gw * gw,
@@ -36873,6 +37724,10 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 u = (stoneWaterDistance - dist * cell) / stoneFade,
                 cap = (stoneMaxHeight - (ter - lvl)) / stoneFade;
             u = u < cap ? u : cap;
+            if (gsChunk) {
+                let below = (stoneUnderwaterDepth - (lvl - ter)) / stoneUnderwaterFade;
+                u = u < below ? u : below;
+            }
             return u < 0 ? 0 : u > 1 ? 1 : u;
         };
         let fol = t.stoneFol = new Uint8Array(64 * 64);
@@ -36893,10 +37748,18 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             let r = ne.foliage,
                 l = !1;
             t.data.holes.length > 0 && (l = !0);
-            let a = [-1, -1, -1, -1];
+            let a = [-1, -1, -1, -1],
+                oasisLayer = [-1, -1, -1, -1],
+                greenLayer = [-1, -1, -1, -1];
             for (let c = 0; c < 4; ++c) {
                 let f = t.data.textureid[c];
-                for (let u = 0; u < 4; ++u) f[u] === 27 && (a[c] = u)
+                for (let u = 0; u < 4; ++u) {
+                    f[u] === 27 && (a[c] = u);
+                    let tr = yc.get(f[u]);
+                    if (!tr) continue;
+                    tr.texture === oasisFoliageTexture && (oasisLayer[c] = u);
+                    tr.texture === oasisGrassTexture && (greenLayer[c] = u);
+                }
             }
             for (let c = 0; c < 64; ++c)
                 for (let f = 0; f < 64; ++f) {
@@ -36904,7 +37767,9 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     let u = c + t.origin[0],
                         p = f + t.origin[2],
                         h = T.getNormal(u, p);
-                    if (h[1] < .6 || l && Wp(t, c, f) || jp(t, c, f) > Zs(t, c, f) + 80) continue;
+                    let wl = jp(t, c, f),
+                        gh = Zs(t, c, f);
+                    if (h[1] < .6 || l && Wp(t, c, f) || wl > gh + 80) continue;
                     let v = T9(c, f),
                         _ = A9(c, f),
                         b = t.data.texture[v][_],
@@ -36920,18 +37785,32 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     t.stoneStrip && t.stoneStrip[v * 9216 + _] && t.stoneStripLayer[v] >= 0 && (I = t.data.textureid[v][t.stoneStripLayer[v]]);
                     t.topGrass && (I = topGrassFoliage(t, v, _, I));
                     if (dirtPatchEnabled && dirtPatchCovers(t, v, _, I)) continue;
+                    let hlGrassed = t.hlBank && t.hlBank[v * 9216 + _] > oasisBankFoliageCut;
+                    if (t.hlStone && t.hlStone[v * 9216 + _] > 127 || !hlGrassed && hlBareDirt(t, v, _)) continue;
                     let R = yc.get(I).foliage;
+                    gsGrassFoliage && yc.get(I).texture === gsSwapFoliageTexture && chunkIsGuardstone(t) && (R = gsGrassFoliage);
                     if (shoreShaderEnabled && isGrassTerrain(I)) {
-                        if (t.stoneFol && t.stoneFol[c + f * 64] || t.steepMask && t.steepMask[v * 9216 + _] > 127) continue;
+                        if (t.stoneFol && t.stoneFol[c + f * 64] || t.steepMask && t.steepMask[v * 9216 + _] > 127 || t.gsStoneMask && t.gsStoneMask[v * 9216 + _] > 127) continue;
                         gw && Hp() < gloomWeight(u, p) && (R = gloomFoliageFor(I));
                         if (t.meadowMask && Hp() < t.meadowMask[v * 9216 + _] / 850 && topGrassShown(I) === 1227) continue;
+                        if (t.pathBand && t.pathBand[v * 9216 + _] > pathBandFoliageCutoff) continue;
+                        if (chunkIsGuardstone(t)) {
+                            let dm = Math.max(t.dirtMask ? t.dirtMask[v * 9216 + _] : 0, t.gsBigDirtMask ? t.gsBigDirtMask[v * 9216 + _] : 0);
+                            if (dm && Hp() < dm / 255 * gsDirtFoliageCut) continue;
+                            if (gsFlowerLists) {
+                                let fl = gsFlowerPick(t, v, _, u, p);
+                                fl && (R = fl);
+                            }
+                        }
                     }
-                    let L = q9[u % 64 + p % 64 * 64];
+                    let L = q9[u % 64 + p % 64 * 64],
+                        oz = t.oasisMode && wl <= gh && (oasisLayer[v] >= 0 ? oasisLayerShare(b, oasisLayer[v]) : 0) + (greenLayer[v] >= 0 ? oasisLayerShare(b, greenLayer[v]) : 0) + (t.hlBank ? t.hlBank[v * 9216 + _] : 0) / 255 >= oasisFoliageGrassMin;
+                    oz && oasisExtraList && (R = R.concat(oasisExtraList));
                     for (let z = 0; z < R.length; ++z) {
                         let V = R[z],
                             q = V[1];
                         if (ya() % 255 > q || V[2] && L <= 0) continue;
-                        let O = V[0],
+                        let O = oz && V[0] < oasisFoliageBase ? oasisFolClones[V[0] % oasisFolClones.length] : V[0],
                             N = n.indexOf(O);
                         if (i[N] >= L9 || N < 0) continue;
                         let U = s[N].attributes.inst.data,
@@ -36975,6 +37854,17 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     }
                 }
                 gloomFolIds && gloomNear(t) && gloomFolIds.forEach(id => n.folIds.indexOf(id) < 0 && n.folIds.push(id));
+                gsGrassFoliage && chunkIsGuardstone(t) && gsGrassFoliage.forEach(f => !hiddenFoliage.has(f[0]) && n.folIds.indexOf(f[0]) < 0 && n.folIds.push(f[0]));
+                gsFlowerIds && chunkIsGuardstone(t) && gsFlowerIds.forEach(id => !hiddenFoliage.has(id) && n.folIds.indexOf(id) < 0 && n.folIds.push(id));
+                t.oasisMode = 0;
+                if (oasisFolClones && chunkWorldOf(t) === "headless" && chunkNeedsOasisFoliage(t)) {
+                    t.oasisMode = 1;
+                    let extra = oasisExtraIds || [],
+                        room = Math.max(1, 12 - oasisFolClones.length - extra.length);
+                    n.folIds.length > room && (n.folIds.length = room);
+                    oasisFolClones.forEach(id => n.folIds.indexOf(id) < 0 && n.folIds.push(id));
+                    extra.forEach(id => n.folIds.indexOf(id) < 0 && n.folIds.push(id));
+                }
                 n.folIds.length > 12 && (n.folIds.length = 12);
                 for (let o = 0; o < n.folIds.length; ++o) {
                     let s = n.folIds[o];
@@ -37132,11 +38022,13 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         n7 = Ot ** 2,
         iy = new Map,
         L_sand = new Map,
+        L_gsp = new Map,
         rl = 96,
         J9 = 96 / 12,
         hf = 8,
         Qp = new Uint8Array(3 * rl ** 2),
         sandBuf = new Uint8Array(4 * rl ** 2),
+        gspBuf = new Uint8Array(4 * rl ** 2),
         ry = new Map,
         f1 = u1 / 2,
         e7 = 3,
@@ -37340,16 +38232,27 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             }
             if (n) {
                 let o = t.x * 2 % hf * 2 + t.z * 2 % hf * hf;
-                t.meshes.atlas = K$(t), t.meshes.texSet = t.data.textureid.map(Z$);
+                t.meshes.atlas = K$(t);
+                let chWorld = ne.faivelRetexture ? chunkWorldOf(t) : null,
+                    gsChunk = chWorld === "guardstone";
+                ne.faivelRetexture && (chWorld = chunkRetextureWorld(t));
+                t.meshes.texSet = t.data.textureid.map(ids => Z$(ids, chWorld));
                 let s = t.data.holes.length > 0;
                 ne.faivelRetexture ? buildStoneStrips(t) : t.stoneStrip = null;
                 t.topGrass = ne.faivelRetexture ? topGrassLookup(t) : null;
-                t.dirtMask = dirtPatchEnabled ? terrainDeferred(t, "dirtmask", buildDirtMask) : null;
-                t.meadowMask = dirtPatchEnabled ? terrainDeferred(t, "meadowmask", buildMeadowMask) : null;
+                t.dirtMask = dirtPatchEnabled ? (gsChunk ? terrainDeferred(t, "gsdirt", buildGsDirtMask) : terrainDeferred(t, "dirtmask", buildDirtMask)) : null;
+                t.gsStoneMask = dirtPatchEnabled && gsChunk ? terrainDeferred(t, "gsstone", buildGsStoneMask) : null;
+                t.meadowMask = dirtPatchEnabled && !gsChunk ? terrainDeferred(t, "meadowmask", buildMeadowMask) : null;
+                t.gsMeadowMask = dirtPatchEnabled && gsChunk ? terrainDeferred(t, "gsmeadow", buildGsMeadowMask) : null;
+                t.gsBigDirtMask = dirtPatchEnabled && gsChunk ? terrainDeferred(t, "gsbigdirt", buildGsBigDirtMask) : null;
+                t.pathBand = dirtPatchEnabled && gsChunk ? buildPathBand(t) : null;
                 t.steepMask = shoreShaderEnabled ? buildSteepMask(t) : null;
+                t.hlStone = ne.faivelRetexture ? buildHeadlessStone(t) : null;
+                t.hlBank = ne.faivelRetexture ? buildHeadlessBank(t) : null;
                 let sampleStone;
                 if (shoreShaderEnabled) {
                     t.meshes.sandAtlas = Qsand(t);
+                    t.meshes.gspAtlas = Qgsp(t);
                     sampleStone = stoneShaderEnabled ? buildStoneData(t) : null;
                 }
                 for (let i = 0; i < 2; ++i)
@@ -37381,14 +38284,31 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                             } else sandBuf.fill(0);
                             if (t.dirtMask)
                                 for (let p = 0, off = l * 9216; p < 9216; ++p) sandBuf[p * 4 + 2] = t.dirtMask[off + p];
+                            gspBuf.fill(0);
+                            if (t.hlBank)
+                                for (let p = 0, off = l * 9216; p < 9216; ++p) gspBuf[p * 4] = t.hlBank[off + p];
+                            if (t.gsStoneMask)
+                                for (let p = 0, off = l * 9216; p < 9216; ++p) gspBuf[p * 4] = t.gsStoneMask[off + p];
+                            if (t.gsMeadowMask)
+                                for (let p = 0, off = l * 9216; p < 9216; ++p) gspBuf[p * 4 + 1] = t.gsMeadowMask[off + p];
+                            if (t.pathBand)
+                                for (let p = 0, off = l * 9216; p < 9216; ++p) gspBuf[p * 4 + 2] = t.pathBand[off + p];
                             if (t.steepMask)
                                 for (let p = 0, off = l * 9216; p < 9216; ++p) sandBuf[p * 4] = t.steepMask[off + p];
+                            if (t.hlStone)
+                                for (let p = 0, off = l * 9216; p < 9216; ++p) t.hlStone[off + p] > sandBuf[p * 4] && (sandBuf[p * 4] = t.hlStone[off + p]);
                             if (t.meadowMask)
                                 for (let p = 0, off = l * 9216; p < 9216; ++p) sandBuf[p * 4 + 3] = t.meadowMask[off + p];
+                            if (t.gsBigDirtMask)
+                                for (let p = 0, off = l * 9216; p < 9216; ++p) sandBuf[p * 4 + 3] = t.gsBigDirtMask[off + p];
                             W4(t.meshes.sandAtlas, o + l, rl, rl, sandBuf);
+                            W4(t.meshes.gspAtlas, o + l, rl, rl, gspBuf);
                         }
                         let c = t.meshes.quadrantUbos[l];
                         let blend = terrainBlendParams(t.data.textureid[l]);
+                        let lit = gsChunk ? gsRockLight : fvStoneLight;
+                        lit[1] > 0 && (blend.shape[6] = lit[0], blend.shape[10] = gsChunk ? lit[1] : -lit[1], blend.shape[14] = lit[2]);
+                        t.hlStone && hlDirtFlags(t, l, blend.shape, chWorld);
                         c.data.quadrant[0] = o + l, c.data.terrainInfo = t.meshes.texSet[l].info, c.data.layerShape = blend.shape, c.data.layerSuppress = blend.suppress, c.data.layerFlags = gloomFlags(t, l);
                         I0(c), _o(c);
                     }
@@ -37461,8 +38381,27 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             }
             return L_sand.get(o);
         },
-        Z$ = t => {
-            let e = t.join(",");
+        Qgsp = t => {
+            let e = Math.floor(t.x * 2 / hf),
+                n = Math.floor(t.z * 2 / hf),
+                o = e + 1e3 * n;
+            if (!L_gsp.has(o)) {
+                let s = Vr({
+                    width: rl,
+                    height: rl,
+                    target: W.TEXTURE_2D_ARRAY,
+                    format: W.RGBA,
+                    internalFormat: W.RGBA8,
+                    depth: hf ** 2,
+                    flipY: !1,
+                    generateMipmaps: !1
+                });
+                F0(s, 4), bs(s), L_gsp.set(o, s);
+            }
+            return L_gsp.get(o);
+        },
+        Z$ = (t, world) => {
+            let e = t.join(",") + (world ? "|" + world : "");
             if (!ry.has(e)) {
                 let n = {
                     info: [],
@@ -37470,8 +38409,11 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     loaded: 0
                 };
                 t.forEach((o, s) => {
-                    let i = yc.get(o);
-                    n.info[s * 4 + 0] = i.scale / 127 / (ne.faivelRetexture && topGrassShown(o) === stoneTextureId ? stoneStretch : 1), n.info[s * 4 + 1] = i.darkest / 255 * 3, n.info[s * 4 + 2] = i.brightest / 255 * 3, n.info[s * 4 + 3] = i.spec / 255, Co(i.texture, r => {
+                    let i = yc.get(o),
+                        map = world ? worldRetexture[world] : null,
+                        raw = world === "guardstone" && pathTextures.indexOf(i.texture) >= 0,
+                        tex = raw ? gsPathKey : map && map[i.texture] != null && bc.has(map[i.texture]) ? map[i.texture] : i.texture;
+                    n.info[s * 4 + 0] = i.scale / 127 / (!raw && ne.faivelRetexture && (topGrassShown(o, world) === stoneTextureId || topGrassShown(o, world) === gsStoneTextureId) ? stoneStretch : 1) * (raw ? gsPathUvScale : 1), n.info[s * 4 + 1] = i.darkest / 255 * 3, n.info[s * 4 + 2] = i.brightest / 255 * 3, n.info[s * 4 + 3] = i.spec / 255 * (!raw && map && map[i.texture] != null && world === "headless" ? headlessSpecScale : 1) * (!raw && ne.faivelRetexture && topGrassShown(o, world) === dirtSpecShown ? dirtSpecScale : 1), Co(tex, r => {
                         n.diffuse[s] = r, n.loaded++
                     })
                 }), ry.set(e, n)
@@ -37499,7 +38441,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             keep === 1 && !rule.some(o => o && o.suppresses) && (keep = 0);
             for (let i = 0; i < 4; ++i) {
                 let o = rule[i];
-                shape.push(o && o.weight != null ? Math.max(0, o.weight) : 1, o && o.sharpness != null ? Math.max(.1, o.sharpness) : 1, i === 0 ? keep : 0, !tex[i] ? 0 : (tex[i][1] != null ? tex[i][1] : tex[i][0]) === 1227 ? 2 : dirtPatchTextures.indexOf(tex[i][0]) >= 0 || tex[i][1] != null && dirtPatchTextures.indexOf(tex[i][1]) >= 0 ? 1 : 0);
+                shape.push(o && o.weight != null ? Math.max(0, o.weight) : 1, o && o.sharpness != null ? Math.max(.1, o.sharpness) : 1, i === 0 ? keep : 0, !tex[i] ? 0 : grassMainTextures.indexOf(tex[i][1] != null ? tex[i][1] : tex[i][0]) >= 0 ? 2 : dirtPatchTextures.indexOf(tex[i][0]) >= 0 || tex[i][1] != null && dirtPatchTextures.indexOf(tex[i][1]) >= 0 ? 1 : 0);
                 for (let j = 0; j < 4; ++j) {
                     let by = 0;
                     if (i !== j && tex[j]) {
@@ -37515,12 +38457,14 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 suppress
             };
         },
-        stoneStripTextures = [2120, 2126],
+        stoneStripTextures = [2120, 2126, 2054, 1845, 1875],
         stoneStripWidth = 17.6,
         stoneStripSurround = 8,
         stoneStripMinStone = .2,
         stoneStripThreshold = .55,
         stoneStripMaxNy = .85,
+        gsStripGrassRadius = 5,
+        gsStripGrassSlopeTol = .06,
         terrainPackW = (() => {
             let w = new Float32Array(32768 * 4);
             for (let v = 0; v < 32768; ++v) {
@@ -37610,9 +38554,10 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             return d;
         },
         terrainPassCache = new Map,
-        terrainCacheKey = (t, kind) => kind + ":" + T.file + ":" + t.id,
+        terrainCacheMax = 3e3,
+        terrainCacheKey = (t, kind) => kind + "~2:" + T.file + ":" + t.id,
         terrainCacheTrim = () => {
-            let n = terrainPassCache.size - 1e3;
+            let n = terrainPassCache.size - terrainCacheMax * .8;
             for (let k of terrainPassCache.keys()) {
                 if (n <= 0) break;
                 let a = k.indexOf(":"),
@@ -37621,11 +38566,10 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 ch && ch.state >= 3 && ch.state !== 8 || (terrainPassCache.delete(k), n--);
             }
         },
-        terrainCacheSet = (t, kind, v) => (terrainPassCache.size >= 1200 && terrainCacheTrim(), terrainPassCache.set(terrainCacheKey(t, kind), v), v),
+        terrainCacheSet = (t, kind, v) => (terrainPassCache.size >= terrainCacheMax && terrainCacheTrim(), terrainPassCache.set(terrainCacheKey(t, kind), v), v),
         buildStoneStrips = t => {
             t.stoneStrip = null;
-            let key = terrainCacheKey(t, "strip"),
-                res = terrainPassCache.has(key) ? terrainPassCache.get(key) : terrainCacheSet(t, "strip", buildStoneStripsNow(t));
+            let res = terrainDeferred(t, "strip", t => terrainCacheSet(t, "strip", buildStoneStripsNow(t)));
             return res ? (t.stoneStrip = res.mask, t.stoneStripLayer = res.layer, res.mask) : null;
         },
         buildStoneStripsNow = t => {
@@ -37641,6 +38585,8 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 span = Math.ceil(P / 64),
                 stone = new Uint8Array(N),
                 road = new Uint8Array(N),
+                grass = new Uint8Array(N),
+                gsHere = chunkIsGuardstone(t),
                 thr = stoneStripThreshold;
             for (let dz = -span; dz <= span; ++dz)
                 for (let dx = -span; dx <= span; ++dx) {
@@ -37649,8 +38595,20 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                         ch = dx || dz ? T.getChunk(cx, cz) : t;
                     if (!terrainChunkUsable(ch, cx, cz, t)) continue;
                     let bits = stoneBitsOf(ch),
-                        rb = roadBitsOf(ch);
+                        rb = roadBitsOf(ch),
+                        gb = gsHere ? grassBitsOf(ch) : null;
                     for (let q = 0; q < 4; ++q) {
+                        if (gb && gb[q]) {
+                            let lut = stoneLut(gb[q]),
+                                a = ch.data.texture[q],
+                                gx0 = dx * 64 + (q & 1) * 32 + P,
+                                gz0 = dz * 64 + (q >> 1) * 32 + P;
+                            for (let f = Math.max(0, -gz0); f < Math.min(32, G - gz0); ++f)
+                                for (let u = Math.max(0, -gx0); u < Math.min(32, G - gx0); ++u) {
+                                    let p = f * 3 * TX + u * 3;
+                                    lut[a[p] & 32767] + lut[a[p + 1] & 32767] + lut[a[p + 2] & 32767] + lut[a[p + TX] & 32767] + lut[a[p + TX + 1] & 32767] + lut[a[p + TX + 2] & 32767] + lut[a[p + 2 * TX] & 32767] + lut[a[p + 2 * TX + 1] & 32767] + lut[a[p + 2 * TX + 2] & 32767] >= thr * 9 && (grass[(gz0 + f) * G + gx0 + u] = 1);
+                                }
+                        }
                         if (rb[q]) {
                             let lut = stoneLut(rb[q]),
                                 a = ch.data.texture[q],
@@ -37696,6 +38654,30 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             let toFilled = toStone,
                 any = !1;
             toFilled.fill(1e9);
+            let nyGrid = new Float32Array(N),
+                nyAt = k => {
+                    if (nyGrid[k] > 0) return nyGrid[k];
+                    let cx = k % G,
+                        cz = (k - cx) / G,
+                        wx = t.origin[0] + cx - P + .5,
+                        wz = t.origin[2] + cz - P + .5,
+                        gx = (T.getHeight(wx + 1, wz) - T.getHeight(wx - 1, wz)) / 2,
+                        gz = (T.getHeight(wx, wz + 1) - T.getHeight(wx, wz - 1)) / 2;
+                    return nyGrid[k] = 1 / Math.sqrt(1 + gx * gx + gz * gz);
+                },
+                gsGrassHolds = (cx, cz, ny) => {
+                    let R = gsStripGrassRadius;
+                    for (let dz = -R; dz <= R; ++dz)
+                        for (let dx = -R; dx <= R; ++dx) {
+                            if (dx * dx + dz * dz > R * R) continue;
+                            let nx = cx + dx,
+                                nz = cz + dz;
+                            if (nx < 0 || nz < 0 || nx >= G || nz >= G) continue;
+                            let n2 = nz * G + nx;
+                            if (grass[n2] && Math.abs(nyAt(n2) - ny) <= gsStripGrassSlopeTol) return !0;
+                        }
+                    return !1;
+                };
             for (let z = P; z < G - P; ++z)
                 for (let x = P; x < G - P; ++x) {
                     let k = z * G + x;
@@ -37704,7 +38686,9 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                         wz = t.origin[2] + z - P + .5,
                         gx = (T.getHeight(wx + 1, wz) - T.getHeight(wx - 1, wz)) / 2,
                         gz = (T.getHeight(wx, wz + 1) - T.getHeight(wx, wz - 1)) / 2;
-                    if (1 / Math.sqrt(1 + gx * gx + gz * gz) > stoneStripMaxNy) continue;
+                    let ny = nyGrid[k] = 1 / Math.sqrt(1 + gx * gx + gz * gz);
+                    if (ny > stoneStripMaxNy) continue;
+                    if (gsHere && gsGrassHolds(x, z, ny)) continue;
                     let x0 = x - R2,
                         z0 = z - R2,
                         x1 = x + R2 + 1,
@@ -37742,39 +38726,77 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 layer
             } : null;
         },
-        topGrassStoneTextures = [2120, 2126],
-        topGrassGrassTextures = [1227],
+        topGrassStoneTextures = [2120, 2126, 2054, 1845, 1875],
+        topGrassGrassTextures = [1227, 1235, 1238],
+        topGrassSandTextures = [1238],
+        topGrassSandCut = .12,
         topGrassSteepStart = .85,
         topGrassSteepFull = .72,
+        topGrassGsSteepStart = .93,
+        topGrassGsSteepFull = .83,
+        topGrassHlSteepStart = .66,
+        topGrassHlSteepFull = .48,
+        topGrassHlHoleScale = 9,
+        topGrassHlHoleCut = .38,
+        topGrassHlHoleFade = .18,
+        topGrassHlEdgeRadius = 4,
+        topGrassHlEdgeDrop = 2.2,
+        topGrassHlEdgeFade = 1.6,
         topGrassSpeckRadius = 3,
         topGrassSpeckMax = .35,
         topGrassSpeckFade = .15,
         topGrassNoiseAmount = .12,
         topGrassNoiseScale = 2.5,
-        topGrassShown = id => {
+        topGrassWaterFade = .6,
+        topGrassNearWater = t => {
+            for (let dz = -1; dz <= 1; ++dz)
+                for (let dx = -1; dx <= 1; ++dx) {
+                    let ch = T.getChunk(t.x + dx, t.z + dz);
+                    if (ch && ch.data && ch.data.water && ch.data.water.length > 0) return !0;
+                }
+            return !1;
+        },
+        topGrassDryness = (wx, wz) => {
+            let cx = Math.floor(wx / 64),
+                cz = Math.floor(wz / 64),
+                ch = T.getChunk(cx, cz);
+            if (!ch || !ch.data || !ch.data.terrain || !ch.data.water || ch.data.water.length === 0) return 1;
+            let d = Zs(ch, wx - cx * 64, wz - cz * 64) - jp(ch, wx - cx * 64, wz - cz * 64);
+            return d <= 0 ? 0 : d >= topGrassWaterFade ? 1 : (d /= topGrassWaterFade, d * d * (3 - 2 * d));
+        },
+        topGrassShown = (id, world) => {
             let terrain = yc.get(id);
             if (!terrain) return null;
-            let o = textureOverrides.get(terrain.texture),
+            let tex = terrain.texture,
+                map = world ? worldRetexture[world] : null;
+            map && map[tex] != null && bc.has(map[tex]) && (tex = map[tex]);
+            let o = textureOverrides.get(tex),
                 mapped = o == null ? null : typeof o == "object" ? o.id : o;
-            return mapped != null ? mapped : terrain.texture;
+            return mapped != null ? mapped : tex;
         },
         topGrassBitsOf = ch => {
-            let d = ch.data;
-            if (d.__topBits) return d.__topBits;
+            let d = ch.data,
+                world = ne.faivelRetexture ? chunkRetextureWorld(ch) : null;
+            if (d.__topBits && d.__topBitsWorld === world) return d.__topBits;
+            d.__topBitsWorld = world;
             let out = [0, 1, 2, 3].map(q => {
                 let stone = 0,
                     other = 0,
                     road = 0,
+                    sand = 0,
                     grass = topGrassGrassTextures.map(() => 0);
                 for (let k = 0; k < 4; ++k) {
                     let terrain = yc.get(d.textureid[q][k]),
-                        g = topGrassGrassTextures.indexOf(topGrassShown(d.textureid[q][k]));
+                        shown = topGrassShown(d.textureid[q][k], world),
+                        g = topGrassGrassTextures.indexOf(shown);
+                    topGrassSandTextures.indexOf(shown) >= 0 && (sand |= 1 << k);
                     terrain && topGrassStoneTextures.indexOf(terrain.texture) >= 0 ? stone |= 1 << k : g >= 0 ? grass[g] |= 1 << k : terrain && (other |= 1 << k, isGrassTerrain(d.textureid[q][k]) || (road |= 1 << k));
                 }
                 return {
                     stone,
                     other,
                     road,
+                    sand,
                     grass
                 };
             });
@@ -37782,9 +38804,27 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         },
         terrainJobs = [],
         terrainJobKeys = new Set,
+        terrainHoldStart = 0,
+        terrainHoldChunks = 10,
+        terrainHoldMax = 2e4,
+        terrainLoadBudget = 30,
+        terrainNearPending = world => {
+            let now = performance.now();
+            terrainHoldStart || (terrainHoldStart = now);
+            if (now - terrainHoldStart > terrainHoldMax) return terrainHoldStart = 0, !1;
+            let ids = new Set;
+            for (let k = 0; k < pa.length && ids.size < terrainHoldChunks; k += 3) {
+                let ch = world.chunksMap.get(pa[k]);
+                if (!ch || ch.state < 5 || ch.state === 8) return !0;
+                ids.add(T.file + ":" + pa[k]);
+            }
+            for (let key of terrainJobKeys)
+                if (ids.has(key.slice(key.indexOf(":") + 1))) return !0;
+            return terrainHoldStart = 0, !1;
+        },
         terrainJobsTick = () => {
             if (!terrainJobs.length) return;
-            let end = performance.now() + 3;
+            let end = performance.now() + (T && T.state !== 4 && ne.faivelRetexture ? terrainLoadBudget : 3);
             do {
                 try {
                     terrainJobs.shift()();
@@ -37798,24 +38838,39 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             let id = t.id,
                 file = T.file,
                 ck = terrainCacheKey(t, "rebuild"),
-                live = () => T.file === file && t.id === id && t.data && t.state >= 5 && t.state !== 8;
+                ready = () => T.file === file && t.id === id && t.data && t.state !== 8,
+                live = () => ready() && t.state >= 5,
+                waits = 0,
+                rebuild = () => {
+                    terrainJobKeys.delete(ck);
+                    if (!ready()) return;
+                    if (!live()) {
+                        if (++waits > 900) return;
+                        terrainJobKeys.add(ck), terrainJobs.push(rebuild);
+                        return;
+                    }
+                    s7(t, !1, !0), terrainJobs.push(() => live() && R9(t, !0));
+                };
             terrainJobKeys.add(key);
             terrainJobs.push(() => {
                 terrainJobKeys.delete(key);
-                if (!live() || terrainPassCache.has(key) || !build(t) || terrainJobKeys.has(ck)) return;
-                terrainJobKeys.add(ck);
-                terrainJobs.push(() => {
-                    terrainJobKeys.delete(ck);
-                    live() && (s7(t, !1, !0), terrainJobs.push(() => live() && R9(t, !0)));
-                });
+                if (!ready() || terrainPassCache.has(key) || !build(t) || terrainJobKeys.has(ck)) return;
+                terrainJobKeys.add(ck), terrainJobs.push(rebuild);
             });
             return null;
         },
-        topGrassLookup = t => terrainDeferred(t, "topgrass3", t => terrainCacheSet(t, "topgrass3", buildTopGrassNow(t))),
+        topGrassLookup = t => terrainDeferred(t, "topgrass5", t => terrainCacheSet(t, "topgrass5", buildTopGrassNow(t))),
         buildTopGrassNow = t => {
             let own = topGrassBitsOf(t);
             if (!own.some(b => b.stone && b.grass.some(Boolean))) return null;
-            let nearGloom = gloomNear(t);
+            if (chunkWorldOf(t) === "water" || chunkWorldOf(t) === "headless") return null;
+            let world = chunkWorldOf(t),
+                gsHere = world === "guardstone",
+                hlHere = world === "headless";
+            let steepStart = gsHere ? topGrassGsSteepStart : hlHere ? topGrassHlSteepStart : topGrassSteepStart,
+                steepFull = gsHere ? topGrassGsSteepFull : hlHere ? topGrassHlSteepFull : topGrassSteepFull,
+                nearGloom = gloomNear(t),
+                nearWater = topGrassNearWater(t);
             let NG = topGrassGrassTextures.length,
                 R = Math.max(1, Math.round(topGrassSpeckRadius)),
                 RO = R,
@@ -37895,9 +38950,30 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                         wx = ox + x + .5,
                         wz = oz + z + .5,
                         nz = (.65 * dirtN(wx / ns + 31.3, wz / ns + 7.9) + .35 * dirtN(wx / (ns * .4) + 3.1, wz / (ns * .4) + 17.7) - .5) * amt,
-                        flat = smooth(ny + nz, topGrassSteepFull, topGrassSteepStart),
+                        flat = smooth(ny + nz, steepFull, steepStart),
                         speck = 1 - smooth(stoneBox(x, z) + nz, topGrassSpeckMax - topGrassSpeckFade, topGrassSpeckMax + topGrassSpeckFade);
-                    val[n] = (flat > speck ? flat : speck) * (nearGloom ? 1 - gloomWeight(wx, wz) : 1) * (1 - smooth(otherBox(x, z), .25, .5));
+                    val[n] = (flat > speck ? flat : speck) * (nearGloom ? 1 - gloomWeight(wx, wz) : 1) * (1 - smooth(otherBox(x, z), .25, .5)) * (nearWater ? topGrassDryness(wx, wz) : 1);
+                    if (val[n] > 0 && t.pathBand) {
+                        let lx = wx - t.origin[0],
+                            lz = wz - t.origin[2];
+                        if (lx >= 0 && lz >= 0 && lx < 64 && lz < 64 && t.pathBand[T9(lx, lz) * 9216 + A9(lx, lz)] > 0) val[n] = 0;
+                    }
+                    if (hlHere && val[n] > 0) {
+                        let hole = dirtN(wx / topGrassHlHoleScale + 41.7, wz / topGrassHlHoleScale + 23.1);
+                        hole = hole <= topGrassHlHoleCut ? 0 : Math.min(1, (hole - topGrassHlHoleCut) / topGrassHlHoleFade);
+                        let h0 = hgt[k],
+                            drop = 0;
+                        for (let a = 0; a < 8; ++a) {
+                            let ang = a * Math.PI / 4,
+                                ex = x + Math.round(Math.cos(ang) * topGrassHlEdgeRadius),
+                                ez = z + Math.round(Math.sin(ang) * topGrassHlEdgeRadius);
+                            ex < 0 ? ex = 0 : ex > H - 1 && (ex = H - 1);
+                            ez < 0 ? ez = 0 : ez > H - 1 && (ez = H - 1);
+                            let d = h0 - hgt[ez * H + ex];
+                            d > drop && (drop = d);
+                        }
+                        val[n] *= hole * hole * (3 - 2 * hole) * (1 - smooth(drop, topGrassHlEdgeDrop, topGrassHlEdgeDrop + topGrassHlEdgeFade));
+                    }
                     let best = 0,
                         bw = -1;
                     for (let g = 0; g < NG; ++g) {
@@ -37955,6 +39031,11 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 let other = 0;
                 for (let k = 0; k < 4; ++k)(b.stone | grassAll) >> k & 1 || (other += w[k]);
                 if (other > .15) continue;
+                if (b.sand) {
+                    let sw = 0;
+                    for (let k = 0; k < 4; ++k) b.sand >> k & 1 && (sw += w[k]);
+                    if (sw > topGrassSandCut) continue;
+                }
                 let share = m / 255,
                     moved = 0;
                 for (let k = 0; k < 4; ++k)
@@ -37985,9 +39066,8 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 return b;
             });
         },
-        buildSteepMask = t => {
-            let key = terrainCacheKey(t, "steep2");
-            if (terrainPassCache.has(key)) return terrainPassCache.get(key);
+        buildSteepMask = t => terrainDeferred(t, "steep2", t => terrainCacheSet(t, "steep2", buildSteepMaskNow(t))),
+        buildSteepMaskNow = t => {
             let own = grassBitsOf(t);
             if (!(own[0] | own[1] | own[2] | own[3])) return terrainCacheSet(t, "steep2", null);
             let RF = Math.max(1, Math.round(steepFillRadius)),
@@ -38063,6 +39143,25 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             let h = Math.imul(x, 374761393) + Math.imul(z, 668265263) | 0;
             return h = Math.imul(h ^ h >>> 13, 1274126177), h ^= h >>> 16, (h >>> 0) / 4294967296;
         },
+        bankCellN = (x, z) => {
+            let ix = Math.floor(x),
+                iz = Math.floor(z),
+                f1 = 9,
+                f2 = 9;
+            for (let dz = -1; dz <= 1; ++dz)
+                for (let dx = -1; dx <= 1; ++dx) {
+                    let cx = ix + dx,
+                        cz = iz + dz,
+                        h = Math.imul(cx, 374761393) + Math.imul(cz, 668265263) | 0;
+                    h = Math.imul(h ^ h >>> 13, 1274126177), h ^= h >>> 16;
+                    let px = cx + (h & 1023) / 1023,
+                        pz = cz + (h >>> 10 & 1023) / 1023,
+                        d = Math.hypot(px - x, pz - z);
+                    d < f1 ? (f2 = f1, f1 = d) : d < f2 && (f2 = d);
+                }
+            let e = (f2 - f1) * 2.4;
+            return e > 1 ? 1 : Math.sqrt(e);
+        },
         dirtN = (x, z) => {
             let ix = Math.floor(x),
                 iz = Math.floor(z),
@@ -38081,6 +39180,702 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             let h = Math.imul(x, 374761393) + Math.imul(z, 668265263) + Math.imul(k, 1442695041) | 0;
             return h = Math.imul(h ^ h >>> 13, 1274126177), h ^= h >>> 16, (h >>> 0) / 4294967296;
         },
+        chunkWorldOf = t => {
+            if (t.__world !== void 0) return t.__world;
+            if (!t.data) return null;
+            let pick = tally => {
+                    let best = null,
+                        bw = 0;
+                    for (let w in tally) w !== "water" && tally[w] > bw && (bw = tally[w], best = w);
+                    return best || (tally.water ? "water" : null);
+                },
+                areas = {},
+                envs = {};
+            if (t.data.area)
+                for (let i = 0; i < t.data.area.length; ++i) {
+                    let w = t.data.area[i] && areaWorlds[t.data.area[i]];
+                    w && (areas[w] = (areas[w] || 0) + 1);
+                }
+            let best = pick(areas);
+            if (!best && t.data.environment)
+                for (let i = 0; i < t.data.environment.length; ++i) {
+                    let id = t.data.environment[i],
+                        w = classicEnvWorlds[id] || envNameWorld(id);
+                    w && (envs[w] = (envs[w] || 0) + 1);
+                }
+            best || (best = pick(envs));
+            return t.__world = best;
+        },
+        chunkIsGuardstone = t => chunkWorldOf(t) === "guardstone",
+        worldOfChunkCell = (t, lx, lz) => areaWorlds[Jb(t, lx, lz)] || classicWorldFor(ey(t, lx, lz)) || null,
+        gsFlowerPick = (t, q, k, wx, wz) => {
+            let gx = Math.floor(wx / gsFlowerCell),
+                gz = Math.floor(wz / gsFlowerCell),
+                roll = dirtHash(gx, gz, 401);
+            if (roll >= gsFlowerPathChance) return null;
+            let bandM = t.pathBand ? t.pathBand[q * 9216 + k] : 0,
+                stoneM = t.gsStoneMask ? t.gsStoneMask[q * 9216 + k] : 0,
+                byPath = bandM > 0 && bandM <= pathBandFoliageCutoff,
+                byStone = !byPath && stoneM > 0 && stoneM <= gsFlowerStoneFringe,
+                want = byPath ? gsFlowerPathChance : byStone ? gsFlowerStoneChance : gsFlowerHillChance;
+            if (roll >= want) return null;
+            if (!byPath && !byStone && localRise(wx, wz, gsFlowerHillRadius) < gsFlowerHillRise) return null;
+            return gsFlowerLists[Math.floor(dirtHash(gx, gz, 402) * gsFlowerLists.length) % gsFlowerLists.length];
+        },
+        scatterRidgePlants = t => {
+            if (!ne.faivelRetexture || !t.data || !t.data.props || t.data.__ridgeplants) return;
+            t.data.__ridgeplants = !0;
+            if (!Os.has(ridgePlantMesh) || chunkWorldOf(t) !== ridgePlantWorld) return;
+            let R = ridgePlantDropRadius,
+                span = 64 - 2 * R - .5;
+            if (span <= 0) return;
+            for (let i = 0; i < ridgePlantTries; ++i) {
+                if (dirtHash(t.x * 64 + i, t.z * 64 - i, 511) > ridgePlantChance) continue;
+                let lx = R + .25 + dirtHash(t.x * 64 + i, t.z * 64, 512) * span,
+                    lz = R + .25 + dirtHash(t.x * 64, t.z * 64 + i, 513) * span;
+                if (Wp(t, lx, lz)) continue;
+                let y = Zs(t, lx, lz);
+                if (y <= jp(t, lx, lz)) continue;
+                let nrm = chunkNormalAt(t, lx, lz);
+                if (nrm[1] < ridgePlantMinNormal) continue;
+                let drop = 0;
+                for (let a = 0; a < 8; ++a) {
+                    let ang = a * Math.PI / 4,
+                        d = y - Zs(t, lx + Math.cos(ang) * R, lz + Math.sin(ang) * R);
+                    d > drop && (drop = d);
+                }
+                if (drop < ridgePlantMinDrop) continue;
+                let tiltX = Math.max(-ridgePlantTiltMax, Math.min(ridgePlantTiltMax, Math.atan2(nrm[2], nrm[1]))),
+                    tiltZ = Math.max(-ridgePlantTiltMax, Math.min(ridgePlantTiltMax, -Math.atan2(nrm[0], nrm[1]))),
+                    r = dirtHash(t.x - i, t.z + i, 514);
+                t.data.props.push({
+                    id: ridgePlantMesh,
+                    x: Math.round(lx * k9),
+                    y: Math.round((y + ridgePlantLift) * D$),
+                    z: Math.round(lz * k9),
+                    rx: Math.round(tiltX * Zb),
+                    ry: Math.round(r * 65535) - 32768,
+                    rz: Math.round(tiltZ * Zb),
+                    scale: ridgePlantScaleMin + Math.round(r * (ridgePlantScaleMax - ridgePlantScaleMin))
+                });
+            }
+        },
+        chunkAreaShare = (t, names, key) => {
+            let d = t.data;
+            if (!d || !d.area) return 0;
+            if (d[key] !== void 0) return d[key];
+            let hit = 0,
+                seen = 0;
+            for (let i = 0; i < d.area.length; ++i) {
+                let id = d.area[i];
+                if (!id) continue;
+                ++seen;
+                let a = Du.get(id);
+                if (!a || !a.name) continue;
+                for (let j = 0; j < names.length; ++j)
+                    if (a.name.indexOf(names[j]) >= 0) {
+                        ++hit;
+                        break;
+                    }
+            }
+            return d[key] = seen ? hit / seen : 0;
+        },
+        chunkNeedsOasisFoliage = t => {
+            let d = t.data;
+            if (d.__oasisFol !== void 0) return d.__oasisFol;
+            let hit = chunkAreaShare(t, [oasisFoliageName], "__oasis") > 0;
+            if (!hit && d.textureid)
+                for (let q = 0; q < 4 && !hit; ++q)
+                    for (let k = 0; k < 4; ++k) {
+                        let r = yc.get(d.textureid[q][k]);
+                        if (r && (r.texture === oasisFoliageTexture || r.texture === oasisGrassTexture)) {
+                            hit = !0;
+                            break;
+                        }
+                    }
+            if (!hit)
+                for (let dz = -1; dz <= 1 && !hit; ++dz)
+                    for (let dx = -1; dx <= 1; ++dx) {
+                        let ch = dx || dz ? T.getChunk(t.x + dx, t.z + dz) : t;
+                        if (ch && ch.data && ch.data.water && ch.data.water.length > 0) {
+                            hit = !0;
+                            break;
+                        }
+                    }
+            return d.__oasisFol = hit;
+        },
+        isOasisArea = id => {
+            if (!id) return !1;
+            if (!oasisAreaIds && Du.size) {
+                oasisAreaIds = new Set;
+                for (let a of Du.values()) a.name && a.name.indexOf(oasisFoliageName) >= 0 && oasisAreaIds.add(a.id);
+            }
+            return !!oasisAreaIds && oasisAreaIds.has(id);
+        },
+        chunkRetextureWorld = ch => chunkWorldOf(ch),
+        scatterPathPlants = t => {
+            if (!ne.faivelRetexture || !t.data || !t.data.props || t.data.__pathplants) return;
+            t.data.__pathplants = !0;
+            if (!Os.has(pathPlantMesh) || chunkWorldOf(t) !== pathPlantWorld) return;
+            let near = chunkHasPath(t);
+            for (let dz = -1; dz <= 1 && !near; ++dz)
+                for (let dx = -1; dx <= 1 && !near; ++dx) {
+                    let ch = T.getChunk(t.x + dx, t.z + dz);
+                    ch && ch.data && ch.data.textureid && chunkHasPath(ch) && (near = !0);
+                }
+            if (!near) return;
+            let pathWithin = (x, z) => {
+                for (let d = 2; d <= pathPlantRadius; d += 2)
+                    for (let a = 0; a < 12; ++a) {
+                        let ang = a * Math.PI / 6;
+                        if (pathWeightAt(x + Math.cos(ang) * d, z + Math.sin(ang) * d) > pathPlantPathWeight) return !0;
+                    }
+                return !1;
+            };
+            for (let i = 0; i < pathPlantTries; ++i) {
+                if (dirtHash(t.x * 64 - i, t.z * 64 + i, 611) > pathPlantChance) continue;
+                let lx = .5 + dirtHash(t.x * 64 + i, t.z * 64, 612) * 63,
+                    lz = .5 + dirtHash(t.x * 64, t.z * 64 + i, 613) * 63;
+                if (Wp(t, lx, lz)) continue;
+                let y = Zs(t, lx, lz);
+                if (y <= jp(t, lx, lz)) continue;
+                if (pathWeightAt(t.origin[0] + lx, t.origin[2] + lz) > pathPlantEdgeMax || !pathWithin(t.origin[0] + lx, t.origin[2] + lz)) continue;
+                let nrm = chunkNormalAt(t, lx, lz);
+                if (nrm[1] < pathPlantMinNormal) continue;
+                let tiltX = Math.max(-pathPlantTiltMax, Math.min(pathPlantTiltMax, Math.atan2(nrm[2], nrm[1]))),
+                    tiltZ = Math.max(-pathPlantTiltMax, Math.min(pathPlantTiltMax, -Math.atan2(nrm[0], nrm[1]))),
+                    r = dirtHash(t.x + i, t.z - i, 614);
+                t.data.props.push({
+                    id: pathPlantMesh,
+                    x: Math.round(lx * k9),
+                    y: Math.round((y + pathPlantLift) * D$),
+                    z: Math.round(lz * k9),
+                    rx: Math.round(tiltX * Zb),
+                    ry: Math.round(r * 65535) - 32768,
+                    rz: Math.round(tiltZ * Zb),
+                    scale: pathPlantScaleMin + Math.round(r * (pathPlantScaleMax - pathPlantScaleMin))
+                });
+            }
+        },
+        chunkNormalAt = (t, lx, lz) => {
+            if (!t.normals) return [0, 1, 0];
+            let e = lx / 2.6666666666666665,
+                n = lz / 2.6666666666666665,
+                i = Math.floor(e) * 2 + 24 * Math.floor(n) * 2;
+            e % 1 + n % 1 > 1 && i++;
+            i *= 3;
+            return [t.normals[i], t.normals[i + 1], t.normals[i + 2]];
+        },
+        scatterLakePlants = t => {
+            if (!ne.faivelRetexture || !t.data || !t.data.props || t.data.__lakeplants) return;
+            t.data.__lakeplants = !0;
+            if (!Os.has(lakePlantMesh) || !t.data.water || t.data.water.length === 0) return;
+            for (let i = 0; i < lakePlantTries; ++i) {
+                if (dirtHash(t.x * 64 + i, t.z * 64 + i, 311) > lakePlantChance) continue;
+                let lx = dirtHash(t.x * 64 + i, t.z * 64, 312) * 63.5 + .25,
+                    lz = dirtHash(t.x * 64, t.z * 64 + i, 313) * 63.5 + .25;
+                if (Wp(t, lx, lz)) continue;
+                let y = Zs(t, lx, lz),
+                    above = y - jp(t, lx, lz);
+                if (above < lakePlantMinAbove || above > lakePlantMaxAbove) continue;
+                let nrm = chunkNormalAt(t, lx, lz);
+                if (nrm[1] < lakePlantMinNormal) continue;
+                let tiltX = Math.atan2(nrm[2], nrm[1]),
+                    tiltZ = -Math.atan2(nrm[0], nrm[1]);
+                tiltX = Math.max(-lakePlantTiltMax, Math.min(lakePlantTiltMax, tiltX));
+                tiltZ = Math.max(-lakePlantTiltMax, Math.min(lakePlantTiltMax, tiltZ));
+                let r = dirtHash(t.x + i, t.z - i, 314);
+                t.data.props.push({
+                    id: lakePlantMesh,
+                    x: Math.round(lx * k9),
+                    y: Math.round((y + lakePlantLift) * D$),
+                    z: Math.round(lz * k9),
+                    rx: Math.round(tiltX * Zb),
+                    ry: Math.round(r * 65535) - 32768,
+                    rz: Math.round(tiltZ * Zb),
+                    scale: lakePlantScaleMin + Math.round(r * (lakePlantScaleMax - lakePlantScaleMin))
+                });
+            }
+        },
+        topGrassShown0 = tex => {
+            let o = textureOverrides.get(tex),
+                mapped = o == null ? null : typeof o == "object" ? o.id : o;
+            return mapped == null ? tex : mapped;
+        },
+        isPathTerrain = id => {
+            let terrain = yc.get(id);
+            return !!terrain && pathTextures.indexOf(terrain.texture) >= 0;
+        },
+        pathBitsOf = ch => {
+            let d = ch.data;
+            if (d.__pathBits) return d.__pathBits;
+            return d.__pathBits = [0, 1, 2, 3].map(q => {
+                let b = 0;
+                for (let k = 0; k < 4; ++k) isPathTerrain(d.textureid[q][k]) && (b |= 1 << k);
+                return b;
+            });
+        },
+        chunkHasPath = t => {
+            let b = pathBitsOf(t);
+            return !!(b[0] | b[1] | b[2] | b[3]);
+        },
+        hlBitsOf = ch => {
+            let d = ch.data,
+                world = ne.faivelRetexture ? chunkRetextureWorld(ch) : null;
+            if (d.__hlBits && d.__hlBitsWorld === world) return d.__hlBits;
+            d.__hlBitsWorld = world;
+            return d.__hlBits = [0, 1, 2, 3].map(q => {
+                let dirt = 0,
+                    sand = 0;
+                for (let k = 0; k < 4; ++k) {
+                    let shown = topGrassShown(d.textureid[q][k], world);
+                    hlIsDirt(d.textureid[q][k], world) && (dirt |= 1 << k);
+                    hlStoneSandShown.indexOf(shown) >= 0 && (sand |= 1 << k);
+                }
+                return {
+                    dirt,
+                    sand
+                };
+            });
+        },
+        buildHeadlessStone = t => chunkWorldOf(t) === "headless" ? terrainDeferred(t, "hlstone4", t => terrainCacheSet(t, "hlstone4", buildHeadlessStoneNow(t))) : null,
+        hlStoneFor = t => {
+            let key = terrainCacheKey(t, "hlstone4");
+            return terrainPassCache.has(key) ? terrainPassCache.get(key) : terrainCacheSet(t, "hlstone4", buildHeadlessStoneNow(t));
+        },
+        buildHeadlessStoneNow = t => {
+            let TX = 96,
+                P = Math.ceil(hlStoneEdgeKeep + hlStoneFade) + 2,
+                G = 64 + 2 * P,
+                N = G * G,
+                span = Math.ceil(P / 64),
+                ok = new Uint8Array(N),
+                bare = new Uint8Array(N),
+                any = !1;
+            for (let dz = -span; dz <= span; ++dz)
+                for (let dx = -span; dx <= span; ++dx) {
+                    let cx = t.x + dx,
+                        cz = t.z + dz,
+                        ch = dx || dz ? T.getChunk(cx, cz) : t;
+                    if (!terrainChunkUsable(ch, cx, cz, t)) continue;
+                    let bits = hlBitsOf(ch);
+                    for (let q = 0; q < 4; ++q) {
+                        let b = bits[q];
+                        if (!b.dirt) continue;
+                        let dl = stoneLut(b.dirt),
+                            sl = b.sand ? stoneLut(b.sand) : null,
+                            a = ch.data.texture[q],
+                            gx0 = dx * 64 + (q & 1) * 32 + P,
+                            gz0 = dz * 64 + (q >> 1) * 32 + P;
+                        for (let f = Math.max(0, -gz0); f < Math.min(32, G - gz0); ++f)
+                            for (let u = Math.max(0, -gx0); u < Math.min(32, G - gx0); ++u) {
+                                let v = a[f * 3 * TX + u * 3 + TX + 1] & 32767;
+                                if (dl[v] < hlStoneDirtMin) continue;
+                                if (sl && sl[v] > hlStoneSandMax) continue;
+                                let wx = cx * 64 + u + .5,
+                                    wz = cz * 64 + f + .5;
+                                bare[(gz0 + f) * G + gx0 + u] = 1;
+                                let gx = (T.getHeight(wx + 1, wz) - T.getHeight(wx - 1, wz)) / 2,
+                                    gz = (T.getHeight(wx, wz + 1) - T.getHeight(wx, wz - 1)) / 2;
+                                if (1 / Math.sqrt(1 + gx * gx + gz * gz) > hlStoneMaxNy) continue;
+                                ok[(gz0 + f) * G + gx0 + u] = 1, any = !0;
+                            }
+                    }
+                }
+            if (!any) return null;
+            let RF = hlStoneFillRadius,
+                sum = new Uint32Array((G + 1) * (G + 1));
+            for (let z = 0; z < G; ++z)
+                for (let x = 0, row = 0; x < G; ++x) row += ok[z * G + x], sum[(z + 1) * (G + 1) + x + 1] = sum[z * (G + 1) + x + 1] + row;
+            for (let z = 0; z < G; ++z)
+                for (let x = 0; x < G; ++x) {
+                    let k = z * G + x;
+                    if (ok[k] || !bare[k]) continue;
+                    let x0 = Math.max(0, x - RF),
+                        z0 = Math.max(0, z - RF),
+                        x1 = Math.min(G, x + RF + 1),
+                        z1 = Math.min(G, z + RF + 1),
+                        n = sum[z1 * (G + 1) + x1] - sum[z0 * (G + 1) + x1] - sum[z1 * (G + 1) + x0] + sum[z0 * (G + 1) + x0];
+                    n >= hlStoneFillShare * (x1 - x0) * (z1 - z0) && (ok[k] = 2);
+                }
+            let field = new Float32Array(N);
+            for (let k = 0; k < N; ++k) field[k] = ok[k] ? 1e9 : 0;
+            terrainChamfer(field, G);
+            let mask = new Uint8Array(4 * 9216),
+                hit = !1;
+            for (let q = 0; q < 4; ++q)
+                for (let f = 0; f < TX; ++f)
+                    for (let u = 0; u < TX; ++u) {
+                        let cx = (q & 1) * 32 + u / 3 + P,
+                            cz = (q >> 1) * 32 + f / 3 + P,
+                            i = Math.min(G - 2, Math.max(0, Math.floor(cx))),
+                            j = Math.min(G - 2, Math.max(0, Math.floor(cz))),
+                            fx = cx - i,
+                            fz = cz - j,
+                            n = j * G + i,
+                            d = (field[n] * (1 - fx) + field[n + 1] * fx) * (1 - fz) + (field[n + G] * (1 - fx) + field[n + G + 1] * fx) * fz;
+                        if (d <= hlStoneEdgeKeep) continue;
+                        let v = d >= hlStoneEdgeKeep + hlStoneFade ? 1 : (d - hlStoneEdgeKeep) / hlStoneFade,
+                            b = v * v * (3 - 2 * v) * hlStoneStrength * 255 + .5 | 0;
+                        b > 0 && (mask[q * 9216 + f * TX + u] = b, hit = !0);
+                    }
+            return hit ? mask : null;
+        },
+        buildHeadlessBank = t => chunkWorldOf(t) === "headless" ? terrainDeferred(t, "hlbank10", t => terrainCacheSet(t, "hlbank10", buildHeadlessBankNow(t))) : null,
+        buildHeadlessBankNow = t => {
+            let world = chunkRetextureWorld(t),
+                from = [0, 1, 2, 3].map(q => {
+                    let b = 0;
+                    for (let k = 0; k < 4; ++k) {
+                        let r = yc.get(t.data.textureid[q][k]);
+                        r && hlBankKeep.indexOf(r.texture) < 0 && topGrassShown(t.data.textureid[q][k], world) === hlBankFrom && (b |= 1 << k);
+                    }
+                    return b;
+                }),
+                dirt = [0, 1, 2, 3].map(q => {
+                    let b = 0;
+                    if (hlBankDirtGrass)
+                        for (let k = 0; k < 4; ++k) topGrassShown(t.data.textureid[q][k], world) === hlBankDirtShown && (b |= 1 << k);
+                    return b;
+                });
+            if (!(from[0] | from[1] | from[2] | from[3] | dirt[0] | dirt[1] | dirt[2] | dirt[3])) return null;
+            let cell = 2,
+                oceanPad = Math.ceil((hlBankOceanReach + hlBankOceanFade) / cell) + 1,
+                pad = Math.max(Math.ceil((hlBankDistance + hlBankNoise + hlBankEdgeNoise + hlBankFade) / cell) + 1, oceanPad, 34),
+                gw = Math.round(64 / cell) + pad * 2,
+                n = gw * gw,
+                terr = new Float32Array(n),
+                field = new Float32Array(n),
+                level = new Float32Array(n),
+                round = new Float32Array(n),
+                gone = new Uint8Array(n),
+                ocean = new Float32Array(n),
+                wet = 0,
+                oceanCells = 0,
+                missing = 0,
+                oceanBits = new Map,
+                bitsFor = ch => {
+                    let b = oceanBits.get(ch);
+                    if (b) return b;
+                    b = [0, 1, 2, 3].map(q => {
+                        let m = 0;
+                        for (let k = 0; k < 4; ++k) {
+                            let r = yc.get(ch.data.textureid[q][k]);
+                            r && r.texture === hlBankOcean && (m |= 1 << k);
+                        }
+                        return m;
+                    });
+                    return oceanBits.set(ch, b), b;
+                };
+            for (let gj = 0; gj < gw; ++gj)
+                for (let gi = 0; gi < gw; ++gi) {
+                    let k = gj * gw + gi,
+                        wx = t.origin[0] + (gi - pad + .5) * cell,
+                        wz = t.origin[2] + (gj - pad + .5) * cell,
+                        cx = Math.floor(wx / 64),
+                        cz = Math.floor(wz / 64),
+                        ch = cx === t.x && cz === t.z ? t : T.getChunk(cx, cz);
+                    field[k] = 1e9, ocean[k] = 1e9;
+                    if (!terrainChunkUsable(ch, cx, cz, t) || !ch.data.terrain) {
+                        terr[k] = 1e9, gone[k] = 1, ++missing;
+                        continue;
+                    }
+                    let lx = wx - cx * 64,
+                        lz = wz - cz * 64,
+                        h = Zs(ch, lx, lz),
+                        wl = ch.data.water && ch.data.water.length > 0 ? jp(ch, lx, lz) : -1e9;
+                    terr[k] = h;
+                    wl > h && (field[k] = 0, level[k] = wl, ++wet);
+                    let q = T9(lx, lz),
+                        ob = bitsFor(ch)[q];
+                    ob && stoneLut(ob)[ch.data.texture[q][A9(lx, lz)] & 32767] >= hlBankOceanMin && (ocean[k] = 0, ++oceanCells);
+                }
+            if (!wet) return null;
+            let comp = new Int32Array(n).fill(-1),
+                stack = new Int32Array(n),
+                ponds = 0,
+                roundest = 0;
+            for (let s0 = 0; s0 < n; ++s0) {
+                if (field[s0] !== 0 || comp[s0] >= 0) continue;
+                let sp = 0,
+                    area = 0,
+                    edges = 0,
+                    open = !1,
+                    cells = [],
+                    bx0 = gw,
+                    bx1 = -1,
+                    bz0 = gw,
+                    bz1 = -1;
+                comp[s0] = s0, stack[sp++] = s0;
+                while (sp > 0) {
+                    let k = stack[--sp],
+                        x = k % gw,
+                        z = (k - x) / gw;
+                    ++area, cells.push(k);
+                    x < bx0 && (bx0 = x), x > bx1 && (bx1 = x), z < bz0 && (bz0 = z), z > bz1 && (bz1 = z);
+                    (x === 0 || z === 0 || x === gw - 1 || z === gw - 1) && (open = !0);
+                    for (let d = 0; d < 4; ++d) {
+                        let nx = x + (d === 0 ? -1 : d === 1 ? 1 : 0),
+                            nz = z + (d === 2 ? -1 : d === 3 ? 1 : 0);
+                        if (nx < 0 || nz < 0 || nx >= gw || nz >= gw) continue;
+                        let nk = nz * gw + nx;
+                        if (gone[nk]) {
+                            open = !0;
+                            continue;
+                        }
+                        field[nk] === 0 ? comp[nk] < 0 && (comp[nk] = s0, stack[sp++] = nk) : ++edges;
+                    }
+                }
+                let circ = edges ? 64 * area / (Math.PI * edges * edges) : 0,
+                    amt = open || Math.max(bx1 - bx0, bz1 - bz0) + 1 > hlBankPondMax ? 0 : Math.max(0, Math.min(1, (circ - hlBankRoundStart) / (hlBankRoundFull - hlBankRoundStart)));
+                amt > 0 && (++ponds, amt * amt * (3 - 2 * amt) > roundest && (roundest = amt * amt * (3 - 2 * amt)));
+                amt = amt * amt * (3 - 2 * amt);
+                for (let c of cells) round[c] = amt;
+            }
+            let diag = Math.SQRT2;
+            for (let gj = 0; gj < gw; ++gj)
+                for (let gi = 0; gi < gw; ++gi) {
+                    let k = gj * gw + gi,
+                        best = field[k],
+                        bl = level[k],
+                        br = round[k],
+                        v;
+                    if (gi > 0 && (v = field[k - 1] + 1) < best) best = v, bl = level[k - 1], br = round[k - 1];
+                    if (gj > 0 && (v = field[k - gw] + 1) < best) best = v, bl = level[k - gw], br = round[k - gw];
+                    if (gi > 0 && gj > 0 && (v = field[k - gw - 1] + diag) < best) best = v, bl = level[k - gw - 1], br = round[k - gw - 1];
+                    if (gi < gw - 1 && gj > 0 && (v = field[k - gw + 1] + diag) < best) best = v, bl = level[k - gw + 1], br = round[k - gw + 1];
+                    field[k] = best, level[k] = bl, round[k] = br;
+                }
+            for (let gj = gw - 1; gj >= 0; --gj)
+                for (let gi = gw - 1; gi >= 0; --gi) {
+                    let k = gj * gw + gi,
+                        best = field[k],
+                        bl = level[k],
+                        br = round[k],
+                        v;
+                    if (gi < gw - 1 && (v = field[k + 1] + 1) < best) best = v, bl = level[k + 1], br = round[k + 1];
+                    if (gj < gw - 1 && (v = field[k + gw] + 1) < best) best = v, bl = level[k + gw], br = round[k + gw];
+                    if (gi < gw - 1 && gj < gw - 1 && (v = field[k + gw + 1] + diag) < best) best = v, bl = level[k + gw + 1], br = round[k + gw + 1];
+                    if (gi > 0 && gj < gw - 1 && (v = field[k + gw - 1] + diag) < best) best = v, bl = level[k + gw - 1], br = round[k + gw - 1];
+                    field[k] = best, level[k] = bl, round[k] = br;
+                }
+            oceanCells && terrainChamfer(ocean, gw);
+            let lerp = (g, k, w00, w10, w01, w11) => g[k] * w00 + g[k + 1] * w10 + g[k + gw] * w01 + g[k + gw + 1] * w11,
+                sample = (lx, lz) => {
+                    let gi = lx / cell + pad - .5,
+                        gj = lz / cell + pad - .5,
+                        i = gi < 0 ? 0 : gi > gw - 2 ? gw - 2 : Math.floor(gi),
+                        j = gj < 0 ? 0 : gj > gw - 2 ? gw - 2 : Math.floor(gj),
+                        fx = gi - i,
+                        fz = gj - j,
+                        k = j * gw + i,
+                        w00 = (1 - fx) * (1 - fz),
+                        w10 = fx * (1 - fz),
+                        w01 = (1 - fx) * fz,
+                        w11 = fx * fz,
+                        dist = lerp(field, k, w00, w10, w01, w11),
+                        lvl = lerp(level, k, w00, w10, w01, w11),
+                        rnd = lerp(round, k, w00, w10, w01, w11),
+                        reach = hlBankDistance;
+                    {
+                        let wx = t.origin[0] + lx,
+                            wz = t.origin[2] + lz,
+                            ns = hlBankNoiseScale,
+                            nz = .72 * bankCellN(wx / ns + 71.3, wz / ns + 19.7) + .28 * bankCellN(wx / (ns * .4) + 5.1, wz / (ns * .4) + 43.9);
+                        reach += (nz - .5) * 2 * (hlBankEdgeNoise + hlBankNoise * rnd);
+                    }
+                    let above = Zs(t, lx, lz) - lvl;
+                    if (above <= 0) return 0;
+                    let hs = (above - hlBankMaxHeight * hlBankHeightTaper) / (hlBankMaxHeight * (1 - hlBankHeightTaper));
+                    hs = hs < 0 ? 0 : hs > 1 ? 1 : hs;
+                    reach *= 1 - hs * hs * (3 - 2 * hs);
+                    let u = (reach - dist * cell) / hlBankFade;
+                    if (u <= 0) return 0;
+                    let far = dist * cell / Math.max(reach, 1);
+                    far = far < 0 ? 0 : far > 1 ? 1 : far;
+                    u = Math.min(u, 1) * (1 - hlBankSandBlend * far * far * (3 - 2 * far));
+                    let dry = above / hlBankDryFade;
+                    u = u < dry ? u : dry;
+                    if (oceanCells) {
+                        let od = lerp(ocean, k, w00, w10, w01, w11) * cell,
+                            of = (od - hlBankOceanReach) / hlBankOceanFade;
+                        u = u < of ? u : of;
+                    }
+                    return u < 0 ? 0 : u > 1 ? 1 : u;
+                };
+            let mask = new Uint8Array(4 * 9216),
+                covered = 0,
+                peak = 0;
+            let smooth = (v, a, b) => {
+                    let x = (v - a) / (b - a || 1e-6);
+                    return x = x < 0 ? 0 : x > 1 ? 1 : x, x * x * (3 - 2 * x);
+                },
+                dirtTexels = 0,
+                hs = dirt[0] | dirt[1] | dirt[2] | dirt[3] ? hlStoneFor(t) : null;
+            for (let q = 0; q < 4; ++q) {
+                if (!from[q] && !dirt[q]) continue;
+                let lut = from[q] ? stoneLut(from[q]) : null,
+                    dlut = dirt[q] ? stoneLut(dirt[q]) : null,
+                    a = t.data.texture[q];
+                for (let f = 0; f < 96; ++f)
+                    for (let u = 0; u < 96; ++u) {
+                        let p = f * 96 + u,
+                            v = a[p] & 32767,
+                            sw = lut ? lut[v] : 0,
+                            lx = (q & 1) * 32 + (u + .5) / 3,
+                            lz = (q >> 1) * 32 + (f + .5) / 3;
+                        if (dlut && dlut[v] > 0) {
+                            let wx = t.origin[0] + lx,
+                                wz = t.origin[2] + lz,
+                                ns = topGrassNoiseScale,
+                                nz = (.65 * dirtN(wx / ns + 31.3, wz / ns + 7.9) + .35 * dirtN(wx / (ns * .4) + 3.1, wz / (ns * .4) + 17.7) - .5) * topGrassNoiseAmount * 2,
+                                flat = smooth(chunkNormalAt(t, lx, lz)[1] + nz, hlBankFlatFull, hlBankFlatStart),
+                                hole = smooth(dirtN(wx / topGrassHlHoleScale + 41.7, wz / topGrassHlHoleScale + 23.1), topGrassHlHoleCut, topGrassHlHoleCut + topGrassHlHoleFade),
+                                stone = hs ? 1 - hs[q * 9216 + p] / 255 : 1,
+                                dw = dlut[v] * flat * hole * stone * hlBankDirtStrength;
+                            dw > 0 && (sw += dw, ++dirtTexels);
+                        }
+                        if (sw <= 0) continue;
+                        sw > 1 && (sw = 1);
+                        let b = sample(lx, lz) * sw * 255 + .5 | 0;
+                        b > 0 && (mask[q * 9216 + p] = b, ++covered, b > peak && (peak = b));
+                    }
+            }
+            return covered ? mask : null;
+        },
+        hlBareDirt = (t, q, p) => {
+            if (chunkWorldOf(t) !== "headless") return !1;
+            let b = hlBitsOf(t)[q];
+            return !!b.dirt && stoneLut(b.dirt)[t.data.texture[q][p] & 32767] >= hlBareDirtCut;
+        },
+        hlDirtFlags = (t, q, shape, world) => {
+            let ids = t.data.textureid[q];
+            for (let k = 0; k < 4; ++k) shape[k * 4 + 3] === 0 && hlIsDirt(ids[k], world) && (shape[k * 4 + 3] = 1);
+        },
+        buildPathBand = t => chunkHasPath(t) ? terrainDeferred(t, "pathband", t => terrainCacheSet(t, "pathband", buildPathBandNow(t))) : null,
+        buildPathBandNow = t => {
+            if (!chunkHasPath(t)) return null;
+            let TX = 96,
+                QN = TX * TX,
+                P = pathPad,
+                G = 64 + 2 * P,
+                N = G * G,
+                span = Math.ceil(P / 64),
+                cell = new Uint8Array(N),
+                known = new Uint8Array(N);
+            for (let dz = -span; dz <= span; ++dz)
+                for (let dx = -span; dx <= span; ++dx) {
+                    let cx = t.x + dx,
+                        cz = t.z + dz,
+                        ch = dx || dz ? T.getChunk(cx, cz) : t;
+                    if (!terrainChunkUsable(ch, cx, cz, t)) continue;
+                    let bits = pathBitsOf(ch);
+                    for (let q = 0; q < 4; ++q) {
+                        let gx0 = dx * 64 + (q & 1) * 32 + P,
+                            gz0 = dz * 64 + (q >> 1) * 32 + P,
+                            u0 = Math.max(0, -gx0),
+                            u1 = Math.min(32, G - gx0),
+                            f0 = Math.max(0, -gz0),
+                            f1 = Math.min(32, G - gz0);
+                        for (let f = f0; f < f1; ++f)
+                            for (let u = u0; u < u1; ++u) known[(gz0 + f) * G + gx0 + u] = 1;
+                        if (!bits[q]) continue;
+                        let lut = stoneLut(bits[q]),
+                            a = ch.data.texture[q];
+                        for (let f = f0; f < f1; ++f)
+                            for (let u = u0; u < u1; ++u) {
+                                let pp = f * 3 * TX + u * 3,
+                                    w = lut[a[pp] & 32767] + lut[a[pp + 1] & 32767] + lut[a[pp + 2] & 32767] + lut[a[pp + TX] & 32767] + lut[a[pp + TX + 1] & 32767] + lut[a[pp + TX + 2] & 32767] + lut[a[pp + 2 * TX] & 32767] + lut[a[pp + 2 * TX + 1] & 32767] + lut[a[pp + 2 * TX + 2] & 32767];
+                                w >= pathThreshold * 9 && (cell[(gz0 + f) * G + gx0 + u] = 1);
+                            }
+                    }
+                }
+            let label = new Int32Array(N).fill(-1),
+                stack = new Int32Array(N),
+                isPath = [],
+                any = !1;
+            for (let start = 0; start < N; ++start) {
+                if (!cell[start] || label[start] >= 0) continue;
+                let id = isPath.length,
+                    sp = 0,
+                    area = 0,
+                    minX = G,
+                    maxX = -1,
+                    minZ = G,
+                    maxZ = -1,
+                    open = !1;
+                label[start] = id, stack[sp++] = start;
+                while (sp > 0) {
+                    let k = stack[--sp],
+                        x = k % G,
+                        z = (k - x) / G;
+                    ++area;
+                    x < minX && (minX = x), x > maxX && (maxX = x);
+                    z < minZ && (minZ = z), z > maxZ && (maxZ = z);
+                    if (x === 0 || z === 0 || x === G - 1 || z === G - 1) open = !0;
+                    for (let d = 0; d < 4; ++d) {
+                        let nx = x + (d === 0 ? -1 : d === 1 ? 1 : 0),
+                            nz = z + (d === 2 ? -1 : d === 3 ? 1 : 0);
+                        if (nx < 0 || nz < 0 || nx >= G || nz >= G) continue;
+                        let nk = nz * G + nx;
+                        if (!known[nk]) {
+                            open = !0;
+                            continue
+                        }
+                        cell[nk] && label[nk] < 0 && (label[nk] = id, stack[sp++] = nk);
+                    }
+                }
+                let long = Math.max(maxX - minX, maxZ - minZ) + 1,
+                    verdict = open || long >= pathMinLength || area >= pathMinArea;
+                isPath.push(verdict), verdict && (any = !0);
+            }
+            if (!any) return null;
+            let dist = new Float32Array(N);
+            for (let k = 0; k < N; ++k) dist[k] = label[k] >= 0 && isPath[label[k]] ? 0 : 1e9;
+            terrainChamfer(dist, G);
+            let field = new Float32Array(N),
+                bx = t.origin[0] - P,
+                bz = t.origin[2] - P;
+            for (let z = 0; z < G; ++z)
+                for (let x = 0; x < G; ++x) {
+                    let k = z * G + x,
+                        d = dist[k];
+                    if (d <= 0) {
+                        field[k] = 1;
+                        continue;
+                    }
+                    let wx = bx + x + .5,
+                        wz = bz + z + .5;
+                    d += (dirtN(wx / pathBandNoiseScale + 19.3, wz / pathBandNoiseScale + 7.1) - .5) * 2 * pathBandNoise;
+                    let gate = dirtN(wx / pathBandGateScale + 61.7, wz / pathBandGateScale + 13.3) - pathBandGateCut;
+                    if (gate <= 0) continue;
+                    gate = gate < pathBandGateFade ? gate / pathBandGateFade : 1;
+                    let sc = gsBaseBandScale(wx, wz) * (pathBandGateWidth + (1 - pathBandGateWidth) * gate),
+                        bw = pathBandWidth * sc,
+                        bf = pathBandFade * sc;
+                    if (d <= 0 || d >= bw + bf) continue;
+                    let v = d <= bw ? 1 : 1 - (d - bw) / bf;
+                    field[k] = v * v * (3 - 2 * v) * gate * gate * (3 - 2 * gate);
+                }
+            let mask = new Uint8Array(4 * QN);
+            any = !1;
+            for (let q = 0; q < 4; ++q)
+                for (let f = 0; f < TX; ++f) {
+                    let cz = ((q >> 1) * TX + f + .5) / 3 + P - .5,
+                        j = Math.min(G - 2, Math.max(0, Math.floor(cz))),
+                        fz = cz - j;
+                    for (let u = 0; u < TX; ++u) {
+                        let cx = ((q & 1) * TX + u + .5) / 3 + P - .5,
+                            i = Math.min(G - 2, Math.max(0, Math.floor(cx))),
+                            fx = cx - i,
+                            n = j * G + i,
+                            v = (field[n] * (1 - fx) + field[n + 1] * fx) * (1 - fz) + (field[n + G] * (1 - fx) + field[n + G + 1] * fx) * fz,
+                            b = v * 255 + .5 | 0;
+                        mask[q * QN + f * TX + u] = b, b && (any = !0);
+                    }
+                }
+            return any ? mask : null;
+        },
         dirtPatchCovers = (t, q, p, id) => {
             let mask = t.dirtMask,
                 terrain = yc.get(id);
@@ -38088,6 +39883,18 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             let ovr = textureOverrides.get(terrain.texture),
                 mapped = ovr == null ? null : typeof ovr == "object" ? ovr.id : ovr;
             return dirtPatchTextures.indexOf(terrain.texture) >= 0 || mapped != null && dirtPatchTextures.indexOf(mapped) >= 0;
+        },
+        patchHeights = t => {
+            let key = terrainCacheKey(t, "pheights");
+            if (terrainPassCache.has(key)) return terrainPassCache.get(key);
+            let h = 2 / 3,
+                NN = 98,
+                ox = t.origin[0] - .5 * h,
+                oz = t.origin[2] - .5 * h,
+                g = new Float32Array(NN * NN);
+            for (let j = 0; j < NN; ++j)
+                for (let i = 0; i < NN; ++i) g[j * NN + i] = T.getHeight(ox + i * h, oz + j * h);
+            return terrainCacheSet(t, "pheights", g);
         },
         buildPatchMask = (t, o) => {
             let key = terrainCacheKey(t, o.key);
@@ -38114,7 +39921,8 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                         wx > x0 - o.propRange && wx < x1 + o.propRange && wz > z0 - o.propRange && wz < z1 + o.propRange && props.push(wx, wz);
                     }
                 }
-            let patches = [];
+            let patches = [],
+                shapes = o.shape ? [] : null;
             for (let gz = Math.floor(z0 / S); gz * S < z1; ++gz)
                 for (let gx = Math.floor(x0 / S); gx * S < x1; ++gx) {
                     let px = (gx + .15 + .7 * dirtHash(gx, gz, 2 + o.salt)) * S,
@@ -38130,8 +39938,36 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     if (dirtHash(gx, gz, 1 + o.salt) >= (near >= 0 ? o.propChance : o.chance)) continue;
                     near >= 0 && (px += (props[near] - px) * pull, pz += (props[near + 1] - pz) * pull);
                     if (o.keep && !o.keep(px, pz)) continue;
-                    patches.push(px, pz, o.minRadius + (o.maxRadius - o.minRadius) * dirtHash(gx, gz, 4 + o.salt));
+                    let pr = o.minRadius + (o.maxRadius - o.minRadius) * dirtHash(gx, gz, 4 + o.salt),
+                        pb = bl;
+                    if (o.patchAt) {
+                        let adj = o.patchAt(px, pz, pr);
+                        pr = adj[0], pb = adj[1];
+                    }
+                    patches.push(px, pz, pr, pb);
+                    shapes && shapes.push(o.shape(px, pz));
                 }
+            if (o.fillGaps) {
+                let fg = o.fillGaps,
+                    base = patches.length;
+                for (let k = 0; k < base; k += 4)
+                    for (let k2 = k + 4; k2 < base; k2 += 4) {
+                        let ax = patches[k],
+                            az = patches[k + 1],
+                            ar = patches[k + 2],
+                            bx = patches[k2],
+                            bz = patches[k2 + 1],
+                            br = patches[k2 + 2],
+                            gap = Math.hypot(bx - ax, bz - az);
+                        if (gap > fg.range || gap < (ar + br) * .75) continue;
+                        let mx = (ax + bx) * .5,
+                            mz = (az + bz) * .5;
+                        if (dirtHash(Math.floor(mx), Math.floor(mz), fg.salt) >= fg.chance) continue;
+                        if (o.keep && !o.keep(mx, mz)) continue;
+                        patches.push(mx, mz, Math.min(ar, br) * fg.scale, patches[k + 3]);
+                        shapes && shapes.push(shapes[k / 4]);
+                    }
+            }
             if (!patches.length) return terrainCacheSet(t, o.key, null);
             let h = 2 / 3,
                 NN = 98,
@@ -38140,6 +39976,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 ns = o.noiseScale,
                 pn = new Float32Array(NN * NN),
                 m = new Float32Array(NN * NN),
+                flow = o.flow ? patchHeights(t) : null,
                 any = !1;
             for (let j = 0; j < NN; ++j)
                 for (let i = 0; i < NN; ++i) {
@@ -38147,24 +39984,34 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                         wz = oz + j * h;
                     pn[j * NN + i] = .65 * dirtN(wx / (2.2 * ns) + o.salt * 1.7, wz / (2.2 * ns) + o.salt * .9) + .35 * dirtN(wx / (.8 * ns) + 13.7 + o.salt * 2.3, wz / (.8 * ns) + 4.1 + o.salt * 1.3);
                 }
-            for (let k = 0; k < patches.length; k += 3) {
+            for (let k = 0; k < patches.length; k += 4) {
                 let px = patches[k],
                     pz = patches[k + 1],
                     r = patches[k + 2],
-                    R = r * (1 + sn),
+                    pbl = patches[k + 3],
+                    sh = shapes ? shapes[k / 4] : null,
+                    st = sh ? sh[2] : 1,
+                    ph = flow ? T.getHeight(px, pz) : 0,
+                    R = r * (1 + sn) * st,
                     i0 = Math.max(0, Math.ceil((px - R - ox) / h)),
                     i1 = Math.min(NN - 1, Math.floor((px + R - ox) / h)),
                     j0 = Math.max(0, Math.ceil((pz - R - oz) / h)),
                     j1 = Math.min(NN - 1, Math.floor((pz + R - oz) / h)),
-                    a = r - bl;
+                    a = r - pbl;
                 for (let j = j0; j <= j1; ++j)
                     for (let i = i0; i <= i1; ++i) {
                         let dx = ox + i * h - px,
                             dz = oz + j * h - pz,
-                            dist = Math.sqrt(dx * dx + dz * dz);
+                            dist;
+                        if (sh) {
+                            let along = (dx * sh[0] + dz * sh[1]) / st,
+                                across = (dz * sh[0] - dx * sh[1]) * st;
+                            dist = Math.sqrt(along * along + across * across);
+                        } else dist = Math.sqrt(dx * dx + dz * dz);
                         if (dist >= R) continue;
                         let n = j * NN + i,
                             dd = dist + (pn[n] - .5) * 2 * sn * r;
+                        if (flow) dd += Math.abs(flow[n] - ph) * o.flow / st;
                         if (dd >= r) continue;
                         let u = (dd - a) / (r - a || 1e-6);
                         u = u < 0 ? 0 : u > 1 ? 1 : u;
@@ -38203,7 +40050,226 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             blend: dirtPatchBlend,
             shapeNoise: dirtPatchShapeNoise,
             noiseScale: dirtPatchNoiseScale,
+            flow: dirtPatchFlow,
             keep: gloomNear(t) ? (x, z) => dirtHash(Math.floor(x * 64), Math.floor(z * 64), 11) < 1 - (1 - gloomDirtFactor) * gloomWeight(x, z) : null
+        }),
+        inCoalMine = (x, z) => T.getAreaId(x, z) === gsStoneCoalArea || Math.hypot(x - gsCoalSite[0], z - gsCoalSite[1]) < gsCoalSite[2],
+        nearGsBase = (x, z, pad) => {
+            for (let i = 0; i < gsBaseSites.length; ++i) {
+                let c = gsBaseSites[i];
+                if (Math.hypot(x - c[0], z - c[1]) < c[2] + (pad || 0)) return !0;
+            }
+            return !1;
+        },
+        valleyOpenness = (x, z, probe, rise) => {
+            let y = T.getHeight(x, z),
+                open = 0;
+            for (let a = 0; a < 8; ++a) {
+                let ang = a * Math.PI / 4,
+                    ok = 1;
+                for (let d = probe * .5; d <= probe; d += probe * .5)
+                    if (T.getHeight(x + Math.cos(ang) * d, z + Math.sin(ang) * d) - y > rise) {
+                        ok = 0;
+                        break;
+                    }
+                open += ok;
+            }
+            return open / 8;
+        },
+        gsBaseBandScale = (x, z) => {
+            let f = 1;
+            for (let i = 0; i < gsBaseSites.length; ++i) {
+                let c = gsBaseSites[i],
+                    u = Math.hypot(x - c[0], z - c[1]) / c[2];
+                if (u >= 1) continue;
+                let e = u * u * (3 - 2 * u);
+                f = Math.min(f, pathBandBaseScale + (1 - pathBandBaseScale) * e);
+            }
+            return f;
+        },
+        grassWeightAt = (x, z) => {
+            let ch = T.getChunk(Math.floor(x / 64), Math.floor(z / 64));
+            if (!ch || !ch.data || !ch.data.texture || !ch.data.textureid) return 0;
+            let q = T9(x, z),
+                bits = grassBitsOf(ch)[q];
+            return bits ? stoneLut(bits)[ch.data.texture[q][A9(x, z)] & 32767] : 0;
+        },
+        pathWeightAt = (x, z) => {
+            let ch = T.getChunk(Math.floor(x / 64), Math.floor(z / 64));
+            if (!ch || !ch.data || !ch.data.texture || !ch.data.textureid) return 0;
+            let q = T9(x, z),
+                bits = pathBitsOf(ch)[q];
+            return bits ? stoneLut(bits)[ch.data.texture[q][A9(x, z)] & 32767] : 0;
+        },
+        nearPath = (x, z, reach) => {
+            if (pathWeightAt(x, z) > gsStonePathWeight) return !0;
+            for (let a = 0; a < 8; ++a) {
+                let ang = a * Math.PI / 4,
+                    cx = Math.cos(ang),
+                    cz = Math.sin(ang);
+                for (let d = reach * .5; d <= reach; d += reach * .5)
+                    if (pathWeightAt(x + cx * d, z + cz * d) > gsStonePathWeight) return !0;
+            }
+            return !1;
+        },
+        nearGsStoneCentre = (x, z, extra) => {
+            let S = gsStoneSpacing,
+                reach = gsStoneMaxRadius + extra,
+                gx0 = Math.floor((x - reach) / S),
+                gx1 = Math.floor((x + reach) / S),
+                gz0 = Math.floor((z - reach) / S),
+                gz1 = Math.floor((z + reach) / S);
+            for (let gz = gz0; gz <= gz1; ++gz)
+                for (let gx = gx0; gx <= gx1; ++gx) {
+                    let px = (gx + .15 + .7 * dirtHash(gx, gz, 2 + gsStoneSeed)) * S,
+                        pz = (gz + .15 + .7 * dirtHash(gx, gz, 3 + gsStoneSeed)) * S,
+                        want = Math.min(1, gsStoneChance * (inCoalMine(px, pz) ? gsStoneCoalBoost : 1) * gsStoneRegion(px, pz));
+                    if (dirtHash(Math.floor(px), Math.floor(pz), 61) >= want) continue;
+                    let r = gsStoneMinRadius + (gsStoneMaxRadius - gsStoneMinRadius) * dirtHash(gx, gz, 4 + gsStoneSeed);
+                    if (Math.hypot(x - px, z - pz) <= r + extra) return !0;
+                }
+            return !1;
+        },
+        gsDirtKeep = (x, z) => {
+            if (inCoalMine(x, z) || nearGsStoneCentre(x, z, gsDirtStoneReach)) return !0;
+            if (!gsBigDirtKeep(x, z)) return !1;
+            let want = localRise(x, z, gsDirtHillRadius) >= gsDirtHillRise ? gsDirtOffStoneChance * gsDirtHillFactor : gsDirtOffStoneChance;
+            return dirtHash(Math.floor(x), Math.floor(z), 91) < want;
+        },
+        gsStoneRegion = (x, z) => {
+            if (inCoalMine(x, z)) return 1;
+            let v = dirtN(x / gsStoneRegionScale + 91.3, z / gsStoneRegionScale + 57.7);
+            return v <= gsStoneRegionCut ? 0 : Math.min(1, (v - gsStoneRegionCut) / gsStoneRegionFade);
+        },
+        gsStoneKeep = (x, z) => {
+            if (nearGsBase(x, z, gsStoneMaxRadius)) return !1;
+            let coal = inCoalMine(x, z);
+            if (!coal && nearPath(x, z, gsStonePathClear)) return !1;
+            let region = gsStoneRegion(x, z);
+            if (region <= 0) return !1;
+            let want = Math.min(1, gsStoneChance * (coal ? gsStoneCoalBoost : 1) * region);
+            if (dirtHash(Math.floor(x), Math.floor(z), 61) >= want) return !1;
+            if (grassWeightAt(x, z) < (coal ? gsStoneCoalGrassWeight : gsStoneGrassWeight)) return !1;
+            if (T.getNormal(x, z)[1] < (coal ? gsStoneCoalFlatNormal : gsStoneFlatNormal)) return !1;
+            let y = T.getHeight(x, z),
+                rise = coal ? gsStoneCoalMaxRise : gsStoneMaxRise;
+            for (let a = 0; a < 8; ++a) {
+                let ang = a * Math.PI / 4;
+                if (T.getHeight(x + Math.cos(ang) * gsStoneRiseRadius, z + Math.sin(ang) * gsStoneRiseRadius) - y > rise) return !1;
+            }
+            return !0;
+        },
+        buildGsDirtMask = t => buildPatchMask(t, {
+            key: "gsdirt",
+            salt: 0,
+            spacing: gsDirtSpacing,
+            chance: gsDirtChance,
+            propChance: gsDirtChance,
+            propRange: dirtPatchPropRange,
+            propPull: dirtPatchPropPull,
+            minRadius: gsDirtMinRadius,
+            maxRadius: gsDirtMaxRadius,
+            blend: gsDirtBlend,
+            shapeNoise: gsDirtShapeNoise,
+            noiseScale: dirtPatchNoiseScale,
+            flow: gsDirtFlow,
+            keep: gsDirtKeep
+        }),
+        localRise = (x, z, r) => {
+            let y = T.getHeight(x, z),
+                rise = 0;
+            for (let a = 0; a < 8; ++a) {
+                let ang = a * Math.PI / 4,
+                    h = T.getHeight(x + Math.cos(ang) * r, z + Math.sin(ang) * r) - y;
+                h > rise && (rise = h);
+            }
+            return rise;
+        },
+        gsBigDirtKeep = (x, z) => {
+            if (nearGsBase(x, z, gsBigDirtMaxRadius)) return !1;
+            if (localRise(x, z, gsBigDirtRiseRadius) >= gsBigDirtMinRise) return !0;
+            return dirtHash(Math.floor(x), Math.floor(z), 83) < gsBigDirtStrayChance;
+        },
+        buildGsBigDirtMask = t => buildPatchMask(t, {
+            key: "gsbigdirt",
+            salt: 53,
+            spacing: gsBigDirtSpacing,
+            chance: gsBigDirtChance,
+            propChance: gsBigDirtChance,
+            propRange: 0,
+            propPull: 0,
+            minRadius: gsBigDirtMinRadius,
+            maxRadius: gsBigDirtMaxRadius,
+            blend: gsBigDirtBlend,
+            shapeNoise: gsBigDirtShapeNoise,
+            noiseScale: gsBigDirtNoiseScale,
+            flow: gsBigDirtFlow,
+            keep: gsBigDirtKeep
+        }),
+        gsStoneShape = (x, z) => {
+            let y0 = T.getHeight(x, z),
+                probe = gsStoneShapeProbe,
+                step = probe / gsStoneShapeSteps,
+                reach = (cx, cz) => {
+                    for (let d = step; d <= probe; d += step)
+                        if (T.getHeight(x + cx * d, z + cz * d) - y0 > gsStoneShapeRise) return d - step;
+                    return probe;
+                },
+                n = gsStoneShapeDirs,
+                best = -1,
+                bestA = 0,
+                worst = 1 / 0;
+            for (let i = 0; i < n; ++i) {
+                let a = i * Math.PI / n,
+                    cx = Math.cos(a),
+                    cz = Math.sin(a),
+                    span = reach(cx, cz) + reach(-cx, -cz);
+                span > best && (best = span, bestA = a);
+                span < worst && (worst = span);
+            }
+            if (!(best > 0) || !(worst > 0)) return null;
+            let ratio = best / worst;
+            if (ratio < gsStoneShapeMinRatio) return null;
+            return [Math.cos(bestA), Math.sin(bestA), Math.min(gsStoneStretchMax, 1 + (ratio - gsStoneShapeMinRatio) * gsStoneStretchGain)];
+        },
+        buildGsStoneMask = t => buildPatchMask(t, {
+            key: "gsstone",
+            salt: gsStoneSeed,
+            spacing: gsStoneSpacing,
+            chance: 1,
+            propChance: 0,
+            propRange: 0,
+            propPull: 0,
+            minRadius: gsStoneMinRadius,
+            maxRadius: gsStoneMaxRadius,
+            blend: gsStoneBlend,
+            shapeNoise: gsStoneShapeNoise,
+            noiseScale: gsStoneNoiseScale,
+            flow: gsStoneFlow,
+            keep: gsStoneKeep,
+            shape: gsStoneShape,
+            fillGaps: {
+                range: gsStoneFillRange,
+                chance: gsStoneFillChance,
+                scale: gsStoneFillScale,
+                salt: 97
+            },
+            patchAt: (x, z, r) => [inCoalMine(x, z) ? r : r * (gsStoneValleyMin + (1 - gsStoneValleyMin) * valleyOpenness(x, z, gsStoneValleyProbe, gsStoneValleyRise)), gsStoneBlend]
+        }),
+        buildGsMeadowMask = t => buildPatchMask(t, {
+            key: "gsmeadow",
+            salt: 7,
+            spacing: gsMeadowSpacing,
+            chance: gsMeadowChance,
+            propChance: gsMeadowChance,
+            propRange: 0,
+            propPull: 0,
+            minRadius: gsMeadowMinRadius,
+            maxRadius: gsMeadowMaxRadius,
+            blend: gsMeadowBlend,
+            shapeNoise: meadowPatchShapeNoise,
+            noiseScale: meadowPatchNoiseScale,
+            keep: (x, z) => !nearGsBase(x, z, gsMeadowMaxRadius)
         }),
         buildMeadowMask = t => buildPatchMask(t, {
             key: "meadowmask",
@@ -38220,8 +40286,13 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             noiseScale: meadowPatchNoiseScale,
             keep: gloomNear(t) ? (x, z) => gloomWeight(x, z) <= 0 && gloomField(x, z) > gloomRadius + meadowPatchMaxRadius * (1 + meadowPatchShapeNoise) : null
         }),
-        gloomReach = () => gloomShapeNoise + gloomEdgeNoise + gloomDetailNoise,
-        gloomField = (x, z) => Math.hypot(x - gloomX, z - gloomZ) + (dirtN(x / gloomShapeNoiseScale + 41.3, z / gloomShapeNoiseScale + 17.9) - .5) * 2 * gloomShapeNoise + (dirtN(x / gloomEdgeNoiseScale + 5.3, z / gloomEdgeNoiseScale + 31.7) - .5) * 2 * gloomEdgeNoise + (dirtN(x / gloomDetailNoiseScale + 23.1, z / gloomDetailNoiseScale + 8.9) - .5) * 2 * gloomDetailNoise,
+        gloomReach = () => gloomShapeNoise + gloomEdgeNoise + gloomDetailNoise + gloomOutNoise + gloomConeReach,
+        gloomField = (x, z) => {
+            let dx = x - gloomX,
+                dz = z - gloomZ,
+                len = Math.hypot(dx, dz);
+            return len + (dirtN(x / gloomShapeNoiseScale + 41.3, z / gloomShapeNoiseScale + 17.9) - .5) * 2 * gloomShapeNoise + (dirtN(x / gloomEdgeNoiseScale + 5.3, z / gloomEdgeNoiseScale + 31.7) - .5) * 2 * gloomEdgeNoise + (dirtN(x / gloomDetailNoiseScale + 23.1, z / gloomDetailNoiseScale + 8.9) - .5) * 2 * gloomDetailNoise + (dirtN(x / gloomOutNoiseScale + 7.7, z / gloomOutNoiseScale + 53.1) - .5) * 2 * gloomOutNoise - gloomConeReach * Math.pow(Math.max(0, dx / Math.max(len, 1e-4)), gloomConeExp);
+        },
         gloomNear = t => gloomEnabled && T.file === gloomWorld && Math.hypot(Math.max(t.origin[0] - gloomX, 0, gloomX - t.origin[0] - 64), Math.max(t.origin[2] - gloomZ, 0, gloomZ - t.origin[2] - 64)) < gloomRadius + gloomReach(),
         gloomWeight = (x, z) => {
             if (!gloomEnabled || T.file !== gloomWorld || Math.hypot(x - gloomX, z - gloomZ) > gloomRadius + gloomReach()) return 0;
@@ -38238,7 +40309,27 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             c = gloomFolIds.map((f, i) => [f, sum * gloomFolShare[i] | 0, 0]);
             return gloomFolCache.set(id, c), c;
         },
+        readTerrainLight = (tex, label) => {
+            for (let r of yc.values())
+                if (r.texture === tex) {
+                    let v = [r.darkest / 255 * 3, r.brightest / 255 * 3, r.spec / 255];
+                    return v;
+                }
+            return null;
+        },
+        readGsRockLight = () => {
+            let a = readTerrainLight(gsRockSourceTexture, "guardstone stone"),
+                b = readTerrainLight(fvStoneSourceTexture, "faivel stone");
+            a && (gsRockLight = a), b && (fvStoneLight = b);
+            gsGrassFoliage = null;
+            for (let r of yc.values())
+                if (r.texture === gsGrassTexture && r.foliage && r.foliage.length) {
+                    gsGrassFoliage = r.foliage;
+                    break;
+                }
+        },
         retextureTerrains = () => {
+            readGsRockLight();
             let byTexture = tex => {
                     for (let r of yc.values())
                         if (r.texture === tex) return r;
@@ -38260,7 +40351,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     texture: 1213,
                     cell
                 }), {
-                    coverage: 3,
+                    coverage: 2,
                     spread: 1.1,
                     scale: 1
                 });
@@ -38308,14 +40399,32 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             }
             if (stoneShaderEnabled) {
                 if (!stoneShaderTexRequested && bc.has(stoneTextureId)) stoneShaderTexRequested = !0, Co(stoneTextureId, tx => stoneShaderTex = tx);
+                if (!stoneRawTexRequested && bc.has(stoneTextureId)) stoneRawTexRequested = !0, Co(stoneTextureId, tx => stoneRawTex = tx, !0);
                 stoneShaderTex && jn("stoneDiffuse", stoneShaderTex, 0, e);
             }
-            let n, o, s = 1;
+            if (shoreShaderEnabled) {
+                if (!gsStoneTexRequested && bc.has(gsStoneTextureId)) gsStoneTexRequested = !0, Co(gsStoneTextureId, tx => gsStoneTex = tx);
+                if (!hlStoneTexRequested && bc.has(hlStoneKey)) hlStoneTexRequested = !0, Co(hlStoneKey, tx => hlStoneTex = tx);
+                if (!hlBankTexRequested && bc.has(hlBankTexture)) hlBankTexRequested = !0, Co(hlBankTexture, tx => hlBankTex = tx);
+                hlBankTex && jn("bankDiffuse", hlBankTex, 0, e);
+                if (!pathBandTexRequested && bc.has(pathBandTextureId)) pathBandTexRequested = !0, Co(pathBandTextureId, tx => pathBandTex = tx);
+                pathBandTex && jn("bandDiffuse", pathBandTex, 0, e);
+            }
+            let n, o, s = 1,
+                gsBound = -1;
             for (let r = 0; r < t.length; ++r) {
                 let l = t[r],
                     a = l.meshes.terrain,
                     c = a.geometry;
-                n !== l.meshes.atlas && (jn("atlas", l.meshes.atlas, 0, e), shoreShaderEnabled && l.meshes.sandAtlas && jn("sandMask", l.meshes.sandAtlas, 0, e), n = l.meshes.atlas), Ac(c, e);
+                let gs = gsStoneTex && chunkIsGuardstone(l) ? 1 : hlStoneTex && chunkWorldOf(l) === "headless" ? 2 : 0;
+                if (gs !== gsBound) {
+                    gsBound = gs;
+                    let st = gs === 1 ? gsStoneTex : gs === 2 ? hlStoneTex : stoneShaderTex,
+                        pd = gs === 1 ? gsStoneTex : dirtPatchTex,
+                        sp = stoneRawTex;
+                    st && jn("stoneDiffuse", st, 0, e), pd && jn("patchDiffuse", pd, 0, e), sp && jn("spDiffuse", sp, 0, e);
+                }
+                n !== l.meshes.atlas && (jn("atlas", l.meshes.atlas, 0, e), shoreShaderEnabled && l.meshes.sandAtlas && jn("sandMask", l.meshes.sandAtlas, 0, e), shoreShaderEnabled && l.meshes.gspAtlas && jn("spMask", l.meshes.gspAtlas, 0, e), n = l.meshes.atlas), Ac(c, e);
                 for (let f = 0; f < 4; ++f)
                     if (l.quadrantlod[f] <= s) {
                         let u = l.meshes.texSet[f];
@@ -38353,7 +40462,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         };
     var c7, f7 = () => {
             c7 = zn(ne.classicWater ? (() => {
-                let n = 32,
+                let n = 16,
                     pos = [],
                     idx = [];
                 for (let B = 0; B <= n; ++B)
@@ -38491,7 +40600,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         tN = async t => {
             try {
                 t.abort = new AbortController;
-                let n = await (await fetch(`data/world/${T.file}/${t.id}?v=8926940`, {
+                let n = await (await fetch(`data/world/${T.file}/${t.id}?v=8971923`, {
                     signal: t.abort.signal,
                     cache: "default"
                 })).arrayBuffer();
@@ -38588,6 +40697,37 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             drift: 150,
             brightness: 150
         },
+        fireflyAreas = [{
+            pos: [3368, 514, 1447],
+            color: "#57a1bf"
+        }, {
+            pos: [3062, 515, 1664],
+            color: "#57bf71"
+        }, {
+            pos: [2060, 499, 3899],
+            color: "#57b21e",
+            radius: 25
+        }, {
+            pos: [2199, 515, 3732],
+            color: "#57b21e",
+            radius: 25
+        }, {
+            pos: [2177, 528, 4162],
+            color: "#57b21e",
+            radius: 25
+        }],
+        fireflyAreaRadius = 30,
+        fireflyAreaLift = 5,
+        fireflyLightLift = 4,
+        fireflyLightRadius = fireflyAreaRadius,
+        fireflyLightPower = 6,
+        fireflyAreaCount = 8,
+        fireflyAreaHeight = 8,
+        fireflyAreaDrift = 2.5,
+        fireflyAreaVDrift = 8,
+        fireflyAreaSize = 52,
+        fireflyAreaBrightness = 140,
+        fireflyDrawDistance = 90,
         fireflyDesertEnvs = ["Desert", "Marrowlands", "Oasis", "Headless Ruins"],
         fireflyInDesert = !1,
         fireflyAreaCheck = 0,
@@ -38607,16 +40747,10 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             return fireflyInDesert;
         },
         fireflyDraw = () => {
-            return
-            //if (!ne.cinematicLighting) return;
             let e = ht[46];
-            if (!e || !e.active) return;
-
-            let r = performance.now(),
-                l = fireflyLastTime ? Math.min((r - fireflyLastTime) / 1e3, .1) : 0;
-            fireflyLastTime = r;
-            fireflyFade += ((fireflyDesertCheck() ? 0 : 1) - fireflyFade) * (1 - Math.exp(-l / .6));
-            if (fireflyFade <= .002) return;
+            if (!e || !e.active || !fireflyAreas.length) return;
+            let cam = nn.camera && nn.camera.data && nn.camera.data.cameraPosition;
+            if (!cam) return;
             if (!fireflyMesh) {
                 let n = new Float32Array(fireflyMax);
                 for (let o = 0; o < fireflyMax; ++o) n[o] = o + 1;
@@ -38632,21 +40766,23 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     }
                 }), 46, W.TRIANGLE_STRIP);
             }
-            let n = nn.camera && nn.camera.data,
-                o = n ? n.cameraPosition[1] - 8 : 0;
-            try {
-                if (T && T.player && T.player.pos) o = T.player.pos[1] - 1;
-            } catch (s) {}
-            fireflyMesh.geometry.instancedCount = Math.max(1, Math.min(fireflyMax, fireflyPreset.count));
-            e.uniforms.ffRange.value = fireflyPreset.range;
-            e.uniforms.ffBaseY.value = o;
-            e.uniforms.ffHeight.value = fireflyPreset.height;
-            e.uniforms.ffSize.value = fireflyPreset.size / 100;
-            e.uniforms.ffDrift.value = fireflyPreset.drift / 100;
-            e.uniforms.ffBrightness.value = fireflyPreset.brightness / 100 * fireflyFade;
-            let i = hexParts(fireflyPreset.color);
-            e.uniforms.ffColor.value = [i[0] / 255, i[1] / 255, i[2] / 255];
-            _s(fireflyMesh, e);
+            fireflyMesh.geometry.instancedCount = Math.max(1, Math.min(fireflyMax, fireflyAreaCount));
+            e.uniforms.ffHeight.value = fireflyAreaHeight;
+            e.uniforms.ffSize.value = fireflyAreaSize / 100;
+            e.uniforms.ffDrift.value = fireflyAreaDrift;
+            e.uniforms.ffVDrift.value = fireflyAreaVDrift;
+            e.uniforms.ffBrightness.value = fireflyAreaBrightness / 100;
+            for (let a = 0; a < fireflyAreas.length; ++a) {
+                let f = fireflyAreas[a],
+                    dx = f.pos[0] - cam[0],
+                    dz = f.pos[2] - cam[2];
+                if (dx * dx + dz * dz > fireflyDrawDistance * fireflyDrawDistance) continue;
+                e.uniforms.ffRange.value = f.radius || fireflyAreaRadius;
+                e.uniforms.ffCenter.value = f.lifted || (f.lifted = [f.pos[0], f.pos[1] + fireflyAreaLift, f.pos[2]]);
+                let c = f.rgb || (f.rgb = hexParts(f.color).map(v => v / 255));
+                e.uniforms.ffColor.value = c;
+                _s(fireflyMesh, e);
+            }
         },
         drawCutoutMeshes = () => {
             for (let e = 0, n = Bh.length; e < n; ++e) {
@@ -38824,7 +40960,10 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         D7 = !1,
         I7 = [256, 512, 1024, 2048][ne.shadowmapResolution] || 1024,
         L7 = () => {
-            W || (alert("WebGL2 problem found."), window.location.href = "/technical"), V7(), P7(I7), d7(I7), R7(it.width, it.height), Nn.className = "l-canvas", zo.className = "l-canvas", zo.style.pointerEvents = "all", window.addEventListener("resize", q7, !1)
+            W || (alert("WebGL2 problem found."), window.location.href = "/technical"), zo.addEventListener("webglcontextlost", ctxLost7), V7(), P7(I7), d7(I7), R7(it.width, it.height), Nn.className = "l-canvas", zo.className = "l-canvas", zo.style.pointerEvents = "all", window.addEventListener("resize", q7, !1)
+        },
+        ctxLost7 = t => {
+            window.reportClientError && window.reportClientError("webgl", "WebGL context lost", "", t.statusMessage || "")
         };
     var hrVal = 1500;
     wl.subscribe(t => {
@@ -39372,7 +41511,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
 
                         if (!revIconImg) {
                             revIconImg = new Image();
-                            revIconImg.src = `/data/ui/skills/7.${Yn}?v=8926940`;
+                            revIconImg.src = `/data/ui/skills/7.${Yn}?v=8971923`;
                         }
 
                         Bo.globalAlpha = revHasOwnCaster && ne.markOwnRevs ? 0.75 : 1;
@@ -39558,7 +41697,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             if (typeof rpv !== "undefined" && rpv.offline) return;
             if (t === 4002) Lo.set("Connecting"), T.destroy();
             else try {
-                if (tm < 10 ? Lo.set("Connecting") : Lo.set(`Connecting (${t})`), t === 1006 && (tm++, tm >= 20) || t >= 4008) throw !0;
+                if (tm < 10 ? Lo.set("Connecting") : Lo.set(`Connecting (${t})`), t === 1006 && (tm++, tm === 3 && window.reportClientError && window.reportClientError("connection", "Repeated connection failure", "", String(t)), tm >= 20) || t >= 4008) throw !0;
                 T.destroy();
                 let e = tm > 1 ? f_(500, 1e3) : f_(1200, 1600);
                 for (await new Promise(n => setTimeout(n, e)); document.visibilityState === "hidden";) Lo.set("Browser is idle"), await new Promise(n => setTimeout(n, e));
@@ -41199,13 +43338,13 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             GE.push(t)
         },
         iW = (t, e, n, o) => {
-            e.logic.customIcon === void 0 ? n.icon = `/data/${e.logic.icon}.${Mo}?v=8926940` : n.icon = `/data/${(() => {
+            e.logic.customIcon === void 0 ? n.icon = `/data/${e.logic.icon}.${Mo}?v=8971923` : n.icon = `/data/${(() => {
                 try {
                     return e.logic.customIcon(e);
                 } catch (s) {
                     return e.logic.icon;
                 }
-            })()}.${Mo}?v=8926940`, n.cancel = o && e.logic.tags.has(12) ? e.logic.id : -1, n.type = e.logic.type, n.time = Math.min(e.timer.duration, e.timer.passed(t)), n.duration = e.timer.duration, n.stacks = e.uniqueInstances > 1 ? e.uniqueInstances : e.stacks
+            })()}.${Mo}?v=8971923`, n.cancel = o && e.logic.tags.has(12) ? e.logic.id : -1, n.type = e.logic.type, n.time = Math.min(e.timer.duration, e.timer.passed(t)), n.duration = e.timer.duration, n.stacks = e.uniqueInstances > 1 ? e.uniqueInstances : e.stacks
         };
     var Jn = class extends Fs {
         constructor(e) {
@@ -41219,13 +43358,18 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             this.createInteraction()
         }
         postFixed(e, n, o) {
-            o.player.target === this.id && this.squaredDistance(o.player.pos) <= 25 ? (this.facingPlayer || (this.restingRot = this.rot), this.facingPlayer = !0, this.setRot(this.rotationToV3(o.player.pos))) : this.facingPlayer && (this.facingPlayer = !1, this.setRot(this.restingRot)), super.postFixed(e, n, o)
+            o.player !== void 0 && o.player.target === this.id && this.squaredDistance(o.player.pos) <= 25 ? (this.facingPlayer || (this.restingRot = this.rot), this.facingPlayer = !0, this.setRot(this.rotationToV3(o.player.pos))) : this.facingPlayer && (this.facingPlayer = !1, this.setRot(this.restingRot)), super.postFixed(e, n, o)
         }
         createInteraction() {
             Do.set({
                 title: this.name,
                 text: this.text,
-                choices: this.choices
+                objectives: [],
+                choices: this.choices,
+                questid: -1,
+                action: -1,
+                rewardExp: 0,
+                rewardGold: 0
             })
         }
         setDialogue(e, n) {
@@ -42869,12 +45013,13 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 let c = l[a];
                 this.returnCachedChunk(c), this.removeChunk(c), uy(c)
             }
+            !o && this.state !== 4 && ne.faivelRetexture && terrainNearPending(this) && (o = !0);
             o !== (this.state !== 4) && this.setState(o ? 3 : 4, "Loading World")
         }
     };
     window.onload = async () => {
-        console.log("Hordes 0.51.8926 Live"), await fv();
-        let t = await fetch("data/game/game.bin?v=8926940");
+        console.log("Hordes 0.51.8971 Live"), await fv();
+        let t = await fetch("data/game/game.bin?v=8971923");
         mv(pc.gamedata.decode(new Uint8Array(await t.arrayBuffer()))), Y5(), L7(), J7(), new wP({
             target: document.querySelector("body")
         }), yw(uE, pE), mw(new tg({})), ky(!0), tI()
