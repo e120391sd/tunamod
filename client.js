@@ -9012,8 +9012,9 @@ void main(){
             textureOverrides.set(gsPathKey, 1229)
             textureOverrides.set(1227, {
                 id: 1227,
-                contrast: 1.1,
-                light: [1, 1, 1.1]
+                contrast: 1,
+                exposure: .2,
+                light: [.85, .85, 1.05]
             })
             meshOverrides.set(1616, {
                 model: 1482,
@@ -9315,9 +9316,9 @@ void main(){
             }));
             gloomFolBase = kc.get(56);
             setFoliageSheet([56, 57, 58, 59, 60, 61, 62, 63], 1213, [0, 4, 10, 5, 6, 13], {
-                coverage: 1.3,
-                spread: 1.5,
-                scale: 1.5
+                coverage: 2,
+                spread: 1.1,
+                scale: 1.87
             });
             
             let gsFolBase = kc.get(63);
@@ -13768,11 +13769,11 @@ void main(){
         dirtPatchSpacing = 10,
         dirtPatchChance = .15,
         dirtPatchMinRadius = 2.5,
-        dirtPatchMaxRadius = 3.6,
-        dirtPatchBlend = 0.5,
+        dirtPatchMaxRadius = 2.6,
+        dirtPatchBlend = 0.2,
         dirtPatchFlow = 10.6,
         dirtPatchShapeNoise = 3.5,
-        dirtPatchNoiseScale = 0.1,
+        dirtPatchNoiseScale = 0.05,
         dirtPatchPropChance = .14,
         dirtPatchPropRange = 1,
         dirtPatchPropPull = 1,
@@ -36653,7 +36654,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             world && classicPalettes[world] && (classicLearnedWorlds.set(envId, world), classicEnvCache.delete(envId));
         };
     var classicSoftness = .65,
-        classicHeadlessNight = 1.15;
+        classicHeadlessNight = 1.1;
     var worldAmbientTint = {
         guardstone: [.94, 1.08, .98]
     };
@@ -36671,7 +36672,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 pal = classicPalettes[classicWorldFor(env.id)],
                 phases = [0, 1, 2];
             if (pal) {
-                let db = classicWorldFor(env.id) === "headless" ? classicHeadlessNight : 1,
+                let db = classicWorldFor(env.id) === "headless" || classicWorldFor(env.id) === "guardstone" ? classicHeadlessNight : 1,
                     scale = [1, 1, db],
                     col = (p, i) => classicHex(pal[p][i]).map(v => v * scale[p]);
                 out.ambient = phases.map(p => col(p, 0));
