@@ -8986,53 +8986,39 @@ void main(){
             });
             textureOverrides.set(2118, {
                 id: 1227,
-                contrast: 1.1,
-                exposure: .15
             })
             textureOverrides.set(2124, {
                 id: 1227,
-                contrast: 1.1,
-                exposure: .15
             }
             )
             textureOverrides.set(2125, {
                 id: 1227,
-                exposure: -0.1
             })
             textureOverrides.set(2119, {
                 id: 1227,
-                exposure: -0.1
             })
             textureOverrides.set(1846, {
-                id: 1224,
-                light: [1, 1, 1],
-                hue: -35
+                id: 1224
             })
             textureOverrides.set(2126, {
                 id: 1233,
-                exposure: .15,
-                hue: -7
             })
             textureOverrides.set(2120, {
                 id: 1233,
-                exposure: .15,
-                hue: -7
             })
             textureOverrides.set(1233, {
                 id: 1233,
-                exposure: .15,
-                hue: -7
             })
             textureOverrides.set(gsPathKey, 1229)
             textureOverrides.set(1227, {
                 id: 1227,
-                contrast: 1.05,
-                light: [1.072, 1.02, 1.2]
+                contrast: 1.1,
+                light: [1, 1, 1.1]
             })
             meshOverrides.set(1616, {
                 model: 1482,
                 texture: 1846,
-                scale: [1.25, 1.5],
+                scale: [0.7, 0.6],
                 offset: {
                     y: -3
                 },
@@ -9094,7 +9080,7 @@ void main(){
             meshOverrides.set(1664, {
                 model: 1482,
                 texture: 1224,
-                scale: [0.8, 0.8],
+                scale: [0.7, 0.6],
                 offset: {
                     y: -3
                 },
@@ -9116,9 +9102,7 @@ void main(){
                 ground: true
             })
             textureOverrides.set(2060, {
-                id: 1233,
-                exposure: .15,
-                hue: -7
+                id: 1233
             })
             textureOverrides.set(2054, {
                 id: gsStoneTextureId,
@@ -13488,7 +13472,7 @@ void main(){
         waterEditorGrid: () => Gq
     });
     let stoneTextureId = 1233,
-        stoneStretch = 2.05,
+        stoneStretch = 1.75,
         stoneShaderUvScale = 1 / stoneStretch,
         stoneOverlayStrength = 1,
         stoneWaterDistance = 4.9,
@@ -13589,15 +13573,15 @@ void main(){
         gsDirtHillRadius = 5,
         gsDirtHillRise = 1.5,
         gsDirtHillFactor = .7,
-        gsDirtShapeNoise = .7,
+        gsDirtShapeNoise = 3.5,
         gsDirtFoliageCut = .7,
         gsBigDirtSpacing = 6,
         gsBigDirtChance = .4,
         gsBigDirtMinRadius = 2.5,
         gsBigDirtMaxRadius = 4.5,
-        gsBigDirtBlend = 3.5,
+        gsBigDirtBlend = 4.5,
         gsBigDirtShapeNoise = 3,
-        gsBigDirtNoiseScale = 3,
+        gsBigDirtNoiseScale = .01,
         gsBigDirtFlow = 1.4,
         gsBigDirtRiseRadius = 7,
         gsBigDirtMinRise = 2.2,
@@ -13779,20 +13763,20 @@ void main(){
         gsPatchHardHi = .6,
         gsPatchNoiseAmount = 1.2,
         gsPatchNoiseScale = .1;
-    let dirtPatchTexture = 1228,
+    let dirtPatchTexture = 1233,
         dirtPatchTextures = [1227, 1235],
-        dirtPatchSpacing = .5,
-        dirtPatchChance = .07,
-        dirtPatchMinRadius = .45,
-        dirtPatchMaxRadius = .65,
-        dirtPatchBlend = 3.9,
-        dirtPatchFlow = 2.6,
-        dirtPatchShapeNoise = 4.5,
-        dirtPatchNoiseScale = 3.1,
+        dirtPatchSpacing = 10,
+        dirtPatchChance = .15,
+        dirtPatchMinRadius = 2.5,
+        dirtPatchMaxRadius = 3.6,
+        dirtPatchBlend = 0.5,
+        dirtPatchFlow = 10.6,
+        dirtPatchShapeNoise = 3.5,
+        dirtPatchNoiseScale = 0.1,
         dirtPatchPropChance = .14,
         dirtPatchPropRange = 1,
         dirtPatchPropPull = 1,
-        dirtPatchUvScale = 1,
+        dirtPatchUvScale = 1 / stoneStretch, 
         dirtPatchStrength = 1,
         dirtPatchTex = null,
         dirtPatchTexRequested = !1;
@@ -13855,14 +13839,14 @@ void main(){
         steepStoneFull = .64,
         steepFillRadius = 2,
         steepFillShare = .35;
-    let meadowPatchTint = [1.07, .84, .9],
-        meadowPatchSpacing = 7,
+    let meadowPatchTint = [1.02, .86, .87],
+        meadowPatchSpacing = 7.07,
         meadowPatchChance = .3,
         meadowPatchMinRadius = 3.6,
-        meadowPatchMaxRadius = 6.3,
-        meadowPatchBlend = 3.3,
-        meadowPatchShapeNoise = .45,
-        meadowPatchNoiseScale = 2.4;
+        meadowPatchMaxRadius = 5.3,
+        meadowPatchBlend = 0,
+        meadowPatchShapeNoise = 1.0,
+        meadowPatchNoiseScale = 1;
     let gloomNoiseGlsl = "float gloomH(ivec2 c){uint h=uint(c.x)*374761393u+uint(c.y)*668265263u;h=(h^(h>>13u))*1274126177u;h^=h>>16u;return float(h)/4294967296.0;}float gloomN(vec2 p){vec2 i=floor(p);vec2 f=p-i;vec2 u=f*f*(3.0-2.0*f);ivec2 c=ivec2(i);return mix(mix(gloomH(c),gloomH(c+ivec2(1,0)),u.x),mix(gloomH(c+ivec2(0,1)),gloomH(c+ivec2(1,1)),u.x),u.y);}";
     let gloomFragCode = `gloomT=vec4(0.0);gloomA=0.0;if(layerFlags!=vec4(0.0)){vec2 gq=vWorldPos.xz;vec2 gv=gq-vec2(${gloomX.toFixed(2)},${gloomZ.toFixed(2)});float glen=length(gv);float gcone=${gloomConeReach.toFixed(2)}*pow(max(0.0,gv.x/max(glen,0.0001)),${gloomConeExp.toFixed(2)});float gd=glen+(gloomN(gq/${gloomShapeNoiseScale.toFixed(4)}+vec2(41.3,17.9))-0.5)*${(2 * gloomShapeNoise).toFixed(4)}+(gloomN(gq/${gloomEdgeNoiseScale.toFixed(4)}+vec2(5.3,31.7))-0.5)*${(2 * gloomEdgeNoise).toFixed(4)}+(gloomN(gq/${gloomDetailNoiseScale.toFixed(4)}+vec2(23.1,8.9))-0.5)*${(2 * gloomDetailNoise).toFixed(4)}+(gloomN(gq/${gloomOutNoiseScale.toFixed(4)}+vec2(7.7,53.1))-0.5)*${(2 * gloomOutNoise).toFixed(4)}-gcone;gloomA=1.0-smoothstep(${(gloomRadius - gloomFade).toFixed(2)},${gloomRadius.toFixed(2)},gd);gloomT=texture(gloomGrass,vec2(-gq.x,gq.y)/4.0*${gloomUvScale.toFixed(4)});}`;
     let gsHardGlsl = `float gsHard(float m,vec2 s1,vec2 s2){if(m<=0.0)return 0.0;float hn=0.6*sandNoise(vWorldPos.xz/${(3.2*gsPatchNoiseScale).toFixed(4)}+s1)+0.4*sandNoise(vWorldPos.xz/${(1.1*gsPatchNoiseScale).toFixed(4)}+s2);return smoothstep(${gsPatchHardLo.toFixed(4)},${gsPatchHardHi.toFixed(4)},m*${(1+gsPatchNoiseAmount*.5).toFixed(4)}+(hn-0.5)*${gsPatchNoiseAmount.toFixed(4)}*min(1.0,m*3.0));}`;
@@ -24558,7 +24542,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             }),
             makeToggle("Pre 0.5 lighting colors", classicLighting),
             makeToggle("Pre 0.5 retexture", faivelRetexture, {
-                note: P.ui.settings.reload + ", turn off ssao and light shafts after enabling if you dont want them",
+                note: "If you use this without grass, I will find you",
                 reload: true,
                 color: "#3ed363"
             }),
@@ -37792,7 +37776,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     if (shoreShaderEnabled && isGrassTerrain(I)) {
                         if (t.stoneFol && t.stoneFol[c + f * 64] || t.steepMask && t.steepMask[v * 9216 + _] > 127 || t.gsStoneMask && t.gsStoneMask[v * 9216 + _] > 127) continue;
                         gw && Hp() < gloomWeight(u, p) && (R = gloomFoliageFor(I));
-                        if (t.meadowMask && Hp() < t.meadowMask[v * 9216 + _] / 850 && topGrassShown(I) === 1227) continue;
+                        if (t.meadowMask && Hp() < t.meadowMask[v * 9216 + _] / 400 && topGrassShown(I) === 1227) continue;
                         if (t.pathBand && t.pathBand[v * 9216 + _] > pathBandFoliageCutoff) continue;
                         if (chunkIsGuardstone(t)) {
                             let dm = Math.max(t.dirtMask ? t.dirtMask[v * 9216 + _] : 0, t.gsBigDirtMask ? t.gsBigDirtMask[v * 9216 + _] : 0);
