@@ -8984,6 +8984,9 @@ void main(){
             textureOverrides.set(1867, {
                 id: 1226
             });
+            textureOverrides.set(1235, {
+                id: 1227
+            });
             textureOverrides.set(2118, {
                 id: 1227,
             })
@@ -9012,48 +9015,41 @@ void main(){
             textureOverrides.set(gsPathKey, 1229)
             textureOverrides.set(1227, {
                 id: 1227,
-                contrast: 1,
-                exposure: .2,
-                light: [.85, .85, 1.05]
             })
             meshOverrides.set(1616, {
                 model: 1482,
                 texture: 1846,
-                scale: [0.7, 0.6],
+                scale: [1.7, 1.6],
                 offset: {
-                    y: -3
                 },
                 ground: true
             })
             meshOverrides.set(1615, {
                 model: 1482,
                 texture: 1846,
-                scale: [1.8, 2.2],
+                scale: [1.1, 1.0],
                 offset: {
-                    y: -3
                 },
                 ground: true
             })
             meshOverrides.set(1614, {
                 model: 1482,
                 texture: 1846,
-                scale: [2.0, 2.4],
+                scale: [1.6, 1.5],
                 offset: {
-                    y: -3
                 },
                 ground: true
             })
             meshOverrides.set(1613, {
                 model: 1482,
                 texture: 1846,
-                scale: [5.3, 5.7],
+                scale: [4.3, 4.7],
                 offset: {
-                    y: -3
                 },
                 ground: true
             })
             meshOverrides.set(1652, {
-                scale: [1.6,1.6],
+                scale: [1.3,1.3],
                 mesh: 1480,
                 ground: true,
                 offset: {
@@ -9063,27 +9059,24 @@ void main(){
             meshOverrides.set(1662, {
                 model: 1482,
                 texture: 1224,
-                scale: [1.2, 1.4],
+                scale: [1.3, 1.3],
                 offset: {
-                    y: -3
                 },
                 ground: true
             })
             meshOverrides.set(1663, {
                 model: 1482,
                 texture: 1224,
-                scale: [1.5, 1.7],
+                scale: [1.2, 1.2],
                 offset: {
-                    y: -2
                 },
                 ground: true
             })
             meshOverrides.set(1664, {
                 model: 1482,
                 texture: 1224,
-                scale: [0.7, 0.6],
+                scale: [1.1, 1.1],
                 offset: {
-                    y: -3
                 },
                 ground: true
             })
@@ -9092,7 +9085,6 @@ void main(){
                 texture: 1224,
                 scale: [4.5, 5.0],
                 offset: {
-                    y: -3
                 },
                 ground: true
             })
@@ -9115,8 +9107,8 @@ void main(){
             })
             textureOverrides.set(pathBandTextureId, {
                 id: pathBandTextureId,
-                contrast: 1.05,
-                exposure: 0.05
+                contrast: 1.1,
+                exposure: -0.2
             })
             textureOverrides.set(1862, 1226)
             textureOverrides.set(1869, 1226)
@@ -9203,7 +9195,6 @@ void main(){
                 ground: true
             })
             meshOverrides.set(1643, {
-                hideChance: .5,
                 model: 1555,
                 texture: 1223,
                 scale: [1.20, 0.97],
@@ -9214,7 +9205,6 @@ void main(){
                 ground: true
             })
             meshOverrides.set(1644, {
-                hideChance: .5,
                 model: 1555,
                 texture: 1223,
                 scale: [0.90, 0.90],
@@ -9327,18 +9317,18 @@ void main(){
                     id: id
                 });
                 kc.set(941, gsFolClone(941)), kc.set(942, gsFolClone(942));
-                setFoliageSheet([35, 36], 1213, [12, 0], {
+                setFoliageSheet([35, 36], 1213, [4,0], {
                     coverage: 0.5,
                     spread: 1.5,
                     scale: 2.5
                 });
-                setFoliageSheet([941, 942], 1213, [15,11], {
+                setFoliageSheet([941, 942], 1214, [15,0], {
                     coverage: 0.5,
                     spread: 1.5,
                     scale: 2.5
                 });
                 kc.set(943, gsFolClone(943)), kc.set(944, gsFolClone(944)), kc.set(945, gsFolClone(945));
-                setFoliageSheet([943, 944, 945], 1213, [9, 1, 2], {
+                setFoliageSheet([943, 944, 945], 1213, [9, 14, 2], {
                     coverage: 0.8,
                     spread: 1.5,
                     scale: 2.5
@@ -13491,7 +13481,7 @@ void main(){
         stoneRawTex = null,
         stoneRawTexRequested = !1,
         gsPathKey = 20601,
-        gsPathUvScale = 1.2,
+        gsPathUvScale = 1,
         stoneSpecScale = .35;
     let pathTextures = [2060],
         pathThreshold = .5,
@@ -13500,7 +13490,7 @@ void main(){
         pathMinArea = 260,
         pathBandWidth = 0,
         pathBandFade = 3.6,
-        pathBandNoise = 1.5,
+        pathBandNoise = 2.5,
         pathBandNoiseScale = 3.5,
         pathBandGateScale = 11,
         pathBandGateCut = .35,
@@ -13535,8 +13525,8 @@ void main(){
         hlBankOceanReach = 40,
         hlBankOceanFade = 12,
         hlBankOceanMin = .3,
-        hlBankDistance = 28,
-        hlBankSandBlend = .85,
+        hlBankDistance = 30,
+        hlBankSandBlend = .65,
         hlBankNoise = 8,
         hlBankNoiseScale = 16,
         hlBankRoundStart = .6,
@@ -13545,7 +13535,7 @@ void main(){
         hlBankFade = 2.5,
         hlBankEdgeNoise = 4,
         hlBankPondMax = 5,
-        hlBankMaxHeight = 14,
+        hlBankMaxHeight = 26,
         hlBankHeightTaper = .3,
         hlBankTex = null,
         hlBankTexRequested = !1,
@@ -13556,9 +13546,6 @@ void main(){
         hlBankFlatStart = .8,
         hlBankFlatFull = .62;
     let worldRetexture = {
-        guardstone: {
-            1235: 1227
-        },
         headless: {
             2060: 1238
         }
@@ -13626,7 +13613,7 @@ void main(){
         gsFlowerIds = null,
         gsFlowerLists = null,
         gsFlowerCell = 4,
-        gsFlowerPathChance = .08,
+        gsFlowerPathChance = .2,
         gsFlowerStoneChance = .07,
         gsFlowerHillChance = .006,
         gsFlowerHillRadius = 6,
@@ -13646,25 +13633,25 @@ void main(){
         headlessFoliageKey = 21213,
         headlessFoliageTint = [1.55, .97, 1.2],
         oasisFoliageKey = 21215,
-        oasisFoliageTint = [.52, .56, .455],
+        oasisFoliageTint = [.7, .7, .8],
         oasisFoliageBase = 960,
         oasisFolSlots = 3,
         oasisFoliageName = "Oasis",
         oasisBankFoliageCut = 0,
         oasisFoliageTexture = 2107,
         oasisGrassTexture = 2109,
-        oasisFoliageScale = 2.0,
-        oasisFoliageCoverage = 2.5,
+        oasisFoliageScale = 1.8,
+        oasisFoliageCoverage = 1.5,
         oasisFoliageSpread = 1.5,
         oasisExtraSheet = 1214,
         oasisExtraKey = 21214,
-        oasisExtraCells = [0, 3],
+        oasisExtraCells = [3],
         oasisExtraBase = 972,
         oasisExtraDensity = 14,
         oasisExtraIds = null,
         oasisExtraList = null,
-        oasisFoliageLayerMin = .15,
-        oasisFoliageGrassMin = .2,
+        oasisFoliageLayerMin = .1,
+        oasisFoliageGrassMin = .25,
         oasisLayerShare = (b, k) => {
             let w0 = b & 31,
                 w1 = b >> 5 & 31,
@@ -13706,22 +13693,22 @@ void main(){
         gsStoneFillChance = .55,
         gsStoneFillScale = .45,
         gsStoneSpacing = 26,
-        gsStoneChance = .5,
+        gsStoneChance = .7,
         gsStoneRegionScale = 150,
         gsStoneRegionCut = .52,
-        gsStoneRegionFade = .1,
-        gsStoneMinRadius = 6,
-        gsStoneMaxRadius = 13,
-        gsStoneBlend = 0,
-        gsStoneShapeNoise = 1.8,
+        gsStoneRegionFade = .3,
+        gsStoneMinRadius = 4,
+        gsStoneMaxRadius = 12,
+        gsStoneBlend = 1.4,
+        gsStoneShapeNoise = 0.8,
         gsStoneShapeDirs = 6,
         gsStoneShapeProbe = 26,
-        gsStoneShapeSteps = 8,
+        gsStoneShapeSteps = 24,
         gsStoneShapeRise = 4,
         gsStoneShapeMinRatio = 1.35,
-        gsStoneStretchGain = .9,
-        gsStoneStretchMax = 2.6,
-        gsStoneNoiseScale = 5.4,
+        gsStoneStretchGain = 1,
+        gsStoneStretchMax = 1,
+        gsStoneNoiseScale = 0.4,
         gsStoneSeed = 57,
         gsStoneFlatNormal = .93,
         gsStoneRiseRadius = 6,
@@ -13733,7 +13720,7 @@ void main(){
         gsStoneCoalFlatNormal = .84,
         gsStoneCoalMaxRise = 9,
         gsStoneCoalGrassWeight = .15,
-        pathBandBaseScale = .5,
+        pathBandBaseScale = 0,
         gsBaseSites = [
             [3214, 1236, 100],
             [2872, 1304, 100]
@@ -13743,7 +13730,7 @@ void main(){
         gsRockLight = [0, 0, 0],
         fvStoneLight = [0, 0, 0];
     let gsStoneTextureId = 1225,
-        gsSpUvScale = .6,
+        gsSpUvScale = 1,
         gsStoneTex = null,
         gsStoneTexRequested = !1;
     let shrubTextureKey = 21224,
@@ -36656,7 +36643,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
     var classicSoftness = .65,
         classicHeadlessNight = 1.1;
     var worldAmbientTint = {
-        guardstone: [.94, 1.08, .98]
+        //guardstone: [.94, 1.08, .98]
     };
     var classicEnvCache = new Map;
     [classicLighting, classicWaterColors].forEach(pt => pt.subscribe(() => classicEnvCache.clear()));
@@ -36672,7 +36659,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 pal = classicPalettes[classicWorldFor(env.id)],
                 phases = [0, 1, 2];
             if (pal) {
-                let db = classicWorldFor(env.id) === "headless" || classicWorldFor(env.id) === "guardstone" ? classicHeadlessNight : 1,
+                let db = 1.2,
                     scale = [1, 1, db],
                     col = (p, i) => classicHex(pal[p][i]).map(v => v * scale[p]);
                 out.ambient = phases.map(p => col(p, 0));
