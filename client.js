@@ -2536,6 +2536,8 @@ void main() {
         tonemapContrast: () => tonemapContrast,
         tonemapSaturation: () => tonemapSaturation,
         tonemapDither: () => tonemapDither,
+        retextureTonemap: () => retextureTonemap,
+        guardstoneTextureFix: () => guardstoneTextureFix,
         bloomHQ: () => bloomHQ,
         bloomThreshold: () => bloomThreshold,
         bloomKnee: () => bloomKnee,
@@ -2881,6 +2883,8 @@ void main() {
         tonemapContrast = ee(100),
         tonemapSaturation = ee(100),
         tonemapDither = ee(true),
+        retextureTonemap = ee(true),
+        guardstoneTextureFix = ee(false),
         bloomHQ = ee(false),
         bloomThreshold = ee(75),
         bloomKnee = ee(50),
@@ -2981,7 +2985,7 @@ void main() {
         oe = {};
     for (let t in cv) fw(t, cv[t]);
 
-    var retextureForced = ["classicSky", "classicWater", "classicWaterLook", "classicWaterColors", "tonemap"];
+    var retextureForced = ["classicSky", "classicWater", "classicWaterLook", "classicWaterColors"];
     if (oe.faivelRetexture)
         for (let t of retextureForced) oe[t] = !0;
 
@@ -3010,6 +3014,7 @@ void main() {
     };
     var cinematicTonemapKeys = ["tonemapMode", "tonemapExposure", "tonemapContrast", "tonemapSaturation", "tonemapDither"];
     var gfx = k => (oe.cinematicLighting || oe.faivelRetexture && cinematicTonemapKeys.indexOf(k) >= 0) && cinematicOverrides[k] !== undefined ? cinematicOverrides[k] : oe[k];
+    var tonemapOn = () => oe.faivelRetexture ? oe.retextureTonemap : oe.tonemap;
 
 
     shadowAlphaVal = gfx("shadowAlpha") / 100;
@@ -9061,6 +9066,17 @@ void main(){
         $v.set(23, shadowstrider);
         $v.set(31, scarab);
 
+        if (oe.guardstoneTextureFix) {
+            for (let terr of guardstoneFixTerrains) Ac.set(terr.id, Object.assign({}, terr, {
+                foliage: terr.foliage.map(f => f.slice())
+            }));
+            for (let id of [2051, 2053]) Pc.has(id) || Pc.set(id, {
+                ext: 3,
+                id: id,
+                type: 2
+            });
+        }
+
         if (oe.faivelRetexture) {
             textureOverrides.set(1867, {
                 id: 1226
@@ -9642,6 +9658,29 @@ void main(){
         for (let e = 0; e < t.filesExt.length; ++e) Xu.push(t.filesExt[e]);
         for (let e = 0; e < t.minimap.length; ++e) Qu.push(t.minimap[e])
     };
+    var guardstoneFixTerrains = [{
+        brightest: 143,
+        darkest: 64,
+        foliage: [],
+        id: 33,
+        scale: 128,
+        spec: 13,
+        texture: 2051
+    }, {
+        brightest: 158,
+        darkest: 88,
+        foliage: [
+            [35, 14, 0],
+            [36, 61, 0],
+            [37, 62, 0],
+            [40, 45, 0],
+            [41, 54, 1]
+        ],
+        id: 34,
+        scale: 128,
+        spec: 12,
+        texture: 2053
+    }];
     var M0 = (t, e) => {
         if (!Pc.has(t)) return console.log("unknown file id: " + t), "";
         let n = Pc.get(t);
@@ -13990,7 +14029,7 @@ void main(){
                 x(g, e, v), d(e, n), d(n, o), d(n, i), t[10](i), u && u.m(n, null), d(n, r), p && p.m(n, null), c || (f = Y(e, "contextmenu", t[6]), c = !0)
             },
             p(g, [v]) {
-                v & 2 && !mt(o.src, s = g[1]) && m(o, "src", s), v & 8 && Fe(o, "max-width", g[3] + "px"), g[0] > 1 ? u ? u.p(g, v) : (u = yM(g), u.c(), u.m(n, r)) : u && (u.d(1), u = null), g[3] > 30 && oe.cdTextBuffs && g[5] > 0 ? p ? p.p(g, v) : (p = zM(g), p.c(), p.m(n, null)) : p && (p.d(1), p = null), v & 4 && l !== (l = "slot border " + (borders[g[2]]) + " svelte-1nn7wcb") && m(n, "class", l), v & 32 && a !== (a = "container " + (g[5] < oe.buffCdFlashingDuration && g[5] % oe.buffCdFlashingInterval * 2 > oe.buffCdFlashingInterval ? "soon" : "") + " svelte-1nn7wcb") && m(e, "class", a);
+                v & 2 && !mt(o.src, s = g[1]) && m(o, "src", s), v & 8 && Fe(o, "max-width", g[3] + "px"), g[0] > 1 ? u ? u.p(g, v) : (u = RM(g), u.c(), u.m(n, r)) : u && (u.d(1), u = null), g[3] > 30 && oe.cdTextBuffs && g[5] > 0 ? p ? p.p(g, v) : (p = zM(g), p.c(), p.m(n, null)) : p && (p.d(1), p = null), v & 4 && l !== (l = "slot border " + (borders[g[2]]) + " svelte-1nn7wcb") && m(n, "class", l), v & 32 && a !== (a = "container " + (g[5] < oe.buffCdFlashingDuration && g[5] % oe.buffCdFlashingInterval * 2 > oe.buffCdFlashingInterval ? "soon" : "") + " svelte-1nn7wcb") && m(e, "class", a);
             },
             i: ae,
             o: ae,
@@ -25073,6 +25112,13 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 note: "If you use this without grass, I will find you",
                 reload: true,
                 color: "#3ed363"
+            }),
+            makeToggle("Tonemapping", retextureTonemap, {
+                note: "Pre 0.5 retexture only"
+            }),
+            makeToggle("Guardstone texture fix", guardstoneTextureFix, {
+                note: P.ui.settings.reload,
+                reload: true
             }),
             makeSlider("Foliage distance", foliageDistance, {
                 min: 32,
@@ -39232,6 +39278,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 }
             return !1;
         },
+        missingTerrains = new Set,
         Z$m = (t, world, orange) => {
             let e = t.join(",") + (world ? "|" + world : "") + (orange ? "|orange" : "");
             if (!Vy.has(e)) {
@@ -39241,6 +39288,11 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     loaded: 0
                 };
                 t.forEach((o, s) => {
+                    if (!Ac.has(o)) {
+                        missingTerrains.has(o) || (missingTerrains.add(o), console.warn("unknown terrain id " + o + " in chunk layers [" + t.join(",") + "], using a neighbouring layer"));
+                        o = t.find(id => Ac.has(id));
+                        o === void 0 && (o = Ac.keys().next().value);
+                    }
                     let i = Ac.get(o),
                         map = world ? worldRetexture[world] : null,
                         raw = world === "guardstone" && pathTextures.indexOf(i.texture) >= 0,
@@ -42230,7 +42282,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 if (oe.bloomHQ && !oe.bloom) {
                     Sf(42, null, n, bloomHQChain(n), pfxToneArgs().concat([
                         ["bloomAmount", bloomAmountVal],
-                        ["tonemapEnabled", oe.tonemap ? 1 : 0]
+                        ["tonemapEnabled", tonemapOn() ? 1 : 0]
                     ]));
                     return;
                 }
@@ -42245,8 +42297,8 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     ["offset", [-o * 2, 0, -o, 0, o, 0, o * 2, 0]], i
                 ]), Sf(30, ua, fa, null, [
                     ["offset", [0, -s * 2, 0, -s, 0, s, 0, s * 2]], i
-                ]), oe.tonemap ? (Sf(31, e, n, ua, []), [e, n] = [n, e], Sf(39, null, n, null, pfxToneArgs())) : Sf(31, null, n, ua, []);
-            } else if (oe.tonemap) Sf(39, null, n, null, pfxToneArgs());
+                ]), tonemapOn() ? (Sf(31, e, n, ua, []), [e, n] = [n, e], Sf(39, null, n, null, pfxToneArgs())) : Sf(31, null, n, ua, []);
+            } else if (tonemapOn()) Sf(39, null, n, null, pfxToneArgs());
             else V1(n, null, N.COLOR_BUFFER_BIT);
         },
         V1 = (t, e, n, o = N.NEAREST) => {
