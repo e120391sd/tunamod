@@ -3013,8 +3013,8 @@ void main() {
         bloomSky: 25
     };
     var cinematicTonemapKeys = ["tonemapMode", "tonemapExposure", "tonemapContrast", "tonemapSaturation", "tonemapDither"];
-    var gfx = k => (oe.cinematicLighting || oe.faivelRetexture && cinematicTonemapKeys.indexOf(k) >= 0) && cinematicOverrides[k] !== undefined ? cinematicOverrides[k] : oe[k];
-    var tonemapOn = () => oe.faivelRetexture ? oe.retextureTonemap : oe.tonemap;
+    var gfx = k => (oe.cinematicLighting || cinematicTonemapKeys.indexOf(k) >= 0) && cinematicOverrides[k] !== undefined ? cinematicOverrides[k] : oe[k];
+    var tonemapOn = () => oe.retextureTonemap;
 
 
     shadowAlphaVal = gfx("shadowAlpha") / 100;
@@ -3023,7 +3023,7 @@ void main() {
     ssaoFadeVal = gfx("ssaoFadeDist");
 
 
-    var cinematicGfxToggles = [ssao, tonemap, bloomHQ, godRays];
+    var cinematicGfxToggles = [ssao, retextureTonemap, bloomHQ, godRays];
 
     var cinematicFirstRun = true;
     cinematicLighting.subscribe(v => {
@@ -25113,9 +25113,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 reload: true,
                 color: "#3ed363"
             }),
-            makeToggle("Tonemapping", retextureTonemap, {
-                note: "Pre 0.5 retexture only"
-            }),
+            makeToggle("Tonemapping", retextureTonemap),
             makeToggle("Guardstone texture fix", guardstoneTextureFix, {
                 note: P.ui.settings.reload,
                 reload: true
@@ -39715,7 +39713,41 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 if (ids.has(key.slice(key.indexOf(":") + 1))) return !0;
             return terrainHoldStart = 0, !1;
         },
+        terrainFrame = 0,
+        chunkBuiltFrame = -1,
+        chunkPrewarmMax = 1500,
+        terrainPassPending = t => {
+            let tail = ":" + T.file + ":" + t.id;
+            for (let key of terrainJobKeys)
+                if (key.endsWith(tail) && !key.startsWith("rebuild~")) return !0;
+            return !1;
+        },
+        terrainPrewarm = t => {
+            if (!oe.faivelRetexture && !dirtPatchEnabled && !shoreShaderEnabled) return !0;
+            let now = performance.now();
+            t.prewarmId !== t.id && (t.prewarmId = t.id, t.prewarmStart = now);
+            if (now - t.prewarmStart > chunkPrewarmMax) return !0;
+            let chWorld = oe.faivelRetexture ? chunkWorldOf(t) : null,
+                gsChunk = chWorld === "guardstone";
+            oe.faivelRetexture && (chWorld = chunkRetextureWorld(t));
+            oe.faivelRetexture && buildStoneStrips(t);
+            if (dirtPatchEnabled) {
+                chWorld !== "headless" && (gsChunk ? terrainDeferred(t, "gsdirt6", buildGsDirtMask) : terrainDeferred(t, "dirtmask", buildDirtMask));
+                gsChunk ? (terrainDeferred(t, "gsstone5", buildGsStoneMask), terrainDeferred(t, "gsmeadow", buildGsMeadowMask), terrainDeferred(t, "gsbigdirt", buildGsBigDirtMask)) : terrainDeferred(t, "meadowmask", buildMeadowMask);
+            }
+            let band = dirtPatchEnabled && gsChunk ? buildPathBand(t) : null;
+            shoreShaderEnabled && buildSteepMask(t);
+            oe.faivelRetexture && (buildHeadlessStone(t), buildHeadlessBank(t), shoreShaderEnabled && buildHeadlessSteep(t));
+            if (terrainPassPending(t)) return !1;
+            return oe.faivelRetexture && (t.pathBand = band, topGrassLookup(t)), !terrainPassPending(t);
+        },
+        chunkBuildReady = t => {
+            if (!T || T.state !== 4) return !0;
+            if (!terrainPrewarm(t) || chunkBuiltFrame === terrainFrame) return !1;
+            return chunkBuiltFrame = terrainFrame, !0;
+        },
         terrainJobsTick = () => {
+            terrainFrame++;
             if (!terrainJobs.length) return;
             let end = performance.now() + (T && T.state !== 4 && oe.faivelRetexture ? terrainLoadBudget : 3);
             do {
@@ -39733,15 +39765,9 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 ck = terrainCacheKey(t, "rebuild"),
                 ready = () => T.file === file && t.id === id && t.data && t.state !== 8,
                 live = () => ready() && t.state >= 5,
-                waits = 0,
                 rebuild = () => {
                     terrainJobKeys.delete(ck);
-                    if (!ready()) return;
-                    if (!live()) {
-                        if (++waits > 900) return;
-                        terrainJobKeys.add(ck), terrainJobs.push(rebuild);
-                        return;
-                    }
+                    if (!live()) return;
                     K7(t, !1, !0), terrainJobs.push(() => live() && A7(t, !0));
                 };
             terrainJobKeys.add(key);
@@ -42070,7 +42096,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                         let i = e.chunksMap.get(t.neighbors[s]);
                         i ? i.state < 3 && (i.state === 0 && (i.state = 1), o = !1) : o = !1
                     }
-                    n === 3 && o && (t.state = 4, uW(t, !0, !0, !0, !0, !0, !0))
+                    n === 3 && o && chunkBuildReady(t) && (t.state = 4, uW(t, !0, !0, !0, !0, !0, !0))
                 }
             } else n >= 5 ? t.inRange && t.state < 7 ? (u9(t), t.state = 7) : !t.inRange && t.state === 7 && (Ry(t), dm(t, !1, !1), t.state = 6) : n === 1 && b9(t) && (t.state = 2)
         }, dm = (t, e, n) => {
