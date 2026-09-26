@@ -14233,6 +14233,14 @@ void main(){
     });
     let stoneTextureId = 1233,
         stoneStretch = 1.75,
+        textureStretch = {
+            [stoneTextureId]: stoneStretch,
+            1227: 1.75,
+            1238: 1.75,
+            1226: 1.75,
+            1228: 1.75,
+            
+        },
         stoneShaderUvScale = 1 / stoneStretch,
         stoneOverlayStrength = 1,
         stoneWaterDistance = 4.9,
@@ -39295,7 +39303,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                         map = world ? worldRetexture[world] : null,
                         raw = world === "guardstone" && pathTextures.indexOf(i.texture) >= 0,
                         tex = raw ? gsPathKey : orange && i.texture === orangePathTexture ? orangePathKey : map && map[i.texture] != null && Pc.has(map[i.texture]) ? map[i.texture] : i.texture;
-                    n.info[s * 4 + 0] = i.scale / 127 / (!raw && oe.faivelRetexture && topGrassShown(o, world) === stoneTextureId ? stoneStretch : 1) * (raw ? gsPathUvScale : 1), n.info[s * 4 + 1] = i.darkest / 255 * 3, n.info[s * 4 + 2] = i.brightest / 255 * 3, n.info[s * 4 + 3] = i.spec / 255 * (!raw && map && map[i.texture] != null && world === "headless" ? headlessSpecScale : 1) * (!raw && oe.faivelRetexture && topGrassShown(o, world) === dirtSpecShown ? dirtSpecScale : 1), Ao(tex, r => {
+                    n.info[s * 4 + 0] = i.scale / 127 / (!raw && oe.faivelRetexture && textureStretch[topGrassShown(o, world)] || 1) * (raw ? gsPathUvScale : 1), n.info[s * 4 + 1] = i.darkest / 255 * 3, n.info[s * 4 + 2] = i.brightest / 255 * 3, n.info[s * 4 + 3] = i.spec / 255 * (!raw && map && map[i.texture] != null && world === "headless" ? headlessSpecScale : 1) * (!raw && oe.faivelRetexture && topGrassShown(o, world) === dirtSpecShown ? dirtSpecScale : 1), Ao(tex, r => {
                         n.diffuse[s] = r, n.loaded++
                     })
                 }), Vy.set(e, n)
