@@ -13730,7 +13730,8 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             } else if (e !== S2 ? (S2 = e, Jc = 1) : Jc = Math.max(Jc * (1 - t * 10), 0), e > 0) {
                 let s = T.getEntityById(e);
                 if (s !== void 0) {
-                    bo(o.circlePos, s.pos[0], s.pos[1] - s.radius, s.pos[2], s.size + Jc);
+                    let p = s.__mag ? s.visualPosition : s.pos;
+                    bo(o.circlePos, p[0], p[1] - s.radius - (s.__mag ? s.radius : 0), p[2], s.size + Jc);
                     let i = s.stats && s.stats.alive ? T.player.hostility(s) > 0 ? xh.enemy : xh.friendly : xh.dead;
                     bo(o.circleInfo, ...i, 1 - Jc)
                 }
