@@ -13660,7 +13660,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 let l = o[i],
                     [a, c, f] = l.hudPos;
                 if (a > 0 && a < e && c > 0 && c < n && f < 1) {
-                    ut(s, l.pos), s[1] += l.size * .3;
+                    ut(s, l.__mag ? l.visualPosition : l.pos), l.__mag && (s[1] -= l.radius || 0), s[1] += l.size * .3;
                     let u = _o(s, q0(_t.worldPosition, Zr, s));
                     u < t && u < (l.size + .7) ** 2 && l.stats.alive && (t = u, Sn = l.id)
                 }
