@@ -32286,9 +32286,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             1238: [[3, 55], [7, 18]]
         },
         oldFolScale = 1.25,
-        oldFolTexSheets = {
-            1232: 1214
-        },
+        oldFolTexSheets = {},
         oldFolSheets = {
             guardstone: 1214
         },
@@ -37070,7 +37068,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         classicMapKey = id => "v7:" + T.file + ":" + id,
         classicMapWorld = null,
         classicMapSince = 0,
-        classicMapLook = 4,
+        classicMapLook = 5,
         classicMapNbrReady = t => {
             for (let dz = -1; dz <= 1; ++dz)
                 for (let dx = -1; dx <= 1; ++dx) {
