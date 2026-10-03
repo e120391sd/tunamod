@@ -1,26 +1,11 @@
 {
     "entries": [
         {
-            "title": "Update 1.27",
+            "title": "Update 2.0",
             "date": "2026-10-03",
             "color": "#F5C247",
-            "description": "Static creatures, signs and a new map.",
+            "description": "Rewrote the client, there will no longer be any gameplay \"mods\", rather I am focusing on continuing the beta retexture, which this client will use by default. I've removed a lot of the procedurally drawn textures from the map, so that is why it will look quite empty (for now).",
             "sections": [
-                {
-                    "name": "General",
-                    "color": "#34CB49",
-                    "points": [
-                        "Signs show a message when you walk up to them",
-                        "Static creatures can talk to you when you target them"
-                    ]
-                },
-                {
-                    "name": "Map",
-                    "color": "#3BCFE5",
-                    "points": [
-                        "The map now has terrain shading"
-                    ]
-                }
             ]
         }
     ]

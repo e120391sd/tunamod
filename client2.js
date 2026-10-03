@@ -40740,6 +40740,6 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         HI = () => {
             let t = zu(),
                 e = (t - (GI || 1e3 / 60)) / 1e3;
-            GI = t, iI(e, t), requestAnimationFrame(HI)
+            GI = t, iI(e, t), requestAnimationFrame(HI) //
         };
 })();

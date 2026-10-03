@@ -84,10 +84,6 @@
                 general: ["General", "#F5C247"],
                 ui: ["User Interface", "#0ceccd"],
                 bugfixes: ["Bugfixes", "#EE960B"],
-                warrior: ["Warrior", "#C7966F"],
-                mage: ["Mage", "#21A9E1"],
-                archer: ["Archer", "#98CE64"],
-                shaman: ["Shaman", "#4f78ff"]
             };
             box.prepend(...render([{
                 title: (c.description ? c.description + " — " : "") + "Update " + c.version,
