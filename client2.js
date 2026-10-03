@@ -29074,6 +29074,15 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             }, o), o)), classicFolMade.set(key, id), id;
         },
         classicStatics = [],
+        classicMagnets = [],
+        classicMagnetRange = 5,
+        classicMagnetFor = e => {
+            if (!classicMagnets.length || !e.name || !T || e.id === T.playerId || classicIsEditor() || !classicWorld || T.file !== classicWorld.source) return null;
+            let n = String(e.name).trim().toLowerCase();
+            for (let m of classicMagnets)
+                if (m.name && m.name === n && Math.hypot(e.pos[0] - m.x, e.pos[2] - m.z) <= classicMagnetRange) return m;
+            return null;
+        },
         classicSigns = {},
         classicSignBases = new Set,
         classicStaticsVer = 0,
@@ -29206,6 +29215,10 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             classicStaticsTick(on, T.player.pos), on && (classicSignsDraw(T.player.pos), classicStaticTalkTick());
         },
         classicWorldExtras = h => {
+            classicMagnets = Array.isArray(h.magnets) ? h.magnets.filter(m => m && m.name && isFinite(m.x) && isFinite(m.z)).map(m => ({
+                ...m,
+                name: String(m.name).trim().toLowerCase()
+            })) : [];
             classicStatics = Array.isArray(h.statics) ? h.statics.filter(s => s && isFinite(s.x) && isFinite(s.z)) : [], classicSigns = h.signs && typeof h.signs == "object" ? h.signs : {}, classicStaticsVer++;
             classicSignBases.clear();
             for (let d of h.meshes || []) d.base === classicSignMesh && classicSignBases.add(d.id);
@@ -29279,8 +29292,22 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             water: c.water.slice()
         }),
         classicChunkFor = (e, t) => {
-            let c = classicWorldApplied && T && T.file === classicWorld.source && classicWorld.chunks.get(e.id);
-            return c ? classicCloneChunk(c) : kc.chunk.decode(t);
+            let c = classicWorldApplied && T && T.file === classicWorld.source && classicWorld.chunks.get(e.id),
+                live = kc.chunk.decode(t);
+            return e.liveShape = null, c ? (e.liveShape = {
+                data: live,
+                normals: new Float32Array(3456)
+            }, b7(e.liveShape), classicCloneChunk(c)) : live;
+        },
+        classicLiveColliders = t => {
+            let L = t.liveShape;
+            if (!L || !L.data.props || T.finishedLoadingChunks.has(t.id)) return;
+            for (let p of L.data.props) {
+                let i = g7(new k1, p),
+                    o = Ys.get(i.id),
+                    c = o && (o.collisionGeometry == null ? o.geometry : o.collisionGeometry);
+                c && (i.setWorldMatrix(new Float32Array(16), t.origin), Wr(c, (g, d) => t.liveShape === L && i.addCollider(T, t, g, d)));
+            }
         },
         classicFolAt = v => v ? classicFolPal[(v >> 4) - 1] : null,
         classicPaintedFoliage = t => {
@@ -31530,7 +31557,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     let hide = this.noThin ? 0 : meshHideChance.get(this.id);
                     if (hide > 0 && dirtHash(Math.round((n.origin[0] + this.pos[0]) * 16), Math.round((n.origin[2] + this.pos[2]) * 16), 173) < hide) return this.loaded = !0, this.postGeometryLoad(e, n);
                     let o = Ys.get(this.id),
-                        c = o.collisionGeometry == null ? o.geometry : o.collisionGeometry,
+                        c = n.liveShape ? 0 : o.collisionGeometry == null ? o.geometry : o.collisionGeometry,
                         collide = () => {
                             if (!c || e.finishedLoadingChunks.has(n.id)) return this.postGeometryLoad(e, n);
                             Wr(c, (s, i) => {
@@ -31734,6 +31761,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 let o = t.props[n];
                 o.onUpdate(T, t.origin, T.bounds), o.loadGeometry(T, t)
             }
+            classicLiveColliders(t);
         },
         WN = t => {
             for (let e = 0; e < t.props.length; ++e) t.props[e].onRemove(t);
@@ -39155,8 +39183,8 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             return !(this.aabb[1] > e[1] + n || this.aabb[4] < e[1] - n || Math.sqrt((e[0] - this.pos[0]) ** 2 + (e[2] - this.pos[2]) ** 2) > o + this.radius)
         }
         tickHoles(e) {
-            let n = T.getHole(this.pos[0], this.pos[2]),
-                o = this.pos[1] - T.getHeight(this.pos[0], this.pos[2]);
+            let n = T.physHole(this.pos[0], this.pos[2]),
+                o = this.pos[1] - T.physHeight(this.pos[0], this.pos[2]);
             return this.belowGround = n && o <= 0, n
         }
         horizontalSteer(e, n, o) {
@@ -39222,7 +39250,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         }
         tickWaterCollisions(e) {
             let n = this.inWater;
-            return this.inWater = Math.max(0, e.getWaterHeight(this.pos[0], this.pos[2]) - this.pos[1]), !n && this.inWater > 0 && this.vel[1] < -3 && this.onEnterWater(), this.inWater > 0
+            return this.inWater = Math.max(0, e.physWater(this.pos[0], this.pos[2]) - this.pos[1]), !n && this.inWater > 0 && this.vel[1] < -3 && this.onEnterWater(), this.inWater > 0
         }
         onEnterWater() {}
     };
@@ -39254,8 +39282,10 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             updateVisualPosition(e, n, o, s = !1) {
                 this.__ocDone || this.type !== 1 || oldCreatureCheck(this);
                 e > 0 && (hn(this.pos, this.pos, this.conciliator, -e * 10), Pn(this.conciliator, this.conciliator, 1 - e * 10));
-                let i = _o(this.pos, this.visualPosition);
-                (s || i > 1e-5) && (ut(this.visualPosition, this.pos), this.visualPosition[1] += this.radius, this.mount === void 0 ? ut(this.visual.transform.position, this.visualPosition) : (ut(this.mount.transform.position, this.visualPosition), this.mount.transform.position[1] += this.mount.skin.size * .5 - this.radius)), this.interiorlightTimer.done(n) && (this.interiorlightTimer.reset(n), o.getInteriorLight(this.interiorlightTarget, this.aabb));
+                let mag = this.__mag = classicMagnetFor(this),
+                    src = mag ? [mag.x, isFinite(mag.y) ? mag.y : this.pos[1], mag.z] : this.pos,
+                    i = _o(src, this.visualPosition);
+                (s || i > 1e-5) && (ut(this.visualPosition, src), this.visualPosition[1] += this.radius, this.mount === void 0 ? ut(this.visual.transform.position, this.visualPosition) : (ut(this.mount.transform.position, this.visualPosition), this.mount.transform.position[1] += this.mount.skin.size * .5 - this.radius)), this.interiorlightTimer.done(n) && (this.interiorlightTimer.reset(n), o.getInteriorLight(this.interiorlightTarget, this.aabb));
                 let r = Math.min(1, e),
                     l = this.interiorlightTarget,
                     a = this.visual.interiorlight;
@@ -39267,7 +39297,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             updateTransformRotation(e) {
                 if (this.stats.alive && this.buffs.visualFreeze === 0) {
                     this.updateMountRotation(e);
-                    let n = Jl(this.rot + this.mountRotAdd, this.visual.transform.rotation[1]);
+                    let n = Jl((this.__mag ? this.__mag.rot || 0 : this.rot) + this.mountRotAdd, this.visual.transform.rotation[1]);
                     Math.abs(n) > .01 && (this.visual.transform.rotation[1] = wc(this.visual.transform.rotation[1] - n * Math.min(1, e * 20), Math.PI * 2))
                 }
             }
@@ -39635,9 +39665,9 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         tickCollisions(e, n, o, s, i) {
             let r = [...this.pos];
             hn(this.pos, this.pos, this.vel, e);
-            let l = this.belowGround || i ? 0 : T.getHeight(this.pos[0], this.pos[2]),
-                a = T.getNormal(this.pos[0], this.pos[2]);
-            this.tickWallCollisions(n, l, a), l = this.belowGround || i ? 0 : T.getHeight(this.pos[0], this.pos[2]), a = T.getNormal(this.pos[0], this.pos[2]), this.tickFloorCollisions(o, l, a), this.tickCeilCollisions(s, r), this.belowGround || (this.pos[1] = Math.max(this.pos[1], T.getHeight(this.pos[0], this.pos[2])))
+            let l = this.belowGround || i ? 0 : T.physHeight(this.pos[0], this.pos[2]),
+                a = T.physNormal(this.pos[0], this.pos[2]);
+            this.tickWallCollisions(n, l, a), l = this.belowGround || i ? 0 : T.physHeight(this.pos[0], this.pos[2]), a = T.physNormal(this.pos[0], this.pos[2]), this.tickFloorCollisions(o, l, a), this.tickCeilCollisions(s, r), this.belowGround || (this.pos[1] = Math.max(this.pos[1], T.physHeight(this.pos[0], this.pos[2])))
         }
         tickWallCollisions(e, n, o) {
             if (o[1] < .6 && this.pos[1] < n) {
@@ -40208,6 +40238,36 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 }
                 return n3
             }
+            physChunk(e, n) {
+                let o = this.chunksMap.get(Math.min(Math.floor(e / 64), this.chunkAmount - 1) + Math.min(Math.floor(n / 64), this.chunkAmount - 1) * this.chunkAmount);
+                return !o || !o.deserialized ? null : o.liveShape || o;
+            }
+            physHeight(e, n) {
+                e = Mt(e, 0, this.bounds), n = Mt(n, 0, this.bounds);
+                let o = this.physChunk(e, n);
+                return o ? ii(o, e >= this.bounds ? 63 : e % 64, n >= this.bounds ? 63 : n % 64) : -0
+            }
+            physHole(e, n) {
+                e = Mt(e, 0, this.bounds), n = Mt(n, 0, this.bounds);
+                let o = this.physChunk(e, n);
+                return o ? am(o, e >= this.bounds ? 63 : e % 64, n >= this.bounds ? 63 : n % 64) : -0
+            }
+            physWater(e, n) {
+                e = Mt(e, 0, this.bounds), n = Mt(n, 0, this.bounds);
+                let o = this.physChunk(e, n);
+                return o ? cm(o, e >= this.bounds ? 63 : e % 64, n >= this.bounds ? 63 : n % 64) : -1
+            }
+            physNormal(e, n) {
+                e = Mt(e, 0, this.bounds), n = Mt(n, 0, this.bounds);
+                let o = this.physChunk(e, n);
+                if (!o) J(n3, 0, 0, 0);
+                else {
+                    e = e >= this.bounds ? 63 : e % 64, n = n >= this.bounds ? 63 : n % 64, e /= 2.6666666666666665, n /= 2.6666666666666665;
+                    let s = Math.floor(e) * 2 + 24 * Math.floor(n) * 2;
+                    e % 1 + n % 1 > 1 && s++, s *= 3, J(n3, o.normals[s], o.normals[s + 1], o.normals[s + 2])
+                }
+                return n3
+            }
             clampV3(e) {
                 return e[0] = Mt(e[0], 0, this.bounds), e[1] = Mt(e[1], 0, 2e3), e[2] = Mt(e[2], 0, this.bounds), e
             }
@@ -40251,7 +40311,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 return !1
             }
             raycastEnvironmentClosest(e, n, o, s, i, r) {
-                let l = this.getHeight(e, o) > n,
+                let l = this.physHeight(e, o) > n,
                     a = this.triangleRaycastClosest(e, n, o, s, i, r);
                 a < 1 && (s *= a, i *= a, r *= a);
                 let c = 0,
@@ -40264,7 +40324,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                             g = e + s * p,
                             v = n + i * p,
                             _ = o + r * p,
-                            b = this.getHole(e, o) ? 0 : this.getHeight(g, _),
+                            b = this.physHole(e, o) ? 0 : this.physHeight(g, _),
                             y = v - b;
                         y < 0 ? y > -.05 ? (f += u, c = 100) : u *= .5 : f += u, c++
                     }
@@ -40282,13 +40342,13 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     b = Math.floor(a / 3),
                     y = 0;
                 for (; y < b;)
-                    if (++y, g += f, v += u, _ += p, this.getHeight(g, _) > v) return !0;
+                    if (++y, g += f, v += u, _ += p, this.physHeight(g, _) > v) return !0;
                 return this.triangleRaycastAny(e, n, o, s, i, r, !0)
             }
             raycastEnvironmentHeight(e, n, o, s, i) {
-                let l = this.getHole(e, n) ? 0 : this.getHeight(e, n),
+                let l = this.physHole(e, n) ? 0 : this.physHeight(e, n),
                     a = 0;
-                o > l && (i !== void 0 && ut(i, this.getNormal(e, n)), a = l);
+                o > l && (i !== void 0 && ut(i, this.physNormal(e, n)), a = l);
                 let c = o - s;
                 Oi[0] = Oi[3] = e, Oi[5] = Oi[2] = n, Oi[4] = o, Oi[1] = s;
                 let f = this.triangleGrid.queryAABB(Oi);
