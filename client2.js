@@ -7501,17 +7501,10 @@ void main() {
                 id: 1233
             })
             textureOverrides.set(2054, {
-                id: gsStoneTextureId,
-                contrast: 1.15
-            })
-            textureOverrides.set(gsStoneTextureId, {
-                id: gsStoneTextureId,
-                contrast: 1.15
+                id: gsStoneTextureId
             })
             textureOverrides.set(pathBandTextureId, {
-                id: pathBandTextureId,
-                contrast: 1.1,
-                exposure: -0.2
+                id: pathBandTextureId
             })
             textureOverrides.set(1862, 1226)
             textureOverrides.set(1869, 1226)
@@ -7700,8 +7693,7 @@ void main() {
                     id: shrubTextureKey
                 }));
                 textureOverrides.set(shrubTextureKey, {
-                    id: 1224,
-                    light: shrubTextureTint
+                    id: 1224
                 });
                 meshOverrides.set(shrubMesh, {
                     texture: shrubTextureKey
@@ -12516,8 +12508,6 @@ void main() {
         riverBankEnabled = !0,
         hlBankEnabled = !1,
         orangeTint = {
-            light: [.98, .72, .57],
-            exposure: -.06
         },
         stoneShaderTex = null,
         stoneShaderTexRequested = !1,
@@ -12570,9 +12560,7 @@ void main() {
         hlBareDirtCut = .85;
     let hlBankKey = 21227,
         hlBankTint = {
-            id: 1227,
-            contrast: 1.05,
-            light: [.62, .643, .439]
+            id: 1227
         };
     let hlBankFrom = 1238,
         hlBankTexture = hlBankKey,
@@ -12718,8 +12706,8 @@ void main() {
         oasisAreaIds = null,
         gsMeadowSpacing = 16,
         gsMeadowChance = .025,
-        gsMeadowBright = .06,
-        gsMeadowContrast = .82,
+        gsMeadowBright = 0,
+        gsMeadowContrast = 1,
         gsMeadowMinRadius = 1.6,
         gsMeadowMaxRadius = 2.9,
         gsMeadowBlend = 3.4,
@@ -12775,7 +12763,7 @@ void main() {
         fvStoneSourceTexture = 2120,
         gsRockLight = [0, 0, 0],
         fvStoneLight = [0, 0, 0];
-    let gsStoneTextureId = 1225,
+    let gsStoneTextureId = 1233,
         gsSpUvScale = 1,
         gsStoneTex = null,
         gsStoneTexRequested = !1;
@@ -12788,10 +12776,7 @@ void main() {
     let hlStoneKey = 21233,
         hlStoneTexture = 1233,
         hlStoneTint = {
-            id: 1233,
-            exposure: -.1,
-            hue: -7,
-            light: [0.92, 0.84, 0.92]
+            id: 1233
         },
         hlStoneTex = null,
         hlStoneTexRequested = !1;
@@ -12920,7 +12905,7 @@ void main() {
         meadowMossBreakScale = 4.5,
         meadowMossBreakCut = .38,
         meadowMossStrength = .85,
-        meadowPatchTint = [1.02, .86, .87],
+        meadowPatchTint = [1, 1, 1],
         meadowPatchSpacing = 7.07,
         meadowPatchChance = .3,
         meadowPatchMinRadius = 3.6,
@@ -30309,7 +30294,13 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         _y = !0,
         ME = (t, e) => {
             let f = classicMapScanFocus();
-            _y = iN(f ? f[0] : tn.position[0], f ? f[1] : tn.position[2], e)
+            if (_y = iN(f ? f[0] : tn.position[0], f ? f[1] : tn.position[2], e), f && _y) {
+                let cx = Math.floor(f[0] / 64),
+                    cz = Math.floor(f[1] / 64),
+                    k = 0;
+                for (let i = 0; i < ya.length; i += 3) Math.abs(ya[i + 1] - cx) <= classicMapScanReach && Math.abs(ya[i + 2] - cz) <= classicMapScanReach && (ya[k++] = ya[i], ya[k++] = ya[i + 1], ya[k++] = ya[i + 2]);
+                ya.length = k;
+            }
         };
     var rN = 0,
         CE = (t, e, n, o = 0, s = !1, i = !1) => {
@@ -33962,7 +33953,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         terrainJobsTick = () => {
             terrainFrame++;
             if (!terrainJobs.length) return;
-            let end = performance.now() + (T && T.state !== 4 && oe.faivelRetexture ? terrainLoadBudget : 3);
+            let end = performance.now() + (T && T.state !== 4 && (oe.faivelRetexture || classicMapScan) ? terrainLoadBudget : 3);
             do {
                 try {
                     terrainJobs.shift()();
@@ -36854,14 +36845,17 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 }
             t.state = 0
         },
-        b9 = t => t.state >= 2 || classicWorldWait() || classicMapFetchDelay() ? !1 : (t.state = 2, cW(t), !0),
+        b9 = t => t.state >= 2 || classicWorldWait() || classicMapFetchDelay(t) ? !1 : (t.state = 2, cW(t), !0),
         cW = async t => {
             try {
                 t.abort = new AbortController;
-                let n = await (await fetch(`data/world/${T.file}/${t.id}?v=9001382`, {
+                let key = classicChunkKey(t.id),
+                    n = await classicChunkGet(key);
+                if (t.state > 2) return;
+                n || (n = await (await fetch(`data/world/${T.file}/${t.id}?v=9001382`, {
                     signal: t.abort.signal,
                     cache: "default"
-                })).arrayBuffer();
+                })).arrayBuffer(), classicChunkPut(key, n));
                 if (t.reloadAttempts = 0, t.state > 2) return;
                 fW(new Uint8Array(n), t)
             } catch (e) {
@@ -36988,8 +36982,8 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         classicMapFb = null,
         classicMapDb = typeof indexedDB == "undefined" ? Promise.resolve(null) : new Promise(res => {
             try {
-                let q = indexedDB.open("classicMap", 1);
-                q.onupgradeneeded = () => q.result.createObjectStore("tiles");
+                let q = indexedDB.open("classicMap", 2);
+                q.onupgradeneeded = () => ["tiles", "chunks"].forEach(n => q.result.objectStoreNames.contains(n) || q.result.createObjectStore(n));
                 q.onsuccess = () => res(q.result), q.onerror = () => res(null);
             } catch (e) {
                 res(null);
@@ -36998,11 +36992,54 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         classicMapKey = id => "v7:" + T.file + ":" + id,
         classicMapWorld = null,
         classicMapSince = 0,
-        classicMapPut = (key, c) => c.toBlob(b => b && classicMapDb.then(db => {
+        classicMapLook = 2,
+        classicMapNbrReady = t => {
+            for (let dz = -1; dz <= 1; ++dz)
+                for (let dx = -1; dx <= 1; ++dx) {
+                    let x = t.x + dx,
+                        z = t.z + dz;
+                    if (!(dx || dz) || x < 0 || z < 0 || x >= T.chunkAmount || z >= T.chunkAmount) continue;
+                    let ch = T.getChunk(x, z);
+                    if (!ch || ch.state !== 7 || !classicMapReady(ch)) return !1;
+                }
+            return !0;
+        },
+        classicMapSigCache = null,
+        classicMapSigOf = new Map,
+        classicMapSig = () => {
+            let at = T.file + ":" + classicWorldApplied;
+            if (classicMapSigCache && classicMapSigCache[0] === at) return classicMapSigCache[1];
+            let str = JSON.stringify([classicMapLook, [...textureOverrides].map(([k, v]) => [k, v && typeof v == "object" ? Object.keys(v).sort().map(n => [n, n === "b64" || n === "src" ? String(v[n]).length : v[n]]) : v]), [...classicTexPresets], ctOldTerrains, worldRetexture, gsStoneTextureId, stoneTextureId, pathBandTextureId, treeDirtTexture, hlStoneTexture, hlSteepTexture, gloomGrassTexture, classicMapUvScale, classicMapShade, classicMapLight, classicMapGain, classicMapGamma, classicMapSat, classicMapTreeAlpha, classicMapRes]),
+                h = 5381;
+            for (let i = 0; i < str.length; ++i) h = (h * 33 ^ str.charCodeAt(i)) >>> 0;
+            return classicMapSigCache = [at, h.toString(36)], classicMapSigCache[1];
+        },
+        classicMapPut = (key, c) => {
+            let sig = classicMapSig();
+            classicMapSigOf.set(key, sig), c.toBlob(b => b && classicMapDb.then(db => {
+                try {
+                    db && db.transaction("tiles", "readwrite").objectStore("tiles").put({
+                        b,
+                        s: sig
+                    }, key);
+                } catch (e) {}
+            }));
+        },
+        classicChunkKey = id => "c9001382:" + T.file + ":" + id,
+        classicChunkHave = new Set,
+        classicChunkGet = key => classicMapDb.then(db => db && new Promise(res => {
             try {
-                db && db.transaction("tiles", "readwrite").objectStore("tiles").put(b, key);
-            } catch (e) {}
+                let q = db.transaction("chunks").objectStore("chunks").get(key);
+                q.onsuccess = () => res(q.result || null), q.onerror = () => res(null);
+            } catch (e) {
+                res(null);
+            }
         })),
+        classicChunkPut = (key, buf) => classicMapDb.then(db => {
+            try {
+                db && (db.transaction("chunks", "readwrite").objectStore("chunks").put(buf, key), classicChunkHave.add(key));
+            } catch (e) {}
+        }),
         classicMapAsk = key => {
             if (classicMapAsked.has(key)) return;
             classicMapAsked.add(key), classicMapDb.then(db => {
@@ -37013,9 +37050,13 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 } catch (e) {
                     return;
                 }
-                q.onsuccess = () => q.result && !classicMapTiles.has(key) && createImageBitmap(q.result).then(img => {
-                    classicMapTiles.has(key) || (classicMapTiles.set(key, img), classicMapVer++);
-                }).catch(() => 0);
+                q.onsuccess = () => {
+                    let v = q.result,
+                        blob = v instanceof Blob ? v : v && v.b;
+                    blob && classicMapSigOf.set(key, v instanceof Blob ? "" : v.s), blob && !classicMapTiles.has(key) && createImageBitmap(blob).then(img => {
+                        classicMapTiles.has(key) || (classicMapTiles.set(key, img), classicMapVer++);
+                    }).catch(() => 0);
+                };
             });
         },
         classicMapReady = t => t && t.state >= 5 && t.data && t.data.aabb && t.ct && !t.ct.quick && !t.ct.partial && t.loadingProps === 0 && t.geometry && t.geometry.terrain,
@@ -37086,10 +37127,11 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         classicMapScan = null,
         classicMapScanStep = 5,
         classicMapScanWait = 3e4,
+        classicMapScanReach = 4,
         classicMapFetchGap = 150,
         classicMapFetchLast = 0,
-        classicMapFetchDelay = () => {
-            if (!classicMapScan) return !1;
+        classicMapFetchDelay = t => {
+            if (!classicMapScan || classicChunkHave.has(classicChunkKey(t.id))) return !1;
             let now = performance.now();
             return now - classicMapFetchLast < classicMapFetchGap ? !0 : (classicMapFetchLast = now, !1);
         },
@@ -37098,16 +37140,34 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             let n = T.chunkAmount,
                 file = T.file,
                 prefix = classicMapKey(""),
+                cprefix = classicChunkKey(""),
+                sig = classicMapSig(),
+                stale = 0,
                 db = await classicMapDb;
             if (db) await new Promise(res => {
                 try {
-                    let q = db.transaction("tiles").objectStore("tiles").getAllKeys();
-                    q.onsuccess = () => (q.result.forEach(k => String(k).startsWith(prefix) && classicMapDone.add(String(k))), res());
+                    let q = db.transaction("tiles").objectStore("tiles").openCursor();
+                    q.onsuccess = () => {
+                        let c = q.result;
+                        if (!c) return res();
+                        let k = String(c.key),
+                            v = c.value;
+                        k.startsWith(prefix) && (v && v.s === sig ? classicMapDone.add(k) : (classicMapDone.delete(k), stale++)), c.continue();
+                    };
+                    q.onerror = () => res();
+                } catch (e) {
+                    res();
+                }
+            }), await new Promise(res => {
+                try {
+                    let q = db.transaction("chunks").objectStore("chunks").getAllKeys();
+                    q.onsuccess = () => (q.result.forEach(k => String(k).startsWith(cprefix) && classicChunkHave.add(String(k))), res());
                     q.onerror = () => res();
                 } catch (e) {
                     res();
                 }
             });
+            if (T.file !== file) return;
             let stops = [],
                 h = classicMapScanStep >> 1,
                 block = (cx, cz) => {
@@ -37133,10 +37193,10 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 i: 0,
                 since: performance.now(),
                 total: stops.length
-            }, classicMapScanSync(), Qt("system", "Mapping the world - " + stops.length + " areas to visit. Stand still until it finishes.", !0);
+            }, _E = bE = -1 / 0, classicMapScanSync(), Qt("system", "Mapping the world - " + stops.length + " areas to visit" + (stale ? ", " + stale + " outdated tiles get redrawn" : "") + ". Stand still until it finishes.", !0);
         },
         classicMapScanStop = msg => {
-            classicMapScan = null, classicMapScanSync(), msg && Qt("system", msg, !0);
+            classicMapScan = null, _E = bE = -1 / 0, classicMapScanSync(), msg && Qt("system", msg, !0);
         },
         classicMapScanSyncs = new Set,
         classicMapScanSync = () => classicMapScanSyncs.forEach(f => f()),
@@ -37172,7 +37232,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 let best = null,
                     bd = 1 / 0;
                 for (let t of Cf) {
-                    if (!classicMapReady(t) || classicMapDone.has(classicMapKey(t.id))) continue;
+                    if (!classicMapReady(t) || classicMapDone.has(classicMapKey(t.id)) || !classicMapNbrReady(t)) continue;
                     let d = (t.origin[0] + 32 - px) ** 2 + (t.origin[2] + 32 - pz) ** 2;
                     d < bd && (bd = d, best = t);
                 }
@@ -40726,7 +40786,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 this.returnCachedChunk(c), this.removeChunk(c), Oy(c)
             }
             !o && this.state !== 4 && oe.faivelRetexture && terrainNearPending(this) && (o = !0);
-            o !== (this.state !== 4) && this.setState(o ? 3 : 4, "Loading World")
+            classicMapScan && (o = !0), o !== (this.state !== 4) && this.setState(o ? 3 : 4, "Loading World")
         }
     };
     window.onload = async () => {
@@ -40740,6 +40800,6 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         HI = () => {
             let t = zu(),
                 e = (t - (GI || 1e3 / 60)) / 1e3;
-            GI = t, iI(e, t), requestAnimationFrame(HI) //
+            GI = t, iI(e, t), requestAnimationFrame(HI)
         };
 })();

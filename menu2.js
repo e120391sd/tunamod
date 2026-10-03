@@ -54,6 +54,7 @@
     const changelog = async () => {
         let box = document.querySelector(".changelogParent .container");
         if (!box) return;
+        box.querySelectorAll(".changelogArticle").forEach(a => a.remove());
         let esc = v => String(v == null ? "" : v).replace(/[&<>"]/g, m => ({
                 "&": "&amp;",
                 "<": "&lt;",
@@ -75,26 +76,7 @@
                 }),
                 c = r.ok ? await r.json() : null,
                 entries = c && (Array.isArray(c) ? c : c.entries);
-            if (Array.isArray(entries) && entries.length) return void box.prepend(...render(entries));
-        } catch (e) {}
-        try {
-            let c = await (await fetch("/api/changelog")).json();
-            if (!c || !c.version) return;
-            let names = {
-                general: ["General", "#F5C247"],
-                ui: ["User Interface", "#0ceccd"],
-                bugfixes: ["Bugfixes", "#EE960B"],
-            };
-            box.prepend(...render([{
-                title: (c.description ? c.description + " — " : "") + "Update " + c.version,
-                date: c.date,
-                description: c.description,
-                sections: Object.keys(c).filter(k => Array.isArray(c[k]) && c[k].length).map(k => ({
-                    name: (names[k] || [k.charAt(0).toUpperCase() + k.slice(1)])[0],
-                    color: (names[k] || [])[1],
-                    points: c[k]
-                }))
-            }]));
+            Array.isArray(entries) && box.prepend(...render(entries));
         } catch (e) {}
     };
     const run = () => {
