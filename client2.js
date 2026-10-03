@@ -29254,10 +29254,11 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 });
             }
             classicFolPal = (h.foliagePalette || []).map(e => {
+                if (e && typeof e == "object" && e.old) return oldFolCellId(e.cell, e.sheet || 1213);
                 if (e && typeof e == "object") return classicFolMake(e.cell, e.sheet || e.tex || 1213, e.custom ? e.light : null);
                 if (e >= 3e3 && e < 3016) return classicFolMake(e - 3e3, 1213, null);
                 if (e >= 3016 && e < 3032) return classicFolMake(e - 3016, 1214, null);
-                return Ec.has(e) ? e : null;
+                return classicFolLegacy(e) ? -2 : Ec.has(e) ? e : null;
             });
             for (let k in h.foliageLists || {}) Array.isArray(h.foliageLists[k]) && (oldFolLists[k] = h.foliageLists[k].map(e => [e[0] | 0, e[1] | 0]));
             for (let id in h.environments || {}) {
@@ -29311,13 +29312,59 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             }
         },
         classicFolAt = v => v ? classicFolPal[(v >> 4) - 1] : null,
+        classicFolLegacy = e => e === -2 || e >= 8600 && e < 8900,
+        classicFolRepair = (t, g, sizes, pal) => {
+            let bad = [];
+            for (let k = 0; k < 4096; ++k) g[k] & 15 && pal[(g[k] >> 4) - 1] === -2 && bad.push(k);
+            if (!bad.length) return {
+                g,
+                sizes,
+                pal
+            };
+            if (!t.ct || t.ct.quick || t.ct.partial) return null;
+            let pick = new Int32Array(4096).fill(-1),
+                seen = new Uint16Array(4096),
+                size = new Float32Array(4096);
+            t.__folRecord = (c, f, fid, sz) => {
+                let k = c + f * 64;
+                ++seen[k], size[k] += sz || 1, Math.random() * seen[k] < 1 && (pick[k] = fid);
+            };
+            try {
+                oldFolGenerate(t);
+            } finally {
+                t.__folRecord = null;
+            }
+            let g2 = g.slice(),
+                s2 = sizes ? sizes.slice() : new Uint8Array(4096).fill(64),
+                pal2 = pal.slice();
+            for (let k of bad) {
+                if (pick[k] < 0) {
+                    g2[k] = 0;
+                    continue;
+                }
+                let i = pal2.indexOf(pick[k]);
+                i < 0 && (pal2.push(pick[k]), i = pal2.length - 1);
+                let dens = Math.min(15, Math.max(1, Math.round(seen[k] * 7.5)));
+                g2[k] = i + 1 << 4 | dens, s2[k] = Math.max(1, Math.min(255, Math.round(size[k] / seen[k] / ((.4 + .95 * dens / 15) / 1.35) * 64)));
+            }
+            return {
+                g: g2,
+                sizes: s2,
+                pal: pal2
+            };
+        },
         classicPaintedFoliage = t => {
-            let g = t.data && t.data.foliageGrid;
-            if (!g || classicIsEditor() || !classicFolPal.length) return !1;
-            let sizes = t.data.foliageSize,
+            let g0 = t.data && t.data.foliageGrid;
+            if (!g0 || classicIsEditor() || !classicFolPal.length || t.__folRecord) return !1;
+            let fixed = t.data.__folFixed || (t.data.__folFixed = classicFolRepair(t, g0, t.data.foliageSize, classicFolPal));
+            if (!fixed) return !1;
+            let g = fixed.g,
+                pal = fixed.pal,
+                at = v => v ? pal[(v >> 4) - 1] : null,
+                sizes = fixed.sizes,
                 ids = [];
             for (let k = 0; k < 4096 && ids.length < 32; ++k) {
-                let fid = classicFolAt(g[k]);
+                let fid = at(g[k]);
                 fid == null || !(g[k] & 15) || !Ec.has(fid) || ids.includes(fid) || ids.push(fid);
             }
             E7(t);
@@ -29340,7 +29387,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 for (let c = 0; c < 64; ++c) {
                     let v = g[c + f * 64],
                         dens = v & 15,
-                        W = dens ? ids.indexOf(classicFolAt(v)) : -1,
+                        W = dens ? ids.indexOf(at(v)) : -1,
                         gx = ox + c,
                         gz = oz + f;
                     if (W < 0 || dirtHash(gx, gz, 700) * 100 >= S1 || holes && am(t, c, f) || cm(t, c, f) > ii(t, c, f) + 80) continue;
@@ -37022,7 +37069,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         classicMapKey = id => "v7:" + T.file + ":" + id,
         classicMapWorld = null,
         classicMapSince = 0,
-        classicMapLook = 2,
+        classicMapLook = 3,
         classicMapNbrReady = t => {
             for (let dz = -1; dz <= 1; ++dz)
                 for (let dx = -1; dx <= 1; ++dx) {
