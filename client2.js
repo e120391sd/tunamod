@@ -32287,6 +32287,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             return ids[k] == null ? null : topGrassShown(ids[k], chunkWorldOf(ch));
         },
         oldFolShownCt = (x, z) => ctDominant(x, z),
+        oldFolGloom = (tex, x, z) => tex != null && gloomGrassTextures.indexOf(tex) >= 0 && gloomWeight(x, z) >= .5 ? gloomGrassTexture : tex,
         oldFolGenerate = t => {
             let world = chunkWorldOf(t),
                 sheet = oldFolSheet(world),
@@ -32302,10 +32303,10 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     n = e + ox,
                     a = i + oz;
                 if (T.getNormal(n, a)[1] < .8) continue;
-                let own = oldFolShownCt(n, a),
+                let own = oldFolGloom(oldFolShownCt(n, a), n, a),
                     list = own != null && oldFolLists[own] || [],
                     other = (x, z) => {
-                        let v = oldFolShownCt(x, z);
+                        let v = oldFolGloom(oldFolShownCt(x, z), x, z);
                         return v == null ? (x >= 0 && z >= 0 && x < T.bounds && z < T.bounds && (t.folGap = !0), !1) : v !== own;
                     },
                     d = other(n + 2, a) || other(n - 2, a) || other(n, a + 2) || other(n, a - 2);
