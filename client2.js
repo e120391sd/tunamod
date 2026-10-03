@@ -32335,7 +32335,8 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             return ids[k] == null ? null : topGrassShown(ids[k], chunkWorldOf(ch));
         },
         oldFolShownCt = (x, z) => ctDominant(x, z),
-        oldFolGloom = (tex, x, z) => tex != null && gloomGrassTextures.indexOf(tex) >= 0 && gloomWeight(x, z) >= .5 ? gloomGrassTexture : tex,
+        oldFolGloomFrom = [1227, 1235, 1233, 1225],
+        oldFolGloom = (tex, x, z) => tex != null && oldFolGloomFrom.indexOf(tex) >= 0 && gloomWeight(x, z) >= .5 ? gloomGrassTexture : tex,
         oldFolGenerate = t => {
             let world = chunkWorldOf(t),
                 sheet = oldFolSheet(world),
@@ -37069,7 +37070,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         classicMapKey = id => "v7:" + T.file + ":" + id,
         classicMapWorld = null,
         classicMapSince = 0,
-        classicMapLook = 3,
+        classicMapLook = 4,
         classicMapNbrReady = t => {
             for (let dz = -1; dz <= 1; ++dz)
                 for (let dx = -1; dx <= 1; ++dx) {
