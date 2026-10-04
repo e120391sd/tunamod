@@ -22571,7 +22571,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         return e = new jt({
             props: {
                 origin: "center",
-                title: "\u{1F465} Party",
+                title: "Party",
                 $$slots: {
                     default: [yO]
                 },
@@ -23863,7 +23863,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         }
         return {
             c() {
-                e = h("div"), n = h("div"), o = h("div"), o.textContent = `\u{1F465} ${P.ui.party.name}`, y.c(), s = h("div"), E.c(), i = h("div"), l.c(), a = Qe(), c = h("div");
+                e = h("div"), n = h("div"), o = h("div"), o.textContent = `${P.ui.party.name}`, y.c(), s = h("div"), E.c(), i = h("div"), l.c(), a = Qe(), c = h("div");
                 for (let z = 0; z < f.length; z += 1) f[z].c();
                 m(o, "class", "btn party"), m(s, "class", "btn border grey textexp"), m(i, "class", "btn border grey textcyan"), m(n, "class", "btnbar"), m(c, "class", "partyframes svelte-1f9hkm3"), Fe(c, "width", t[7] + "px"), m(e, "class", "l-corner-ul uiscaled svelte-1f9hkm3")
             },
