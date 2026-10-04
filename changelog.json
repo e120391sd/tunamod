@@ -1,18 +1,18 @@
 {
     "entries": [
         {
-            "title": "Update 2.0",
-            "date": "2026-10-03",
-            "color": "#F5C247",
-            "description": "Rewrote the client, there will no longer be any gameplay \"mods\", rather I am focusing on continuing the beta retexture, which this client will use by default. I've removed a lot of the procedurally drawn textures from the map, so that is why it will look quite empty (for now).",
-            "sections": [
-            ]
-        },
-        {
             "title": "Update 2.01",
             "date": "2026-10-04",
             "color": "#F5C247",
             "description": "Small guardstone world edits (focused on bases)",
+            "sections": [
+            ]
+        },
+        {
+            "title": "Update 2.0",
+            "date": "2026-10-03",
+            "color": "#F5C247",
+            "description": "Rewrote the client, there will no longer be any gameplay \"mods\", rather I am focusing on continuing the beta retexture, which this client will use by default. I've removed a lot of the procedurally drawn textures from the map, so that is why it will look quite empty (for now).",
             "sections": [
             ]
         }
