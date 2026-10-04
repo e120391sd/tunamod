@@ -6,6 +6,20 @@
             "color": "#F5C247",
             "description": "Small guardstone world edits (focused on bases)",
             "sections": [
+                {
+                    "name": "Map",
+                    "color": "#db9155",
+                    "points": [
+                        "Edits to vanguard and bloodlust's guardstone base areas"
+                    ]
+                }
+                {
+                    "name": "User Interface",
+                    "color": "#3dedcc",
+                    "points": [
+                        "Added the time changer mod (Settings -> Graphics)"
+                    ]
+                }
             ]
         },
         {
