@@ -19,6 +19,9 @@
         if (!window.google || !window.google.accounts) return err.textContent = "Google Sign-In is not loading properly.", !1;
         window.google.accounts.id.initialize({
             client_id: clientId,
+            ux_mode: "popup",
+            use_fedcm_for_button: !1,
+            use_fedcm_for_prompt: !1,
             callback: async c => {
                 try {
                     let r = await fetch("/auth/google", {
