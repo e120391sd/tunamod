@@ -29552,10 +29552,10 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         },
         UA = (t, e, n, o, s = !1) => {
             if (!(!oe.mapShowMonsters && e === 1))
-                if (Nn.strokeStyle = uf.black, Nn.lineWidth = 1, e === 0) {
+                if (e === 0) {
                     if (il && o && T.smoothtime % 1 > .5) return;
-                    n === 0 ? Nn.fillStyle = o ? uf.party : uf.friendly : Nn.fillStyle = uf.pvp, Nn.fillRect(...t, 6, 6), Nn.strokeRect(...t, 6, 6)
-                } else Nn.fillStyle = n > 0 ? uf.monster : uf.friendly, Nn.fillRect(...t, 4, 4), Nn.strokeRect(...t, 4, 4), s && (Nn.save(), Nn.strokeStyle = "#FFE45A", Nn.lineWidth = 1, Nn.strokeRect(t[0] - 1, t[1] - 1, 6, 6), Nn.restore())
+                    n === 0 ? Nn.fillStyle = o ? uf.party : uf.friendly : Nn.fillStyle = uf.pvp, Nn.fillRect(Math.round(t[0]), Math.round(t[1]), 5, 5)
+                } else Nn.fillStyle = n > 0 ? uf.monster : uf.friendly, Nn.fillRect(Math.round(t[0]), Math.round(t[1]), 3, 3)
         },
         O$ = (t, e) => {
             let n = $A[e];

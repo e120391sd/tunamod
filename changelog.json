@@ -1,6 +1,24 @@
 {
     "entries": [
         {
+            "title": "Update 2.02",
+            "date": "2026-10-04",
+            "color": "#F5C247",
+            "description": "",
+            "sections": [
+                {
+                    "name": "User Interface",
+                    "color": "#3dedcc",
+                    "points": [
+                        "Removed the emojis from the party button",
+                        "Made the map entity dots resemble the old look",
+                        "Added the highlight own revitalize mod (Settings -> Controls)",
+                        "Added the time changer mod (Settings -> Graphics)"
+                    ]
+                }
+            ]
+        },
+        {
             "title": "Update 2.01",
             "date": "2026-10-04",
             "color": "#F5C247",
@@ -11,13 +29,6 @@
                     "color": "#db9155",
                     "points": [
                         "Edits to vanguard and bloodlust's guardstone base areas"
-                    ]
-                },
-                {
-                    "name": "User Interface",
-                    "color": "#3dedcc",
-                    "points": [
-                        "Added the time changer mod (Settings -> Graphics)"
                     ]
                 }
             ]
