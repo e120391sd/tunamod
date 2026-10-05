@@ -12503,15 +12503,27 @@ void main() {
         waterEditorGrid: () => tz
     });
     let stoneTextureId = 1233,
-        stoneStretch = 1.75,
-        textureStretch = {
-            [stoneTextureId]: stoneStretch,
-            1238: 1.75,
-            1226: 1.75,
-            1228: 1.75,
-            
+        oldTerrainUv = {
+            1225: 102,
+            1226: 102,
+            1227: 166,
+            1228: 102,
+            1229: 191,
+            1230: 102,
+            1231: 102,
+            1232: 166,
+            1233: 102,
+            1234: 44,
+            1235: 128,
+            1236: 102,
+            1237: 102,
+            1238: 102,
+            1239: 102,
+            1240: 102,
+            1241: 102
         },
-        stoneShaderUvScale = 1 / stoneStretch,
+        oldUv = tex => (oldTerrainUv[tex] || 127) / 127,
+        stoneShaderUvScale = oldUv(stoneTextureId),
         stoneOverlayStrength = 1,
         stoneWaterDistance = 4.9,
         stoneFade = 1.3 * stoneWaterDistance,
@@ -12584,7 +12596,7 @@ void main() {
         };
     let hlBankFrom = 1238,
         hlBankTexture = hlBankKey,
-        hlBankUvScale = 1,
+        hlBankUvScale = oldUv(1227),
         hlBankOcean = 1867,
         hlBankOceanReach = 40,
         hlBankOceanFade = 12,
@@ -12830,7 +12842,7 @@ void main() {
         treeDirtTex = null,
         treeDirtTexRequested = !1,
         hlStripTextures = [1228],
-        hlSteepUvScale = 1,
+        hlSteepUvScale = oldUv(1228),
         hlSteepTex = null,
         hlSteepTexRequested = !1;
     let gsPatchHardLo = .1,
@@ -12851,7 +12863,7 @@ void main() {
         dirtPatchPropChance = .14,
         dirtPatchPropRange = 1,
         dirtPatchPropPull = 1,
-        dirtPatchUvScale = 1 / stoneStretch, 
+        dirtPatchUvScale = oldUv(1233),
         dirtPatchStrength = 1,
         dirtPatchTex = null,
         dirtPatchTexRequested = !1;
@@ -12904,7 +12916,7 @@ void main() {
         ],
         gloomGrassTextures = [1227, 1235],
         gloomGrassTexture = 1232,
-        gloomUvScale = 1,
+        gloomUvScale = oldUv(1232),
         gloomDirtFactor = .2,
         gloomGrassTex = null,
         gloomTexRequested = !1,
@@ -12913,7 +12925,7 @@ void main() {
         steepFillRadius = 2,
         steepFillShare = .35;
     let meadowMossTexture = 1235,
-        meadowMossUvScale = 128 / 127,
+        meadowMossUvScale = oldUv(1235),
         meadowMossShift = [1.5, 3.2],
         meadowMossDirScale = 14,
         meadowMossNoiseScale = 3,
@@ -33604,7 +33616,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                         map = world ? worldRetexture[world] : null,
                         raw = world === "guardstone" && pathTextures.indexOf(i.texture) >= 0,
                         tex = raw ? gsPathKey : orange === !0 && i.texture === orangePathTexture ? orangePathKey : map && map[i.texture] != null && Pc.has(map[i.texture]) ? map[i.texture] : i.texture;
-                    n.info[s * 4 + 0] = i.scale / 127 / (!raw && oe.faivelRetexture && textureStretch[topGrassShown(o, world)] || 1) , raw && (n.info[s * 4 + 0] = fvPathScale), n.info[s * 4 + 1] = i.darkest / 255 * 3, n.info[s * 4 + 2] = i.brightest / 255 * 3, n.info[s * 4 + 3] = i.spec / 255 * (!raw && map && map[i.texture] != null && world === "headless" ? headlessSpecScale : 1) * (!raw && oe.faivelRetexture && topGrassShown(o, world) === dirtSpecShown ? dirtSpecScale : 1), Ao(tex, r => {
+                    n.info[s * 4 + 0] = i.scale / 127, raw && (n.info[s * 4 + 0] = fvPathScale), n.info[s * 4 + 1] = i.darkest / 255 * 3, n.info[s * 4 + 2] = i.brightest / 255 * 3, n.info[s * 4 + 3] = i.spec / 255 * (!raw && map && map[i.texture] != null && world === "headless" ? headlessSpecScale : 1) * (!raw && oe.faivelRetexture && topGrassShown(o, world) === dirtSpecShown ? dirtSpecScale : 1), Ao(tex, r => {
                         n.diffuse[s] = r, n.loaded++
                     })
                 }), Vy.set(e, n)
@@ -34435,7 +34447,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             } : null;
         },
         fvPathTexture = 1229,
-        fvPathScale = 191 / 127 * 1.07,
+        fvPathScale = oldUv(1229),
         fvPathTerrainId = 990001,
         fvPathWorlds = ["faivel", "gloomfury"],
         fvPathMaxHalf = 4,

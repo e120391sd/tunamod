@@ -1,6 +1,22 @@
 {
     "entries": [
         {
+            "title": "Update 2.03 - Gloomfury area changes",
+            "date": "2026-10-054",
+            "color": "#F5C247",
+            "description": "",
+            "sections": [
+                {
+                    "name": "Map",
+                    "color": "#db9155",
+                    "points": [
+                        "Reworked the entire gloomfury area",
+                        "Removed the moai guardian and added a grave to honor his legacy of being alive for 1 whole day"
+                    ]
+                }
+            ]
+        },
+        {
             "title": "Update 2.02",
             "date": "2026-10-04",
             "color": "#F5C247",
