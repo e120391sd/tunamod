@@ -13087,7 +13087,8 @@ precision highp float;precision highp int;uniform Environment{vec3 worldlight[3]
 precision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};in float vCameraDistance;in vec4 vWorldPos;uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform Water{vec3 verts[4];};uniform highp sampler2D waterHeight;uniform sampler2D waterTexH;uniform highp sampler2D waterProps;uniform vec3 classicWCols[3];uniform float classicWOn;uniform float classicWUv;uniform sampler2D waterWave;uniform sampler2D waterLines;in vec2 vUv;out vec4 fragColor;
 float wTerrBase(vec2 p){vec2 g=clamp((p-verts[0].xz)/2.6666667,vec2(0.0),vec2(23.999));ivec2 i=ivec2(g);vec2 f=g-vec2(i);if(f.x+f.y<1.0)return texelFetch(waterHeight,i,0).r*(1.0-f.x-f.y)+texelFetch(waterHeight,i+ivec2(0,1),0).r*f.y+texelFetch(waterHeight,i+ivec2(1,0),0).r*f.x;return texelFetch(waterHeight,i+ivec2(1,0),0).r*(1.0-f.y)+texelFetch(waterHeight,i+ivec2(0,1),0).r*(1.0-f.x)+texelFetch(waterHeight,i+ivec2(1,1),0).r*(f.x+f.y-1.0);}
 float wProp(vec2 p){vec2 g=clamp((p-verts[0].xz)*${(waterPropRes / 64).toFixed(1)}-0.5,vec2(0.0),vec2(${(waterPropRes - 1.001).toFixed(3)}));ivec2 i=ivec2(g);vec2 f=g-vec2(i);float a=texelFetch(waterProps,i,0).r;float b=texelFetch(waterProps,i+ivec2(1,0),0).r;float c=texelFetch(waterProps,i+ivec2(0,1),0).r;float d=texelFetch(waterProps,i+ivec2(1,1),0).r;return mix(mix(a,b,f.x),mix(c,d,f.x),f.y);}float wTerr(vec2 p){return max(wTerrBase(p)+${waterTexLift.toFixed(3)}*texture(waterTexH,clamp((p-verts[0].xz)/64.0,vec2(0.0),vec2(1.0))).r,wProp(p));}
-void main(){vec2 wUv=vUv/max(classicWUv,1.0);float dist=length(cameraPosition-vWorldPos.xyz);if(dist>fog[1][1]){fragColor=vec4(fog[0],1.0);return;}
+float wMask(vec2 p){vec2 g=clamp((p-verts[0].xz)/2.6666667,vec2(0.0),vec2(23.999));ivec2 i=ivec2(g);vec2 f=g-vec2(i);float a=mix(texelFetch(waterHeight,i,0).g,texelFetch(waterHeight,i+ivec2(1,0),0).g,f.x);float b=mix(texelFetch(waterHeight,i+ivec2(0,1),0).g,texelFetch(waterHeight,i+ivec2(1,1),0).g,f.x);return mix(a,b,f.y);}
+void main(){if(wMask(vWorldPos.xz)>0.5)discard;vec2 wUv=vUv/max(classicWUv,1.0);float dist=length(cameraPosition-vWorldPos.xyz);if(dist>fog[1][1]){fragColor=vec4(fog[0],1.0);return;}
 float depth=max(0.0,vWorldPos.y-wTerr(vWorldPos.xz))*0.25;float speed=0.05;float vis=0.65;float wave=0.0;vec2 dir=vec2(1.0,0.0);float wiggle=1.0;
 for(int i=0;i<2;++i){float off=1.0/3.0*float(i);float t=mod(time*0.2+off,1.0)*3.141;float sppd=speed+0.2;vec2 shift=vec2(sppd*dir.y*t+off,sppd*dir.x*t+off);float curve=abs(sin(t));wave+=texture(waterWave,wUv.yx*0.5+shift).r*curve;wiggle+=((sin((wUv.x+shift.y)*10.0)+cos((wUv.y+shift.x)*10.0))*curve*(0.2+sppd*0.6));}
 vec3 colFoam=classicWOn>0.5?classicWCols[0]:watercolors[0];vec3 colShallow=classicWOn>0.5?classicWCols[1]:watercolors[1];vec3 colDeep=classicWOn>0.5?classicWCols[2]:watercolors[2];vec4 bigwave=texture(waterLines,wUv.yx+time*speed*2.0+wave*0.1);
@@ -29045,7 +29046,10 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                         w: u8.slice(q, q + n * 4096)
                     }, p = q + n * 4096;
                 } else if (tag(72, 87, 84, 78)) p += 5 + 4 * 27648;
+                else if (tag(72, 87, 87, 77) && u8.length >= p + 630) c.waterMask = u8.slice(p + 5, p + 630), p += 630;
                 else break;
+            let q = u8.length - 630;
+            !c.waterMask && q >= 0 && u8[q] === 72 && u8[q + 1] === 87 && u8[q + 2] === 87 && u8[q + 3] === 77 && (c.waterMask = u8.slice(q + 5));
             return c;
         },
         classicInflate = async (u8, deflate) => deflate ? new Uint8Array(await new Response(new Blob([u8]).stream().pipeThrough(new DecompressionStream("deflate-raw"))).arrayBuffer()) : u8,
@@ -31797,6 +31801,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         },
         cm = (t, e, n) => {
             if (t.data.water.length === 0) return -1;
+            if (t.data.waterMask && !t.data.waterMask[Math.min(24, Math.round(e / 2.6666666666666665)) + 25 * Math.min(24, Math.round(n / 2.6666666666666665))]) return -1;
             e /= 64, n /= 64;
             let o = e % 1,
                 s = n % 1;
@@ -32374,6 +32379,29 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             return ids[k] == null ? null : topGrassShown(ids[k], chunkWorldOf(ch));
         },
         oldFolShownCt = (x, z) => ctDominant(x, z),
+        oldFolSolidShare = .55,
+        oldFolSolidReach = 3,
+        oldFolBaseShare = .35,
+        oldFolShare = (x, z, tex) => {
+            if (x < 0 || z < 0 || x >= T.bounds || z >= T.bounds) return 0;
+            let ch = T.getChunkFromWorld(x, z),
+                ct = ch && ch.ct,
+                pi = ctByTexture.get(tex),
+                j = ct && pi !== void 0 ? ct.ids.indexOf(pi) : -1;
+            if (j < 0) return 0;
+            let vi = Math.min(63, Math.floor(x - ch.origin[0])) + Math.min(63, Math.floor(z - ch.origin[2])) * 64,
+                n = ct.n,
+                tot = 0;
+            for (let k = 0; k < n; ++k) tot += ct.w[vi * n + k];
+            return tot ? ct.w[vi * n + j] / tot : 0;
+        },
+        oldFolSprinkle = (x, z, tex, base) => {
+            if (oldFolShare(x, z, base) < oldFolBaseShare) return !1;
+            for (let dz = -oldFolSolidReach; dz <= oldFolSolidReach; ++dz)
+                for (let dx = -oldFolSolidReach; dx <= oldFolSolidReach; ++dx)
+                    if (oldFolShare(x + dx, z + dz, tex) >= oldFolSolidShare) return !1;
+            return !0;
+        },
         oldFolGloomFrom = [1227, 1235, 1233, 1225],
         oldFolGloom = (tex, x, z) => tex != null && oldFolGloomFrom.indexOf(tex) >= 0 && gloomWeight(x, z) >= .5 ? gloomGrassTexture : tex,
         oldFolGenerate = t => {
@@ -32395,7 +32423,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     list = own != null && oldFolLists[own] || [],
                     other = (x, z) => {
                         let v = oldFolGloom(oldFolShownCt(x, z), x, z);
-                        return v == null ? (x >= 0 && z >= 0 && x < T.bounds && z < T.bounds && (t.folGap = !0), !1) : v !== own;
+                        return v == null ? (x >= 0 && z >= 0 && x < T.bounds && z < T.bounds && (t.folGap = !0), !1) : v !== own && !oldFolSprinkle(x, z, v, own) && !oldFolSprinkle(n, a, own, v);
                     },
                     d = other(n + 2, a) || other(n - 2, a) || other(n, a + 2) || other(n, a - 2);
                 if (!(d || oldFolRand() > .8)) continue;
@@ -36764,11 +36792,12 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                         target: N.TEXTURE_2D,
                         texture: N.createTexture()
                     }),
-                    d = new Float32Array(625);
-                for (let i = 0; i < 625; ++i) d[i] = t.data.terrain[i] * .030517578125;
+                    d = new Float32Array(1250),
+                    wm = t.data.waterMask;
+                for (let i = 0; i < 625; ++i) d[i * 2] = t.data.terrain[i] * .030517578125, d[i * 2 + 1] = wm && !wm[i] ? 1 : 0;
                 au(0), N.bindTexture(N.TEXTURE_2D, tx.texture), lt.textureUnits[0] = tx.id;
                 lt.flipY && (N.pixelStorei(N.UNPACK_FLIP_Y_WEBGL, !1), lt.flipY = !1);
-                N.texImage2D(N.TEXTURE_2D, 0, N.R32F, 25, 25, 0, N.RED, N.FLOAT, d);
+                N.texImage2D(N.TEXTURE_2D, 0, N.RG32F, 25, 25, 0, N.RG, N.FLOAT, d);
                 N.texParameteri(N.TEXTURE_2D, N.TEXTURE_MIN_FILTER, N.NEAREST), N.texParameteri(N.TEXTURE_2D, N.TEXTURE_MAG_FILTER, N.NEAREST);
                 N.texParameteri(N.TEXTURE_2D, N.TEXTURE_WRAP_S, N.CLAMP_TO_EDGE), N.texParameteri(N.TEXTURE_2D, N.TEXTURE_WRAP_T, N.CLAMP_TO_EDGE);
             }
@@ -37109,7 +37138,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         classicMapKey = id => "v7:" + T.file + ":" + id,
         classicMapWorld = null,
         classicMapSince = 0,
-        classicMapLook = 5,
+        classicMapLook = 6,
         classicMapNbrReady = t => {
             for (let dz = -1; dz <= 1; ++dz)
                 for (let dx = -1; dx <= 1; ++dx) {
@@ -40382,6 +40411,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                         let o = e.props[n];
                         o.loaded = !1, o.loadGeometry(this, e)
                     }
+                    e.deserialized && classicLiveColliders(e)
                 })
             }
             triangleRaycastClosest(e, n, o, s, i, r) {
