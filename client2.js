@@ -13309,10 +13309,11 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 let n = kh[e];
                 n.vert && (n.vert = n.vert.replace("#SHADOWS", oe.shadows ? 1 : 0)), n.frag && (n.frag = n.frag.replace("#SHADOWS", oe.shadows ? 1 : 0))
             }
+            let fogDotSize = 2;
             if (oe.fogpattern)
                 for (let e of ["drop", "foliagePlant", "foliageStatic", "multimeshEffect", "multimeshFlat", "multimeshTextured", "multimeshTexturedVcol", "multimeshTree", "terrain", "water"]) {
                     let n = kh[e];
-                    n && n.frag && n.frag.indexOf("in float vCameraDistance;") >= 0 && (n.frag = n.frag.replace("void main(){", "void main(){if(vCameraDistance>fog[1][1]*0.9&&fract(sin(gl_FragCoord.x*556.78+gl_FragCoord.y*7123.4))<smoothstep(fog[1][1]*0.9,fog[1][1],vCameraDistance))discard;"))
+                    n && n.frag && n.frag.indexOf("in float vCameraDistance;") >= 0 && (n.frag = n.frag.replace("void main(){", "void main(){if(vCameraDistance>fog[1][1]*0.9&&fract(sin(floor(gl_FragCoord.x/" + fogDotSize.toFixed(1) + ")*556.78+floor(gl_FragCoord.y/" + fogDotSize.toFixed(1) + ")*7123.4))<smoothstep(fog[1][1]*0.9,fog[1][1],vCameraDistance))discard;"))
                 }
             let t = {
                 mesh: ["position", "uv", "normal", "color", "interiorlight", "alpha", "worldMatrix"],
