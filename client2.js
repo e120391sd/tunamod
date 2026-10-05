@@ -32665,9 +32665,51 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 e.effect.done = !0
             }), xf.length = 0, Mf.length = 0, dl.clear()
         };
+    var classicSkySphere = (lon = 48, lat = 24) => {
+            let pos = [],
+                uv = [],
+                nrm = [],
+                idx = [];
+            for (let j = 0; j <= lat; ++j) {
+                let v = j / lat,
+                    th = v * Math.PI;
+                for (let i = 0; i <= lon; ++i) {
+                    let u = i / lon,
+                        ph = u * Math.PI * 2,
+                        x = Math.sin(th) * Math.cos(ph),
+                        y = Math.cos(th),
+                        z = Math.sin(th) * Math.sin(ph);
+                    pos.push(x * .5, y * .5, z * .5), uv.push(u, 1 - v), nrm.push(-x, -y, -z);
+                }
+            }
+            for (let j = 0; j < lat; ++j)
+                for (let i = 0; i < lon; ++i) {
+                    let a = j * (lon + 1) + i,
+                        b = a + lon + 1;
+                    idx.push(a, b, a + 1, b, b + 1, a + 1);
+                }
+            return On({
+                position: {
+                    size: 3,
+                    data: new Float32Array(pos)
+                },
+                uv: {
+                    size: 2,
+                    data: new Float32Array(uv)
+                },
+                normal: {
+                    size: 3,
+                    data: new Float32Array(nrm)
+                },
+                index: {
+                    type: N.UNSIGNED_INT,
+                    data: new Uint32Array(idx)
+                }
+            });
+        };
     var Ps, O7 = () => {
             Ps = ts(void 0, 11, N.TRIANGLES), Co(Ps.transform.scale, 40), Ps.transform.visible = !1, Ps.transform.matrixAutoUpdate = !0, Wr(1456, t => {
-                let e = On(t);
+                let e = classicSkySphere();
                 Ps.geometry = e;
                 let n = cr(1024, 1024, 1, !1, N.NONE, N.REPEAT, N.REPEAT);
                 uk(n), ks(np, ht[34]);
