@@ -32378,32 +32378,15 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 ids = ch.fvPath && ch.fvPath.ids[q] || ch.data.textureid[q];
             return ids[k] == null ? null : topGrassShown(ids[k], chunkWorldOf(ch));
         },
-        oldFolShownCt = (x, z) => ctDominant(x, z),
-        oldFolSolidShare = .55,
-        oldFolSolidReach = 3,
-        oldFolBaseShare = .35,
-        oldFolShare = (x, z, tex) => {
-            if (x < 0 || z < 0 || x >= T.bounds || z >= T.bounds) return 0;
-            let ch = T.getChunkFromWorld(x, z),
-                ct = ch && ch.ct,
-                pi = ctByTexture.get(tex),
-                j = ct && pi !== void 0 ? ct.ids.indexOf(pi) : -1;
-            if (j < 0) return 0;
-            let vi = Math.min(63, Math.floor(x - ch.origin[0])) + Math.min(63, Math.floor(z - ch.origin[2])) * 64,
-                n = ct.n,
-                tot = 0;
-            for (let k = 0; k < n; ++k) tot += ct.w[vi * n + k];
-            return tot ? ct.w[vi * n + j] / tot : 0;
+        oldFolShownCt = (x, z) => {
+            if (x < 0 || z < 0 || x >= T.bounds || z >= T.bounds) return null;
+            let ch = T.getChunkFromWorld(x, z);
+            if (!ch || !ch.ct) return null;
+            if (!ch.ct.rawDom) return ctDominant(x, z);
+            let lx = Math.floor(x - ch.origin[0]),
+                lz = Math.floor(z - ch.origin[2]);
+            return ctPalette[ch.ct.rawDom[Math.min(63, lx) + Math.min(63, lz) * 64]].texture;
         },
-        oldFolSprinkle = (x, z, tex, base) => {
-            if (oldFolShare(x, z, base) < oldFolBaseShare) return !1;
-            for (let dz = -oldFolSolidReach; dz <= oldFolSolidReach; ++dz)
-                for (let dx = -oldFolSolidReach; dx <= oldFolSolidReach; ++dx)
-                    if (oldFolShare(x + dx, z + dz, tex) >= oldFolSolidShare) return !1;
-            return !0;
-        },
-        oldFolGloomFrom = [1227, 1235, 1233, 1225],
-        oldFolGloom = (tex, x, z) => tex != null && oldFolGloomFrom.indexOf(tex) >= 0 && gloomWeight(x, z) >= .5 ? gloomGrassTexture : tex,
         oldFolGenerate = t => {
             let world = chunkWorldOf(t),
                 sheet = oldFolSheet(world),
@@ -32419,11 +32402,11 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     n = e + ox,
                     a = i + oz;
                 if (T.getNormal(n, a)[1] < .8) continue;
-                let own = oldFolGloom(oldFolShownCt(n, a), n, a),
+                let own = oldFolShownCt(n, a),
                     list = own != null && oldFolLists[own] || [],
                     other = (x, z) => {
-                        let v = oldFolGloom(oldFolShownCt(x, z), x, z);
-                        return v == null ? (x >= 0 && z >= 0 && x < T.bounds && z < T.bounds && (t.folGap = !0), !1) : v !== own && !oldFolSprinkle(x, z, v, own) && !oldFolSprinkle(n, a, own, v);
+                        let v = oldFolShownCt(x, z);
+                        return v == null ? (x >= 0 && z >= 0 && x < T.bounds && z < T.bounds && (t.folGap = !0), !1) : v !== own;
                     },
                     d = other(n + 2, a) || other(n - 2, a) || other(n, a + 2) || other(n, a - 2);
                 if (!(d || oldFolRand() > .8)) continue;
@@ -33190,6 +33173,11 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 slotOf = new Map,
                 acc = [],
                 sum = new Float32Array(4096),
+                gacc = new Map,
+                gMove = new Float32Array(4096),
+                gUsed = !1,
+                gk = [],
+                gm = 1,
                 slotIdx = new Int16Array(1024).fill(-1),
                 slot = pi => {
                     let s = slotIdx[pi];
@@ -33212,7 +33200,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 over = (pi, a) => {
                     if (!(a > 0)) return;
                     for (let k = 0; k < tn; ++k) tw[k] *= 1 - a;
-                    add(pi, a);
+                    gm *= 1 - a, add(pi, a);
                 },
                 holes = d.holes.length > 0,
                 ox = t.origin[0],
@@ -33261,7 +33249,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                             grassW = 0;
                         t.hlStone && (steep = Math.max(steep, t.hlStone[off + p] / 255));
                         gloomBox && (gA = gloomWeight(ox + lx, oz + lz));
-                        tn = 0;
+                        tn = 0, gk.length = 0, gm = 1;
                         for (let k = 0; k < 4; ++k) {
                             let w = xs[k];
                             if (!(w > 0) || pis[k] < 0) continue;
@@ -33271,7 +33259,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                                 add(stoneSteep, s), w -= s;
                                 if (gA > 0 && gloomOn[k]) {
                                     let gl = w * gA;
-                                    add(gloomPi, gl), w -= gl;
+                                    add(gloomPi, gl), gk.push(pis[k], gl), w -= gl;
                                 }
                             }
                             add(pis[k], w);
@@ -33304,11 +33292,31 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                                 vi = vx + vz * 64;
                             if (!(b > 0)) continue;
                             for (let k = 0; k < tn; ++k) acc[slot(tp[k])][vi] += tw[k] * b;
+                            for (let k = 0; k < gk.length; k += 2) {
+                                let gs2 = slot(gk[k]),
+                                    ga = gk[k + 1] * gm * b;
+                                gacc.has(gs2) || gacc.set(gs2, new Float32Array(4096)), gacc.get(gs2)[vi] += ga, gMove[vi] += ga, gUsed = !0;
+                            }
                             sum[vi] += b * tt;
                         }
                     }
             }
-            return ctFinish(slots, acc, sum);
+            let ct = ctFinish(slots, acc, sum);
+            if (gUsed) {
+                let raw = new Int16Array(4096),
+                    gslot = slots.indexOf(gloomPi);
+                for (let vi = 0; vi < 4096; ++vi) {
+                    let best = -1,
+                        bw = 0;
+                    for (let k = 0; k < slots.length; ++k) {
+                        let v = acc[k][vi] + (gacc.has(k) ? gacc.get(k)[vi] : 0) - (k === gslot ? gMove[vi] : 0);
+                        v > bw && (bw = v, best = k);
+                    }
+                    raw[vi] = best >= 0 ? slots[best] : ct.ids[ct.dom[vi]];
+                }
+                ct.rawDom = raw;
+            }
+            return ct;
         },
         ctFinish = (slots, acc, sum) => {
             let use = slots.map((pi, s) => [s, acc[s].reduce((a, v) => a + v, 0)]).sort((a, b) => b[1] - a[1]),
@@ -37138,7 +37146,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         classicMapKey = id => "v7:" + T.file + ":" + id,
         classicMapWorld = null,
         classicMapSince = 0,
-        classicMapLook = 6,
+        classicMapLook = 7,
         classicMapNbrReady = t => {
             for (let dz = -1; dz <= 1; ++dz)
                 for (let dx = -1; dx <= 1; ++dx) {
