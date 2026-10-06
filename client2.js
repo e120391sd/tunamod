@@ -31294,11 +31294,20 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 if (n.indexOf(w) >= 0) return w;
             return n.indexOf("gloomfury") >= 0 ? "gloomfury" : void 0;
         },
-        classicWorldFor = id => classicEnvWorlds[id] || classicLearnedWorlds.get(id) || envNameWorld(id),
+        classicRealmWorlds = {
+            g: "guardstone",
+            f: "faivel",
+            h: "headless"
+        },
+        classicRealmWorld = () => {
+            let p = T && T.player ? T.player.pos : typeof tn != "undefined" && tn.position;
+            return p ? classicRealmWorlds[classicRealmAt(p[0], p[2])] : void 0;
+        },
+        classicWorldFor = id => classicEnvWorlds[id] || classicLearnedWorlds.get(id) || envNameWorld(id) || classicRealmWorld(),
         classicLearnWorld = (envId, areaId) => {
             if (!(envId > 0) || !(areaId > 0) || classicEnvWorlds[envId] || classicLearnedWorlds.has(envId)) return;
             let world = areaWorlds[areaId];
-            world && classicPalettes[world] && (classicLearnedWorlds.set(envId, world), classicEnvCache.delete(envId));
+            world && classicPalettes[world] && (classicLearnedWorlds.set(envId, world), classicEnvCache.clear());
         };
     var classicSoftness = .65,
         classicHeadlessNight = 1.1;
@@ -31351,14 +31360,15 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             let env = Ic.get(id),
                 tint = env && worldAmbientTint[classicWorldFor(id)];
             if (!env || !oe.classicLighting && !oe.classicWaterColors && !tint) return env;
-            let c = classicEnvCache.get(id);
+            let ck = id + ":" + classicWorldFor(id),
+                c = classicEnvCache.get(ck);
             if (c) return c;
             c = oe.classicLighting ? buildClassicEnv(env) : Object.assign({}, env);
             if (oe.classicWaterColors) c.water = (classicWaterCols[classicWorldFor(id)] || classicWaterCols.guardstone).map(classicHex);
             let wdef = classicWaterDefaults[classicWaterWorldOf(id)];
             wdef && (c.water = wdef.map(v => v.slice()));
             if (tint && c.ambient) c.ambient = c.ambient.map(ph => [ph[0] * tint[0], ph[1] * tint[1], ph[2] * tint[2]]);
-            return classicEnvCache.set(id, c), c;
+            return classicEnvCache.set(ck, c), c;
         };
     var o7 = (t, e, n, o) => {
             LN(), qN(t, n, e), DN(), e > 0 && VN(e, o), ko(on.sky), ko(on.environment);
@@ -31657,14 +31667,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                         c = n.liveShape ? 0 : cv,
                         collide = () => {
                             if (!c && n.liveShape && cv && !e.finishedLoadingChunks.has(n.id)) return void Wr(cv, (s, i) => {
-                                let g = e.triangleGrid;
-                                e.triangleGrid = e.visualGrid;
-                                try {
-                                    this.addCollider(e, n, s, i);
-                                } finally {
-                                    e.triangleGrid = g;
-                                }
-                                this.postGeometryLoad(e, n);
+                                this.addVisual(e, n, i), this.postGeometryLoad(e, n);
                             });
                             if (!c || e.finishedLoadingChunks.has(n.id)) return this.postGeometryLoad(e, n);
                             Wr(c, (s, i) => {
@@ -31712,6 +31715,17 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 let i = new Map;
                 this.handleColliderGeometry(e, s.index, s, i), this.handleColliderGeometry(e, s.indexInvisible, s, i);
                 sink && this.matrix && (this.sink = sink, this.setWorldMatrix(this.matrix, n.origin));
+                n.liveShape || this.addVisual(e, n, s);
+            }
+            addVisual(e, n, s) {
+                if (!this.matrix || !e.visualGrid || e.triangleGrid === e.visualGrid) return;
+                let g = e.triangleGrid;
+                e.triangleGrid = e.visualGrid;
+                try {
+                    this.handleColliderGeometry(e, s.index, s, new Map);
+                } finally {
+                    e.triangleGrid = g;
+                }
             }
             onRemove() {}
         },
@@ -36908,7 +36922,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 lvl = Math.max(...t.data.water) * .030517578125,
                 h = new Float32Array(R * R).fill(-1e4),
                 any = !1,
-                tris = (t.liveShape ? T.visualGrid : T.triangleGrid).queryAABB([ox, lvl - 6, oz, ox + 64, lvl + 4, oz + 64]);
+                tris = T.visualGrid.queryAABB([ox, lvl - 6, oz, ox + 64, lvl + 4, oz + 64]);
             for (let tr of tris) {
                 let [a, b, c] = tr,
                     x0 = Math.max(0, Math.floor((Math.min(a[0], b[0], c[0]) - ox) * k)),
