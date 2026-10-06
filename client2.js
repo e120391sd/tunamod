@@ -32426,7 +32426,9 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 let own = oldFolShownCt(n, a),
                     list = own != null && oldFolLists[own] || [],
                     other = (x, z) => {
-                        let v = oldFolShownCt(x, z);
+                        let v = oldFolShownCt(x, z),
+                            nc = v != null && T.getChunkFromWorld(x, z);
+                        nc && nc !== t && nc.ct && (nc.ct.quick || nc.ct.partial) && (v = null);
                         return v == null ? (x >= 0 && z >= 0 && x < T.bounds && z < T.bounds && (t.folGap = !0), !1) : v !== own;
                     },
                     d = other(n + 2, a) || other(n - 2, a) || other(n, a + 2) || other(n, a - 2);
@@ -33520,7 +33522,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 if (c && c.deps && c.deps.every((d, i) => d === deps[i])) ct = c;
                 else ct = t.ct && t.ctKey === key ? t.ct : ctQuick(t), ctSchedule(t, key);
             }
-            t.ct = ct, t.ctKey = key, ctUpload(t), ctNeighbours(t);
+            t.ct = ct, t.ctKey = key, ctUpload(t), ctNeighbours(t), ct.quick || ct.partial || ctFolNeighbours(t);
         },
         ctDominant = (x, z) => {
             if (x < 0 || z < 0 || x >= T.bounds || z >= T.bounds) return null;
