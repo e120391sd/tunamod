@@ -29550,18 +29550,11 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 let fe = Yh(se.spawnid, se.definitions);
                 fe !== 0 && O$(D, fe)
             }
-            n.globalAlpha = il && T.smoothtime % 1 < .5 ? .5 : 1;
-            let z = T.player.visual.transform.rotation[1],
-                q = Math.sin(z) * 8,
-                R = Math.cos(z) * 8,
-                O = Math.sin(z + 2.4) * 8,
-                W = Math.cos(z + 2.4) * 8,
-                U = Math.sin(z - 2.4) * 8,
-                $ = Math.cos(z - 2.4) * 8,
-                G = c / l,
+            n.globalAlpha = 1;
+            let G = c / l,
                 de = f / 2 + (o.pos[0] - s) * G,
                 be = u / 2 + (o.pos[2] - i) * G;
-            n.fillStyle = "#C1DAE2", n.strokeStyle = "#1A293A", n.lineWidth = 2, n.beginPath(), n.moveTo(de + q, be + R), n.lineTo(de + O, be + W), n.lineTo(de + U, be + $), n.closePath(), n.fill(), n.stroke()
+            il && o.party > 0 && T.smoothtime % 1 > .5 || (n.fillStyle = uf.player, n.fillRect(Math.round(de), Math.round(be), 5, 5))
         },
         Kb = (t, e, n) => {
             if (Xb.has(e)) {
@@ -33522,7 +33515,9 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 if (c && c.deps && c.deps.every((d, i) => d === deps[i])) ct = c;
                 else ct = t.ct && t.ctKey === key ? t.ct : ctQuick(t), ctSchedule(t, key);
             }
-            t.ct = ct, t.ctKey = key, ctUpload(t), ctNeighbours(t), ct.quick || ct.partial || ctFolNeighbours(t);
+            let was = t.ctKey === key ? t.ct : null,
+                upgraded = !ct.quick && !ct.partial && (!was || was.quick || was.partial);
+            t.ct = ct, t.ctKey = key, ctUpload(t), ctNeighbours(t), upgraded && ctFolNeighbours(t);
         },
         ctDominant = (x, z) => {
             if (x < 0 || z < 0 || x >= T.bounds || z >= T.bounds) return null;
