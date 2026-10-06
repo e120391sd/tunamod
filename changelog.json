@@ -1,6 +1,29 @@
 {
     "entries": [
         {
+            "title": "Update 2.03 - Oasis cleanup",
+            "date": "2026-10-05",
+            "color": "#F5C247",
+            "description": "",
+            "sections": [
+                {
+                    "name": "Map",
+                    "color": "#db9155",
+                    "points": [
+                        "Polished the gloomfury area and surrounding paths (east faivel)",
+                        "Cleaned up the oasis, will be edited more in the future but I am focusing on the older parts of the map first"
+                    ]
+                },
+                {
+                    "name": "Bug Fixes",
+                    "color": "#ede43d",
+                    "points": [
+                        "Fixed an issue where foliage would treat the edge of a chunk as different terrain and cause foliage to be drawn there"
+                    ]
+                }
+            ]
+        },
+        {
             "title": "Update 2.03 - Gloomfury area changes",
             "date": "2026-10-05",
             "color": "#F5C247",
