@@ -36921,6 +36921,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 oz = t.origin[2],
                 lvl = Math.max(...t.data.water) * .030517578125,
                 h = new Float32Array(R * R).fill(-1e4),
+                lo = new Float32Array(R * R).fill(1e9),
                 any = !1,
                 tris = T.visualGrid.queryAABB([ox, lvl - 6, oz, ox + 64, lvl + 4, oz + 64]);
             for (let tr of tris) {
@@ -36941,9 +36942,10 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                         if (u < -1e-4 || v < -1e-4 || w < -1e-4) continue;
                         let y = u * a[1] + v * b[1] + w * c[1],
                             i = gx + gz * R;
-                        y > h[i] && (h[i] = y, any = !0);
+                        y > h[i] && (h[i] = y), y < lo[i] && (lo[i] = y);
                     }
             }
+            for (let i = 0; i < R * R; ++i) h[i] > -1e4 && (lo[i] > lvl + .05 ? h[i] = -1e4 : any = !0);
             return any ? h : null;
         },
         waterPropsUpdate = t => {
