@@ -31660,8 +31660,19 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     let hide = this.noThin ? 0 : meshHideChance.get(this.id);
                     if (hide > 0 && dirtHash(Math.round((n.origin[0] + this.pos[0]) * 16), Math.round((n.origin[2] + this.pos[2]) * 16), 173) < hide) return this.loaded = !0, this.postGeometryLoad(e, n);
                     let o = Ys.get(this.id),
-                        c = n.liveShape ? 0 : o.collisionGeometry == null ? o.geometry : o.collisionGeometry,
+                        cv = o.collisionGeometry == null ? o.geometry : o.collisionGeometry,
+                        c = n.liveShape ? 0 : cv,
                         collide = () => {
+                            if (!c && n.liveShape && cv && !e.finishedLoadingChunks.has(n.id)) return void Wr(cv, (s, i) => {
+                                let g = e.triangleGrid;
+                                e.triangleGrid = e.visualGrid;
+                                try {
+                                    this.addCollider(e, n, s, i);
+                                } finally {
+                                    e.triangleGrid = g;
+                                }
+                                this.postGeometryLoad(e, n);
+                            });
                             if (!c || e.finishedLoadingChunks.has(n.id)) return this.postGeometryLoad(e, n);
                             Wr(c, (s, i) => {
                                 this.addCollider(e, n, s, i), this.postGeometryLoad(e, n);
@@ -36900,7 +36911,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 lvl = Math.max(...t.data.water) * .030517578125,
                 h = new Float32Array(R * R).fill(-1e4),
                 any = !1,
-                tris = T.triangleGrid.queryAABB([ox, lvl - 6, oz, ox + 64, lvl + 4, oz + 64]);
+                tris = (t.liveShape ? T.visualGrid : T.triangleGrid).queryAABB([ox, lvl - 6, oz, ox + 64, lvl + 4, oz + 64]);
             for (let tr of tris) {
                 let [a, b, c] = tr,
                     x0 = Math.max(0, Math.floor((Math.min(a[0], b[0], c[0]) - ox) * k)),
@@ -40283,7 +40294,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     array: [],
                     map: new Map,
                     type: {}
-                }, t3.forEach((e, n) => this.entities.type[n] = []), this.mode = Uh.normal, this.chunksMap = new Map, this.chunksArray = [], this.finishedLoadingChunks = new Set, this.time = this.accum = -0, this.timestep = 1 / 60, this.tickId = 0, this.data = void 0, this.triangleGrid = new R1
+                }, t3.forEach((e, n) => this.entities.type[n] = []), this.mode = Uh.normal, this.chunksMap = new Map, this.chunksArray = [], this.finishedLoadingChunks = new Set, this.time = this.accum = -0, this.timestep = 1 / 60, this.tickId = 0, this.data = void 0, this.triangleGrid = new R1, this.visualGrid = new R1
             }
             load(e, n) {
                 this.id = e, this.file = n, this.sourceFile = void 0, jv.forEach(o => {
@@ -40421,10 +40432,10 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 this.setMode(), e || (this.chunkAmount = this.data.chunkAmount, this.bounds = 64 * this.chunkAmount, this.setGrids(), this.finishedLoadingChunks.clear(), this.createChunks())
             }
             setGrids() {
-                this.triangleGrid.setDimensions(this.bounds, this.bounds, this.bounds, 15, 15, 15)
+                this.triangleGrid.setDimensions(this.bounds, this.bounds, this.bounds, 15, 15, 15), this.visualGrid.setDimensions(this.bounds, this.bounds, this.bounds, 15, 15, 15)
             }
             rebuildTriangleOctree() {
-                this.triangleGrid.clear(), this.chunksMap.forEach(e => {
+                this.triangleGrid.clear(), this.visualGrid.clear(), this.chunksMap.forEach(e => {
                     for (let n = 0; n < e.props.length; ++n) {
                         let o = e.props[n];
                         o.loaded = !1, o.loadGeometry(this, e)
@@ -40926,7 +40937,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             }
             this.chunksMap.clear(), this.chunksArray.length = 0;
             for (let e = this.entities.array.length - 1; e >= 0; e--) this.removeEntity(this.entities.array[e]);
-            this.data = void 0, this.bounds = 1, this.triangleGrid.clear(), L9(this), X9(this)
+            this.data = void 0, this.bounds = 1, this.triangleGrid.clear(), this.visualGrid.clear(), L9(this), X9(this)
         }
         setPlayer(e) {
             this.player = e, bl.set(!0), jI()
