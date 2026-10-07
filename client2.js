@@ -29108,35 +29108,80 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         },
         classicInflate = async (u8, deflate) => deflate ? new Uint8Array(await new Response(new Blob([u8]).stream().pipeThrough(new DecompressionStream("deflate-raw"))).arrayBuffer()) : u8,
         classicWorldLoading = !classicIsEditor() && typeof fetch != "undefined",
-        classicWorldWait = () => classicWorldLoading && !classicIsEditor(),
-        classicWorldLoad = async () => {
-            if (classicIsEditor() || typeof fetch == "undefined") return;
-            let abort = new AbortController(),
-                timer = setTimeout(() => abort.abort(), 9e4);
+        classicWorldT0 = Date.now(),
+        classicWorldWait = () => classicWorldLoading && !classicIsEditor() && Date.now() - classicWorldT0 < 2e4,
+        classicWorldCache = (write, v) => new Promise(r => {
             try {
-                let res = await fetch(classicWorldUrl + "?t=" + Math.floor(Date.now() / 6e4), {
+                let q = indexedDB.open("classicWorld", 1);
+                q.onupgradeneeded = () => q.result.createObjectStore("w"), q.onerror = () => r(null), q.onsuccess = () => {
+                    let db = q.result,
+                        tx = db.transaction("w", write ? "readwrite" : "readonly"),
+                        st = tx.objectStore("w"),
+                        g = write ? st.put(v, "world") : st.get("world");
+                    tx.oncomplete = () => (db.close(), r(write ? !0 : g.result || null)), tx.onerror = tx.onabort = () => (db.close(), r(null));
+                };
+            } catch (e) {
+                r(null);
+            }
+        }),
+        classicWorldRange = async (from, to) => {
+            let abort = new AbortController(),
+                timer = setTimeout(() => abort.abort(), 15e3);
+            try {
+                let res = await fetch(classicWorldUrl + "?t=" + Date.now(), {
                     cache: "no-store",
+                    headers: {
+                        Range: "bytes=" + from + "-" + to
+                    },
                     signal: abort.signal
                 });
-                if (!res.ok) return;
-                let u8 = new Uint8Array(await res.arrayBuffer());
-                if (u8.length < 12 || u8[0] !== 72 || u8[1] !== 87 || u8[2] !== 76 || u8[3] !== 68) return console.warn("classic world: not a .hworld file");
-                let dv = new DataView(u8.buffer),
-                    len = dv.getUint32(8, !0),
-                    header = JSON.parse(new TextDecoder().decode(u8.subarray(12, 12 + len))),
-                    base = 12 + len,
-                    chunks = new Map,
-                    deflate = header.compression === "deflate";
-                for (let [id, off, n] of header.chunks || []) chunks.set(id, classicRead(await classicInflate(u8.subarray(base + off, base + off + n), deflate)));
-                classicWorld = {
-                    header,
-                    chunks,
-                    source: header.source || "main"
-                }, classicWorldApply();
+                if (res.status !== 206) throw abort.abort(), new Error("no range support");
+                return new Uint8Array(await res.arrayBuffer());
+            } finally {
+                clearTimeout(timer);
+            }
+        },
+        classicWorldHead = u8 => u8.length < 12 || u8[0] !== 72 || u8[1] !== 87 || u8[2] !== 76 || u8[3] !== 68 ? null : new DataView(u8.buffer, u8.byteOffset).getUint32(8, !0),
+        classicWorldUse = async u8 => {
+            let len = classicWorldHead(u8);
+            if (len == null) return console.warn("classic world: not a .hworld file"), null;
+            let text = new TextDecoder().decode(u8.subarray(12, 12 + len)),
+                header = JSON.parse(text),
+                base = 12 + len,
+                chunks = new Map,
+                deflate = header.compression === "deflate";
+            for (let [id, off, n] of header.chunks || []) chunks.set(id, classicRead(await classicInflate(u8.subarray(base + off, base + off + n), deflate)));
+            return classicWorld = {
+                header,
+                chunks,
+                source: header.source || "main"
+            }, classicWorldApply(), text;
+        },
+        classicWorldLoad = async () => {
+            if (classicIsEditor() || typeof fetch == "undefined") return;
+            classicWorldT0 = Date.now();
+            try {
+                let cached = await classicWorldCache(!1),
+                    head = null;
+                try {
+                    let len = classicWorldHead(await classicWorldRange(0, 11));
+                    len != null && (head = new TextDecoder().decode(await classicWorldRange(12, 11 + len)));
+                } catch (e) {}
+                if (cached && cached.bytes && (head == null || head === cached.head)) return void await classicWorldUse(new Uint8Array(cached.bytes));
+                let res = await fetch(classicWorldUrl + "?t=" + Date.now(), {
+                    cache: "no-store"
+                });
+                if (!res.ok) return void(cached && cached.bytes && await classicWorldUse(new Uint8Array(cached.bytes)));
+                let u8 = new Uint8Array(await res.arrayBuffer()),
+                    text = await classicWorldUse(u8);
+                text && classicWorldCache(!0, {
+                    head: text,
+                    bytes: u8.buffer
+                });
             } catch (e) {
                 console.warn("classic world: could not load", e);
             } finally {
-                clearTimeout(timer), classicWorldLoading = !1;
+                classicWorldLoading = !1;
             }
         },
         classicFolLook = {
