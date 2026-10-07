@@ -31908,7 +31908,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         $N = 65536 / 100;
     var g7 = (t, e) => (t.id = e.id, J(t.pos, e.x / d7, e.y / UN, e.z / d7), J(t.rot, e.rx / Sy, e.ry / Sy, e.rz / Sy), t.scale = Math.max(e.scale, 100) / $N, t);
     var v7 = (t, e, n, o) => {
-            t.id = e, t.x = n, t.z = o, t.origin[0] = n * 64, t.origin[2] = o * 64, t.deserialized = !1, t.props.length = 0, t.data = void 0, t.loadingProps = 0, t.__world = void 0, t.gsStoneMask = null, t.gsMeadowMask = null, t.gsBigDirtMask = null, t.pathBand = null
+            t.id = e, t.x = n, t.z = o, t.origin[0] = n * 64, t.origin[2] = o * 64, t.deserialized = !1, t.props.length = 0, t.data = void 0, t.ct = null, t.ctKey = null, t.folGap = !1, t.loadingProps = 0, t.__world = void 0, t.gsStoneMask = null, t.gsMeadowMask = null, t.gsBigDirtMask = null, t.pathBand = null
         },
         _7 = (t, e) => {
             classicHlSwap(e), t.data = e, b7(t), e.ctw || (scatterLakePlants(t), scatterRidgePlants(t), scatterPathPlants(t), scatterGsBushes(t)), NN(t, !0), t.deserialized = !0
@@ -32519,7 +32519,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         oldFolShownCt = (x, z) => {
             if (x < 0 || z < 0 || x >= T.bounds || z >= T.bounds) return null;
             let ch = T.getChunkFromWorld(x, z);
-            if (!ch || !ch.ct) return null;
+            if (!ch || !ch.ct || ch.ctKey !== T.file + ":" + ch.id) return null;
             if (!ch.ct.rawDom) return ctDominant(x, z);
             let lx = Math.floor(x - ch.origin[0]),
                 lz = Math.floor(z - ch.origin[2]);
@@ -33677,7 +33677,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         ctDominant = (x, z) => {
             if (x < 0 || z < 0 || x >= T.bounds || z >= T.bounds) return null;
             let ch = T.getChunkFromWorld(x, z);
-            if (!ch || !ch.ct) return null;
+            if (!ch || !ch.ct || ch.ctKey !== T.file + ":" + ch.id) return null;
             let lx = Math.floor(x - ch.origin[0]),
                 lz = Math.floor(z - ch.origin[2]);
             return ctPalette[ch.ct.ids[ch.ct.dom[Math.min(63, lx) + Math.min(63, lz) * 64]]].texture;
