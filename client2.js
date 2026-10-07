@@ -2399,10 +2399,10 @@ void main() {
         classicLighting: !1,
         guardstoneTextureFix: !0
     });
-    var stoneShaderEnabled = !0,
+    var stoneShaderEnabled = !worldOverrideOff,
         dirtPatchEnabled = !1,
-        gloomEnabled = !0,
-        shoreShaderEnabled = !0;
+        gloomEnabled = !worldOverrideOff,
+        shoreShaderEnabled = !worldOverrideOff;
     var P;
     Vl.subscribe(async t => {
         await fetch(`/data/loc/${t}.json?v=9001382`).then(async e => {
@@ -7778,7 +7778,7 @@ void main() {
                 id: 1218,
                 crop: [i & 7, i >> 3, 8]
             });
-        Pc.has(1218) && classicCellMeshes();
+        Pc.has(1218) && !worldOverrideOff && classicCellMeshes();
         classicWorldApply();
         for (let id in classicOldParticles) k0.has(+id) && Object.assign(k0.get(+id), classicOldParticles[id]);
         for (let id in classicOldEffects) ju.has(+id) && ju.set(+id, Object.assign({}, ju.get(+id), JSON.parse(JSON.stringify(classicOldEffects[id]))));
@@ -13337,12 +13337,6 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 let n = kh[e];
                 n.vert && (n.vert = n.vert.replace("#SHADOWS", oe.shadows ? 1 : 0)), n.frag && (n.frag = n.frag.replace("#SHADOWS", oe.shadows ? 1 : 0))
             }
-            let fogDotSize = 2;
-            if (oe.fogpattern)
-                for (let e of ["drop", "foliagePlant", "foliageStatic", "multimeshEffect", "multimeshFlat", "multimeshTextured", "multimeshTexturedVcol", "multimeshTree", "terrain", "water"]) {
-                    let n = kh[e];
-                    n && n.frag && n.frag.indexOf("in float vCameraDistance;") >= 0 && (n.frag = n.frag.replace("void main(){", "void main(){if(vCameraDistance>fog[1][1]*0.9&&fract(sin(floor(gl_FragCoord.x/" + fogDotSize.toFixed(1) + ")*556.78+floor(gl_FragCoord.y/" + fogDotSize.toFixed(1) + ")*7123.4))<smoothstep(fog[1][1]*0.9,fog[1][1],vCameraDistance))discard;"))
-                }
             let t = {
                 mesh: ["position", "uv", "normal", "color", "interiorlight", "alpha", "worldMatrix"],
                 effect: ["position", "uv", "normal", "color", "uvshift", "ycutoff", "worldMatrix"],
@@ -33026,7 +33020,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         ctGrassTextures = [1227, 1235],
         ctAdd = o => (ctByTexture.set(o.texture, ctPalette.length), ctPalette.push(o), ctDiffuseDirty = !0, ctPalette.length - 1),
         ctPaletteInit = () => {
-            ctPalette.length || ctOldTerrains.forEach(([texture, scale, darkest, brightest, spec]) => ctAdd({
+            ctPalette.length || worldOverrideOff || ctOldTerrains.forEach(([texture, scale, darkest, brightest, spec]) => ctAdd({
                 texture,
                 scale,
                 darkest,
@@ -33211,12 +33205,17 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         ctShownTexture = (id, world) => {
             let i = Ac.get(id);
             if (!i) return null;
+            if (worldOverrideOff) return i.texture;
             if (world === "guardstone" && pathTextures.indexOf(i.texture) >= 0) return 1229;
             return topGrassShown(id, world);
         },
         ctPrepare = t => {
             let world = chunkWorldOf(t),
                 gs = world === "guardstone";
+            if (worldOverrideOff) return t.fvPath = t.stoneUnder = t.softUnder = t.topGrass = t.steepMask = t.hlStone = t.hlSteep = t.treeDirt = t.ctStone = null, {
+                world,
+                gs
+            };
             t.fvPath = fvPathWorld(t) ? faivelPathLookup(t) : null;
             buildStoneStrips(t);
             t.stoneUnder = stoneUnderLookup(t);
@@ -33721,9 +33720,9 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                         o === void 0 && (o = Ac.keys().next().value);
                     }
                     let i = Ac.get(o),
-                        map = world ? worldRetexture[world] : null,
-                        raw = world === "guardstone" && pathTextures.indexOf(i.texture) >= 0,
-                        tex = raw ? gsPathKey : orange === !0 && i.texture === orangePathTexture ? orangePathKey : map && map[i.texture] != null && Pc.has(map[i.texture]) ? map[i.texture] : i.texture;
+                        map = world && !worldOverrideOff ? worldRetexture[world] : null,
+                        raw = !worldOverrideOff && world === "guardstone" && pathTextures.indexOf(i.texture) >= 0,
+                        tex = raw ? gsPathKey : !worldOverrideOff && orange === !0 && i.texture === orangePathTexture ? orangePathKey : map && map[i.texture] != null && Pc.has(map[i.texture]) ? map[i.texture] : i.texture;
                     n.info[s * 4 + 0] = i.scale / 127, raw && (n.info[s * 4 + 0] = fvPathScale), n.info[s * 4 + 1] = i.darkest / 255 * 3, n.info[s * 4 + 2] = i.brightest / 255 * 3, n.info[s * 4 + 3] = i.spec / 255 * (!raw && map && map[i.texture] != null && world === "headless" ? headlessSpecScale : 1) * (!raw && oe.faivelRetexture && topGrassShown(o, world) === dirtSpecShown ? dirtSpecScale : 1), Ao(tex, r => {
                         n.diffuse[s] = r, n.loaded++
                     })
@@ -34088,7 +34087,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             let terrain = Ac.get(id);
             if (!terrain) return null;
             let tex = terrain.texture,
-                map = world ? worldRetexture[world] : null;
+                map = world && !worldOverrideOff ? worldRetexture[world] : null;
             map && map[tex] != null && Pc.has(map[tex]) && (tex = map[tex]);
             let o = textureOverrides.get(tex),
                 mapped = o == null ? null : typeof o == "object" ? o.id : o;
