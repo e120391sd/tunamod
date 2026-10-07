@@ -13062,6 +13062,8 @@ precision highp float;precision highp int;uniform sampler2D particleDiffuse;in v
 precision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};in float vCameraDistance;in vec4 vWorldPos;uniform sampler2D particleDiffuse;in vec4 vCol;in vec2 vOffset;in float vRotationCos;in float vRotationSin;out vec4 fragColor;const float a=1.0/(1024.0/8.0);void main(){float b=0.5;float c=abs(vRotationSin)+abs(vRotationCos);vec2 d=vec2(gl_PointCoord.x-b,gl_PointCoord.y-b)*c;vec2 e=d*vRotationCos;vec2 f=d*vRotationSin;d=vec2(e.x+f.y+b,e.y-f.x+b);if(d.x<a||d.x>1.0-a||d.y>1.0-a||d.y<a){discard;}d.x*=0.125;d.y=1.0-d.y*0.125;vec3 g=texture(particleDiffuse,d+vOffset).rgb;if((g.r+g.g+g.b)<0.1){discard;}fragColor=vec4(g.rgb,1.0);}`;
     var p6 = `#version 300 es
 precision highp float;precision highp int;uniform Screen{vec2 resolution;};uniform sampler2D inputA;uniform vec2 offset[4];uniform vec4 amount;in vec2 vUv;out vec4 fragColor;void main(){vec3 a=texture(inputA,vUv+offset[0]).rgb*amount[0];a+=texture(inputA,vUv+offset[1]).rgb*amount[1];a+=texture(inputA,vUv+offset[2]).rgb*amount[2];a+=texture(inputA,vUv+offset[3]).rgb*amount[3];fragColor=vec4(a,1.0);}`;
+    var oldBloomFrag = `#version 300 es
+precision highp float;precision highp int;uniform Screen{vec2 resolution;};uniform sampler2D inputA;uniform sampler2D inputB;uniform int step;uniform float amount;in vec2 vUv;float weight[8]=float[8](0.118,0.113,0.100,0.082,0.061,0.042,0.027,0.016);out vec4 fragColor;void main(){vec2 o=1.0/resolution;vec3 r;if(step==0){r=texture(inputA,vUv).rgb*weight[0];for(int i=1;i<8;++i){r+=texture(inputA,vUv+vec2(o.x*float(i),0.0)).rgb*weight[i];r+=texture(inputA,vUv-vec2(o.x*float(i),0.0)).rgb*weight[i];}r=smoothstep(vec3(0.4),vec3(0.75),r)*0.18;fragColor=vec4(r,1.0);return;}r=texture(inputA,vUv).rgb*weight[0];for(int i=1;i<8;++i){r+=texture(inputA,vUv+vec2(0.0,o.y*float(i))).rgb*weight[i];r+=texture(inputA,vUv-vec2(0.0,o.y*float(i))).rgb*weight[i];}vec4 b=texture(inputB,vUv);fragColor=vec4(r*amount+b.rgb,b.a);}`;
     var m6 = `#version 300 es
 precision highp float;precision highp int;uniform Screen{vec2 resolution;};uniform sampler2D inputA;uniform sampler2D inputB;uniform float amount;in vec2 vUv;out vec4 fragColor;void main(){vec4 a=texture(inputA,vUv);vec3 b=texture(inputB,vUv).rgb;b=b*b;fragColor.w=a.w;fragColor.xyz=b*amount+a.xyz;}`;
     var d6 = `#version 300 es
@@ -13590,6 +13592,27 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 uniforms: {
                     aoDepth: {
                         value: null
+                    }
+                },
+                attributeLocations: t.post
+            }), ht[37] = kn({
+                vertex: hc,
+                fragment: oldBloomFrag,
+                depthWrite: !1,
+                depthTest: !1,
+                globalUniforms: xn,
+                uniforms: {
+                    inputA: {
+                        value: null
+                    },
+                    inputB: {
+                        value: null
+                    },
+                    step: {
+                        value: 0
+                    },
+                    amount: {
+                        value: 1
                     }
                 },
                 attributeLocations: t.post
@@ -37623,19 +37646,12 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 ]), [e, n] = [n, e];
             }
             if (t.has(32) && (t.delete(32), Sf(32, e, n, null, []), [e, n] = [n, e]), t.has(33) && (t.delete(33), Sf(33, e, n, null, []), [e, n] = [n, e]), t.has(30)) {
-                t.delete(30);
-                let o = .5 / fa.width,
-                    s = .5 / fa.height;
-                Sf(30, ua, n, null, [
-                    ["offset", [-o, -s, o, -s, o, s, -o, s]],
-                    ["amount", [.25, .25, .25, .25]]
-                ]);
-                let i = ["amount", [.125, .375, .375, .125]];
-                o *= 2, s *= 2, Sf(30, fa, ua, null, [
-                    ["offset", [-o * 2, 0, -o, 0, o, 0, o * 2, 0]], i
-                ]), Sf(30, ua, fa, null, [
-                    ["offset", [0, -s * 2, 0, -s, 0, s, 0, s * 2]], i
-                ]), Sf(31, null, n, ua, [])
+                t.delete(30), Sf(37, e, n, null, [
+                    ["step", 0]
+                ]), Sf(37, null, e, n, [
+                    ["step", 1],
+                    ["amount", ht[31].uniforms.amount.value]
+                ])
             } else V1(n, null, N.COLOR_BUFFER_BIT)
         },
         V1 = (t, e, n, o = N.NEAREST) => {
