@@ -7903,6 +7903,7 @@ void main() {
         "bosses": []
     };
     var ocData = creatureOverrideData,
+        ocBaseSize = new Map,
         ocBossActive = new Map,
         ocHash = (a, b) => {
             let h = Math.imul(a | 0, 374761393) + Math.imul(b | 0, 668265263) | 0;
@@ -7984,7 +7985,7 @@ void main() {
             e.__ocDone = !0;
             let pick = oldCreatureFor(e);
             if (!pick) return;
-            e.__oc = pick, e.name = pick.name, e.setSize(pick.size), e.visual && e.remakeTransform();
+            e.__ocSrc = (e.originalName || e.name).toLowerCase(), e.__oc = pick, e.name = pick.name, e.setSize((e.stats && e.stats.getStat(27) || 100) / 100), e.visual && e.remakeTransform();
         };
     var spiderLegMesh = 1560,
         customLegMesh = 7878;
@@ -39593,7 +39594,11 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 super.setName(e), this.__oc ? this.name = this.__oc.name : this.__ocDone = !1
             }
             setSize(e) {
-                super.setSize(this.__oc ? this.__oc.size : e)
+                if (!this.__oc) return super.setSize(e);
+                let raw = this.stats && this.stats.getStat(27),
+                    b = ocBaseSize.get(this.__ocSrc);
+                raw && (b == null || e < b) && ocBaseSize.set(this.__ocSrc, b = e);
+                super.setSize(this.__oc.size * (raw && b > 0 ? e / b : 1));
             }
             remakeTransform(e, n, o) {
                 this.makeVisual(e, n, o), this.updateTransformScale(), this.updateTransformRotation(1), this.updateVisualPosition(0, 0, T, !0)
