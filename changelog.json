@@ -1,6 +1,23 @@
 {
     "entries": [
         {
+            "title": "Update 2.05 - Faivel changes & creature overrides",
+            "date": "2026-10-09",
+            "color": "#F5C247",
+            "description": "",
+            "sections": [
+                {
+                    "name": "Map",
+                    "color": "#db9155",
+                    "points": [
+                        "Retextured north faivel (around vanguard base)",
+                        "Replaced every faivel beach with grey sand, also improved the crocodile area a bit, may do some more to this area in the future",
+                        "Every creature in the game has been replaced with an old mob roughly corresponding to its level and location on the map. Most of these are temporary and will be polished further once the entire map has been retextured. Rare mobs have also been overridden, but their mount / pet skins remain the same."
+                    ]
+                }
+            ]
+        },
+        {
             "title": "Update 2.04 - Oasis cleanup",
             "date": "2026-10-06",
             "color": "#F5C247",
