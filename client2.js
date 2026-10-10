@@ -1765,7 +1765,28 @@
         classicAoB = null,
         ssao = ee(!1),
         classicSsaoFrag = `#version 300 es
-precision highp float;precision highp int;uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};uniform sampler2D aoDepth;in vec2 vUv;out vec4 fragColor;const int zr=16;const float Ul=float(zr);const vec3 Rs[zr]=vec3[](vec3(0.5381,0.1856,-0.4319),vec3(0.1379,0.2486,0.4430),vec3(0.3371,0.5679,-0.0057),vec3(-0.6999,-0.0451,-0.0019),vec3(0.0689,-0.1598,-0.8547),vec3(0.0560,0.0069,-0.1843),vec3(-0.0146,0.1402,0.0762),vec3(0.0100,-0.1924,-0.0344),vec3(-0.3577,-0.5301,-0.4358),vec3(-0.3169,0.1063,0.0158),vec3(0.0103,-0.5869,0.0046),vec3(-0.0897,-0.4940,0.3287),vec3(0.7119,-0.0154,-0.0918),vec3(-0.0533,0.0596,-0.5411),vec3(0.0352,-0.0631,0.5460),vec3(-0.4776,0.2847,-0.0271));const float Fc=0.03;const float Lc=0.0000005;const float radius=0.004;const vec2 dq=vec2(0.0,0.001);const vec2 ql=vec2(0.001,0.0);float od(vec2 uv){float d=texture(aoDepth,uv).r;float n=projectionMatrix[3][2]/(projectionMatrix[2][2]-1.0);float f=projectionMatrix[3][2]/(projectionMatrix[2][2]+1.0);float z=2.0*n*f/(f+n-(2.0*d-1.0)*(f-n));return 0.5*(200.1/199.9-40.0/(199.9*z))+0.5;}vec3 normal_from_depth(float BS,vec2 texcoords){float oN=od(texcoords+dq);float NH=od(texcoords+ql);vec3 p1=vec3(dq,oN-BS);vec3 p2=vec3(ql,NH-BS);vec3 Ip=cross(p1,p2);Ip.z=-Ip.z;return normalize(Ip);}void main(){float BS=od(vUv);vec3 tj=vec3(vUv.xy,BS);vec3 Ip=normal_from_depth(BS,vUv);float qh=(2.0*0.1*200.0)/(200.0+0.1-BS*(200.0-0.1))/200.0;float XZ=radius/qh;float NJ=0.0;float ign=fract(52.9829189*fract(dot(gl_FragCoord.xy,vec2(0.06711056,0.00583715))));float ang=ign*6.2831853;vec3 uH=normalize(vec3(cos(ang),sin(ang),ign*2.0-1.0));for(int i=0;i<zr;i++){vec3 Jm=XZ*reflect(Rs[i],uH);vec3 HZ=tj+sign(dot(Jm,Ip))*Jm;float Uu=od(clamp(HZ.xy,0.0,1.0));float difference=BS-Uu;NJ+=step(Lc,difference)*(1.0-smoothstep(Lc,Fc,difference));}NJ*=(1.0-smoothstep(0.6,1.0,qh));NJ*=(1.0/Ul);NJ=pow(NJ,1.7);float QE=clamp(0.1+1.0-NJ,0.0,1.0);fragColor=vec4(mix(worldlight[1]*0.2,vec3(1.0),QE),1.0);}`,
+precision highp float;precision highp int;uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};uniform sampler2D aoDepth;uniform float aoSeed;in vec2 vUv;out vec4 fragColor;const int zr=16;const float Ul=float(zr);const vec3 Rs[zr]=vec3[](vec3(0.5381,0.1856,-0.4319),vec3(0.1379,0.2486,0.4430),vec3(0.3371,0.5679,-0.0057),vec3(-0.6999,-0.0451,-0.0019),vec3(0.0689,-0.1598,-0.8547),vec3(0.0560,0.0069,-0.1843),vec3(-0.0146,0.1402,0.0762),vec3(0.0100,-0.1924,-0.0344),vec3(-0.3577,-0.5301,-0.4358),vec3(-0.3169,0.1063,0.0158),vec3(0.0103,-0.5869,0.0046),vec3(-0.0897,-0.4940,0.3287),vec3(0.7119,-0.0154,-0.0918),vec3(-0.0533,0.0596,-0.5411),vec3(0.0352,-0.0631,0.5460),vec3(-0.4776,0.2847,-0.0271));const float Fc=0.03;const float Lc=0.0000005;const float radius=0.004;const vec2 dq=vec2(0.0,0.001);const vec2 ql=vec2(0.001,0.0);float od(vec2 uv){float d=texture(aoDepth,uv).r;float n=projectionMatrix[3][2]/(projectionMatrix[2][2]-1.0);float f=projectionMatrix[3][2]/(projectionMatrix[2][2]+1.0);float z=2.0*n*f/(f+n-(2.0*d-1.0)*(f-n));return 0.5*(200.1/199.9-40.0/(199.9*z))+0.5;}vec3 normal_from_depth(float BS,vec2 texcoords){float oN=od(texcoords+dq);float NH=od(texcoords+ql);vec3 p1=vec3(dq,oN-BS);vec3 p2=vec3(ql,NH-BS);vec3 Ip=cross(p1,p2);Ip.z=-Ip.z;return normalize(Ip);}void main(){float BS=od(vUv);vec3 tj=vec3(vUv.xy,BS);vec3 Ip=normal_from_depth(BS,vUv);float qh=(2.0*0.1*200.0)/(200.0+0.1-BS*(200.0-0.1))/200.0;float XZ=radius/qh;float NJ=0.0;float ign=fract(52.9829189*fract(dot(gl_FragCoord.xy+aoSeed*5.588238,vec2(0.06711056,0.00583715))));float ang=ign*6.2831853;vec3 uH=normalize(vec3(cos(ang),sin(ang),ign*2.0-1.0));for(int i=0;i<zr;i++){vec3 Jm=XZ*reflect(Rs[i],uH);vec3 HZ=tj+sign(dot(Jm,Ip))*Jm;float Uu=od(clamp(HZ.xy,0.0,1.0));float difference=BS-Uu;NJ+=step(Lc,difference)*(1.0-smoothstep(Lc,Fc,difference));}NJ*=(1.0-smoothstep(0.6,1.0,qh));NJ*=(1.0/Ul);NJ=pow(NJ,1.7);float QE=clamp(0.1+1.0-NJ,0.0,1.0);fragColor=vec4(mix(worldlight[1]*0.2,vec3(1.0),QE),1.0);}`,
+        classicAoTemporalFrag = `#version 300 es
+precision highp float;precision highp int;uniform Screen{vec2 resolution;};uniform sampler2D inputA;uniform sampler2D inputB;uniform sampler2D aoDepth;uniform mat4 invPV;uniform mat4 prevPV;uniform float aoKeep;in vec2 vUv;out vec4 fragColor;void main(){vec3 cur=texture(inputA,vUv).rgb;vec2 px=1.0/resolution;vec3 mn=cur,mx=cur;for(int y=-1;y<=1;++y)for(int x=-1;x<=1;++x){vec3 c=texture(inputA,vUv+vec2(x,y)*px).rgb;mn=min(mn,c);mx=max(mx,c);}float d=texture(aoDepth,vUv).r;vec4 w=invPV*vec4(vUv*2.0-1.0,d*2.0-1.0,1.0);w/=w.w;vec4 p=prevPV*w;vec2 puv=p.xy/p.w*0.5+0.5;float k=aoKeep;if(p.w<=0.0||puv.x<0.0||puv.y<0.0||puv.x>1.0||puv.y>1.0)k=0.0;vec3 h=clamp(texture(inputB,puv).rgb,mn,mx);fragColor=vec4(mix(cur,h,k),1.0);}`,
+        classicAoHist = null,
+        classicAoHi = 0,
+        classicAoSeed = 0,
+        classicAoLast = 0,
+        classicAoPrev = new Float32Array(16),
+        classicAoInv = new Float32Array(16),
+        classicAoInvert = (m, o) => {
+            let a = m[0], b = m[1], c = m[2], d = m[3], e = m[4], f = m[5], g = m[6], h = m[7], i = m[8], j = m[9], k = m[10], l = m[11], n = m[12], p = m[13], q = m[14], r = m[15],
+                A = a * f - b * e, B = a * g - c * e, C = a * h - d * e, D = b * g - c * f, E = b * h - d * f, F = c * h - d * g,
+                G = i * p - j * n, H = i * q - k * n, I = i * r - l * n, J = j * q - k * p, K = j * r - l * p, L = k * r - l * q,
+                det = A * L - B * K + C * J + D * I - E * H + F * G;
+            if (!det) return !1;
+            det = 1 / det;
+            o[0] = (f * L - g * K + h * J) * det, o[1] = (c * K - b * L - d * J) * det, o[2] = (p * F - q * E + r * D) * det, o[3] = (k * E - j * F - l * D) * det;
+            o[4] = (g * I - e * L - h * H) * det, o[5] = (a * L - c * I + d * H) * det, o[6] = (q * C - n * F - r * B) * det, o[7] = (i * F - k * C + l * B) * det;
+            o[8] = (e * K - f * I + h * G) * det, o[9] = (b * I - a * K - d * G) * det, o[10] = (n * E - p * C + r * A) * det, o[11] = (j * C - i * E - l * A) * det;
+            o[12] = (f * H - e * J - g * G) * det, o[13] = (a * J - b * H + c * G) * det, o[14] = (p * B - n * D - q * A) * det, o[15] = (i * D - j * B + k * A) * det;
+            return !0;
+        },
         classicSsaoBlurFrag = `#version 300 es
 precision highp float;precision highp int;uniform Screen{vec2 resolution;};uniform sampler2D inputA;uniform sampler2D inputB;uniform int step;in vec2 vUv;out vec4 fragColor;const float weight[5]=float[5](0.227027,0.1945946,0.1216216,0.054054,0.016216);void main(){vec2 k=2.0/resolution;vec3 r=texture(inputA,vUv).rgb*weight[0];vec2 dir=step==0?vec2(k.x,0.0):vec2(0.0,k.y);for(int i=1;i<5;++i){r+=texture(inputA,vUv+dir*float(i)).rgb*weight[i];r+=texture(inputA,vUv-dir*float(i)).rgb*weight[i];}if(step==1)r*=texture(inputB,vUv).rgb;fragColor=vec4(r,1.0);}`,
         checkRow = (label, store, target, anchor) => {
@@ -12513,10 +12534,10 @@ void main() {
             let e = lt.width,
                 n = lt.height;
             for (let o = 0; o < 2; ++o) Kc.push(cr(t, t, 0, !0, N.COMPARE_REF_TO_TEXTURE));
-            Zc = cr(t, t, 0, !0, N.COMPARE_REF_TO_TEXTURE), ei = cr(e, n, 1, !0), gr = cr(e, n, 1, !0), fa = cr(Math.ceil(e / 4), Math.ceil(n / 4)), ua = cr(Math.ceil(e / 4), Math.ceil(n / 4)), classicAoA = cr(e, n), classicAoB = cr(e, n)
+            Zc = cr(t, t, 0, !0, N.COMPARE_REF_TO_TEXTURE), ei = cr(e, n, 1, !0), gr = cr(e, n, 1, !0), fa = cr(Math.ceil(e / 4), Math.ceil(n / 4)), ua = cr(Math.ceil(e / 4), Math.ceil(n / 4)), classicAoA = cr(e, n), classicAoB = cr(e, n), classicAoHist = [cr(e, n), cr(e, n)]
         },
         WM = (t, e) => {
-            ep(ei, t, e), ep(gr, t, e), ep(fa, Math.ceil(t / 4), Math.ceil(e / 4)), ep(ua, Math.ceil(t / 4), Math.ceil(e / 4))
+            ep(ei, t, e), ep(gr, t, e), ep(fa, Math.ceil(t / 4), Math.ceil(e / 4)), ep(ua, Math.ceil(t / 4), Math.ceil(e / 4)), classicAoA && (ep(classicAoA, t, e), ep(classicAoB, t, e), classicAoHist.forEach(b => ep(b, t, e)), classicAoLast = 0)
         };
     var kh = {};
     so(kh, {
@@ -13618,6 +13639,36 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 uniforms: {
                     aoDepth: {
                         value: null
+                    },
+                    aoSeed: {
+                        value: 0
+                    }
+                },
+                attributeLocations: t.post
+            }), ht[38] = kn({
+                vertex: hc,
+                fragment: classicAoTemporalFrag,
+                depthWrite: !1,
+                depthTest: !1,
+                globalUniforms: xn,
+                uniforms: {
+                    inputA: {
+                        value: null
+                    },
+                    inputB: {
+                        value: null
+                    },
+                    aoDepth: {
+                        value: null
+                    },
+                    invPV: {
+                        value: new Float32Array(16)
+                    },
+                    prevPV: {
+                        value: new Float32Array(16)
+                    },
+                    aoKeep: {
+                        value: 0
                     }
                 },
                 attributeLocations: t.post
@@ -37726,8 +37777,22 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             if (t.has(35) && classicAoA) {
                 t.delete(35);
                 let p = ht[35];
+                classicAoSeed = (classicAoSeed + 1) % 64, p.uniforms.aoSeed.value = classicAoSeed;
                 Gn("aoDepth", gr.depthTexture, 0, p), hm(classicAoA), ks(np, p);
-                Sf(36, classicAoB, classicAoA, null, [
+                let aoSrc = classicAoA,
+                    pv = on.camera.data.projectionViewMatrix,
+                    now = performance.now();
+                if (classicAoHist && classicAoInvert(pv, classicAoInv)) {
+                    let q = ht[38],
+                        out = classicAoHist[classicAoHi ^ 1];
+                    Gn("aoDepth", gr.depthTexture, 0, q), Sf(38, out, classicAoA, classicAoHist[classicAoHi], [
+                        ["invPV", classicAoInv],
+                        ["prevPV", classicAoPrev],
+                        ["aoKeep", classicAoLast && now - classicAoLast < 250 ? .55 : 0]
+                    ]), aoSrc = out, classicAoHi ^= 1;
+                }
+                classicAoPrev.set(pv), classicAoLast = now;
+                Sf(36, classicAoB, aoSrc, null, [
                     ["step", 0]
                 ]), Sf(36, e, classicAoB, n, [
                     ["step", 1]
