@@ -29432,8 +29432,11 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 rewardGold: 0
             }));
         },
+        classicRealmNext = 0,
         classicHudTick = () => {
             if (!T || !T.player || classicIsEditor()) return;
+            let rn = performance.now();
+            rn >= classicRealmNext && (classicRealmNext = rn + 500, nn.forEach(classicRealmUpdate));
             let on = !!classicWorld && T.file === classicWorld.source;
             classicStaticsTick(on, T.player.pos), on && (classicSignsDraw(T.player.pos), classicStaticTalkTick());
         },
