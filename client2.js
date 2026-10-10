@@ -7993,10 +7993,10 @@ void main() {
                 n = Math.sin(a.angle || 0);
             return Math.abs(dx * c + dz * n) <= a.w / 2 && Math.abs(dz * c - dx * n) <= a.h / 2;
         },
-        ocOptions = (src, x, z) => {
+        ocOptions = (src, x, z, friendly) => {
             let areas = ocData.areas || [],
                 pick = rules => {
-                    let r = rules && (rules[src] && rules[src].length ? rules[src] : rules["*"]);
+                    let r = rules && (rules[src] && rules[src].length ? rules[src] : friendly ? null : rules["*"]);
                     return r && r.length ? r : null;
                 };
             for (let i = areas.length - 1; i >= 0; --i) {
@@ -8010,7 +8010,7 @@ void main() {
         },
         oldCreatureFor = e => {
             let src = (e.originalName || e.name || "").toLowerCase(),
-                opts = ocOptions(src, e.pos[0], e.pos[2]);
+                opts = ocOptions(src, e.pos[0], e.pos[2], !!(T && T.player && T.player !== e && T.player.hostility(e) === 0));
             if (!opts) return null;
             let pick = ocPick(opts, e.id, 11);
             if (!pick) return null;
@@ -8023,7 +8023,7 @@ void main() {
             return pick;
         },
         oldCreatureCheck = e => {
-            if (e.__ocDone || !oe.faivelRetexture || e.type !== 1 || !e.pos || !(e.pos[0] || e.pos[2]) || !(e.originalName || e.name)) return;
+            if (e.__ocDone || !oe.faivelRetexture || !T || !T.player || e.type !== 1 || !e.pos || !(e.pos[0] || e.pos[2]) || !(e.originalName || e.name)) return;
             e.__ocDone = !0;
             let pick = oldCreatureFor(e);
             if (!pick) return;
