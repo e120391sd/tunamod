@@ -13110,7 +13110,7 @@ precision highp float;precision highp int;uniform Environment{vec3 worldlight[3]
     var p6 = `#version 300 es
 precision highp float;precision highp int;uniform Screen{vec2 resolution;};uniform sampler2D inputA;uniform vec2 offset[4];uniform vec4 amount;in vec2 vUv;out vec4 fragColor;void main(){vec3 a=texture(inputA,vUv+offset[0]).rgb*amount[0];a+=texture(inputA,vUv+offset[1]).rgb*amount[1];a+=texture(inputA,vUv+offset[2]).rgb*amount[2];a+=texture(inputA,vUv+offset[3]).rgb*amount[3];fragColor=vec4(a,1.0);}`;
     var oldBloomFrag = `#version 300 es
-precision highp float;precision highp int;uniform Screen{vec2 resolution;};uniform sampler2D inputA;uniform sampler2D inputB;uniform int step;uniform float amount;in vec2 vUv;float weight[8]=float[8](0.118,0.113,0.100,0.082,0.061,0.042,0.027,0.016);out vec4 fragColor;void main(){vec2 o=1.0/resolution;vec3 r;if(step==0){r=texture(inputA,vUv).rgb*weight[0];for(int i=1;i<8;++i){r+=texture(inputA,vUv+vec2(o.x*float(i),0.0)).rgb*weight[i];r+=texture(inputA,vUv-vec2(o.x*float(i),0.0)).rgb*weight[i];}fragColor=vec4(r,1.0);return;}r=texture(inputA,vUv).rgb*weight[0];for(int i=1;i<8;++i){r+=texture(inputA,vUv+vec2(0.0,o.y*float(i))).rgb*weight[i];r+=texture(inputA,vUv-vec2(0.0,o.y*float(i))).rgb*weight[i];}vec4 b=texture(inputB,vUv);fragColor=vec4(r*r*amount+b.rgb,b.a);}`;
+precision highp float;precision highp int;uniform Screen{vec2 resolution;};uniform sampler2D inputA;uniform float amount;in vec2 vUv;out vec4 fragColor;void main(){vec2 o=1.0/resolution;vec4 b=texture(inputA,vUv);vec3 g=b.rgb*0.6+(texture(inputA,vUv+vec2(o.x,0.0)).rgb+texture(inputA,vUv-vec2(o.x,0.0)).rgb+texture(inputA,vUv+vec2(0.0,o.y)).rgb+texture(inputA,vUv-vec2(0.0,o.y)).rgb)*0.1;fragColor=vec4(g*g*amount+b.rgb,b.a);}`;
     var m6 = `#version 300 es
 precision highp float;precision highp int;uniform Screen{vec2 resolution;};uniform sampler2D inputA;uniform sampler2D inputB;uniform float amount;in vec2 vUv;out vec4 fragColor;void main(){vec4 a=texture(inputA,vUv);vec3 b=texture(inputB,vUv).rgb;b=b*b;fragColor.w=a.w;fragColor.xyz=b*amount+a.xyz;}`;
     var d6 = `#version 300 es
@@ -13255,15 +13255,12 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
     if (oe.faivelRetexture) {
         let folSprite = src => src.replace(/g\[1\]=instNorm\.xyz;[\s\S]*?g\[0\]=normalize\(cross\(g\[1\],g\[2\]\)\);/, "g[0]=vec3(viewMatrix[0][0],viewMatrix[1][0],viewMatrix[2][0]);g[1]=vec3(viewMatrix[0][1],viewMatrix[1][1],viewMatrix[2][1]);g[2]=vec3(viewMatrix[0][2],viewMatrix[1][2],viewMatrix[2][2]);f.x*=fract((instPos.x+instPos.z*1.618)*3.7)<0.5?-1.0:1.0;");
         QM.indexOf("g[1]=instNorm.xyz;") < 0 || KM.indexOf("g[1]=instNorm.xyz;") < 0 ? console.warn("pre 0.5 foliage: foliage shader has changed, keeping the new orientation") : (QM = folSprite(QM), KM = folSprite(KM));
+        let folOld = (src, pairs) => pairs.every(([x]) => src.indexOf(x) >= 0) ? pairs.reduce((r, [x, y]) => r.replace(x, y), src) : (console.warn("2023 foliage: foliage shader has changed, not applied"), src);
+        QM = folOld(QM, [["void main(){vUv=uv;", "float folSh(vec3 p){float dist=length(cameraPosition-p);float s=1.0;if(a==1&&dist<shadowRange[2]){float fd=smoothstep(shadowRange[1],shadowRange[2],dist);vec4 sp=dist>shadowRange[0]?shadowPVMatrix[1]*vec4(p,1.0):shadowPVMatrix[0]*vec4(p,1.0);vec3 sc=(sp.xyz/sp.w)*0.5+0.5;s=dist>shadowRange[0]?texture(shadowMaps[1],sc):texture(shadowMaps[0],sc);s=max(s,fd);}return s;}" + "void main(){vUv=uv;"], ["b+=0.3*lightCols[c].rgb*e;", "b+=0.5*lightCols[c].rgb*e;"], ["vLightDir=worldlight[0]*max(0.0,dot(instNorm.xyz,worldlight[2]));", "vLightDir=worldlight[0]*0.65*folSh(instPos.xyz+vec3(0.0,0.5,0.0));"], ["float e=sin(time+instPos.x+f.x)*0.1*f.y;f.xz+=e;", "f.x+=cos(time*0.5+instPos.x*0.2)*sin(time*4.0+instPos.z*0.5)*0.08*f.y;"]]);
+        KM = folOld(KM, [["void main(){vUv=uv;", "float folSh(vec3 p){float dist=length(cameraPosition-p);float s=1.0;if(a==1&&dist<shadowRange[2]){float fd=smoothstep(shadowRange[1],shadowRange[2],dist);vec4 sp=dist>shadowRange[0]?shadowPVMatrix[1]*vec4(p,1.0):shadowPVMatrix[0]*vec4(p,1.0);vec3 sc=(sp.xyz/sp.w)*0.5+0.5;s=dist>shadowRange[0]?texture(shadowMaps[1],sc):texture(shadowMaps[0],sc);s=max(s,fd);}return s;}" + "void main(){vUv=uv;"], ["b+=0.3*lightCols[c].rgb*e;", "b+=0.5*lightCols[c].rgb*e;"], ["vLightDir+=worldlight[0]*max(0.0,dot(instNorm.xyz,worldlight[2]));", "vLightDir=worldlight[0]*0.65*folSh(instPos.xyz+vec3(0.0,0.5,0.0));"], ["vec3 f=position;", "vec3 f=position;f.x+=cos(time*0.5+instPos.x*0.2)*sin(time*4.0+instPos.z*0.5)*0.08*f.y;"]]);
+        YM = folOld(YM, [["b.rgb=b.rgb*(vLight+vLightAmb+vLightDir*d);", "b.rgb=b.rgb*(vLight+vLightAmb+vLightDir);"]]);
+        XM = folOld(XM, [["b.rgb=b.rgb*(vLight+vLightAmb+vLightDir*c);", "b.rgb=b.rgb*(vLight+vLightAmb+vLightDir);"]]);
     }
-    var oldFolPointVert = `#version 300 es
-precision highp float;precision highp int;precision highp sampler2DShadow;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};out float vCameraDistance;uniform Pointlights{vec4 lightCols[16];vec3 lightPos[16];int lightCount;};out vec3 vLight;uniform Shadows{uniform mat4 shadowPVMatrix[2];uniform vec3 shadowRange;};const int a=
-#SHADOWS;uniform sampler2DShadow shadowMaps[2];uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform Screen{vec2 resolution;};in vec4 posOffset;in vec3 info;out float lightValue;out float direction;out float wind;void main(){direction=info.x;vCameraDistance=length(cameraPosition-posOffset.xyz);float scale=clamp(1.0-(vCameraDistance-min(fog[1][1]/2.0,100.0))/20.0,0.0,1.0);if(scale<=0.0){gl_PointSize=0.0;gl_Position=vec4(2.0,2.0,2.0,1.0);lightValue=0.0;wind=0.0;vLight=vec3(0.0);return;}wind=cos(time*0.5+posOffset.x*0.2)*sin(time*4.0+posOffset.z*0.5);vec4 wp=vec4(posOffset.xyz,1.0);float sv=1.0;if(a==1&&vCameraDistance<shadowRange[2]){float fd=smoothstep(shadowRange[1],shadowRange[2],vCameraDistance);vec4 sp=vCameraDistance>shadowRange[0]?shadowPVMatrix[1]*wp:shadowPVMatrix[0]*wp;vec3 sc=(sp.xyz/sp.w)*0.5+0.5;sv=vCameraDistance>shadowRange[0]?texture(shadowMaps[1],sc):texture(shadowMaps[0],sc);sv=max(sv,fd);}lightValue=sv*0.65;vec3 light=vec3(0.0);for(int i=0;i<lightCount;++i){vec3 ld=lightPos[i]-posOffset.xyz;float st=lightCols[i].w-dot(ld,ld);if(st>0.0){st/=lightCols[i].w;st=st*st;light+=0.5*lightCols[i].rgb*st;}}vLight=light;gl_Position=projectionViewMatrix*wp;gl_PointSize=(1.0/gl_Position.w)*resolution[1]*scale*posOffset.w*0.8390996*projectionMatrix[1][1]*1.2;}`;
-    var oldFolPointFrag = `#version 300 es
-precision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};in float vCameraDistance;uniform sampler2D foliageDiffuse;uniform vec4 folCell;in vec3 vLight;in float lightValue;in float direction;in float wind;out vec4 fragColor;const float CUTOFF=1.0/(128.0/4.0);void main(){vec2 pc=(gl_PointCoord-0.5)*1.2+0.5;vec2 uv=vec2(pc.x+wind*(1.0-pc.y)*0.08,pc.y);bool cut=uv.x<CUTOFF||uv.x>1.0-CUTOFF||uv.y>1.0-CUTOFF||uv.y<CUTOFF;vec2 ts=vec2(textureSize(foliageDiffuse,0));vec2 dx=dFdx(pc*ts*0.25),dy=dFdy(pc*ts*0.25);float lod=clamp(0.5*log2(max(max(dot(dx,dx),dot(dy,dy)),1e-8)),0.0,4.0);if(cut){discard;}uv.x=mod(direction*uv.x,1.0)*0.25;uv.y=folCell.z>0.5?1.0-uv.y*0.25:uv.y*0.25;uv+=folCell.xy;vec2 lo=vec2(folCell.x,folCell.z>0.5?1.0+folCell.y-0.25:folCell.y),m=0.5*exp2(lod)/ts;uv=clamp(uv,lo+m,lo+0.25-m);vec4 result=textureLod(foliageDiffuse,uv,lod);if(result.a<0.1)discard;result.a=min(1.0,result.a*2.0);result.rgb=result.rgb*vLight+result.rgb*worldlight[0]*lightValue+result.rgb*worldlight[1];result.rgb=mix(result.rgb,fog[0],smoothstep(fog[1][0],fog[1][1],vCameraDistance));fragColor=result;}`;
-    var oldFolPointFlipY = !0,
-        oldFolPointVao = null,
-        oldFolPointCellLoc = null;
     var ch = {
             frag: GM,
             vert: HM
@@ -13421,25 +13418,6 @@ precision highp float;precision highp int;uniform Environment{vec3 worldlight[3]
                 globalUniforms: xn,
                 transparent: !0,
                 attributeLocations: t.foliage
-            }), ht[39] = kn({
-                vertex: oldFolPointVert.replace("#SHADOWS", oe.shadows ? 1 : 0),
-                fragment: oldFolPointFrag,
-                cullFace: null,
-                instanced: [{
-                    name: "posOffset",
-                    size: 4
-                }, {
-                    name: "info",
-                    size: 3
-                }],
-                uniforms: {
-                    folCell: {
-                        value: [0, 0, 1, 0]
-                    }
-                },
-                globalUniforms: xn,
-                transparent: !0,
-                attributeLocations: ["position", "uv", "posOffset", "info"]
             }), ht[14] = kn({
                 vertex: uh.vert,
                 fragment: uh.frag,
@@ -13708,12 +13686,6 @@ precision highp float;precision highp int;uniform Environment{vec3 worldlight[3]
                 uniforms: {
                     inputA: {
                         value: null
-                    },
-                    inputB: {
-                        value: null
-                    },
-                    step: {
-                        value: 0
                     },
                     amount: {
                         value: 1
@@ -32589,7 +32561,7 @@ precision highp float;precision highp int;uniform Environment{vec3 worldlight[3]
             1235: [[4, 122], [8, 71]],
             1238: [[3, 55], [7, 18]]
         },
-        oldFolScale = 1.25,
+        oldFolScale = 1.125,
         oldFolTexSheets = {},
         oldFolSheets = {
             guardstone: 1214
@@ -32613,11 +32585,10 @@ precision highp float;precision highp int;uniform Environment{vec3 worldlight[3]
                 texture: tex,
                 cell
             }, oldFolLook);
-            return oldFolCellOf.set(id, cell), Ec.set(id, foliageExtras(gridCellFoliage(Object.assign({}, base, {
+            return Ec.set(id, foliageExtras(gridCellFoliage(Object.assign({}, base, {
                 id
             }), o), o)), oldFolIds.set(key, id), id;
         },
-        oldFolCellOf = new Map,
         oldFolSeed = 1,
         oldFolSetSeed = v => (oldFolSeed = v % 2147483647, oldFolSeed <= 0 && (oldFolSeed += 2147483646)),
         oldFolInt = () => oldFolSeed = 16807 * oldFolSeed % 2147483647,
@@ -32678,15 +32649,15 @@ precision highp float;precision highp int;uniform Environment{vec3 worldlight[3]
                     let x = e - .5 + oldFolRand(),
                         z = i - .5 + oldFolRand();
                     if (x < 0 || x >= 64 || z < 0 || z >= 64) continue;
-                    let size = (.6 * oldFolRand() + .7) * (d ? .8 : .5),
-                        dir = oldFolInt() % 2 ? -1 : 1;
+                    let size = (.6 * oldFolRand() + .7) * (d ? .8 : .5);
+                    oldFolInt();
                     let fid = oldFolCellId(entry[0], oldFolTexSheets[own] || sheet);
                     if (fid == null) continue;
                     if (t.__folRecord) {
                         t.__folRecord(Math.floor(x), Math.floor(z), fid, size * oldFolScale);
                         continue;
                     }
-                    perCell.has(fid) || perCell.set(fid, []), perCell.get(fid).push(x, z, size, dir), placed++;
+                    perCell.has(fid) || perCell.set(fid, []), perCell.get(fid).push(x, z, size * oldFolScale), placed++;
                 }
             }
             if (t.__folRecord) return !0;
@@ -32694,24 +32665,23 @@ precision highp float;precision highp int;uniform Environment{vec3 worldlight[3]
             let ids = [...perCell.keys()].slice(0, 32),
                 geo = t.geometry.foliage = {
                     instances: [],
-                    folIds: ids,
-                    points: !0
+                    folIds: ids
                 };
             ids.forEach((fid, o) => {
                 geo.instances.push(HN(o));
                 let def = Ec.get(fid);
-                C7.has(def.texture) || (C7.add(def.texture), Ao(def.texture, r => {
+                P1.has(def.id) || P1.set(def.id, F7(def)), C7.has(def.texture) || (C7.add(def.texture), Ao(def.texture, r => {
                     A0(r, 16), ws(r), Ly.set(def.texture, r)
                 }));
                 let U = geo.instances[o].attributes.inst.data,
                     list = perCell.get(fid),
                     cnt = 0;
-                for (let j = 0; j < list.length && cnt < S7; j += 4) {
+                for (let j = 0; j < list.length && cnt < S7; j += 3) {
                     let x = list[j],
                         z = list[j + 1],
-                        l = list[j + 2],
+                        nrm = T.getNormal(x + ox, z + oz),
                         $ = cnt++ * 7;
-                    U[$] = x + ox, U[$ + 1] = ii(t, x, z) + .8 * l - .1, U[$ + 2] = z + oz, U[$ + 3] = l, U[$ + 4] = list[j + 3], U[$ + 5] = 0, U[$ + 6] = 0;
+                    U[$] = x + ox, U[$ + 1] = ii(t, x, z), U[$ + 2] = z + oz, U[$ + 3] = list[j + 2], U[$ + 4] = nrm[0] + .001, U[$ + 5] = nrm[1], U[$ + 6] = nrm[2];
                 }
                 let f = geo.instances[o];
                 T0(f, cnt), Po(f, f.attributes.inst), f.bounds = t.geometry.terrain.bounds;
@@ -32836,28 +32806,12 @@ precision highp float;precision highp int;uniform Environment{vec3 worldlight[3]
                     for (let f = 0; f < c.folIds.length; ++f) {
                         let u = c.folIds[f],
                             p = o.indexOf(u);
-                        p < 0 && (o.push(u), s.push([]), i.push(c.points ? 39 : Ec.get(u).type === 0 ? 13 : 14), p = o.length - 1), s[p].push(c.instances[f])
+                        p < 0 && (o.push(u), s.push([]), i.push(Ec.get(u).type === 0 ? 13 : 14), p = o.length - 1), s[p].push(c.instances[f])
                     }
                 }
             }
             for (let r = 0; r < o.length; ++r) {
                 let l = Ec.get(o[r]);
-                if (i[r] === 39) {
-                    let c = ht[39];
-                    if (!c.active || !Ly.has(l.texture)) continue;
-                    lt.currentProgram !== c.id && (N.useProgram(c.program), lt.currentProgram = c.id, Oc(c), Bc(c), Kv(c.uniformArray), oldFolPointCellLoc = N.getUniformLocation(c.program, "folCell"));
-                    oldFolPointVao || (oldFolPointVao = N.createVertexArray()), N.bindVertexArray(oldFolPointVao), lt.currentGeometry = -1;
-                    let cell = oldFolCellOf.get(l.id) || 0;
-                    Gn("foliageDiffuse", Ly.get(l.texture), 0, c), Zu(c), N.uniform4f(oldFolPointCellLoc, cell % 4 * .25, (oldFolPointFlipY ? -1 : 1) * Math.floor(cell / 4) * .25, oldFolPointFlipY ? 1 : 0, 0);
-                    let u = s[r];
-                    for (let p = 0; p < u.length; ++p) {
-                        let g = u[p];
-                        if (!g.instancedCount) continue;
-                        N.bindBuffer(N.ARRAY_BUFFER, g.attributes.inst.buffer), N.vertexAttribPointer(n, 4, N.FLOAT, !1, 7 * 4, 0), N.enableVertexAttribArray(n), dc(n, 1), N.vertexAttribPointer(e, 3, N.FLOAT, !1, 7 * 4, 4 * 4), N.enableVertexAttribArray(e), dc(e, 1), lt.boundBuffer = g.attributes.inst.id, N.drawArraysInstanced(N.POINTS, 0, 1, g.instancedCount);
-                    }
-                    N.bindVertexArray(null);
-                    continue;
-                }
                 if (P1.has(l.id) && Ly.has(l.texture)) {
                     let a = i[r],
                         c = ht[a];
@@ -37847,10 +37801,7 @@ precision highp float;precision highp int;uniform Environment{vec3 worldlight[3]
                 ]), [e, n] = [n, e];
             }
             if (t.has(32) && (t.delete(32), Sf(32, e, n, null, []), [e, n] = [n, e]), t.has(33) && (t.delete(33), Sf(33, e, n, null, []), [e, n] = [n, e]), t.has(30)) {
-                t.delete(30), Sf(37, e, n, null, [
-                    ["step", 0]
-                ]), Sf(37, null, e, n, [
-                    ["step", 1],
+                t.delete(30), Sf(37, null, n, null, [
                     ["amount", ht[31].uniforms.amount.value]
                 ])
             } else V1(n, null, N.COLOR_BUFFER_BIT)
