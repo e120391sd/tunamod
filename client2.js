@@ -7478,11 +7478,50 @@ void main() {
         if (oe.faivelRetexture) {
             $v.set(23, shadowstrider);
             $v.set(31, scarab);
+            let silk = $v.get(99);
+            silk && $v.set(99, {
+                ...shadowstrider,
+                id: 99,
+                colPrim: silk.colPrim,
+                colSec: silk.colSec,
+                body: shadowstrider.body.map(p => {
+                    let q = silk.body.find(b => b.bid === p.bid);
+                    return q ? {
+                        ...p,
+                        col: q.col.slice(),
+                        colMode: q.colMode
+                    } : {
+                        ...p
+                    };
+                })
+            });
+            let hexCol = (h, a) => [(h >> 16 & 255) / 255, (h >> 8 & 255) / 255, (h & 255) / 255, a];
+            for (let [tier, oldId, eyes, prim, sec, curShape] of oldMountLooks) {
+                let item = Xt["mount" + tier],
+                    cur = item && $v.get(item.skin),
+                    old = curShape ? cur : oldSkinImports.find(k => k.id === 1e3 + oldId);
+                if (!old || !cur) continue;
+                let id = 7100 + tier;
+                $v.set(id, {
+                    ...old,
+                    id,
+                    size: cur.size,
+                    soundset: cur.soundset,
+                    mountPart: cur.mountPart,
+                    mountPos: cur.mountPos,
+                    colPrim: prim ? hexCol(...prim) : old.colPrim,
+                    colSec: sec ? hexCol(...sec) : old.colSec,
+                    body: old.body.map(p => ({
+                        ...p,
+                        col: p.bid === 1 && eyes ? hexCol(...eyes) : p.colMode === 1 && prim ? hexCol(...prim) : p.colMode === 2 && sec ? hexCol(...sec) : p.col.slice()
+                    }))
+                }), item.skin = id;
+            }
         }
         for (let skin of oldSkinImports) Nv.has(skin.skeleton) && $v.set(skin.id, skin);
         if (oe.faivelRetexture)
             for (let skin of $v.values())
-                for (let part of skin.body || []) part.mid === spiderLegMesh && (part.mid = customLegMesh);
+                for (let part of skin.body || [])(part.mid === spiderLegMesh || part.mid === spiderLegMeshNew) && (part.mid = customLegMesh, part.scl = (part.scl || [1, 1, 1]).map(v => v * customLegScale));
 
         if (oe.guardstoneTextureFix && !oe.faivelRetexture) {
             for (let terr of guardstoneFixTerrains) Ac.set(terr.id, Object.assign({}, terr, {
@@ -8062,7 +8101,24 @@ void main() {
             e.__ocSrc = (e.originalName || e.name).toLowerCase(), e.__oc = pick, e.name = pick.name, e.setSize((e.stats && e.stats.getStat(27) || 100) / 100), e.visual && e.remakeTransform();
         };
     var spiderLegMesh = 1560,
-        customLegMesh = 7878;
+        spiderLegMeshNew = 1627,
+        customLegMesh = 7878,
+        customLegScale = 1.6 / 1.4,
+        oldMountLooks = [
+            [0, 6],
+            [1, 21],
+            [2, 21, [11332842, 0], [4772165, -.2], [1351204, -.2]],
+            [3, 21, [16751284, 0], [15737892, .5], [15737892, .5]],
+            [4, 22, [14292553, 0], [4075311, .1], [1970198, .1], !0],
+            [6, 24, [15704439, 0], [11313312, .1], [8221555, .1]],
+            [7, 25],
+            [8, 27, [12451327, 0], [3950066, -.4], [3511541, -.4]],
+            [9, 28, [2747996, 0], [1907231, .4]],
+            [10, 30, [16758891, 0], [15448667, .1], [11370036, .1]],
+            [12, 32],
+            [13, 29, [14715686, -.7], [3355443, .5]],
+            [14, 33, [16119285, 0]]
+        ];
     var guardstoneFixTerrains = [{
         brightest: 143,
         darkest: 64,
@@ -15176,7 +15232,6 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         breakOnCast: !0,
         tags: new Set([12]),
         icon: "ui/skills/39",
-        customIcon: t => "items/mount/mount" + $r[t.data[0]].tier + "_q1",
         fx: {
             mount: t => $r[t.data[0]].skin,
             apply: 76,
