@@ -7478,42 +7478,18 @@ void main() {
         if (oe.faivelRetexture) {
             $v.set(23, shadowstrider);
             $v.set(31, scarab);
-            let silk = $v.get(99);
-            silk && $v.set(99, {
-                ...shadowstrider,
-                id: 99,
-                colPrim: silk.colPrim,
-                colSec: silk.colSec,
-                body: shadowstrider.body.map(p => {
-                    let q = silk.body.find(b => b.bid === p.bid);
-                    return q ? {
-                        ...p,
-                        col: q.col.slice(),
-                        colMode: q.colMode
-                    } : {
-                        ...p
-                    };
-                })
-            });
             let hexCol = (h, a) => [(h >> 16 & 255) / 255, (h >> 8 & 255) / 255, (h & 255) / 255, a];
-            for (let [tier, oldId, eyes, prim, sec, curShape] of oldMountLooks) {
+            for (let [tier, eyes, alpha] of oldMountEyes) {
                 let item = Xt["mount" + tier],
-                    cur = item && $v.get(item.skin),
-                    old = curShape ? cur : oldSkinImports.find(k => k.id === 1e3 + oldId);
-                if (!old || !cur) continue;
+                    cur = item && $v.get(item.skin);
+                if (!cur) continue;
                 let id = 7100 + tier;
                 $v.set(id, {
-                    ...old,
+                    ...cur,
                     id,
-                    size: cur.size,
-                    soundset: cur.soundset,
-                    mountPart: cur.mountPart,
-                    mountPos: cur.mountPos,
-                    colPrim: prim ? hexCol(...prim) : old.colPrim,
-                    colSec: sec ? hexCol(...sec) : old.colSec,
-                    body: old.body.map(p => ({
+                    body: cur.body.map(p => ({
                         ...p,
-                        col: p.bid === 1 && eyes ? hexCol(...eyes) : p.colMode === 1 && prim ? hexCol(...prim) : p.colMode === 2 && sec ? hexCol(...sec) : p.col.slice()
+                        col: p.bid === 1 ? hexCol(eyes, alpha) : p.col.slice()
                     }))
                 }), item.skin = id;
             }
@@ -8104,20 +8080,16 @@ void main() {
         spiderLegMeshNew = 1627,
         customLegMesh = 7878,
         customLegScale = 1.6 / 1.4,
-        oldMountLooks = [
-            [0, 6],
-            [1, 21],
-            [2, 21, [11332842, 0], [4772165, -.2], [1351204, -.2]],
-            [3, 21, [16751284, 0], [15737892, .5], [15737892, .5]],
-            [4, 22, [14292553, 0], [4075311, .1], [1970198, .1], !0],
-            [6, 24, [15704439, 0], [11313312, .1], [8221555, .1]],
-            [7, 25],
-            [8, 27, [12451327, 0], [3950066, -.4], [3511541, -.4]],
-            [9, 28, [2747996, 0], [1907231, .4]],
-            [10, 30, [16758891, 0], [15448667, .1], [11370036, .1]],
-            [12, 32],
-            [13, 29, [14715686, -.7], [3355443, .5]],
-            [14, 33, [16119285, 0]]
+        oldMountEyes = [
+            [2, 11332842, 0],
+            [3, 16751284, 0],
+            [4, 14292553, 0],
+            [6, 15704439, 0],
+            [8, 12451327, 0],
+            [9, 2747996, 0],
+            [10, 16758891, 0],
+            [13, 14715686, -.7],
+            [14, 16119285, 0]
         ];
     var guardstoneFixTerrains = [{
         brightest: 143,
