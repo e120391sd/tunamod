@@ -30823,7 +30823,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         hy = 0,
         gy = 0,
         kE = (t, e) => {
-            t = Math.max(90, Math.min(1500, t)), Ts = t, uy = Math.min(Ts, 150), fy = 5, my = Ts, gy = Ts ** 2, dy = Math.min(Ts, 50), hy = Math.min(Ts / 32, 150 / 32) ** 2, _t.far = yE = t + 10, oN = yE ** 2, iu(_t), Zp = Math.min(Ts, 100 + e * 50), Kp = Math.min(Ts, 40 + e * 10), py = (Zp + Kp) / 2, to = Math.ceil(t * 2 / 32), to += to % 2, yr = to / 2, yr += yr % 2, sN()
+            t = Math.max(150, Math.min(1500, t)), Ts = t * .8, uy = Math.min(Ts, 150), fy = 5, my = Ts, gy = Ts ** 2, dy = Math.min(Ts, 50), hy = Math.min(Ts / 32, 150 / 32) ** 2, _t.far = yE = t, oN = t ** 2, iu(_t), Zp = Math.min(Ts, 100 + e * 50), Kp = Math.min(Ts, 40 + e * 10), py = (Zp + Kp) / 2, to = Math.ceil(t * 2 / 32), to += to % 2, yr = to / 2, yr += yr % 2, sN()
         },
         cy = [],
         rl = [],
@@ -32027,7 +32027,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         let r = on.sky.data;
         Bi(r.skycolors, 0, bn.skytop[s], bn.skytop[i], o), Bi(r.skycolors, 3, bn.skymid[s], bn.skymid[i], o), Bi(r.skycolors, 6, bn.skybot[s], bn.skybot[i], o), Bi(r.skycolors, 9, bn.horizon[s], bn.horizon[i], o), Bi(r.skycolors, 12, bn.clouds[s], bn.clouds[i], o), Bi(r.suncolor, 0, bn.sun[s], bn.sun[i], o), ut(vf, gf), vf[1] = Math.abs(Math.sin(t * 6.282)), go(vf, vf);
         let l = on.environment.data;
-        Bi(l.worldlight, 0, bn.direct[s], bn.direct[i], o), Bi(l.worldlight, 3, bn.ambient[s], bn.ambient[i], o), l.worldlight[6] = gf[0], l.worldlight[7] = gf[1], l.worldlight[8] = gf[2], Bi(l.fog, 0, bn.fog[s], bn.fog[i], o), l.fog[3] = n > 0 ? -100 : fy, l.fog[4] = n > 0 ? uy : Ts + 10, l.daycycle[0] = t, l.time[0] = e % 3600, ht[31].uniforms.amount.value = qu(o, bn.bloom[s], bn.bloom[i])
+        Bi(l.worldlight, 0, bn.direct[s], bn.direct[i], o), Bi(l.worldlight, 3, bn.ambient[s], bn.ambient[i], o), l.worldlight[6] = gf[0], l.worldlight[7] = gf[1], l.worldlight[8] = gf[2], Bi(l.fog, 0, bn.fog[s], bn.fog[i], o), l.fog[3] = n > 0 ? -100 : fy, l.fog[4] = n > 0 ? uy : Ts, l.daycycle[0] = t, l.time[0] = e % 3600, ht[31].uniforms.amount.value = qu(o, bn.bloom[s], bn.bloom[i])
     };
     var RN = [],
         zN = [],
