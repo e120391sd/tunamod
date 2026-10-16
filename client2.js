@@ -29182,7 +29182,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             let n = T.chunkAmount || 100;
             if (cx < 0 || cz < 0 || cx >= n || cz >= n) return null;
             let now = performance.now();
-            now - classicWaterCacheAt > 1e3 && (classicWaterCache.clear(), classicWaterCacheAt = now);
+            now - classicWaterCacheAt > 2e3 && (classicWaterCache.clear(), classicWaterCacheAt = now);
             let id = cx + cz * n;
             if (classicWaterCache.has(id)) return classicWaterCache.get(id);
             let x = cx * 64 + 32,
@@ -29190,7 +29190,12 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 c = classicWaterChunkCols.get(id) || classicWaterAreaCols.get(T.getAreaId(x, z)) || classicWaterRealmCols(x, z) || null;
             return classicWaterCache.set(id, c), c;
         },
+        classicWaterCornerCache = new Map,
         classicWaterCorners = (cx, cz, own) => {
+            let ck = cx + cz * 1e4,
+                hit = classicWaterCornerCache.get(ck);
+            if (hit && hit.at === classicWaterCacheAt) return hit.v;
+            classicWaterCornerCache.size > 4e3 && classicWaterCornerCache.clear();
             let out = new Array(36),
                 r = Math.ceil(classicWaterFade + 1),
                 s2 = 2 * classicWaterFade * classicWaterFade / 2.2;
@@ -29215,7 +29220,10 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     }
                 for (let i = 0; i < 9; ++i) out[k * 9 + i] = tw > 0 ? acc[i] / tw : own[i / 3 | 0][i % 3];
             }
-            return out;
+            return classicWaterCornerCache.set(ck, {
+                at: classicWaterCacheAt,
+                v: out
+            }), out;
         },
         classicWaterUniforms = (e, t) => {
             let L = classicWaterLoc.get(e.program);
