@@ -32269,7 +32269,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 let was = this.sink;
                 this.computeGroundSink(e), this.sink !== was && this.updateMesh(e.origin)
             }
-            this.mesh && this.mesh.data && this.mesh.data.interiorlight && T.getInteriorLight(this.mesh.data.interiorlight, b1(Oi, this.mesh.position, 3, 3, 3))
+            this.mesh && this.mesh.data && this.mesh.data.interiorlight && (classicWorld && T.file === classicWorld.source ? bo(this.mesh.data.interiorlight, 0, 0, 0, 0) : T.getInteriorLight(this.mesh.data.interiorlight, b1(Oi, this.mesh.position, 3, 3, 3)))
         }
         createEffects() {
             if (this.isEffectProp = !0, !this.effectsCreated) {
