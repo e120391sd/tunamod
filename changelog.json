@@ -1,6 +1,22 @@
 {
     "entries": [
         {
+            "title": "Update 2.06 - Headless & Faivel map changes",
+            "date": "2026-10-18",
+            "color": "#F5C247",
+            "description": "",
+            "sections": [
+                {
+                    "name": "Map",
+                    "color": "#db9155",
+                    "points": [
+                        "Edited the entirety of old & new headless",
+                        "Improved every currently edited area of faivel and finished the entirety of north & east faivel (only spots missing now are raiders and tribal giants)"
+                    ]
+                }
+            ]
+        },
+        {
             "title": "Update 2.05 - Faivel changes & creature overrides",
             "date": "2026-10-09",
             "color": "#F5C247",
