@@ -2466,6 +2466,7 @@ void main() {
             return !1;
         }
     })();
+    var classicWorldOnly = !1;
     worldOverrideOff && Object.assign(oe, {
         faivelRetexture: !1,
         oldFoliage: !1,
@@ -7511,7 +7512,7 @@ void main() {
             });
         }
 
-        if (oe.faivelRetexture) {
+        if (oe.faivelRetexture && !classicWorldOnly) {
             textureOverrides.set(1867, {
                 id: 1226
             });
@@ -7861,7 +7862,7 @@ void main() {
             }
 
         }
-        oe.faivelRetexture && retextureTerrains();
+        oe.faivelRetexture && !classicWorldOnly && retextureTerrains();
         if (Pc.has(1218))
             for (let i = 0; i < 64; ++i) Pc.set(12180 + i, {
                 ...Pc.get(1218),
@@ -13251,10 +13252,10 @@ void main(){if(wMask(vWorldPos.xz)>0.5)discard;vec2 wUv=vUv/max(classicWUv,1.0);
 float depth=max(0.0,vWorldPos.y-wTerr(vWorldPos.xz))*0.25;float speed=0.05;float vis=0.65;float wave=0.0;vec2 dir=vec2(1.0,0.0);float wiggle=1.0;
 for(int i=0;i<2;++i){float off=1.0/3.0*float(i);float t=mod(time*0.2+off,1.0)*3.141;float sppd=speed+0.2;vec2 shift=vec2(sppd*dir.y*t+off,sppd*dir.x*t+off);float curve=abs(sin(t));wave+=texture(waterWave,wUv.yx*0.5+shift).r*curve;wiggle+=((sin((wUv.x+shift.y)*10.0)+cos((wUv.y+shift.x)*10.0))*curve*(0.2+sppd*0.6));}
 vec3 colFoam=classicWOn>0.5?wcCol(0,vWorldPos.xz):watercolors[0];vec3 colShallow=classicWOn>0.5?wcCol(1,vWorldPos.xz):watercolors[1];vec3 colDeep=classicWOn>0.5?wcCol(2,vWorldPos.xz):watercolors[2];vec4 bigwave=texture(waterLines,wUv.yx+time*speed*2.0+wave*0.1);
-vec4 wet_c=vec4(colFoam,0.0);vec4 foam_c=vec4(colFoam,0.9);vec4 blub_c=vec4(mix(colFoam,colShallow,0.9)*0.8,0.5)+speed*0.1;vec4 shallow_c=vec4(colShallow,0.4)+bigwave*0.05;vec4 water_c=vec4(mix(colShallow,colDeep,0.5),0.8-vis*0.4)+bigwave*0.08;vec4 deep_c=vec4(colDeep,1.4-vis*0.8)+bigwave*0.12;
+vec4 wet_c=vec4(colFoam,0.0);vec4 foam_c=vec4(colFoam,0.9);vec4 deep_c=vec4(colDeep,1.4-vis*0.8)+bigwave*0.12;vec4 blub_c=deep_c;vec4 shallow_c=deep_c;vec4 water_c=deep_c;
 float wet_r=0.03+0.01*wave;float foam_r=wet_r+0.02+speed*0.05+0.03*wave+wiggle*0.02;float blub_r=foam_r+(0.05+speed*0.5*wave+wiggle*0.05)*vis;float shallow_r=blub_r+(0.2+speed*0.2-wave*0.1)*vis;float water_r=shallow_r+(0.2)*vis;
 vec4 result=vec4(0.0);if(depth<wet_r){result=mix(wet_c,foam_c,smoothstep(0.0,wet_r,depth));}else if(depth<foam_r){result=mix(foam_c,blub_c,smoothstep(wet_r,foam_r,depth));}else if(depth<blub_r){result=mix(blub_c,shallow_c,smoothstep(foam_r+(blub_r-foam_r)*0.3,blub_r,depth));}else if(depth<shallow_r){result=mix(shallow_c,water_c,smoothstep(blub_r+(shallow_r-blub_r)*0.4,shallow_r,depth));}else{result=mix(water_c,deep_c,smoothstep(water_r,1.0,depth));}
-result.rgb-=0.2;vec3 up=vec3(0.0,1.0,0.0);float lambertian=max(dot(worldlight[2],up),0.0);vec3 reflectDir=reflect(-worldlight[2],up);vec3 viewDir=-normalize(vWorldPos.xyz-cameraPosition);float specular=min(1.0,max(0.0,pow(max(dot(reflectDir,viewDir),0.0),10.0)))*(classicWUv>1.5?0.0:0.6);result.rgb=result.rgb*worldlight[0]*lambertian+result.rgb*worldlight[1]+specular*worldlight[0];
+result.rgb-=0.2;vec3 up=vec3(0.0,1.0,0.0);float lambertian=max(dot(worldlight[2],up),0.0);vec3 reflectDir=reflect(-worldlight[2],up);vec3 viewDir=-normalize(vWorldPos.xyz-cameraPosition);float specular=min(1.0,max(0.0,pow(max(dot(reflectDir,viewDir),0.0),10.0)))*(classicWUv>1.5?0.0:0.6);result.rgb=result.rgb*worldlight[0]*lambertian+result.rgb*worldlight[1];
 
 result.rgb=mix(fog[0],result.rgb,(1.0-smoothstep(fog[1][0],fog[1][1],dist)));fragColor=vec4(result.rgb,clamp(result.a,0.0,1.0));}`;
     var classicWaveAt = (w, B) => {
@@ -41568,6 +41569,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             Math.abs(n) > 1 ? this.smoothtime = this.time : n > .05 ? this.smoothtime += e * .5 : n < -.05 ? this.smoothtime += e * 2 : this.smoothtime += e
         }
         getInteriorLight(e, n) {
+            if (classicWorld && this.file === classicWorld.source) return void bo(e, 0, 0, 0, 0);
             let o = this.triangleGrid.queryAABB(n);
             for (let s = 0; s < o.length; ++s)
                 if (o[s].length > 4) {
