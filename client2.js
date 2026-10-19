@@ -1765,7 +1765,7 @@
         classicAoB = null,
         ssao = ee(!1),
         classicSsaoFrag = `#version 300 es
-precision highp float;precision highp int;uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};uniform sampler2D aoDepth;uniform float aoSeed;in vec2 vUv;out vec4 fragColor;const int zr=16;const float Ul=float(zr);const vec3 Rs[zr]=vec3[](vec3(0.5381,0.1856,-0.4319),vec3(0.1379,0.2486,0.4430),vec3(0.3371,0.5679,-0.0057),vec3(-0.6999,-0.0451,-0.0019),vec3(0.0689,-0.1598,-0.8547),vec3(0.0560,0.0069,-0.1843),vec3(-0.0146,0.1402,0.0762),vec3(0.0100,-0.1924,-0.0344),vec3(-0.3577,-0.5301,-0.4358),vec3(-0.3169,0.1063,0.0158),vec3(0.0103,-0.5869,0.0046),vec3(-0.0897,-0.4940,0.3287),vec3(0.7119,-0.0154,-0.0918),vec3(-0.0533,0.0596,-0.5411),vec3(0.0352,-0.0631,0.5460),vec3(-0.4776,0.2847,-0.0271));const float Fc=0.03;const float Lc=0.0000005;const float radius=0.004;const vec2 dq=vec2(0.0,0.001);const vec2 ql=vec2(0.001,0.0);float od(vec2 uv){float d=texture(aoDepth,uv).r;float n=projectionMatrix[3][2]/(projectionMatrix[2][2]-1.0);float f=projectionMatrix[3][2]/(projectionMatrix[2][2]+1.0);float z=2.0*n*f/(f+n-(2.0*d-1.0)*(f-n));return 0.5*(200.1/199.9-40.0/(199.9*z))+0.5;}vec3 normal_from_depth(float BS,vec2 texcoords){float oN=od(texcoords+dq);float NH=od(texcoords+ql);vec3 p1=vec3(dq,oN-BS);vec3 p2=vec3(ql,NH-BS);vec3 Ip=cross(p1,p2);Ip.z=-Ip.z;return normalize(Ip);}void main(){float BS=od(vUv);vec3 tj=vec3(vUv.xy,BS);vec3 Ip=normal_from_depth(BS,vUv);float qh=(2.0*0.1*200.0)/(200.0+0.1-BS*(200.0-0.1))/200.0;float XZ=radius/qh;float NJ=0.0;float ign=fract(52.9829189*fract(dot(gl_FragCoord.xy+aoSeed*5.588238,vec2(0.06711056,0.00583715))));float ang=ign*6.2831853;vec3 uH=normalize(vec3(cos(ang),sin(ang),ign*2.0-1.0));for(int i=0;i<zr;i++){vec3 Jm=XZ*reflect(Rs[i],uH);vec3 HZ=tj+sign(dot(Jm,Ip))*Jm;float Uu=od(clamp(HZ.xy,0.0,1.0));float difference=BS-Uu;NJ+=step(Lc,difference)*(1.0-smoothstep(Lc,Fc,difference));}NJ*=(1.0-smoothstep(0.6,1.0,qh));NJ*=(1.0/Ul);NJ=pow(NJ,1.7);float QE=clamp(0.1+1.0-NJ,0.0,1.0);fragColor=vec4(mix(worldlight[1]*0.2,vec3(1.0),QE),1.0);}`,
+precision highp float;precision highp int;uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};uniform sampler2D aoDepth;uniform float aoSeed;in vec2 vUv;out vec4 fragColor;const int zr=16;const vec3 Rs[zr]=vec3[](vec3(0.5381,0.1856,-0.4319),vec3(0.1379,0.2486,0.4430),vec3(0.3371,0.5679,-0.0057),vec3(-0.6999,-0.0451,-0.0019),vec3(0.0689,-0.1598,-0.8547),vec3(0.0560,0.0069,-0.1843),vec3(-0.0146,0.1402,0.0762),vec3(0.0100,-0.1924,-0.0344),vec3(-0.3577,-0.5301,-0.4358),vec3(-0.3169,0.1063,0.0158),vec3(0.0103,-0.5869,0.0046),vec3(-0.0897,-0.4940,0.3287),vec3(0.7119,-0.0154,-0.0918),vec3(-0.0533,0.0596,-0.5411),vec3(0.0352,-0.0631,0.5460),vec3(-0.4776,0.2847,-0.0271));const float R=1.6;float lz(vec2 uv){float d=texture(aoDepth,uv).r;float n=projectionMatrix[3][2]/(projectionMatrix[2][2]-1.0);float f=projectionMatrix[3][2]/(projectionMatrix[2][2]+1.0);return 2.0*n*f/(f+n-(2.0*d-1.0)*(f-n));}vec3 vp(vec2 uv){float z=lz(uv);return vec3((uv*2.0-1.0)*vec2(z/projectionMatrix[0][0],z/projectionMatrix[1][1]),-z);}void main(){float dRaw=texture(aoDepth,vUv).r;if(dRaw>=0.99999){fragColor=vec4(1.0);return;}vec2 px=1.0/vec2(textureSize(aoDepth,0));vec3 P=vp(vUv);vec3 pr=vp(vUv+vec2(px.x,0.0)),pl=vp(vUv-vec2(px.x,0.0)),pu=vp(vUv+vec2(0.0,px.y)),pd=vp(vUv-vec2(0.0,px.y));vec3 dx=abs(pr.z-P.z)<abs(P.z-pl.z)?pr-P:P-pl;vec3 dy=abs(pu.z-P.z)<abs(P.z-pd.z)?pu-P:P-pd;vec3 Nm=normalize(cross(dx,dy));if(dot(Nm,P)>0.0)Nm=-Nm;float ign=fract(52.9829189*fract(dot(gl_FragCoord.xy+aoSeed*5.588238,vec2(0.06711056,0.00583715))));float ang=ign*6.2831853;vec3 uH=normalize(vec3(cos(ang),sin(ang),ign*2.0-1.0));float occ=0.0;for(int i=0;i<zr;i++){vec3 k=reflect(Rs[i],uH);k*=sign(dot(k,Nm));vec3 S=P+(Nm*0.15+k)*R;vec4 c=projectionMatrix*vec4(S,1.0);vec2 suv=c.xy/c.w*0.5+0.5;if(suv.x<0.0||suv.y<0.0||suv.x>1.0||suv.y>1.0)continue;float sz=-lz(suv);float rc=smoothstep(0.0,1.0,R/max(abs(P.z-sz),1e-3));occ+=(sz>=S.z+0.05?1.0:0.0)*rc;}occ/=float(zr);occ*=1.0-smoothstep(120.0,180.0,-P.z);float QE=clamp(1.0-pow(occ,1.3)*1.15,0.0,1.0);fragColor=vec4(mix(worldlight[1]*0.2,vec3(1.0),QE),1.0);}`,
         classicAoTemporalFrag = `#version 300 es
 precision highp float;precision highp int;uniform Screen{vec2 resolution;};uniform sampler2D inputA;uniform sampler2D inputB;uniform sampler2D aoDepth;uniform mat4 invPV;uniform mat4 prevPV;uniform float aoKeep;in vec2 vUv;out vec4 fragColor;void main(){vec3 cur=texture(inputA,vUv).rgb;vec2 px=1.0/resolution;vec3 mn=cur,mx=cur;for(int y=-1;y<=1;++y)for(int x=-1;x<=1;++x){vec3 c=texture(inputA,vUv+vec2(x,y)*px).rgb;mn=min(mn,c);mx=max(mx,c);}float d=texture(aoDepth,vUv).r;vec4 w=invPV*vec4(vUv*2.0-1.0,d*2.0-1.0,1.0);w/=w.w;vec4 p=prevPV*w;vec2 puv=p.xy/p.w*0.5+0.5;float k=aoKeep;if(p.w<=0.0||puv.x<0.0||puv.y<0.0||puv.x>1.0||puv.y>1.0)k=0.0;vec3 h=clamp(texture(inputB,puv).rgb,mn,mx);fragColor=vec4(mix(cur,h,k),1.0);}`,
         classicAoHist = null,
@@ -1874,7 +1874,7 @@ precision highp float;precision highp int;uniform Screen{vec2 resolution;};unifo
             return () => (off(), row.remove());
         },
         dayTime = e => {
-            let o = worldOverrideOff ? (e / 3600 + .9) % 1 : (Date.now() / 6e5 + .9) % 1;
+            let o = classicPlain ? (e / 3600 + .9) % 1 : (Date.now() / 6e5 + .9) % 1;
             return oe.timeSlider ? oe.timeSlider / 1e3 : o;
         };
     var hc = `#version 300 es
@@ -2466,7 +2466,18 @@ void main() {
             return !1;
         }
     })();
-    var classicWorldOnly = !1;
+    var classicWorldOnly = !0,
+        classicNewGame = !1,
+        classicPlain = worldOverrideOff || classicNewGame;
+    classicNewGame && Object.assign(oe, {
+        faivelRetexture: !1,
+        oldFoliage: !1,
+        classicWater: !1,
+        classicWaterLook: !1,
+        classicWaterColors: !1,
+        classicLighting: !1,
+        guardstoneTextureFix: !0
+    });
     worldOverrideOff && Object.assign(oe, {
         faivelRetexture: !1,
         oldFoliage: !1,
@@ -2476,10 +2487,10 @@ void main() {
         classicLighting: !1,
         guardstoneTextureFix: !0
     });
-    var stoneShaderEnabled = !worldOverrideOff,
+    var stoneShaderEnabled = !worldOverrideOff && !classicNewGame,
         dirtPatchEnabled = !1,
-        gloomEnabled = !worldOverrideOff,
-        shoreShaderEnabled = !worldOverrideOff;
+        gloomEnabled = !worldOverrideOff && !classicNewGame,
+        shoreShaderEnabled = !worldOverrideOff && !classicNewGame;
     var P;
     Vl.subscribe(async t => {
         await fetch(`/data/loc/${t}.json?v=9001382`).then(async e => {
@@ -7496,7 +7507,7 @@ void main() {
                 }), item.skin = id;
             }
         }
-        for (let skin of oldSkinImports) Nv.has(skin.skeleton) && $v.set(skin.id, skin);
+        classicNewGame || oldSkinImports.forEach(skin => Nv.has(skin.skeleton) && $v.set(skin.id, skin));
         if (oe.faivelRetexture)
             for (let skin of $v.values())
                 for (let part of skin.body || [])(part.mid === spiderLegMesh || part.mid === spiderLegMeshNew) && (part.mid = customLegMesh, part.scl = (part.scl || [1, 1, 1]).map(v => v * customLegScale));
@@ -7871,11 +7882,13 @@ void main() {
                 id: 1218,
                 crop: [i & 7, i >> 3, 8]
             });
-        Pc.has(1218) && !worldOverrideOff && classicCellMeshes();
+        Pc.has(1218) && !classicPlain && classicCellMeshes();
         classicWorldApply();
-        for (let id in classicOldParticles) k0.has(+id) && Object.assign(k0.get(+id), classicOldParticles[id]);
-        for (let id in classicOldEffects) ju.has(+id) && ju.set(+id, Object.assign({}, ju.get(+id), JSON.parse(JSON.stringify(classicOldEffects[id]))));
-        for (let id in classicOldRibbons) Uv.has(+id) && Object.assign(Uv.get(+id), classicOldRibbons[id]);
+        if (!classicNewGame) {
+            for (let id in classicOldParticles) k0.has(+id) && Object.assign(k0.get(+id), classicOldParticles[id]);
+            for (let id in classicOldEffects) ju.has(+id) && ju.set(+id, Object.assign({}, ju.get(+id), JSON.parse(JSON.stringify(classicOldEffects[id]))));
+            for (let id in classicOldRibbons) Uv.has(+id) && Object.assign(Uv.get(+id), classicOldRibbons[id]);
+        }
         [
             [1, 1559, 100],
             [117, 1557, 4],
@@ -13172,7 +13185,7 @@ precision highp float;precision highp int;uniform Camera{mat4 projectionMatrix;m
     var s6 = `#version 300 es
 precision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};in float vCameraDistance;in vec4 vWorldPos;precision highp sampler2DShadow;uniform Shadows{uniform mat4 shadowPVMatrix[2];uniform vec3 shadowRange;};const int a=
 #SHADOWS;uniform sampler2DShadow shadowMaps[2];uniform Circle{vec4 circlePos;vec4 circleInfo;};in vec3 vLight;uniform sampler2D diffuse;in vec3 vNormal;in vec2 vUv;in vec4 vInteriorlight;in vec3 vViewDir;vec3 b(vec3 c,vec3 d,vec3 e,vec3 f,float g,vec3 h,float i){f=normalize(f);float j=clamp(dot(f,worldlight[2]),0.0,g);vec3 k=c*mix(0.7,1.1,0.5+(0.5*j));vec3 l=normalize(worldlight[2]+vViewDir);vec3 m=d*pow(max(0.0,dot(l,f)),20.0)*i*max(g*0.7+0.2,0.2)*20.0;vec3 n=k+d*j+h;return n*e+m;}out vec4 fragColor;void main(){if(vCameraDistance>fog[1][1]){fragColor=vec4(fog[0],1.0);return;}vec4 o=texture(diffuse,vUv);if(o.a<0.5)discard;float p=1.0;if(a==1&&vCameraDistance<shadowRange[2]){float q=smoothstep(shadowRange[1],shadowRange[2],vCameraDistance);if(vCameraDistance>shadowRange[0]){vec4 r=shadowPVMatrix[1]*(vWorldPos);vec3 s=(r.xyz/r.w)*0.5+0.5;p=texture(shadowMaps[1],s);}else{vec4 r=shadowPVMatrix[0]*(vWorldPos);vec3 s=(r.xyz/r.w)*0.5+0.5;p=texture(shadowMaps[0],s);}p=p;p=max(p,q);}vec3 t=worldlight[1];vec3 u=worldlight[0];t=mix(t,vInteriorlight.rgb*0.5,vInteriorlight.a);u=mix(u,vInteriorlight.rgb,vInteriorlight.a);o.rgb=b(t,u,o.rgb,vNormal,p,vLight,0.0);o.rgb/=o.a;float v=(1.0-smoothstep(fog[1][0],fog[1][1],vCameraDistance));o.rgb=mix(fog[0],o.rgb,v);float w=distance(vWorldPos.xz,circlePos.xz);float x=min(1.0,max(0.0,4.0-abs(vWorldPos.y-circlePos.y)));if(w<circlePos.w+0.1&&x>0.0){o.rgb=mix(o.rgb,circleInfo.rgb,x*circleInfo.a*((w<circlePos.w?w/circlePos.w*0.5:0.0)+max(0.,(0.1-abs(circlePos.w-w))/0.1)));}fragColor=o;}`;
-    worldOverrideOff || (e6 = e6.replace("float u=max(0.0,min(1.0,vColor[3]*0.2));vec4 v=vec4(b(s,t,vColor.rgb,vNormal,o,vLight,u),vAlpha);float w=max(0.0,min(1.0,-vColor[3]));v.rgb=mix(v.rgb,vColor.rgb,w);", "vec3 fn=normalize(vNormal)*(gl_FrontFacing?1.0:-1.0);float fl=clamp(dot(fn,worldlight[2]),0.0,1.0);vec3 fr=reflect(worldlight[2],fn);float fs=pow(max(0.0,dot(normalize(cameraPosition-vWorldPos.xyz),-fr))*clamp(vColor[3]*2.0,0.0,1.0)*1.5,5.0);vec4 v=vec4(vColor.rgb*(vLight+(fl*t+fs)*o+s+max(vColor[3]*0.5-0.5,-vColor[3])),vAlpha);"), s6 = s6.replace("o.rgb=b(t,u,o.rgb,vNormal,p,vLight,0.0);", "o.rgb=b(t,u,o.rgb,vNormal*(gl_FrontFacing?1.0:-1.0),p,vLight,0.0);").replace("float j=clamp(dot(f,worldlight[2]),0.0,g);vec3 k=c*mix(0.7,1.1,0.5+(0.5*j));", "float j=clamp(dot(f,worldlight[2]),0.0,1.0)*g;vec3 k=c;"));
+    classicPlain || (e6 = e6.replace("float u=max(0.0,min(1.0,vColor[3]*0.2));vec4 v=vec4(b(s,t,vColor.rgb,vNormal,o,vLight,u),vAlpha);float w=max(0.0,min(1.0,-vColor[3]));v.rgb=mix(v.rgb,vColor.rgb,w);", "vec3 fn=normalize(vNormal)*(gl_FrontFacing?1.0:-1.0);float fl=clamp(dot(fn,worldlight[2]),0.0,1.0);vec3 fr=reflect(worldlight[2],fn);float fs=pow(max(0.0,dot(normalize(cameraPosition-vWorldPos.xyz),-fr))*clamp(vColor[3]*2.0,0.0,1.0)*1.5,5.0);vec4 v=vec4(vColor.rgb*(vLight+(fl*t+fs)*o+s+max(vColor[3]*0.5-0.5,-vColor[3])),vAlpha);"), s6 = s6.replace("o.rgb=b(t,u,o.rgb,vNormal,p,vLight,0.0);", "o.rgb=b(t,u,o.rgb,vNormal*(gl_FrontFacing?1.0:-1.0),p,vLight,0.0);").replace("float j=clamp(dot(f,worldlight[2]),0.0,g);vec3 k=c*mix(0.7,1.1,0.5+(0.5*j));", "float j=clamp(dot(f,worldlight[2]),0.0,1.0)*g;vec3 k=c;"));
     var i6 = `#version 300 es
 precision highp float;precision highp int;uniform Pointlights{vec4 lightCols[16];vec3 lightPos[16];int lightCount;};out vec3 vLight;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};out float vCameraDistance;out vec4 vWorldPos;uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};in vec2 uv;in vec3 position;in vec3 normal;in vec4 interiorlight;in mat4 worldMatrix;out vec3 vNormal;out vec2 vUv;out vec4 vInteriorlight;out vec3 vViewDir;void main(){vNormal=normalize(mat3(worldMatrix)*normal);vUv=uv;vWorldPos=worldMatrix*vec4(position,1.0);vInteriorlight=interiorlight;vCameraDistance=length(cameraPosition-vWorldPos.xyz);vec3 a=vec3(0.0);for(int b=0;b<lightCount;++b){vec3 c=lightPos[b]-vWorldPos.xyz;float d=lightCols[b].w-dot(c,c);if(d>0.0){d/=(lightCols[b].w);d=d*d;a+=max(0.0,dot(normalize(c),vNormal))*lightCols[b].rgb*d;}}vLight=a;vViewDir=-normalize(vWorldPos.xyz-cameraPosition);gl_Position=projectionViewMatrix*vWorldPos;}`;
     var r6 = `#version 300 es
@@ -13243,13 +13256,13 @@ precision highp float;precision highp int;uniform Environment{vec3 worldlight[3]
     var waterTexLift = .6,
         waterPropRes = 128;
     var classicWaterFrag = `#version 300 es
-precision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};in float vCameraDistance;in vec4 vWorldPos;uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform Water{vec3 verts[4];};uniform highp sampler2D waterHeight;uniform sampler2D waterTexH;uniform highp sampler2D waterProps;uniform vec3 classicWCols[12];uniform float classicWOn;uniform float classicWUv;uniform sampler2D waterWave;uniform sampler2D waterLines;in vec2 vUv;out vec4 fragColor;
+precision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};in float vCameraDistance;in vec4 vWorldPos;uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform Water{vec3 verts[4];};uniform highp sampler2D waterHeight;uniform sampler2D waterTexH;uniform highp sampler2D waterProps;uniform vec3 classicWCols[12];uniform float classicWOn;uniform float classicWSpeed;uniform float classicWVis;uniform float classicWUv;uniform sampler2D waterWave;uniform sampler2D waterLines;in vec2 vUv;out vec4 fragColor;
 float wTerrBase(vec2 p){vec2 g=clamp((p-verts[0].xz)/2.6666667,vec2(0.0),vec2(23.999));ivec2 i=ivec2(g);vec2 f=g-vec2(i);if(f.x+f.y<1.0)return texelFetch(waterHeight,i,0).r*(1.0-f.x-f.y)+texelFetch(waterHeight,i+ivec2(0,1),0).r*f.y+texelFetch(waterHeight,i+ivec2(1,0),0).r*f.x;return texelFetch(waterHeight,i+ivec2(1,0),0).r*(1.0-f.y)+texelFetch(waterHeight,i+ivec2(0,1),0).r*(1.0-f.x)+texelFetch(waterHeight,i+ivec2(1,1),0).r*(f.x+f.y-1.0);}
 float wProp(vec2 p){vec2 g=clamp((p-verts[0].xz)*${(waterPropRes / 64).toFixed(1)}-0.5,vec2(0.0),vec2(${(waterPropRes - 1.001).toFixed(3)}));ivec2 i=ivec2(g);vec2 f=g-vec2(i);float a=texelFetch(waterProps,i,0).r;float b=texelFetch(waterProps,i+ivec2(1,0),0).r;float c=texelFetch(waterProps,i+ivec2(0,1),0).r;float d=texelFetch(waterProps,i+ivec2(1,1),0).r;return mix(mix(a,b,f.x),mix(c,d,f.x),f.y);}float wTerr(vec2 p){return max(wTerrBase(p)+${waterTexLift.toFixed(3)}*texture(waterTexH,clamp((p-verts[0].xz)/64.0,vec2(0.0),vec2(1.0))).r,wProp(p));}
 float wMask(vec2 p){vec2 g=clamp((p-verts[0].xz)/2.6666667,vec2(0.0),vec2(23.999));ivec2 i=ivec2(g);vec2 f=g-vec2(i);float a=mix(texelFetch(waterHeight,i,0).g,texelFetch(waterHeight,i+ivec2(1,0),0).g,f.x);float b=mix(texelFetch(waterHeight,i+ivec2(0,1),0).g,texelFetch(waterHeight,i+ivec2(1,1),0).g,f.x);return mix(a,b,f.y);}
 float wcH(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}float wcN(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);return mix(mix(wcH(i),wcH(i+vec2(1,0)),f.x),mix(wcH(i+vec2(0,1)),wcH(i+vec2(1,1)),f.x),f.y);}vec3 wcCol(int k,vec2 p){vec2 f=(p-verts[0].xz)/64.0;f+=vec2(wcN(p/19.0)-0.5,wcN(p/19.0+7.3)-0.5)*0.45+vec2(wcN(p/6.0+3.1)-0.5,wcN(p/6.0+9.7)-0.5)*0.12;f=clamp(f,0.0,1.0);return mix(mix(classicWCols[k],classicWCols[3+k],f.x),mix(classicWCols[6+k],classicWCols[9+k],f.x),f.y);}
 void main(){if(wMask(vWorldPos.xz)>0.5)discard;vec2 wUv=vUv/max(classicWUv,1.0);float dist=length(cameraPosition-vWorldPos.xyz);if(dist>fog[1][1]){fragColor=vec4(fog[0],1.0);return;}
-float depth=max(0.0,vWorldPos.y-wTerr(vWorldPos.xz))*0.25;float speed=0.05;float vis=0.65;float wave=0.0;vec2 dir=vec2(1.0,0.0);float wiggle=1.0;
+float depth=max(0.0,vWorldPos.y-wTerr(vWorldPos.xz))*0.25;float speed=classicWSpeed*0.01;float vis=classicWVis/100.0;float wave=0.0;vec2 dir=vec2(1.0,0.0);float wiggle=1.0;
 for(int i=0;i<2;++i){float off=1.0/3.0*float(i);float t=mod(time*0.2+off,1.0)*3.141;float sppd=speed+0.2;vec2 shift=vec2(sppd*dir.y*t+off,sppd*dir.x*t+off);float curve=abs(sin(t));wave+=texture(waterWave,wUv.yx*0.5+shift).r*curve;wiggle+=((sin((wUv.x+shift.y)*10.0)+cos((wUv.y+shift.x)*10.0))*curve*(0.2+sppd*0.6));}
 vec3 colFoam=classicWOn>0.5?wcCol(0,vWorldPos.xz):watercolors[0];vec3 colShallow=classicWOn>0.5?wcCol(1,vWorldPos.xz):watercolors[1];vec3 colDeep=classicWOn>0.5?wcCol(2,vWorldPos.xz):watercolors[2];vec4 bigwave=texture(waterLines,wUv.yx+time*speed*2.0+wave*0.1);
 vec4 wet_c=vec4(colFoam,0.0);vec4 foam_c=vec4(colFoam,0.9);vec4 blub_c=vec4(mix(colFoam,colShallow,0.9)*0.8,0.5)+speed*0.1;vec4 shallow_c=vec4(colShallow,0.4)+bigwave*0.05;vec4 water_c=vec4(mix(colShallow,colDeep,0.5),0.8-vis*0.4)+bigwave*0.08;vec4 deep_c=vec4(colDeep,1.4-vis*0.8)+bigwave*0.12;
@@ -13313,6 +13326,23 @@ precision highp float;precision highp int;uniform Environment{vec3 worldlight[3]
 precision highp float;precision highp int;uniform Circle{vec4 circlePos;vec4 circleInfo;};precision highp sampler2DShadow;uniform Shadows{uniform mat4 shadowPVMatrix[2];uniform vec3 shadowRange;};const int a=
 #SHADOWS;uniform sampler2DShadow shadowMaps[2];uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};in float vCameraDistance;in vec4 vWorldPos;uniform MeshTerrain{mat4 modelMatrix;vec4 ctInfo[16];vec4 ctLayer[4];vec4 ctMeta;int quadrant;};const float b=256.0;const float c=4.0;precision highp sampler2DArray;uniform sampler2DArray atlas;uniform sampler2D diffuse[4];in vec3 vLight;in vec3 vNormal;in vec3 vViewDir;in vec3 vUvChannel;in vec2 vUvTexture[4];vec4 d;float e;vec3 f(vec3 g,vec3 h,vec3 i,vec3 j,float k,vec3 l,float m){j=normalize(j);float n=clamp(dot(j,worldlight[2]),0.0,k);vec3 o=g*mix(0.7,1.1,0.5+(0.5*n));vec3 p=normalize(worldlight[2]+vViewDir);vec3 q=h*pow(max(0.0,dot(p,j)),20.0)*m*max(k*0.7+0.2,0.2)*20.0;vec3 r=o+h*n+l;return r*i+q;}void s(vec4 t,float u,vec4 v){float w=t.x+t.y+t.z;e+=v[3]*smoothstep(v[1],v[2],w)*u;t.a=u;t.rgb*=u;d+=t;}out vec4 fragColor;void main(){if(vCameraDistance>fog[1][1]){fragColor=vec4(fog[0],1.0);return;}vec4 x=texture(atlas,vUvChannel);x[3]=max(0.0,min(1.0,1.0-(x.r+x.g+x.b)));if(x[0]==1.0&&x[1]==1.0&&x[2]==1.0)discard;s(texture(diffuse[0],vUvTexture[0]),x[0],ctInfo[0]);s(texture(diffuse[1],vUvTexture[1]),x[1],ctInfo[1]);s(texture(diffuse[2],vUvTexture[2]),x[2],ctInfo[2]);s(texture(diffuse[3],vUvTexture[3]),x[3],ctInfo[3]);d.rgb/=d.a;e/=d.a;d.a=1.0;float y=1.0;if(a==1&&vCameraDistance<shadowRange[2]){float az=smoothstep(shadowRange[1],shadowRange[2],vCameraDistance);if(vCameraDistance>shadowRange[0]){vec4 aa=shadowPVMatrix[1]*(vWorldPos);vec3 ab=(aa.xyz/aa.w)*0.5+0.5;y=texture(shadowMaps[1],ab);}else{vec4 aa=shadowPVMatrix[0]*(vWorldPos);vec3 ab=(aa.xyz/aa.w)*0.5+0.5;y=texture(shadowMaps[0],ab);}y=y;y=max(y,az);}d.rgb=f(worldlight[1],worldlight[0],d.rgb,vNormal,y,vLight,e);float ac=distance(vWorldPos.xz,circlePos.xz);float ad=min(1.0,max(0.0,4.0-abs(vWorldPos.y-circlePos.y)));if(ac<circlePos.w+0.1&&ad>0.0){d.rgb=mix(d.rgb,circleInfo.rgb,ad*circleInfo.a*((ac<circlePos.w?ac/circlePos.w*0.5:0.0)+max(0.,(0.1-abs(circlePos.w-ac))/0.1)));}float ae=(1.0-smoothstep(fog[1][0],fog[1][1],vCameraDistance));d.rgb=mix(fog[0],d.rgb,ae);fragColor=d;}`;
     var baseTerrainVert = I6.replace(/terrainInfo/g, "ctInfo");
+    var ngTerrainFrag = (() => {
+        let f = ctTerrainFrag,
+            sw = (a, b) => {
+                if (f.split(a).length !== 2) throw new Error("ng terrain shader anchor missing: " + a.slice(0, 40));
+                f = f.replace(a, () => b);
+            };
+        sw("void cc(vec4 c,float v,vec4 i){float b=max(max(c.r,c.g),c.b);float w=pow(smoothstep(i.y,max(i.z,i.y+0.001),b)*v,2.5);D+=i.w*w;R+=vec4(c.rgb*min(1.0,v*0.5+0.7)*w,w);}", "void cc(vec4 c,float v,vec4 i){D+=i.w*smoothstep(i.y*3.0,max(i.z*3.0,i.y*3.0+0.001),c.r+c.g+c.b)*v;R+=vec4(c.rgb*v,v);}vec3 ngL(vec3 g,vec3 h,vec3 i,vec3 j,float k,vec3 l,float m){j=normalize(j);float n=clamp(dot(j,worldlight[2]),0.0,k);vec3 o=g*mix(0.7,1.1,0.5+(0.5*n));vec3 p=normalize(worldlight[2]+vViewDir);vec3 q=h*pow(max(0.0,dot(p,j)),20.0)*m*max(k*0.7+0.2,0.2)*20.0;vec3 r=o+h*n+l;return r*i+q;}");
+        f = f.split("if(v>0.1)cc(").join("if(v>0.0)cc(");
+        sw("vec3 col=R.rgb/(R.a*0.85);", "vec3 col=R.rgb/R.a;");
+        let a = f.indexOf("vec3 nm=normalize(vNormal);"),
+            b = f.indexOf("vec3 r=col*worldlight[1]");
+        if (a < 0 || b < 0) throw new Error("ng terrain lighting anchor missing");
+        let e = f.indexOf(";", f.indexOf("vLight*li", b)) + 1;
+        f = f.slice(0, a) + "vec3 r=ngL(worldlight[1],worldlight[0],col,vNormal,y,vLight,det);" + f.slice(e);
+        return f;
+    })();
+
     var L6 = `#version 300 es
 precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;uniform vec4 colors[576];uniform int divider;void main(){float a=64.0/float(divider);int b=int(floor(mod(vWorldPos.x,64.0)/a)+floor(mod(vWorldPos.z,64.0)/a)*float(divider));fragColor.rgba=colors[b];}`;
     var D6 = `#version 300 es
@@ -13343,6 +13373,8 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         KM = folOld(KM, [["void main(){vUv=uv;", "float folSh(vec3 p){float dist=length(cameraPosition-p);float s=1.0;if(a==1&&dist<shadowRange[2]){float fd=smoothstep(shadowRange[1],shadowRange[2],dist);vec4 sp=dist>shadowRange[0]?shadowPVMatrix[1]*vec4(p,1.0):shadowPVMatrix[0]*vec4(p,1.0);vec3 sc=(sp.xyz/sp.w)*0.5+0.5;s=dist>shadowRange[0]?texture(shadowMaps[1],sc):texture(shadowMaps[0],sc);s=max(s,fd);}return s;}" + "void main(){vUv=uv;"], ["b+=0.3*lightCols[c].rgb*e;", "b+=0.5*lightCols[c].rgb*e;"], ["vLightDir+=worldlight[0]*max(0.0,dot(instNorm.xyz,worldlight[2]));", "vLightDir=worldlight[0]*0.65*folSh(instPos.xyz+vec3(0.0,0.5,0.0));"], ["vec3 f=position;", "vec3 f=position;f.x+=cos(time*0.5+instPos.x*0.2)*sin(time*4.0+instPos.z*0.5)*0.08*f.y;"]]);
         YM = folOld(YM, [["b.rgb=b.rgb*(vLight+vLightAmb+vLightDir*d);", "b.rgb=b.rgb*(vLight+vLightAmb+vLightDir);"]]);
         XM = folOld(XM, [["b.rgb=b.rgb*(vLight+vLightAmb+vLightDir*c);", "b.rgb=b.rgb*(vLight+vLightAmb+vLightDir);"]]);
+        let folFar = src => src.replace("vec3 h=g*f;vWorldPos=vec4(h*instPos.w+instPos.xyz,1.0);", "float fs=clamp(1.0-(length(cameraPosition-instPos.xyz)-min(fog[1][1]/2.0,100.0))/20.0,0.0,1.0);vec3 h=g*f*fs;vWorldPos=vec4(h*instPos.w+instPos.xyz,1.0);");
+        QM.indexOf("vec3 h=g*f;vWorldPos=vec4(h*instPos.w+instPos.xyz,1.0);") >= 0 && (QM = folFar(QM)), KM.indexOf("vec3 h=g*f;vWorldPos=vec4(h*instPos.w+instPos.xyz,1.0);") >= 0 && (KM = folFar(KM));
     }
     var ch = {
             frag: GM,
@@ -13436,7 +13468,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             frag: Kw_orig
         },
         _h = {
-            frag: worldOverrideOff ? baseTerrainFrag : ctTerrainFrag,
+            frag: worldOverrideOff ? baseTerrainFrag : classicNewGame ? ngTerrainFrag : ctTerrainFrag,
             vert: worldOverrideOff ? baseTerrainVert : ctTerrainVert
         },
         KR = {
@@ -29226,14 +29258,37 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 v: out
             }), out;
         },
+        classicOldWaterBodies = [[2, 3673, 4183.9, 43, 63, 9, 16, 3588, 4096], [2, 4132, 4494, 20, 20, 5, 65, 3588, 4096], [2, 4096, 4523, 21, 18, 5, 30, 3588, 4096], [2, 4280, 4445, 30, 54, 5, 65, 3588, 4096], [0, 3972, 4480, 5, 5, 7, 69, 3588, 4096], [2, 4249, 4785, 21, 29, 6, 78, 3588, 4096], [2, 4215, 4262.3, 144, 85, 8, 52, 3588, 4096], [2, 3924, 4266, 75, 69, 13, 65, 3588, 4096], [2, 2818, 1767, 21, 29, 0, 100, 2688, 1150], [2, 3227.5, 1788, 12, 10, 0, 65, 2688, 1150], [2, 3244.4, 1582.5, 30, 49, 0, 100, 2688, 1150], [2, 2826.7, 1463, 100, 91, 0, 63, 2688, 1150], [2, 3218, 1478, 120, 158, 10, 70, 2688, 1150], [2, 2198.8, 3735.5, 42, 61, 5, 72, 1532, 3518], [0, 1916, 3902, 5, 5, 14, 22, 1532, 3518]],
+        classicWaterParamCache = new Map,
+        classicWaterParamsAt = (cx, cz) => {
+            let k = cx + cz * 1e4,
+                hit = classicWaterParamCache.get(k);
+            if (hit) return hit;
+            let x = cx * 64 + 32,
+                z = cz * 64 + 32,
+                out = null,
+                sea = null;
+            for (let [type, bx, bz, sx, sz, sp, vis, ox, oz] of classicOldWaterBodies) {
+                if (x < ox || z < oz || x >= ox + 768 || z >= oz + 768) continue;
+                if (type === 0) sea = sea || [sp, vis];
+                else if (Math.abs(x - bx) <= sx / 2 + 32 && Math.abs(z - bz) <= sz / 2 + 32) out = out || [sp, vis];
+            }
+            return out = out || sea || [5, 65], classicWaterParamCache.set(k, out), out;
+        },
         classicWaterUniforms = (e, t) => {
             let L = classicWaterLoc.get(e.program);
             L || (L = {
+                speed: N.getUniformLocation(e.program, "classicWSpeed"),
+                vis: N.getUniformLocation(e.program, "classicWVis"),
                 on: N.getUniformLocation(e.program, "classicWOn"),
                 cols: N.getUniformLocation(e.program, "classicWCols"),
                 uv: N.getUniformLocation(e.program, "classicWUv")
             }, classicWaterLoc.set(e.program, L));
             L.uv && N.uniform1f(L.uv, classicMapCapturing ? classicMapUvScale : 1);
+            if (L.speed) {
+                let wp = classicWaterParamsAt(t.x, t.z);
+                N.uniform1f(L.speed, wp[0]), L.vis && N.uniform1f(L.vis, wp[1]);
+            }
             if (!L.on) return;
             let c = classicWaterColAt(t.x, t.z),
                 v = e.uniforms.classicWCols && e.uniforms.classicWCols.value;
@@ -29917,7 +29972,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                         W = dens ? ids.indexOf(at(v)) : -1,
                         gx = ox + c,
                         gz = oz + f;
-                    if (W < 0 || dirtHash(gx, gz, 700) * 100 >= S1 || holes && am(t, c, f) || cm(t, c, f) > ii(t, c, f) + 80) continue;
+                    if (W < 0 || dirtHash(gx, gz, 700) * 100 >= S1 || holes && am(t, c, f) || cm(t, c, f) > ii(t, c, f) - .1) continue;
                     let count = Math.min(Math.round(dens / 8), 2),
                         sizeK = sizes ? sizes[c + f * 64] / 64 : 1,
                         U = geo.instances[W].attributes.inst.data;
@@ -32017,7 +32072,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         let o = .5,
             s = 0,
             i = 0,
-            stages = worldOverrideOff ? g1 : oldDayStages;
+            stages = classicPlain ? g1 : oldDayStages;
         for (let a = 0; a < stages.length; ++a) {
             let c = stages[a];
             if (c.end >= t) {
@@ -32072,7 +32127,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         _1 = t => v1 = t,
         c7 = (t, e, n) => {
             let o = dayTime(e);
-            worldOverrideOff ? o < .7 ? o = Vu(0, .7, o) * .4 : o = .4 + Vu(.7, 1, o) * .6 : o = o < .85 ? Vu(0, .85, o) * .5 : .5 + Vu(.85, 1, o) * .5, o7(o, v1, e, n), l7(o, v1, e, n), r7(o, v1)
+            classicPlain ? o < .7 ? o = Vu(0, .7, o) * .4 : o = .4 + Vu(.7, 1, o) * .6 : o = o < .85 ? Vu(0, .85, o) * .5 : .5 + Vu(.85, 1, o) * .5, o7(o, v1, e, n), l7(o, v1, e, n), r7(o, v1)
         };
     var rm = () => [-0, -0, -0, -0, -0, -0],
         Oi = rm();
@@ -32938,7 +32993,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     i = oldFolInt() % 64,
                     n = e + ox,
                     a = i + oz;
-                if (T.getNormal(n, a)[1] < .8) continue;
+                if (T.getNormal(n, a)[1] < .8 || cm(t, e, i) > ii(t, e, i) - .1) continue;
                 let own = oldFolShownCt(n, a),
                     list = own != null && oldFolLists[own] || [],
                     other = (x, z) => {
@@ -32994,9 +33049,96 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 T0(f, cnt), Po(f, f.attributes.inst), f.bounds = t.geometry.terrain.bounds;
             });
             return !0;
+        },
+        ngTexSheets = new Map,
+        ngFolCache = new Map,
+        ngFolReset = () => ngFolCache.clear(),
+        ngFolList = (tex, t) => {
+            let own = null;
+            if (t && t.data && t.data.textureid && !ngTexSheets.has(tex))
+                for (let q of t.data.textureid) {
+                    for (let id of q) {
+                        let r = Ac.get(id);
+                        if (r && r.texture === tex) {
+                            own = id;
+                            break;
+                        }
+                    }
+                    if (own != null) break;
+                }
+            let key = tex + ":" + (own == null ? "" : own);
+            if (ngFolCache.has(key)) return ngFolCache.get(key);
+            let out = [],
+                sheet = ngTexSheets.get(tex);
+            if (own != null && !sheet) {
+                for (let q of Ac.get(own).foliage || []) Ec.has(q[0]) && out.push([q[0], q[1]]);
+                return ngFolCache.set(key, out), out;
+            }
+            if (sheet && Pc.has(sheet)) {
+                for (let c = 0; c < 16; ++c) {
+                    let fid = oldFolCellId(c, sheet);
+                    fid != null && out.push([fid, 40]);
+                }
+            } else
+                for (let r of Ac.values())
+                    if (r.texture === tex && r.foliage) {
+                        for (let q of r.foliage) Ec.has(q[0]) && out.push([q[0], q[1]]);
+                        break;
+                    } return ngFolCache.set(key, out), out;
+        },
+        ngFolGenerate = t => {
+            if (!t.ct) return !1;
+            let ox = t.origin[0],
+                oz = t.origin[2],
+                perCell = new Map,
+                holes = t.data.holes.length > 0;
+            oldFolSetSeed(t.id + 1e3);
+            for (let c = 0; c < 64; ++c)
+                for (let f = 0; f < 64; ++f) {
+                    if (oldFolInt() % 100 > S1) continue;
+                    let u = c + ox,
+                        p = f + oz,
+                        g = T.getNormal(u, p);
+                    if (g[1] < .6 || holes && am(t, c, f) || cm(t, c, f) > ii(t, c, f) - .1) continue;
+                    let tex = oldFolShownCt(u, p),
+                        list = tex != null ? ngFolList(tex, t) : [];
+                    for (let q of list) {
+                        if (oldFolInt() % 255 > q[1]) continue;
+                        let x = Math.max(0, Math.min(63.99, c - .25 + oldFolRand() * .5)),
+                            z = Math.max(0, Math.min(63.99, f - .25 + oldFolRand() * .5));
+                        perCell.has(q[0]) || perCell.set(q[0], []), perCell.get(q[0]).push(x, z, .5 + oldFolRand());
+                    }
+                }
+            E7(t);
+            let ids = [...perCell.keys()].slice(0, 32),
+                geo = t.geometry.foliage = {
+                    instances: [],
+                    folIds: ids
+                };
+            ids.forEach((fid, o) => {
+                geo.instances.push(HN(o));
+                let def = Ec.get(fid);
+                P1.has(def.id) || P1.set(def.id, F7(def)), C7.has(def.texture) || (C7.add(def.texture), Ao(def.texture, r => {
+                    A0(r, 16), ws(r), Ly.set(def.texture, r)
+                }));
+                let U = geo.instances[o].attributes.inst.data,
+                    list = perCell.get(fid),
+                    cnt = 0;
+                for (let j = 0; j < list.length && cnt < S7; j += 3) {
+                    let x = list[j],
+                        z = list[j + 1],
+                        nrm = T.getNormal(x + ox, z + oz),
+                        $ = cnt++ * 7;
+                    U[$] = x + ox, U[$ + 1] = ii(t, x, z), U[$ + 2] = z + oz, U[$ + 3] = list[j + 2], U[$ + 4] = nrm[0] + .001, U[$ + 5] = nrm[1], U[$ + 6] = nrm[2];
+                }
+                let f = geo.instances[o];
+                T0(f, cnt), Po(f, f.attributes.inst), f.bounds = t.geometry.terrain.bounds;
+            });
+            return !0;
         };
     var A7 = (t, e) => {
             if (S1 === 0 || !e) return;
+            if (classicNewGame && ngFolGenerate(t)) return;
             if (classicPaintedFoliage(t)) return;
             if (oe.faivelRetexture && oe.oldFoliage && oldFolGenerate(t)) return;
             QN(t, N), w1(t.id + 1e3);
@@ -33019,7 +33161,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     let u = c + t.origin[0],
                         p = f + t.origin[2],
                         g = T.getNormal(u, p);
-                    if (g[1] < .6 || l && am(t, c, f) || cm(t, c, f) > ii(t, c, f) + 80) continue;
+                    if (g[1] < .6 || l && am(t, c, f) || cm(t, c, f) > ii(t, c, f) - .1) continue;
                     let v = k7(c, f),
                         _ = w7(c, f),
                         b = t.data.texture[v][_],
@@ -33521,7 +33663,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         ctGrassTextures = [1227, 1235],
         ctAdd = o => (ctByTexture.set(o.texture, ctPalette.length), ctPalette.push(o), ctDiffuseDirty = !0, ctPalette.length - 1),
         ctPaletteInit = () => {
-            ctPalette.length || worldOverrideOff || ctOldTerrains.forEach(([texture, scale, darkest, brightest, spec]) => ctAdd({
+            ctPalette.length || worldOverrideOff || classicNewGame || ctOldTerrains.forEach(([texture, scale, darkest, brightest, spec]) => ctAdd({
                 texture,
                 scale,
                 darkest,
@@ -33706,14 +33848,14 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         ctShownTexture = (id, world) => {
             let i = Ac.get(id);
             if (!i) return null;
-            if (worldOverrideOff) return i.texture;
+            if (classicPlain) return i.texture;
             if (world === "guardstone" && pathTextures.indexOf(i.texture) >= 0) return 1229;
             return topGrassShown(id, world);
         },
         ctPrepare = t => {
             let world = chunkWorldOf(t),
                 gs = world === "guardstone";
-            if (worldOverrideOff) return t.fvPath = t.stoneUnder = t.softUnder = t.topGrass = t.steepMask = t.hlStone = t.hlSteep = t.treeDirt = t.ctStone = null, {
+            if (classicPlain) return t.fvPath = t.stoneUnder = t.softUnder = t.topGrass = t.steepMask = t.hlStone = t.hlSteep = t.treeDirt = t.ctStone = null, {
                 world,
                 gs
             };
@@ -34221,9 +34363,9 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                         o === void 0 && (o = Ac.keys().next().value);
                     }
                     let i = Ac.get(o),
-                        map = world && !worldOverrideOff ? worldRetexture[world] : null,
-                        raw = !worldOverrideOff && world === "guardstone" && pathTextures.indexOf(i.texture) >= 0,
-                        tex = raw ? gsPathKey : !worldOverrideOff && orange === !0 && i.texture === orangePathTexture ? orangePathKey : map && map[i.texture] != null && Pc.has(map[i.texture]) ? map[i.texture] : i.texture;
+                        map = world && !classicPlain ? worldRetexture[world] : null,
+                        raw = !classicPlain && world === "guardstone" && pathTextures.indexOf(i.texture) >= 0,
+                        tex = raw ? gsPathKey : !classicPlain && orange === !0 && i.texture === orangePathTexture ? orangePathKey : map && map[i.texture] != null && Pc.has(map[i.texture]) ? map[i.texture] : i.texture;
                     n.info[s * 4 + 0] = i.scale / 127, raw && (n.info[s * 4 + 0] = fvPathScale), n.info[s * 4 + 1] = i.darkest / 255 * 3, n.info[s * 4 + 2] = i.brightest / 255 * 3, n.info[s * 4 + 3] = i.spec / 255 * (!raw && map && map[i.texture] != null && world === "headless" ? headlessSpecScale : 1) * (!raw && oe.faivelRetexture && topGrassShown(o, world) === dirtSpecShown ? dirtSpecScale : 1), Ao(tex, r => {
                         n.diffuse[s] = r, n.loaded++
                     })
@@ -34588,7 +34730,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             let terrain = Ac.get(id);
             if (!terrain) return null;
             let tex = terrain.texture,
-                map = world && !worldOverrideOff ? worldRetexture[world] : null;
+                map = world && !classicPlain ? worldRetexture[world] : null;
             map && map[tex] != null && Pc.has(map[tex]) && (tex = map[tex]);
             let o = textureOverrides.get(tex),
                 mapped = o == null ? null : typeof o == "object" ? o.id : o;
@@ -38855,7 +38997,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                                     r = n ? t.cycle(0) * .3 - i : t.cycle(.5) * .3 + i;
                                 J(Ct, n ? .3 - i : -.3 + i, -.65, r), Cl(o.position, Ct, 0), J(o.rotation, -r, s, 0)
                             } else J(o.position, n ? .3 : -.3, -.3, 0), J(o.rotation, 0, 0, 0);
-                        else if (t.entity.inWater > t.entity.radius) t.walking ? (J(o.rotation, 1.3, n ? .1 : -.1, 0), J(o.position, n ? .3 : -.3, Math.cos(t.cycleRad + n * Math.PI) * .4, -1.1)) : (J(o.rotation, 1, n ? .1 : -.1, 0), J(o.position, n ? .3 : -.3, -.7, Math.cos(t.cycleRad + n * Math.PI) * .4));
+                        else if ((t.entity.inWater > t.entity.radius && t.entity.mount === void 0)) t.walking ? (J(o.rotation, 1.3, n ? .1 : -.1, 0), J(o.position, n ? .3 : -.3, Math.cos(t.cycleRad + n * Math.PI) * .4, -1.1)) : (J(o.rotation, 1, n ? .1 : -.1, 0), J(o.position, n ? .3 : -.3, -.7, Math.cos(t.cycleRad + n * Math.PI) * .4));
                         else {
                             if (t.walking) {
                                 let i = t.entity.steer[1] < 0 ? .4 : .6,
@@ -38872,7 +39014,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 o = n.position,
                 s = n.rotation;
             if (n.visible) {
-                if (!t.falling || e ? (t.walking ? t.entity.inWater > t.entity.radius ? J(o, 0, -.1, 0) : J(o, 0, Math.cos(t.cycleRad * 2) * .1 + .4, 0) : t.entity.inWater > t.entity.radius ? J(o, 0, .3, 0) : J(o, 0, e ? .5 : t.cycle(0) * .1 + .4, 0), t.transform.rotation[0] !== 0 && (t.transform.rotation[0] = 0)) : (t.transform.rotation[0] = t.cycleRad * t.flip, J(o, 0, t.flip != 0 ? .3 : .5, 0)), t.entity.inWater > t.entity.radius) t.walking ? J(s, 1.2, 0, Math.sin(t.cycleRad) * .1) : J(s, Math.sin(t.cycleRad) * .1 - .1, 0, Math.cos(t.cycleRad) * .05);
+                if (!t.falling || e ? (t.walking ? (t.entity.inWater > t.entity.radius && t.entity.mount === void 0) ? J(o, 0, -.1, 0) : J(o, 0, Math.cos(t.cycleRad * 2) * .1 + .4, 0) : (t.entity.inWater > t.entity.radius && t.entity.mount === void 0) ? J(o, 0, .3, 0) : J(o, 0, e ? .5 : t.cycle(0) * .1 + .4, 0), t.transform.rotation[0] !== 0 && (t.transform.rotation[0] = 0)) : (t.transform.rotation[0] = t.cycleRad * t.flip, J(o, 0, t.flip != 0 ? .3 : .5, 0)), (t.entity.inWater > t.entity.radius && t.entity.mount === void 0)) t.walking ? J(s, 1.2, 0, Math.sin(t.cycleRad) * .1) : J(s, Math.sin(t.cycleRad) * .1 - .1, 0, Math.cos(t.cycleRad) * .05);
                 else {
                     J(s, -t.pushBack[1] * 5 + t.movementPushback[2], 0, t.pushBack[0] * 5 - t.movementPushback[0]), R0(o, o, t.pushBackOffset), hn(o, o, t.movementPushback, 1);
                     let i = -t.movementPushback[1] * .5;
@@ -38894,7 +39036,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 let o = t.body[2 + n];
                 if (o.visible) {
                     if (!t.falling || e)
-                        if (t.entity.inWater > t.entity.radius)
+                        if ((t.entity.inWater > t.entity.radius && t.entity.mount === void 0))
                             if (t.walking) {
                                 let s = t.cycle(0),
                                     i = t.entity.steer[1] < 0 ? .3 : .5,
