@@ -2466,7 +2466,7 @@ void main() {
             return !1;
         }
     })();
-    var classicWorldOnly = !0,
+    var classicWorldOnly = !1,
         classicNewGame = !1,
         classicPlain = worldOverrideOff || classicNewGame;
     classicNewGame && Object.assign(oe, {
