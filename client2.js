@@ -29259,6 +29259,11 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             }), out;
         },
         classicOldWaterBodies = [[2, 3673, 4183.9, 43, 63, 9, 16, 3588, 4096], [2, 4132, 4494, 20, 20, 5, 65, 3588, 4096], [2, 4096, 4523, 21, 18, 5, 30, 3588, 4096], [2, 4280, 4445, 30, 54, 5, 65, 3588, 4096], [0, 3972, 4480, 5, 5, 7, 69, 3588, 4096], [2, 4249, 4785, 21, 29, 6, 78, 3588, 4096], [2, 4215, 4262.3, 144, 85, 8, 52, 3588, 4096], [2, 3924, 4266, 75, 69, 13, 65, 3588, 4096], [2, 2818, 1767, 21, 29, 0, 100, 2688, 1150], [2, 3227.5, 1788, 12, 10, 0, 65, 2688, 1150], [2, 3244.4, 1582.5, 30, 49, 0, 100, 2688, 1150], [2, 2826.7, 1463, 100, 91, 0, 63, 2688, 1150], [2, 3218, 1478, 120, 158, 10, 70, 2688, 1150], [2, 2198.8, 3735.5, 42, 61, 5, 72, 1532, 3518], [0, 1916, 3902, 5, 5, 14, 22, 1532, 3518]],
+        classicOldWaterOrigins = {
+            g: [2688, 1150],
+            f: [3588, 4096],
+            h: [1532, 3518]
+        },
         classicWaterParamCache = new Map,
         classicWaterParamsAt = (cx, cz) => {
             let k = cx + cz * 1e4,
@@ -29267,11 +29272,20 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             let x = cx * 64 + 32,
                 z = cz * 64 + 32,
                 out = null,
-                sea = null;
+                sea = null,
+                inOld = !1;
             for (let [type, bx, bz, sx, sz, sp, vis, ox, oz] of classicOldWaterBodies) {
                 if (x < ox || z < oz || x >= ox + 768 || z >= oz + 768) continue;
+                inOld = !0;
                 if (type === 0) sea = sea || [sp, vis];
                 else if (Math.abs(x - bx) <= sx / 2 + 32 && Math.abs(z - bz) <= sz / 2 + 32) out = out || [sp, vis];
+            }
+            if (!inOld) {
+                let r = classicRealmAt(x, z),
+                    o = r && classicOldWaterOrigins[r];
+                if (o)
+                    for (let [type, , , , , sp, vis, ox, oz] of classicOldWaterBodies) type === 0 && ox === o[0] && oz === o[1] && (sea = sea || [sp, vis]);
+                if (!T || r === null) return sea || [5, 65];
             }
             return out = out || sea || [5, 65], classicWaterParamCache.set(k, out), out;
         },
