@@ -6690,7 +6690,7 @@ void main() {
                 }
                 if (o.texture != null) next.texture = !o.texture || Pc.has(o.texture) ? o.texture : (console.log("mesh override " + V0 + ": unknown texture file " + o.texture + ", keeping " + next.texture), next.texture);
                 o.shader != null && (next.shader = o.shader), o.cull != null && (next.cull = o.cull), o.shadow != null && (next.shadow = o.shadow);
-                (o.scale != null || o.offset != null || o.ground || o.uvScale) && next.geometry && (next.geometry = addDerivedGeometry(next.geometry, o));
+                (o.scale != null || o.offset != null || o.ground || o.uvScale || o.dropUv || o.flatUv) && next.geometry && (next.geometry = addDerivedGeometry(next.geometry, o));
                 M2.length && M2[next.shader] === void 0 && console.log("mesh override " + V0 + ": shader " + next.shader + " has no material");
                 next.geometry !== base.geometry && (next.collisionGeometry = base.collisionGeometry == null ? base.geometry : base.collisionGeometry);
                 o.groundSink != null && meshGroundSink.set(V0, o.groundSink);
@@ -7689,7 +7689,7 @@ void main() {
             meshOverrides.set(1636, {
                 model: 1554,
                 texture: 1222,
-                scale: [1.924, 2.38],
+                scale: [2.245, 2.777],
                 groundSink: !0,
                 offset: {
                     y: -2
@@ -7699,7 +7699,7 @@ void main() {
             meshOverrides.set(1637, {
                 model: 1554,
                 texture: 1222,
-                scale: [1.838, 1.96],
+                scale: [2.45, 2.613],
                 groundSink: !0,
                 offset: {
                     y: -2
@@ -7709,7 +7709,7 @@ void main() {
             meshOverrides.set(1638, {
                 model: 1554,
                 texture: 1222,
-                scale: [1.76, 1.82],
+                scale: [2.636, 2.726],
                 groundSink: !0,
                 offset: {
                     y: -2
@@ -7729,14 +7729,14 @@ void main() {
             meshOverrides.set(1640, {
                 model: 1553,
                 texture: 1221,
-                scale: [1.04, 1.23],
+                scale: [1.34, 1.584],
                 groundSink: !0,
                 ground: true
             })
             meshOverrides.set(1641, {
                 model: 1554,
                 texture: 1222,
-                scale: [2.011, 2.363],
+                scale: [2.681, 3.15],
                 groundSink: !0,
                 offset: {
                     y: -2
@@ -8002,6 +8002,58 @@ void main() {
         let k = c.name.toLowerCase();
         oldCreatureByName.has(k) || oldCreatureByName.set(k, []), oldCreatureByName.get(k).push(c);
     });
+    var classicCustomSkin = id => id + 1e5,
+        classicSkinEyes = skin => {
+            let s = $v.get(skin),
+                p = s && s.body && s.body.find(p => p.bid === 1);
+            return p ? p.col : null;
+        },
+        classicCustomIds = new Set,
+        classicCustomList = [],
+        classicRegisterCustom = list => {
+            if (classicCustomIds.size) {
+                for (let i = oldCreatureImports.length - 1; i >= 0; --i) classicCustomIds.has(oldCreatureImports[i].id) && oldCreatureImports.splice(i, 1);
+                for (let id of classicCustomIds) oldCreatureById.delete(id), $v.delete(classicCustomSkin(id));
+                for (let [k, L] of oldCreatureByName) {
+                    let f = L.filter(c => !classicCustomIds.has(c.id));
+                    f.length ? oldCreatureByName.set(k, f) : oldCreatureByName.delete(k);
+                }
+                classicCustomIds.clear();
+            }
+            classicCustomList = Array.isArray(list) ? list : [];
+            for (let d of classicCustomList) {
+                let b = d && oldCreatureById.get(d.base);
+                if (!b || !d.name || !(d.id > 0)) continue;
+                let c = {
+                    ...b,
+                    id: d.id,
+                    oldId: b.oldId,
+                    name: String(d.name),
+                    level: d.level > 0 ? d.level : b.level,
+                    colPrim: Array.isArray(d.colPrim) ? d.colPrim : b.colPrim,
+                    colSec: Array.isArray(d.colSec) ? d.colSec : b.colSec,
+                    size: d.size > 0 ? d.size : b.size,
+                    custom: !0,
+                    base: b.id
+                };
+                let sk = $v.get(b.skin);
+                if (Array.isArray(d.eyes) && sk && sk.body && sk.body.some(p => p.bid === 1)) {
+                    let nid = classicCustomSkin(c.id);
+                    $v.set(nid, {
+                        ...sk,
+                        id: nid,
+                        body: sk.body.map(p => p.bid === 1 ? {
+                            ...p,
+                            col: [d.eyes[0], d.eyes[1], d.eyes[2], p.col[3]]
+                        } : p)
+                    }), c.skin = nid;
+                }
+                oldCreatureImports.push(c), oldCreatureById.set(c.id, c), classicCustomIds.add(c.id);
+                let k = c.name.toLowerCase();
+                oldCreatureByName.has(k) || oldCreatureByName.set(k, []), oldCreatureByName.get(k).push(c);
+            }
+            typeof ocBaseSize != "undefined" && ocBaseSize.clear();
+        };
     var creatureOverrideData = {
         "version": 1,
         "bossChance": 0.01,
@@ -8805,7 +8857,9 @@ void main() {
                     scale: o.scale,
                     offset: o.offset,
                     ground: o.ground,
-                    uvScale: o.uvScale
+                    uvScale: o.uvScale,
+                    dropUv: o.dropUv,
+                    flatUv: o.flatUv
                 }), V0;
             },
             cloneGeometry = t => {
@@ -8837,8 +8891,53 @@ void main() {
                 }
                 if (dx || dy || h$)
                     for (let s = 0; s < m.length; s += 3) m[s] += dx, m[s + 1] += dy, m[s + 2] += h$;
+                if (o.dropUv && geo.uv && geo.index) {
+                    let ix = geo.index.data,
+                        u = geo.uv.data,
+                        keep = [];
+                    for (let s = 0; s + 2 < ix.length; s += 3) {
+                        let cu = (u[ix[s] * 2] + u[ix[s + 1] * 2] + u[ix[s + 2] * 2]) / 3,
+                            cv = (u[ix[s] * 2 + 1] + u[ix[s + 1] * 2 + 1] + u[ix[s + 2] * 2 + 1]) / 3;
+                        o.dropUv.some(r => cu >= r[0] && cu <= r[2] && cv >= r[1] && cv <= r[3]) || keep.push(ix[s], ix[s + 1], ix[s + 2]);
+                    }
+                    geo.index = {
+                        type: geo.index.type,
+                        data: new Uint32Array(keep)
+                    };
+                }
+                let flat = [];
+                if (o.flatUv && geo.uv && geo.index)
+                    for (let s = 0, ix = geo.index.data, u = geo.uv.data; s + 2 < ix.length; s += 3) {
+                        let cu = (u[ix[s] * 2] + u[ix[s + 1] * 2] + u[ix[s + 2] * 2]) / 3,
+                            cv = (u[ix[s] * 2 + 1] + u[ix[s + 1] * 2 + 1] + u[ix[s + 2] * 2 + 1]) / 3;
+                        (o.flatUv.rects && o.flatUv.rects.some(r => cu >= r[0] && cu <= r[2] && cv >= r[1] && cv <= r[3]) || o.flatUv.tris && o.flatUv.tris.includes(s / 3)) && flat.push(s);
+                    }
                 if (o.uvScale && geo.uv)
                     for (let s = 0, u = geo.uv.data; s < u.length; ++s) u[s] *= o.uvScale;
+                if (flat.length) {
+                    let n = geo.position.data.length / 3,
+                        ix = new Uint32Array(geo.index.data),
+                        keys = Object.keys(geo).filter(k => k !== "index" && geo[k] && geo[k].data && geo[k].size);
+                    for (let k of keys) {
+                        let a = geo[k],
+                            d = new a.data.constructor((n + flat.length * 3) * a.size);
+                        d.set(a.data), flat.forEach((s, j) => {
+                            for (let c = 0; c < 3; ++c)
+                                for (let q = 0; q < a.size; ++q) d[(n + j * 3 + c) * a.size + q] = a.data[ix[s + c] * a.size + q];
+                        }), geo[k] = {
+                            ...a,
+                            data: d
+                        };
+                    }
+                    let u = geo.uv.data;
+                    flat.forEach((s, j) => {
+                        for (let c = 0; c < 3; ++c) ix[s + c] = n + j * 3 + c, u[(n + j * 3 + c) * 2] = o.flatUv.uv[0], u[(n + j * 3 + c) * 2 + 1] = o.flatUv.uv[1];
+                    });
+                    geo.index = {
+                        type: geo.index.type,
+                        data: ix
+                    };
+                }
                 return geo;
             },
             Wr = (t, e) => {
@@ -12995,6 +13094,10 @@ void main() {
             guardstone: [1.5, .75]
         },
         treeDirtSkipModels = [1555],
+        treeDirtHuge = {},
+        treeDirtTrunk = {
+            1639: 26
+        },
         treeDirtBigScale = {
             guardstone: [3, 1.75, 10]
         },
@@ -29042,17 +29145,55 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             1489: 0.1,
         },
         classicCellMesh1489 = 33,
+        classicCellMeshDrop = {
+            1610: [
+                [0, .357, .39, .504]
+            ],
+            1531: [
+                [0, .357, .39, .504]
+            ]
+        },
+        classicCellMeshFlat = {
+            1530: {
+                rects: [
+                    [.66, .84, .79, 1]
+                ]
+            },
+            1611: {
+                rects: [
+                    [.66, .84, .79, 1]
+                ]
+            },
+            1532: {
+                tris: [22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99]
+            }
+        },
+        classicCrackTris1528 = [434, 435, 436, 437, 438, 439, 442, 443, 444, 445, 446, 447, 448, 449, 450, 451, 452, 453, 454, 455, 456, 457, 458, 459, 460, 461, 462, 463, 464, 465, 466, 467, 468, 469, 470, 471, 472, 473, 474, 475, 476, 477, 478, 479, 480, 481, 482, 483, 484, 485, 486, 487, 488, 489, 490, 491, 494, 495, 496, 497, 498, 499, 500, 501, 502, 503, 504, 505, 506, 507, 510, 511, 516, 517, 518, 519, 522, 523, 524, 525, 526, 527, 528, 529, 532, 533, 534, 535, 538, 539, 540, 541, 542, 543, 546, 547, 548, 549, 552, 553, 554, 555, 558, 559, 560, 561, 562, 565, 568, 569, 570, 571, 574, 575, 576, 579, 580, 581, 582, 583, 584, 585, 588, 589, 592, 593, 596, 597, 598, 599, 600, 601, 607, 608, 609, 610, 611, 612, 615, 616, 621, 622, 623, 624, 625, 626, 627, 628, 629, 630, 637, 643, 644, 647, 648, 651, 652, 653, 654, 655, 656, 657, 658, 659, 660],
         classicHlMeshBase = 5e4,
         classicHlMeshes = new Map,
         classicCellMeshes = () => {
             let use = (id, cell, uv) => Ys.has(id) && Ys.set(id, {
                 ...Ys.get(id),
                 texture: 12180 + cell,
-                ...(uv && Ys.get(id).geometry ? {
+                ...((uv || classicCellMeshDrop[id] || classicCellMeshFlat[id]) && Ys.get(id).geometry ? {
                     geometry: addDerivedGeometry(Ys.get(id).geometry, {
-                        uvScale: uv
+                        uvScale: uv,
+                        dropUv: classicCellMeshDrop[id],
+                        flatUv: classicCellMeshFlat[id] && {
+                            ...classicCellMeshFlat[id],
+                            uv: [.836, .5]
+                        }
                     })
                 } : {})
+            });
+            Ys.has(1528) && Ys.get(1528).geometry && Ys.set(1528, {
+                ...Ys.get(1528),
+                geometry: addDerivedGeometry(Ys.get(1528).geometry, {
+                    flatUv: {
+                        tris: classicCrackTris1528,
+                        uv: [.4795, .3125]
+                    }
+                })
             });
             classicCellMeshIds.forEach(id => use(id, classicCellMeshCell, classicCellMeshUv[id])), use(1489, classicCellMesh1489);
             for (let id of classicCellMeshIds.concat(1528)) {
@@ -29419,6 +29560,18 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 else break;
             let q = u8.length - 630;
             !c.waterMask && q >= 0 && u8[q] === 72 && u8[q + 1] === 87 && u8[q + 2] === 87 && u8[q + 3] === 77 && (c.waterMask = u8.slice(q + 5));
+            let pe = u8.length - (c.waterMask ? 630 : 0) - 4;
+            if (pe > 7) {
+                let L = dv.getUint32(pe, !0),
+                    s0 = pe - L;
+                if (L > 6 && s0 >= 0 && u8[s0] === 72 && u8[s0 + 1] === 87 && u8[s0 + 2] === 80 && u8[s0 + 3] === 83) {
+                    let n = dv.getUint16(s0 + 5, !0);
+                    for (let k = 0; k < n && s0 + 13 + k * 6 <= pe; ++k) {
+                        let pr = c.props[dv.getUint16(s0 + 7 + k * 6, !0)];
+                        pr && (pr.sw = dv.getUint16(s0 + 9 + k * 6, !0) / 1e3, pr.sh = dv.getUint16(s0 + 11 + k * 6, !0) / 1e3);
+                    }
+                }
+            }
             return c;
         },
         classicInflate = async (u8, deflate) => deflate ? new Uint8Array(await new Response(new Blob([u8]).stream().pipeThrough(new DecompressionStream("deflate-raw"))).arrayBuffer()) : u8,
@@ -29836,6 +29989,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             classicStaticsTick(on, T.player.pos), on && (classicSignsDraw(T.player.pos), classicStaticTalkTick());
         },
         classicWorldExtras = h => {
+            classicRegisterCustom(h.customCreatures);
             classicMagnets = Array.isArray(h.magnets) ? h.magnets.filter(m => m && m.name && isFinite(m.x) && isFinite(m.z)).map(m => ({
                 ...m,
                 name: String(m.name).trim().toLowerCase()
@@ -32233,10 +32387,10 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         };
     var y1 = class {
             constructor() {
-                this.id = 0, this.pos = [-0, -0, -0], this.rot = [-0, -0, -0], this.scale = 1, this.matrix = void 0, this.loaded = !1, this.sink = 0
+                this.id = 0, this.pos = [-0, -0, -0], this.rot = [-0, -0, -0], this.scale = 1, this.sw = 1, this.sh = 1, this.matrix = void 0, this.loaded = !1, this.sink = 0
             }
             setWorldMatrix(e, n) {
-                this.matrix = e, Xn(Ct, n, this.pos), this.sink && (Ct[1] -= this.sink), Co(Dn, this.scale), pd(ir, this.rot), cd(this.matrix, ir, Ct, Dn)
+                this.matrix = e, Xn(Ct, n, this.pos), this.sink && (Ct[1] -= this.sink), J(Dn, this.scale * this.sw, this.scale * this.sh, this.scale * this.sw), pd(ir, this.rot), cd(this.matrix, ir, Ct, Dn)
             }
             computeGroundSink(e) {
                 if (!meshGroundSink.get(this.id) || !this.geoExtent) return;
@@ -32345,7 +32499,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             this.mesh !== void 0 && this.updateMesh(n), super.onUpdate(e, n, o)
         }
         updateMesh(e) {
-            this.setWorldMatrix(this.mesh.worldMatrix, e), Xn(this.mesh.position, e, this.pos), J(this.mesh.rotation, this.rot[0], this.rot[1], this.rot[2]), Co(this.mesh.scale, this.scale), this.mesh.data.multi && (this.mesh.data.multi.needsUpdate = !0)
+            this.setWorldMatrix(this.mesh.worldMatrix, e), Xn(this.mesh.position, e, this.pos), J(this.mesh.rotation, this.rot[0], this.rot[1], this.rot[2]), J(this.mesh.scale, this.scale * this.sw, this.scale * this.sh, this.scale * this.sw), this.mesh.data.multi && (this.mesh.data.multi.needsUpdate = !0)
         }
         onRemove(e) {
             super.onRemove(e), Ys.get(this.id).effects.length && this.deleteEffects(), this.mesh && (this.mesh.data.multi ? oi(this.mesh.data.multi, this.mesh) : Ws(this.mesh), this.mesh = void 0)
@@ -32397,7 +32551,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         UN = 2147483647 / 2e3,
         Sy = 65536 / (Math.PI * 2),
         $N = 65536 / 100;
-    var g7 = (t, e) => (t.id = e.id, J(t.pos, e.x / d7, e.y / UN, e.z / d7), J(t.rot, e.rx / Sy, e.ry / Sy, e.rz / Sy), t.scale = Math.max(e.scale, 100) / $N, t);
+    var g7 = (t, e) => (t.id = e.id, J(t.pos, e.x / d7, e.y / UN, e.z / d7), J(t.rot, e.rx / Sy, e.ry / Sy, e.rz / Sy), t.scale = Math.max(e.scale, 100) / $N, t.sw = e.sw || 1, t.sh = e.sh || 1, t);
     var v7 = (t, e, n, o) => {
             t.id = e, t.x = n, t.z = o, t.origin[0] = n * 64, t.origin[2] = o * 64, t.deserialized = !1, t.props.length = 0, t.data = void 0, t.ct = null, t.ctKey = null, t.folGap = !1, t.loadingProps = 0, t.__world = void 0, t.gsStoneMask = null, t.gsMeadowMask = null, t.gsBigDirtMask = null, t.pathBand = null
         },
@@ -35697,9 +35851,9 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             big && r >= big[0] && (r = Math.min(big[2], r * big[1]));
             return r;
         },
-        buildTreeDirt = t => treeDirtWorlds.indexOf(chunkWorldOf(t)) >= 0 || gloomNear(t) ? terrainDeferred(t, "treedirt13", t => {
+        buildTreeDirt = t => treeDirtWorlds.indexOf(chunkWorldOf(t)) >= 0 || gloomNear(t) ? terrainDeferred(t, "treedirt19", t => {
             let r = buildTreeDirtNow(t);
-            return r === !1 ? (treeWidthWaiting.push([t, t.id, T.file]), null) : terrainCacheSet(t, "treedirt13", r);
+            return r === !1 ? (treeWidthWaiting.push([t, t.id, T.file]), null) : terrainCacheSet(t, "treedirt19", r);
         }) : null,
         buildTreeDirtNow = t => {
             let trees = new Set(treeDirtMeshes().filter(id => treeDirtSkipModels.indexOf(meshOverrides.get(id).model) < 0)),
@@ -35724,8 +35878,8 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                         if (!w) continue;
                         let hide = meshHideChance.get(p.id);
                         if (hide > 0 && dirtHash(Math.round((cx * 64 + p.x / d7) * 16), Math.round((cz * 64 + p.z / d7) * 16), 173) < hide) continue;
-                        let r = treeDirtRadius(w, Math.max(p.scale, 100) / $N, chunkWorldOf(t)),
-                            c = treeCenters.get(p.id) || [0, 0],
+                        let r = Math.max(treeDirtRadius(w, Math.max(p.scale, 100) / $N, chunkWorldOf(t)) * (treeDirtHuge[p.id] || 1), treeDirtTrunk[p.id] ? treeDirtTrunk[p.id] * Math.max(p.scale, 100) / $N + 1.5 : 0),
+                            c = meshOverrides.has(p.id) && meshOverrides.get(p.id).model ? [0, 0] : treeCenters.get(p.id) || [0, 0],
                             ang = p.ry / Sy,
                             sc = Math.max(p.scale, 100) / $N,
                             lx = dx * 64 + p.x / d7 + (c[0] * Math.cos(ang) + c[1] * Math.sin(ang)) * sc,
@@ -37793,7 +37947,10 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 if (t.reloadAttempts = 0, t.state > 2) return;
                 fW(new Uint8Array(n), t)
             } catch (e) {
-                t.state === 2 && t.reloadAttempts++ < 5 ? (t.state = 2 - 1, b9(t)) : console.log(`failed to load chunk ${t.id}, giving up`, e)
+                if (t.state !== 2) return;
+                if (t.reloadAttempts++ < 5) return t.state = 1, void b9(t);
+                let id = t.id;
+                t.reloadAttempts = 0, setTimeout(() => t.id === id && t.state === 2 && (t.state = 1), 3e3);
             }
         }, fW = (t, e) => {
             e.state = 3, _7(e, classicChunkFor(e, t)), By(e), stoneShaderEnabled && e.data.water && e.data.water.length > 0 && lakeClassify(T.file, e.x, e.z)
