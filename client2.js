@@ -12946,43 +12946,6 @@ void main() {
         gsBigDirtRiseRadius = 7,
         gsBigDirtMinRise = 2.2,
         gsBigDirtStrayChance = .12,
-        lakePlantMesh = 1480,
-        lakePlantTries = 48,
-        lakePlantChance = .4,
-        lakePlantMinAbove = 0,
-        lakePlantMaxAbove = .9,
-        lakePlantLift = .08,
-        lakePlantMinNormal = .7,
-        lakePlantTiltMax = .55,
-        lakePlantScaleMin = 520,
-        lakePlantScaleMax = 820,
-        gsBushMeshes = [1650, 1651],
-        gsBushPropChance = .35,
-        gsBushMax = 3,
-        gsBushMinDist = 4.2,
-        gsBushMaxDist = 6,
-        gsBushMeshScale = {
-           
-        },
-        gsBushMinNormal = .75,
-        gsBushScaleMin = 520,
-        gsBushScaleMax = 760,
-        gsBushBaseAreas = ["Vanguard Village", "Bloodlust Camp"],
-        gsBushBaseDist = .5,
-        gsBushCrowdRadius = 10,
-        gsBushCrowdCount = 3,
-        gsBushMinGap = 2,
-        gsBushNoGround = [1226],
-        gsBushHillSpacing = 12,
-        gsBushHillChance = .45,
-        gsBushHillRadius = 3,
-        gsBushHillRise = .8,
-        gsBushValleyRadius = 16,
-        gsBushValleyDepth = 2,
-        gsBushHillTreeClear = 10,
-        gsBushHillSpread = 2.5,
-        gsBushNoGroundShare = .25,
-        gsBushBaseShare = .1,
         ridgePlantMesh = 1480,
         ridgePlantWorld = "headless",
         ridgePlantTries = 56,
@@ -13117,13 +13080,19 @@ void main() {
         treeDirtWorldScale = {
             faivel: .575
         },
+        treeDirtCapGrow = {
+            faivel: !0
+        },
         treeDirtSmallScale = {
             guardstone: [1.5, .75]
         },
         treeDirtSkipModels = [1555],
         treeDirtHuge = {},
         treeDirtTrunk = {
-            1639: 26
+            1639: 23.4
+        },
+        treeDirtCenter = {
+            1639: [2.77, 1.91]
         },
         treeDirtBigScale = {
             guardstone: [3, 1.75, 10]
@@ -32583,7 +32552,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             t.id = e, t.x = n, t.z = o, t.origin[0] = n * 64, t.origin[2] = o * 64, t.deserialized = !1, t.props.length = 0, t.data = void 0, t.ct = null, t.ctKey = null, t.folGap = !1, t.loadingProps = 0, t.__world = void 0, t.gsStoneMask = null, t.gsMeadowMask = null, t.gsBigDirtMask = null, t.pathBand = null
         },
         _7 = (t, e) => {
-            classicHlSwap(e), t.data = e, b7(t), e.ctw || (scatterLakePlants(t), scatterRidgePlants(t), scatterPathPlants(t), scatterGsBushes(t)), NN(t, !0), t.deserialized = !0
+            classicHlSwap(e), t.data = e, b7(t), e.ctw || (scatterRidgePlants(t), scatterPathPlants(t)), NN(t, !0), t.deserialized = !0
         },
         ii = (t, e, n) => {
             e /= 2.6666666666666665, n /= 2.6666666666666665;
@@ -35874,16 +35843,16 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             return treeWidths.get(id);
         },
         treeDirtRadius = (w, sc, world) => {
-            let r = Math.min(treeDirtMaxRadius, Math.max(treeDirtMinRadius, treeDirtShare * w * sc / 2)) * (treeDirtWorldScale[world] || 1),
+            let r = Math.min(treeDirtMaxRadius * (treeDirtCapGrow[world] ? Math.max(1, sc) : 1), Math.max(treeDirtMinRadius, treeDirtShare * w * sc / 2)) * (treeDirtWorldScale[world] || 1),
                 small = treeDirtSmallScale[world],
                 big = treeDirtBigScale[world];
             small && r < small[0] && (r *= small[1]);
             big && r >= big[0] && (r = Math.min(big[2], r * big[1]));
             return r;
         },
-        buildTreeDirt = t => treeDirtWorlds.indexOf(chunkWorldOf(t)) >= 0 || gloomNear(t) ? terrainDeferred(t, "treedirt19", t => {
+        buildTreeDirt = t => treeDirtWorlds.indexOf(chunkWorldOf(t)) >= 0 || gloomNear(t) ? terrainDeferred(t, "treedirt21", t => {
             let r = buildTreeDirtNow(t);
-            return r === !1 ? (treeWidthWaiting.push([t, t.id, T.file]), null) : terrainCacheSet(t, "treedirt19", r);
+            return r === !1 ? (treeWidthWaiting.push([t, t.id, T.file]), null) : terrainCacheSet(t, "treedirt21", r);
         }) : null,
         buildTreeDirtNow = t => {
             let trees = new Set(treeDirtMeshes().filter(id => treeDirtSkipModels.indexOf(meshOverrides.get(id).model) < 0)),
@@ -35909,7 +35878,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                         let hide = meshHideChance.get(p.id);
                         if (hide > 0 && dirtHash(Math.round((cx * 64 + p.x / d7) * 16), Math.round((cz * 64 + p.z / d7) * 16), 173) < hide) continue;
                         let r = Math.max(treeDirtRadius(w, Math.max(p.scale, 100) / $N, chunkWorldOf(t)) * (treeDirtHuge[p.id] || 1), treeDirtTrunk[p.id] ? treeDirtTrunk[p.id] * Math.max(p.scale, 100) / $N + 1.5 : 0),
-                            c = meshOverrides.has(p.id) && meshOverrides.get(p.id).model ? [0, 0] : treeCenters.get(p.id) || [0, 0],
+                            c = treeDirtCenter[p.id] || (meshOverrides.has(p.id) && meshOverrides.get(p.id).model ? [0, 0] : treeCenters.get(p.id) || [0, 0]),
                             ang = p.ry / Sy,
                             sc = Math.max(p.scale, 100) / $N,
                             lx = dx * 64 + p.x / d7 + (c[0] * Math.cos(ang) + c[1] * Math.sin(ang)) * sc,
@@ -36235,121 +36204,6 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             return !!oasisAreaIds && oasisAreaIds.has(id);
         },
         chunkRetextureWorld = ch => chunkWorldOf(ch),
-        scatterGsBushes = t => {
-            if (!oe.faivelRetexture || !t.data || !t.data.props || t.data.__gsbushes) return;
-            t.data.__gsbushes = !0;
-            if (!chunkIsGuardstone(t)) return;
-            let meshes = gsBushMeshes.filter(id => Ys.has(id));
-            if (!meshes.length) return;
-            let src = t.data.props.slice(),
-                onPath = (lx, lz) => {
-                    let q = k7(lx, lz),
-                        b = t.data.texture[q][w7(lx, lz)],
-                        w = [b & 31, b >> 5 & 31, b >> 10 & 31],
-                        top = w[0] + w[1] + w[2] < 16 ? 3 : w.indexOf(Math.max(...w));
-                    return isPathTerrain(t.data.textureid[q][top]);
-                },
-                bushWorld = chunkRetextureWorld(t),
-                onSand = (lx, lz) => {
-                    let q = k7(lx, lz),
-                        b = t.data.texture[q][w7(lx, lz)],
-                        w = [b & 31, b >> 5 & 31, b >> 10 & 31],
-                        sum = w[0] + w[1] + w[2],
-                        all = Math.max(32, sum),
-                        v = 0;
-                    w.push(all - sum);
-                    for (let k = 0; k < 4; ++k) gsBushNoGround.indexOf(topGrassShown(t.data.textureid[q][k], bushWorld)) >= 0 && (v += w[k]);
-                    return v / all > gsBushNoGroundShare;
-                };
-            let anchors = [];
-            for (let p of src) {
-                let px = p.x / d7,
-                    pz = p.z / d7;
-                gsBushMeshes.indexOf(p.id) < 0 && dirtHash(Math.floor(t.x * 64 + px), Math.floor(t.z * 64 + pz), 701) < gsBushPropChance && anchors.push([px, pz, gsBushMinDist, gsBushMaxDist]);
-            }
-            {
-                let trees = new Set(treeDirtMeshes()),
-                    treePts = [];
-                for (let dz = -1; dz <= 1; ++dz)
-                    for (let dx = -1; dx <= 1; ++dx) {
-                        let cx = t.x + dx,
-                            cz = t.z + dz,
-                            ch = dx || dz ? T.getChunk(cx, cz) : t;
-                        if (!terrainChunkUsable(ch, cx, cz, t) || !ch.data.props) continue;
-                        for (let p of ch.data.props) trees.has(p.id) && treePts.push(dx * 64 + p.x / d7, dz * 64 + p.z / d7);
-                    }
-                let S = gsBushHillSpacing,
-                    h = (lx, lz) => lx >= 0 && lz >= 0 && lx < 64 && lz < 64 ? ii(t, lx, lz) : groundAt(t.origin[0] + lx, t.origin[2] + lz);
-                for (let gz = 0; gz * S < 64; ++gz)
-                    for (let gx = 0; gx * S < 64; ++gx) {
-                        let wx0 = Math.floor(t.origin[0] / S) + gx,
-                            wz0 = Math.floor(t.origin[2] / S) + gz;
-                        if (dirtHash(wx0, wz0, 721) >= gsBushHillChance) continue;
-                        let lx = (gx + .2 + .6 * dirtHash(wx0, wz0, 722)) * S,
-                            lz = (gz + .2 + .6 * dirtHash(wx0, wz0, 723)) * S,
-                            y = h(lx, lz);
-                        if (y === null) continue;
-                        let low = 1 / 0,
-                            around = 0,
-                            count = 0,
-                            bad = !1;
-                        for (let a = 0; a < 8 && !bad; ++a) {
-                            let ang = a * Math.PI / 4,
-                                c = Math.cos(ang),
-                                sn = Math.sin(ang),
-                                y1 = h(lx + c * gsBushHillRadius, lz + sn * gsBushHillRadius),
-                                y2 = h(lx + c * gsBushValleyRadius, lz + sn * gsBushValleyRadius);
-                            if (y1 === null || y2 === null) bad = !0;
-                            else y1 < low && (low = y1), around += y2, ++count;
-                        }
-                        if (bad || y - low < gsBushHillRise || around / count - y < gsBushValleyDepth) continue;
-                        let clear = !0;
-                        for (let i = 0; i < treePts.length && clear; i += 2) Math.hypot(treePts[i] - lx, treePts[i + 1] - lz) < gsBushHillTreeClear && (clear = !1);
-                        clear && anchors.push([lx, lz, 0, gsBushHillSpread]);
-                    }
-            }
-            for (let [px, pz, dMin, dMax] of anchors) {
-                let hx = Math.floor(t.x * 64 + px),
-                    hz = Math.floor(t.z * 64 + pz),
-                    n = 1 + Math.floor(dirtHash(hx, hz, 702) * gsBushMax),
-                    area = Gu.get(Ty(t, Math.min(63.9, Math.max(0, px)), Math.min(63.9, Math.max(0, pz)))),
-                    base = !!area && gsBushBaseAreas.indexOf(area.name) >= 0;
-                for (let k = 0; k < n; ++k) {
-                    if (base && dirtHash(hx + k, hz + k, 707) >= gsBushBaseShare) continue;
-                    let a = dirtHash(hx + k, hz, 703) * Math.PI * 2,
-                        d = (dMin + dirtHash(hx, hz + k, 704) * (dMax - dMin)) * (base ? gsBushBaseDist : 1),
-                        lx = px + Math.cos(a) * d,
-                        lz = pz + Math.sin(a) * d;
-                    if (lx < .5 || lz < .5 || lx > 63.5 || lz > 63.5 || am(t, lx, lz)) continue;
-                    let y = ii(t, lx, lz);
-                    if (y <= cm(t, lx, lz) || chunkNormalAt(t, lx, lz)[1] < gsBushMinNormal || onPath(lx, lz) || onSand(lx, lz)) continue;
-                    let near = 0,
-                        tooClose = !1;
-                    for (let b of t.data.props) {
-                        if (gsBushMeshes.indexOf(b.id) < 0) continue;
-                        let bd = Math.hypot(b.x / d7 - lx, b.z / d7 - lz);
-                        if (bd < gsBushMinGap) {
-                            tooClose = !0;
-                            break;
-                        }
-                        bd < gsBushCrowdRadius && ++near;
-                    }
-                    if (tooClose || near >= gsBushCrowdCount && dirtHash(hx - k, hz - k, 708) >= gsBushBaseShare) continue;
-                    let r = dirtHash(hx - k, hz + k, 705),
-                        mesh = meshes[Math.floor(dirtHash(hx + k, hz - k, 706) * meshes.length) % meshes.length];
-                    t.data.props.push({
-                        id: mesh,
-                        x: Math.round(lx * d7),
-                        y: Math.round(y * UN),
-                        z: Math.round(lz * d7),
-                        rx: 0,
-                        ry: Math.round(r * 65535) - 32768,
-                        rz: 0,
-                        scale: Math.round((gsBushScaleMin + r * (gsBushScaleMax - gsBushScaleMin)) * (gsBushMeshScale[mesh] || 1))
-                    });
-                }
-            }
-        },
         scatterPathPlants = t => {
             if (!oe.faivelRetexture || !t.data || !t.data.props || t.data.__pathplants) return;
             t.data.__pathplants = !0;
@@ -36402,35 +36256,6 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             e % 1 + n % 1 > 1 && i++;
             i *= 3;
             return [t.normals[i], t.normals[i + 1], t.normals[i + 2]];
-        },
-        scatterLakePlants = t => {
-            if (!oe.faivelRetexture || !t.data || !t.data.props || t.data.__lakeplants) return;
-            t.data.__lakeplants = !0;
-            if (!Ys.has(lakePlantMesh) || !t.data.water || t.data.water.length === 0) return;
-            for (let i = 0; i < lakePlantTries; ++i) {
-                if (dirtHash(t.x * 64 + i, t.z * 64 + i, 311) > lakePlantChance) continue;
-                let lx = dirtHash(t.x * 64 + i, t.z * 64, 312) * 63.5 + .25,
-                    lz = dirtHash(t.x * 64, t.z * 64 + i, 313) * 63.5 + .25;
-                if (am(t, lx, lz)) continue;
-                let y = ii(t, lx, lz),
-                    above = y - cm(t, lx, lz);
-                if (above < lakePlantMinAbove || above > lakePlantMaxAbove) continue;
-                let nrm = chunkNormalAt(t, lx, lz);
-                if (nrm[1] < lakePlantMinNormal) continue;
-                let r = dirtHash(t.x + i, t.z - i, 314),
-                    ry = Math.round(r * 65535) - 32768,
-                    [tiltX, tiltZ] = plantTilt(nrm, ry, lakePlantTiltMax);
-                t.data.props.push({
-                    id: lakePlantMesh,
-                    x: Math.round(lx * d7),
-                    y: Math.round((y + lakePlantLift) * UN),
-                    z: Math.round(lz * d7),
-                    rx: Math.round(tiltX * Sy),
-                    ry: ry,
-                    rz: Math.round(tiltZ * Sy),
-                    scale: lakePlantScaleMin + Math.round(r * (lakePlantScaleMax - lakePlantScaleMin))
-                });
-            }
         },
         topGrassShown0 = tex => {
             let o = textureOverrides.get(tex),
