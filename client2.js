@@ -7566,7 +7566,7 @@ void main() {
             meshOverrides.set(1616, {
                 model: 1482,
                 texture: 1846,
-                scale: [1, 0.95],
+                scale: [1.05, 1.05],
                 offset: {
                 },
                 ground: true
@@ -7574,7 +7574,7 @@ void main() {
             meshOverrides.set(1615, {
                 model: 1482,
                 texture: 1846,
-                scale: [0.9, 0.82],
+                scale: [0.9, 0.9],
                 offset: {
                 },
                 ground: true
@@ -7582,7 +7582,7 @@ void main() {
             meshOverrides.set(1614, {
                 model: 1482,
                 texture: 1846,
-                scale: [0.95, 0.9],
+                scale: [1.2, 1.2],
                 offset: {
                 },
                 ground: true
@@ -7590,7 +7590,7 @@ void main() {
             meshOverrides.set(1613, {
                 model: 1482,
                 texture: 1846,
-                scale: [3.8, 4.2],
+                scale: [4.3, 4.8],
                 offset: {
                 },
                 ground: true
@@ -7601,7 +7601,7 @@ void main() {
             meshOverrides.set(1662, {
                 model: 1482,
                 texture: 1846,
-                scale: [1.3, 1.3],
+                scale: [1.2, 1.2],
                 offset: {
                 },
                 ground: true
@@ -7609,7 +7609,7 @@ void main() {
             meshOverrides.set(1663, {
                 model: 1482,
                 texture: 1846,
-                scale: [1.2, 1.2],
+                scale: [1.05, 1.05],
                 offset: {
                 },
                 ground: true
@@ -7617,7 +7617,7 @@ void main() {
             meshOverrides.set(1664, {
                 model: 1482,
                 texture: 1846,
-                scale: [1.1, 1.1],
+                scale: [0.9, 0.9],
                 offset: {
                 },
                 ground: true
@@ -7625,7 +7625,7 @@ void main() {
             meshOverrides.set(1661, {
                 model: 1482,
                 texture: 1846,
-                scale: [4.5, 5],
+                scale: [4.3, 4.8],
                 offset: {
                 },
                 ground: true
@@ -7633,7 +7633,7 @@ void main() {
             meshOverrides.set(1660, {
                 model: 1481,
                 texture: 1218,
-                scale: [1.7,1.7],
+                scale: [1.7, 1.7],
                 ground: true
             })
             textureOverrides.set(2109, 1232)
@@ -7746,7 +7746,7 @@ void main() {
             meshOverrides.set(1642, {
                 model: 1555,
                 texture: 1223,
-                scale: [0.66, 0.66],
+                scale: [1, 1],
                 groundSink: !0,
                 offset: {
                     y: -2
@@ -7756,7 +7756,7 @@ void main() {
             meshOverrides.set(1643, {
                 model: 1555,
                 texture: 1223,
-                scale: [1.2, 1.2],
+                scale: [1.5, 1.5],
                 groundSink: !0,
                 offset: {
                     y: -2
@@ -7766,7 +7766,7 @@ void main() {
             meshOverrides.set(1644, {
                 model: 1555,
                 texture: 1223,
-                scale: [0.9, 0.9],
+                scale: [1, 1],
                 groundSink: !0,
                 offset: {
                     y: -2
@@ -7776,7 +7776,7 @@ void main() {
             meshOverrides.set(1645, {
                 model: 1555,
                 texture: 1223,
-                scale: [1.49, 1.49],
+                scale: [1.5, 1.5],
                 groundSink: !0,
                 offset: {
                     y: -2
@@ -7786,7 +7786,7 @@ void main() {
             meshOverrides.set(1646, {
                 model: 1555,
                 texture: 1223,
-                scale: [1.6, 1.6],
+                scale: [1.5, 1.5],
                 groundSink: !0,
                 offset: {
                     y: -2
@@ -7796,7 +7796,7 @@ void main() {
             meshOverrides.set(1647, {
                 model: 1555,
                 texture: 1223,
-                scale: [0.96, 0.96],
+                scale: [1, 1],
                 groundSink: !0,
                 offset: {
                     y: -2
@@ -7806,7 +7806,7 @@ void main() {
             meshOverrides.set(1648, {
                 model: 1555,
                 texture: 1223,
-                scale: [0.96, 0.96],
+                scale: [1, 1],
                 groundSink: !0,
                 offset: {
                     y: -2
@@ -7816,7 +7816,7 @@ void main() {
             meshOverrides.set(1649, {
                 model: 1555,
                 texture: 1223,
-                scale: [0.72, 0.72],
+                scale: [1, 1],
                 groundSink: !0,
                 offset: {
                     y: -2
@@ -8082,12 +8082,38 @@ void main() {
                 if ((h -= w[i]) <= 0) return list[i];
             return list[list.length - 1];
         },
-        ocPick = (opts, eid, salt) => {
-            let usable = opts.map(([target, weight, mode]) => [ocVariants(target), weight, mode]).filter(o => o[0].length);
+        ocLimitActive = new Map,
+        ocLimitKey = o => JSON.stringify(o[0]),
+        ocLimitFull = (o, ent) => {
+            let l = o[3];
+            if (!l || !ent || !T) return !1;
+            let key = ocLimitKey(o),
+                set = ocLimitActive.get(key),
+                n = 0;
+            if (!set) return !1;
+            for (let id of set) {
+                let x = T.entity(id);
+                if (!x || x.__ocKey !== key || !x.stats || !x.stats.alive || !x.pos) {
+                    set.delete(id);
+                    continue;
+                }
+                (!(l.r > 0) || Math.hypot(x.pos[0] - ent.pos[0], x.pos[2] - ent.pos[2]) <= l.r) && ++n;
+            }
+            return n >= Math.max(1, l.n | 0);
+        },
+        ocLimitTake = (o, ent) => {
+            if (!o || !o[3] || !ent) return;
+            let key = ocLimitKey(o);
+            ocLimitActive.has(key) || ocLimitActive.set(key, new Set), ocLimitActive.get(key).add(ent.id), ent.__ocKey = key;
+        },
+        ocPicked = null,
+        ocPick = (opts, eid, salt, ent) => {
+            ocPicked = null;
+            let usable = opts.map(o => [ocVariants(o[0]), o[1], o[2], o]).filter(o => o[0].length && !ocLimitFull(o[3], ent));
             if (!usable.length) return null;
             let sum = usable.reduce((a, o) => a + o[1], 0),
                 h = ocHash(eid, salt) * sum,
-                pick = o => o[2] === "any" ? o[0][Math.floor(ocHash(eid, salt + 1) * o[0].length)] : ocPickVariant(o[0], eid, salt + 1);
+                pick = o => (ocPicked = o[3], o[2] === "any" ? o[0][Math.floor(ocHash(eid, salt + 1) * o[0].length)] : ocPickVariant(o[0], eid, salt + 1));
             for (let o of usable)
                 if ((h -= o[1]) <= 0) return pick(o);
             return pick(usable[usable.length - 1]);
@@ -8130,7 +8156,8 @@ void main() {
             let src = (e.originalName || e.name || "").toLowerCase(),
                 opts = ocOptions(src, e.pos[0], e.pos[2], !!(T && T.player && T.player !== e && T.player.hostility(e) === 0));
             if (!opts) return null;
-            let pick = ocPick(opts, e.id, 11);
+            let pick = ocPick(opts, e.id, 11, e),
+                opt = ocPicked;
             if (!pick) return null;
             for (let b of ocBosses()) {
                 if (b.from ? b.from !== src : !b.result.test(pick.name.toLowerCase())) continue;
@@ -8138,7 +8165,7 @@ void main() {
                 let boss = ocPickVariant(ocVariants(b.to), e.id, 101);
                 if (boss) return ocBossActive.set(b.to, e.id), boss;
             }
-            return pick;
+            return ocLimitTake(opt, e), pick;
         },
         oldCreatureCheck = e => {
             if (e.__ocDone || !oe.faivelRetexture || !T || !T.player || e.type !== 1 || !e.pos || !(e.pos[0] || e.pos[2]) || !(e.originalName || e.name)) return;
@@ -33109,12 +33136,15 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             1227: [[0, 73], [5, 103], [4, 84], [6, 109], [13, 4], [15, 47]],
             1228: [[8, 16]],
             1232: [[0, 122], [3, 126]],
-            1233: [[7, 22]],
+            1233: [[7, 100]],
             1234: [[3, 57]],
             1235: [[4, 122], [8, 71]],
             1238: [[3, 55], [7, 18]]
         },
-        oldFolScale = 1.125,
+        oldFolScale = .872,
+        oldFolTexScale = {
+            1233: 1.3
+        },
         oldFolTexSheets = {},
         oldFolSheets = {
             guardstone: 1214
@@ -33202,7 +33232,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     let x = e - .5 + oldFolRand(),
                         z = i - .5 + oldFolRand();
                     if (x < 0 || x >= 64 || z < 0 || z >= 64) continue;
-                    let size = (.6 * oldFolRand() + .7) * (d ? .8 : .5);
+                    let size = (.6 * oldFolRand() + .7) * (d ? .8 : .5) * (oldFolTexScale[own] || 1);
                     oldFolInt();
                     let fid = oldFolCellId(entry[0], oldFolTexSheets[own] || sheet);
                     if (fid == null) continue;
@@ -33234,7 +33264,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                         z = list[j + 1],
                         nrm = T.getNormal(x + ox, z + oz),
                         $ = cnt++ * 7;
-                    U[$] = x + ox, U[$ + 1] = ii(t, x, z), U[$ + 2] = z + oz, U[$ + 3] = list[j + 2], U[$ + 4] = nrm[0] + .001, U[$ + 5] = nrm[1], U[$ + 6] = nrm[2];
+                    U[$] = x + ox, U[$ + 1] = ii(t, x, z) - .1 - .045 * list[j + 2], U[$ + 2] = z + oz, U[$ + 3] = list[j + 2], U[$ + 4] = nrm[0] + .001, U[$ + 5] = nrm[1], U[$ + 6] = nrm[2];
                 }
                 let f = geo.instances[o];
                 T0(f, cnt), Po(f, f.attributes.inst), f.bounds = t.geometry.terrain.bounds;
@@ -36152,6 +36182,59 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 });
             }
         },
+        chunkAreaShare = (t, names, key) => {
+            let d = t.data;
+            if (!d || !d.area) return 0;
+            if (d[key] !== void 0) return d[key];
+            let hit = 0,
+                seen = 0;
+            for (let i = 0; i < d.area.length; ++i) {
+                let id = d.area[i];
+                if (!id) continue;
+                ++seen;
+                let a = Gu.get(id);
+                if (!a || !a.name) continue;
+                for (let j = 0; j < names.length; ++j)
+                    if (a.name.indexOf(names[j]) >= 0) {
+                        ++hit;
+                        break;
+                    }
+            }
+            return d[key] = seen ? hit / seen : 0;
+        },
+        chunkNeedsOasisFoliage = t => {
+            let d = t.data;
+            if (d.__oasisFol !== void 0) return d.__oasisFol;
+            let hit = chunkAreaShare(t, [oasisFoliageName], "__oasis") > 0;
+            if (!hit && d.textureid)
+                for (let q = 0; q < 4 && !hit; ++q)
+                    for (let k = 0; k < 4; ++k) {
+                        let r = Ac.get(d.textureid[q][k]);
+                        if (r && (r.texture === oasisFoliageTexture || r.texture === oasisGrassTexture)) {
+                            hit = !0;
+                            break;
+                        }
+                    }
+            if (!hit)
+                for (let dz = -1; dz <= 1 && !hit; ++dz)
+                    for (let dx = -1; dx <= 1; ++dx) {
+                        let ch = dx || dz ? T.getChunk(t.x + dx, t.z + dz) : t;
+                        if (ch && ch.data && ch.data.water && ch.data.water.length > 0) {
+                            hit = !0;
+                            break;
+                        }
+                    }
+            return d.__oasisFol = hit;
+        },
+        isOasisArea = id => {
+            if (!id) return !1;
+            if (!oasisAreaIds && Gu.size) {
+                oasisAreaIds = new Set;
+                for (let a of Gu.values()) a.name && a.name.indexOf(oasisFoliageName) >= 0 && oasisAreaIds.add(a.id);
+            }
+            return !!oasisAreaIds && oasisAreaIds.has(id);
+        },
+        chunkRetextureWorld = ch => chunkWorldOf(ch),
         scatterGsBushes = t => {
             if (!oe.faivelRetexture || !t.data || !t.data.props || t.data.__gsbushes) return;
             t.data.__gsbushes = !0;
@@ -36267,59 +36350,6 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 }
             }
         },
-        chunkAreaShare = (t, names, key) => {
-            let d = t.data;
-            if (!d || !d.area) return 0;
-            if (d[key] !== void 0) return d[key];
-            let hit = 0,
-                seen = 0;
-            for (let i = 0; i < d.area.length; ++i) {
-                let id = d.area[i];
-                if (!id) continue;
-                ++seen;
-                let a = Gu.get(id);
-                if (!a || !a.name) continue;
-                for (let j = 0; j < names.length; ++j)
-                    if (a.name.indexOf(names[j]) >= 0) {
-                        ++hit;
-                        break;
-                    }
-            }
-            return d[key] = seen ? hit / seen : 0;
-        },
-        chunkNeedsOasisFoliage = t => {
-            let d = t.data;
-            if (d.__oasisFol !== void 0) return d.__oasisFol;
-            let hit = chunkAreaShare(t, [oasisFoliageName], "__oasis") > 0;
-            if (!hit && d.textureid)
-                for (let q = 0; q < 4 && !hit; ++q)
-                    for (let k = 0; k < 4; ++k) {
-                        let r = Ac.get(d.textureid[q][k]);
-                        if (r && (r.texture === oasisFoliageTexture || r.texture === oasisGrassTexture)) {
-                            hit = !0;
-                            break;
-                        }
-                    }
-            if (!hit)
-                for (let dz = -1; dz <= 1 && !hit; ++dz)
-                    for (let dx = -1; dx <= 1; ++dx) {
-                        let ch = dx || dz ? T.getChunk(t.x + dx, t.z + dz) : t;
-                        if (ch && ch.data && ch.data.water && ch.data.water.length > 0) {
-                            hit = !0;
-                            break;
-                        }
-                    }
-            return d.__oasisFol = hit;
-        },
-        isOasisArea = id => {
-            if (!id) return !1;
-            if (!oasisAreaIds && Gu.size) {
-                oasisAreaIds = new Set;
-                for (let a of Gu.values()) a.name && a.name.indexOf(oasisFoliageName) >= 0 && oasisAreaIds.add(a.id);
-            }
-            return !!oasisAreaIds && oasisAreaIds.has(id);
-        },
-        chunkRetextureWorld = ch => chunkWorldOf(ch),
         scatterPathPlants = t => {
             if (!oe.faivelRetexture || !t.data || !t.data.props || t.data.__pathplants) return;
             t.data.__pathplants = !0;
