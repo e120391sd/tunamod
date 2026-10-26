@@ -6583,6 +6583,7 @@ void main() {
                 Xh = row * i,
                 ev = Zh + i,
                 Zg = Xh + i,
+                ins = (o.inset || 0) * i,
                 cx = (Zh + ev) / 2,
                 Ih = base.nodes && base.nodes[0];
             return {
@@ -6593,9 +6594,9 @@ void main() {
                 nodes: [{
                     geotype: 0,
                     leafCount: o.leafCount == null ? 2 : o.leafCount,
-                    points: [Zh, Zg, ev, Zg, Zh, Xh, ev, Xh],
-                    start: [cx, Zg],
-                    end: [cx, Xh],
+                    points: [Zh + ins, Zg - ins, ev - ins, Zg - ins, Zh + ins, Xh + ins, ev - ins, Xh + ins],
+                    start: [cx, Zg - ins],
+                    end: [cx, Xh + ins],
                     size: o.size == null ? (Ih ? Ih.size : 4) : o.size,
                     radius: o.radius || 0,
                     slant: 0,
@@ -13483,7 +13484,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         let folOld = (src, pairs) => pairs.every(([x]) => src.indexOf(x) >= 0) ? pairs.reduce((r, [x, y]) => r.replace(x, y), src) : (console.warn("2023 foliage: foliage shader has changed, not applied"), src);
         QM = folOld(QM, [["void main(){vUv=uv;", "float folSh(vec3 p){float dist=length(cameraPosition-p);float s=1.0;if(a==1&&dist<shadowRange[2]){float fd=smoothstep(shadowRange[1],shadowRange[2],dist);vec4 sp=dist>shadowRange[0]?shadowPVMatrix[1]*vec4(p,1.0):shadowPVMatrix[0]*vec4(p,1.0);vec3 sc=(sp.xyz/sp.w)*0.5+0.5;s=dist>shadowRange[0]?texture(shadowMaps[1],sc):texture(shadowMaps[0],sc);s=max(s,fd);}return s;}" + "void main(){vUv=uv;"], ["b+=0.3*lightCols[c].rgb*e;", "b+=0.5*lightCols[c].rgb*e;"], ["vLightDir=worldlight[0]*max(0.0,dot(instNorm.xyz,worldlight[2]));", "vLightDir=worldlight[0]*0.65*folSh(instPos.xyz+vec3(0.0,0.5,0.0));"], ["float e=sin(time+instPos.x+f.x)*0.1*f.y;f.xz+=e;", "f.x+=cos(time*0.5+instPos.x*0.2)*sin(time*4.0+instPos.z*0.5)*0.08*f.y;"]]);
         KM = folOld(KM, [["void main(){vUv=uv;", "float folSh(vec3 p){float dist=length(cameraPosition-p);float s=1.0;if(a==1&&dist<shadowRange[2]){float fd=smoothstep(shadowRange[1],shadowRange[2],dist);vec4 sp=dist>shadowRange[0]?shadowPVMatrix[1]*vec4(p,1.0):shadowPVMatrix[0]*vec4(p,1.0);vec3 sc=(sp.xyz/sp.w)*0.5+0.5;s=dist>shadowRange[0]?texture(shadowMaps[1],sc):texture(shadowMaps[0],sc);s=max(s,fd);}return s;}" + "void main(){vUv=uv;"], ["b+=0.3*lightCols[c].rgb*e;", "b+=0.5*lightCols[c].rgb*e;"], ["vLightDir+=worldlight[0]*max(0.0,dot(instNorm.xyz,worldlight[2]));", "vLightDir=worldlight[0]*0.65*folSh(instPos.xyz+vec3(0.0,0.5,0.0));"], ["vec3 f=position;", "vec3 f=position;f.x+=cos(time*0.5+instPos.x*0.2)*sin(time*4.0+instPos.z*0.5)*0.08*f.y;"]]);
-        YM = folOld(YM, [["b.rgb=b.rgb*(vLight+vLightAmb+vLightDir*d);", "b.rgb=b.rgb*(vLight+vLightAmb+vLightDir);"]]);
+        YM = folOld(YM, [["b.rgb=b.rgb*(vLight+vLightAmb+vLightDir*d);", "b.rgb=b.rgb*(vLight+vLightAmb+vLightDir);"], ["b.a=b.a*smoothstep(1.0,0.0,(vCameraDistance-110.0)/20.0);if(b.a<c){discard;};", "if(b.a<c){discard;};b.a=min(1.0,b.a*2.0);"]]);
         XM = folOld(XM, [["b.rgb=b.rgb*(vLight+vLightAmb+vLightDir*c);", "b.rgb=b.rgb*(vLight+vLightAmb+vLightDir);"]]);
         let folFar = src => src.replace("vec3 h=g*f;vWorldPos=vec4(h*instPos.w+instPos.xyz,1.0);", "float fs=clamp(1.0-(length(cameraPosition-instPos.xyz)-min(fog[1][1]/2.0,100.0))/20.0,0.0,1.0);vec3 h=g*f*fs;vWorldPos=vec4(h*instPos.w+instPos.xyz,1.0);");
         QM.indexOf("vec3 h=g*f;vWorldPos=vec4(h*instPos.w+instPos.xyz,1.0);") >= 0 && (QM = folFar(QM)), KM.indexOf("vec3 h=g*f;vWorldPos=vec4(h*instPos.w+instPos.xyz,1.0);") >= 0 && (KM = folFar(KM));
@@ -33122,7 +33123,8 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         oldFolLook = {
             coverage: 0,
             spread: 0,
-            scale: 1.87
+            scale: 1.87,
+            inset: 1 / 32
         },
         oldFolIds = new Map,
         oldFolNext = 8600,
@@ -33233,7 +33235,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                         z = list[j + 1],
                         nrm = T.getNormal(x + ox, z + oz),
                         $ = cnt++ * 7;
-                    U[$] = x + ox, U[$ + 1] = ii(t, x, z) - .1 - .045 * list[j + 2], U[$ + 2] = z + oz, U[$ + 3] = list[j + 2], U[$ + 4] = nrm[0] + .001, U[$ + 5] = nrm[1], U[$ + 6] = nrm[2];
+                    U[$] = x + ox, U[$ + 1] = ii(t, x, z) - .1 + .015 * list[j + 2], U[$ + 2] = z + oz, U[$ + 3] = list[j + 2], U[$ + 4] = nrm[0] + .001, U[$ + 5] = nrm[1], U[$ + 6] = nrm[2];
                 }
                 let f = geo.instances[o];
                 T0(f, cnt), Po(f, f.attributes.inst), f.bounds = t.geometry.terrain.bounds;
@@ -34276,6 +34278,13 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             let j = ct.ids.indexOf(pi);
             return j < 0 ? 0 : ct.w[vi * ct.n + j];
         },
+        ctLayersSeam = sb => {
+            let L = Math.ceil(sb.n / 4),
+                out = new Uint8Array(ctRes * ctRes * 4 * L);
+            for (let v = 0; v < ctRes * ctRes; ++v)
+                for (let j = 0; j < sb.n; ++j) out[((j >> 2) * ctRes * ctRes + v) * 4 + (j & 3)] = sb.w[v * sb.n + j];
+            return out;
+        },
         ctLayersFor = t => {
             let ct = t.ct,
                 n = ct.n,
@@ -34297,21 +34306,108 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 }
             return out;
         },
+        ctSeamR = 8,
+        ctSeamLines = [0, 32, 64],
+        ctSeamBlend = t => {
+            let R = ctSeamR,
+                S = ctRes + 2 * R,
+                own = t.ct,
+                key = T.file + ":",
+                got = new Map,
+                chunkAt = (cx, cz) => {
+                    let k = cx + "," + cz;
+                    if (got.has(k)) return got.get(k);
+                    let ch = cx === t.x && cz === t.z ? t : T.getChunk(cx, cz),
+                        ok = ch && ch.ct && ch.x === cx && ch.z === cz && ch.ctKey === key + ch.id ? ch.ct : null;
+                    return got.set(k, ok), ok;
+                },
+                ids = own.ids.slice(),
+                wsum = new Map;
+            for (let dz = -1; dz <= 1; ++dz)
+                for (let dx = -1; dx <= 1; ++dx) {
+                    let c = (dx || dz) && chunkAt(t.x + dx, t.z + dz);
+                    if (c)
+                        for (let j = 0; j < c.n; ++j) ids.includes(c.ids[j]) || wsum.set(c.ids[j], (wsum.get(c.ids[j]) || 0) + 1);
+                }
+            [...wsum.keys()].sort((a, b) => wsum.get(b) - wsum.get(a)).forEach(pi => ids.length < 16 && ids.push(pi));
+            let K = ids.length,
+                F = new Float32Array(S * S * K),
+                col = new Map(ids.map((pi, j) => [pi, j]));
+            for (let gz = 0; gz < S; ++gz)
+                for (let gx = 0; gx < S; ++gx) {
+                    let wx = gx - R,
+                        wz = gz - R,
+                        cx = t.x + Math.floor(wx / 64),
+                        cz = t.z + Math.floor(wz / 64),
+                        c = chunkAt(cx, cz),
+                        lx = wx - Math.floor(wx / 64) * 64,
+                        lz = wz - Math.floor(wz / 64) * 64;
+                    c || (c = own, lx = Math.max(0, Math.min(63, wx)), lz = Math.max(0, Math.min(63, wz)));
+                    let vi = lx + lz * 64,
+                        o = (gx + gz * S) * K,
+                        tot = 0;
+                    for (let j = 0; j < c.n; ++j) {
+                        let v = c.w[vi * c.n + j],
+                            q = col.get(c.ids[j]);
+                        q != null && v && (F[o + q] += v, tot += v);
+                    }
+                    if (tot > 0)
+                        for (let q = 0; q < K; ++q) F[o + q] /= tot;
+                }
+            let at = (x, z, q) => F[((x + R) + (z + R) * S) * K + q],
+                jump = (x0, z0, x1, z1) => {
+                    let d = 0;
+                    for (let q = 0; q < K; ++q) d += Math.abs(at(x0, z0, q) - at(x1, z1, q));
+                    return d / 2;
+                },
+                out = new Uint8Array(ctRes * ctRes * K),
+                blur = new Float32Array(K);
+            for (let z = 0; z < ctRes; ++z)
+                for (let x = 0; x < ctRes; ++x) {
+                    let f = 0;
+                    for (let L of ctSeamLines) {
+                        let dx = Math.abs(x - L),
+                            dz = Math.abs(z - L);
+                        dx < R && (f = Math.max(f, ctSmooth(.18, .45, jump(L - 1, z, L, z)) * (1 - dx / R)));
+                        dz < R && (f = Math.max(f, ctSmooth(.18, .45, jump(x, L - 1, x, L)) * (1 - dz / R)));
+                    }
+                    let o = (x + z * ctRes) * K;
+                    if (f > 0) {
+                        blur.fill(0);
+                        let n = 0;
+                        for (let bz = -R; bz <= R; ++bz)
+                            for (let bx = -R; bx <= R; ++bx) {
+                                if (bx * bx + bz * bz > R * R) continue;
+                                for (let q = 0; q < K; ++q) blur[q] += at(x + bx, z + bz, q);
+                                ++n;
+                            }
+                        f = f * f * (3 - 2 * f);
+                        for (let q = 0; q < K; ++q) out[o + q] = Math.round(255 * (at(x, z, q) * (1 - f) + blur[q] / n * f));
+                    } else
+                        for (let q = 0; q < K; ++q) out[o + q] = Math.round(255 * at(x, z, q));
+                }
+            return {
+                ids,
+                n: K,
+                w: out
+            };
+        },
         ctUpload = t => {
             let ct = t.ct;
             if (!ct) return;
-            let tex = t.meshes.ctAtlas = ctAtlas(t),
+            let sb = classicPlain && !ct.quick ? ctSeamBlend(t) : null,
+                tex = t.meshes.ctAtlas = ctAtlas(t),
                 base = ctAtlasBase(t),
-                data = ctLayersFor(t),
-                L = Math.ceil(ct.n / 4);
+                data = sb ? ctLayersSeam(sb) : ctLayersFor(t),
+                L = Math.ceil((sb ? sb.n : ct.n) / 4);
             for (let l = 0; l < L; ++l) o5(tex, base + l, ctRes, ctRes, data.subarray(l * ctRes * ctRes * 4, (l + 1) * ctRes * ctRes * 4));
             let info = new Array(64).fill(0),
                 layer = new Array(16).fill(0);
-            ct.ids.forEach((pi, j) => {
+            (sb ? sb.ids : ct.ids).forEach((pi, j) => {
                 let p = ctPalette[pi];
                 info[j * 4] = p.scale / 127, info[j * 4 + 1] = p.darkest / 255, info[j * 4 + 2] = p.brightest / 255, info[j * 4 + 3] = p.spec / 255, layer[j] = pi;
             });
-            ct.info = info, ct.layer = layer, ct.meta = [base, ct.n, 0, 0];
+            ct.info = info, ct.layer = layer, ct.meta = [base, sb ? sb.n : ct.n, 0, 0];
             if (t.meshes.quadrantUbos)
                 for (let c of t.meshes.quadrantUbos) c.data.ctInfo = info, c.data.ctLayer = layer, c.data.ctMeta = ct.meta, ah(c), ko(c);
         },
@@ -34365,7 +34461,12 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             for (let [dx, dz] of [
                     [-1, 0],
                     [0, -1],
-                    [-1, -1]
+                    [-1, -1],
+                    [1, 0],
+                    [0, 1],
+                    [1, 1],
+                    [1, -1],
+                    [-1, 1]
                 ]) {
                 let nb = T.getChunk(t.x + dx, t.z + dz);
                 nb && nb.ct && nb.x === t.x + dx && nb.z === t.z + dz && nb.meshes.ctAtlas && ctUpload(nb);
@@ -37645,7 +37746,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             N.useProgram(G.p), N.bindVertexArray(G.vao);
             N.activeTexture(N.TEXTURE0), N.bindTexture(N.TEXTURE_2D_ARRAY, t.meshes.ctAtlas.texture), N.uniform1i(G.u.ctWeights, 0);
             N.activeTexture(N.TEXTURE1), N.bindTexture(N.TEXTURE_2D_ARRAY, ctDiffuse.texture), N.uniform1i(G.u.ctDiffuse, 1);
-            N.uniform1f(G.u.base, t.ct.meta[0]), N.uniform1i(G.u.count, t.ct.n), N.uniform4fv(G.u.info, new Float32Array(t.ct.info)), N.uniform1fv(G.u.layer, new Float32Array(t.ct.layer)), N.uniform2f(G.u.org, t.origin[0], t.origin[2]);
+            N.uniform1f(G.u.base, t.ct.meta[0]), N.uniform1i(G.u.count, t.ct.meta ? t.ct.meta[1] : t.ct.n), N.uniform4fv(G.u.info, new Float32Array(t.ct.info)), N.uniform1fv(G.u.layer, new Float32Array(t.ct.layer)), N.uniform2f(G.u.org, t.origin[0], t.origin[2]);
             N.drawArrays(N.TRIANGLES, 0, 3);
             } catch (e) {
                 ctFail("water height", e);
