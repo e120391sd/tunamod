@@ -6619,6 +6619,7 @@ void main() {
                 Ih = base.nodes && base.nodes[0];
             return {
                 id: base.id,
+                cell: o.cell,
                 texture: o.texture == null ? base.texture : o.texture,
                 type: o.type == null ? base.type : o.type,
                 seed: o.seed == null ? base.seed : o.seed,
@@ -13313,6 +13314,11 @@ precision highp float;precision highp int;uniform Environment{vec3 worldlight[3]
     var YM = `#version 300 es
 precision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};in float vCameraDistance;in vec4 vWorldPos;precision highp sampler2DShadow;uniform Shadows{uniform mat4 shadowPVMatrix[2];uniform vec3 shadowRange;};const int a=
 #SHADOWS;uniform sampler2DShadow shadowMaps[2];uniform sampler2D foliageDiffuse;in vec3 vLight;in vec3 vLightAmb;in vec3 vLightDir;in vec2 vUv;out vec4 fragColor;void main(){vec4 b=texture(foliageDiffuse,vUv);float c=0.1;b.a=b.a*smoothstep(1.0,0.0,(vCameraDistance-110.0)/20.0);if(b.a<c){discard;};float d=1.0;if(a==1&&vCameraDistance<shadowRange[2]){float e=smoothstep(shadowRange[1],shadowRange[2],vCameraDistance);if(vCameraDistance>shadowRange[0]){vec4 f=shadowPVMatrix[1]*(vWorldPos);vec3 g=(f.xyz/f.w)*0.5+0.5;d=texture(shadowMaps[1],g);}else{vec4 f=shadowPVMatrix[0]*(vWorldPos);vec3 g=(f.xyz/f.w)*0.5+0.5;d=texture(shadowMaps[0],g);}d=d;d=max(d,e);}b.rgb=b.rgb*(vLight+vLightAmb+vLightDir*d);float h=(1.0-smoothstep(fog[1][0],fog[1][1],vCameraDistance));b.rgb=mix(fog[0],b.rgb,h);fragColor=b;}`;
+    var preFolVS = `#version 300 es
+precision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};uniform Pointlights{vec4 lightCols[16];vec3 lightPos[16];int lightCount;};uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform Screen{vec2 resolution;};in vec4 instPos;in vec3 instNorm;in vec3 position;in vec2 uv;out float vCameraDistance;out vec4 vWorldPos;out vec3 vLight;out vec2 vPc;out vec2 vOffset;out float direction;out float wind;void main(){vOffset=vec2(fract(instNorm.x*0.25),-floor(instNorm.x/4.0)*0.25);direction=instNorm.y;vPc=uv;vWorldPos=vec4(instPos.xyz,1.0);vCameraDistance=length(cameraPosition-instPos.xyz);float scale=clamp(1.0-(vCameraDistance-min(fog[1][1]/2.0,100.0))/20.0,0.0,1.0);wind=cos(time*0.5+instPos.x*0.2)*sin(time*4.0+instPos.z*0.5);vec3 b=vec3(0.0);for(int c=0;c<lightCount;++c){vec3 d=lightPos[c]-instPos.xyz;float e=lightCols[c].w-dot(d,d);if(e>0.0){e/=(lightCols[c].w);e=e*e;b+=0.5*lightCols[c].rgb*e;}}vLight=b;vec4 p=projectionViewMatrix*vec4(instPos.xyz,1.0);if(scale<=0.0){gl_Position=vec4(0.0,0.0,0.0,0.0);return;}p.x+=(uv.x*2.0-1.0)*scale*instPos.w*resolution.y/resolution.x;p.y+=(1.0-uv.y*2.0)*scale*instPos.w;gl_Position=p;}`;
+    var preFolFS = `#version 300 es
+precision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};in float vCameraDistance;in vec4 vWorldPos;precision highp sampler2DShadow;uniform Shadows{uniform mat4 shadowPVMatrix[2];uniform vec3 shadowRange;};const int a=
+#SHADOWS;uniform sampler2DShadow shadowMaps[2];uniform sampler2D foliageDiffuse;in vec3 vLight;in vec2 vPc;in vec2 vOffset;in float direction;in float wind;out vec4 fragColor;const float CUTOFF=1.0/(128.0/4.0);void main(){vec2 uv=vec2(vPc.x+wind*(1.0-vPc.y)*0.08,vPc.y);if(uv.x<CUTOFF||uv.x>1.0-CUTOFF||uv.y>1.0-CUTOFF||uv.y<CUTOFF){discard;}uv.x=mod(direction*uv.x,1.0)*0.25;uv.y=1.0-uv.y*0.25;uv+=vOffset;vec4 r=texture(foliageDiffuse,uv);if(r.a<0.1)discard;r.a=min(1.0,r.a*2.0);float d=1.0;if(a==1&&vCameraDistance<shadowRange[2]){float e=smoothstep(shadowRange[1],shadowRange[2],vCameraDistance);if(vCameraDistance>shadowRange[0]){vec4 f=shadowPVMatrix[1]*vWorldPos;vec3 g=(f.xyz/f.w)*0.5+0.5;d=texture(shadowMaps[1],g);}else{vec4 f=shadowPVMatrix[0]*vWorldPos;vec3 g=(f.xyz/f.w)*0.5+0.5;d=texture(shadowMaps[0],g);}d=max(d,e);}float lightValue=d*0.65;r.rgb=r.rgb*vLight+r.rgb*worldlight[0]*lightValue+r.rgb*worldlight[1];r.rgb=mix(r.rgb,fog[0],smoothstep(fog[1][0],fog[1][1],vCameraDistance));fragColor=r;}`;
     var QM = `#version 300 es
 precision highp float;precision highp int;precision highp sampler2DShadow;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};out float vCameraDistance;out vec4 vWorldPos;uniform Pointlights{vec4 lightCols[16];vec3 lightPos[16];int lightCount;};out vec3 vLight;uniform Shadows{uniform mat4 shadowPVMatrix[2];uniform vec3 shadowRange;};const int a=
 #SHADOWS;uniform sampler2DShadow shadowMaps[2];uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform Screen{vec2 resolution;};in vec4 instPos;in vec3 instNorm;in vec3 position;in vec2 uv;out vec3 vLightAmb;out vec3 vLightDir;out vec2 vUv;void main(){vUv=uv;vec3 b=vec3(0.0);for(int c=0;c<lightCount;++c){vec3 d=lightPos[c]-instPos.xyz;float e=lightCols[c].w-dot(d,d);if(e>0.0){e/=(lightCols[c].w);e=e*e;b+=0.3*lightCols[c].rgb*e;;}};vLight=b;vLightAmb=worldlight[1];vLightDir=worldlight[0]*max(0.0,dot(instNorm.xyz,worldlight[2]));vec3 f=position;float e=sin(time+instPos.x+f.x)*0.1*f.y;f.xz+=e;mat3 g;g[1]=instNorm.xyz;g[2]=normalize(cross(vec3(sin(instPos.x*100.0),0.0,cos(instPos.z*100.0)),g[1]));g[0]=normalize(cross(g[1],g[2]));vec3 h=g*f;vWorldPos=vec4(h*instPos.w+instPos.xyz,1.0);vCameraDistance=length(cameraPosition-vWorldPos.xyz);gl_Position=projectionViewMatrix*vWorldPos;}`;
@@ -13360,7 +13366,7 @@ precision highp float;precision highp int;uniform Screen{vec2 resolution;};unifo
     var simpleBloomFrag = `#version 300 es
 precision highp float;precision highp int;uniform Screen{vec2 resolution;};uniform sampler2D inputA;uniform float amount;in vec2 vUv;out vec4 fragColor;void main(){vec2 o=1.0/resolution;vec4 b=texture(inputA,vUv);vec3 g=b.rgb*0.6+(texture(inputA,vUv+vec2(o.x,0.0)).rgb+texture(inputA,vUv-vec2(o.x,0.0)).rgb+texture(inputA,vUv+vec2(0.0,o.y)).rgb+texture(inputA,vUv-vec2(0.0,o.y)).rgb)*0.1;fragColor=vec4(g*g*amount+b.rgb,b.a);}`;
     var oldBloomFrag = `#version 300 es
-precision highp float;precision highp int;uniform Screen{vec2 resolution;};uniform sampler2D inputA;uniform sampler2D inputB;uniform float step;uniform float amount;in vec2 vUv;out vec4 fragColor;float weight[8]=float[8](0.118,0.113,0.100,0.082,0.061,0.042,0.027,0.016);void main(){vec2 o=1.0/resolution;vec3 r;if(step<0.5){r=texture(inputB,vUv).rgb*weight[0];for(int i=1;i<8;++i){r+=texture(inputB,vUv+vec2(o.x*float(i),0.0)).rgb*weight[i];r+=texture(inputB,vUv-vec2(o.x*float(i),0.0)).rgb*weight[i];}r=smoothstep(vec3(0.4),vec3(0.75),r)*0.18;fragColor=vec4(r,1.0);}else{r=texture(inputA,vUv).rgb*weight[0];for(int i=1;i<8;++i){r+=texture(inputA,vUv+vec2(0.0,o.y*float(i))).rgb*weight[i];r+=texture(inputA,vUv-vec2(0.0,o.y*float(i))).rgb*weight[i];}vec4 b=texture(inputB,vUv);vec3 g=b.rgb*0.6+(texture(inputB,vUv+vec2(o.x,0.0)).rgb+texture(inputB,vUv-vec2(o.x,0.0)).rgb+texture(inputB,vUv+vec2(0.0,o.y)).rgb+texture(inputB,vUv-vec2(0.0,o.y)).rgb)*0.1;fragColor=vec4(r+b.rgb+g*g*amount,b.a);}}`;
+precision highp float;precision highp int;uniform Screen{vec2 resolution;};uniform sampler2D inputA;uniform sampler2D inputB;uniform float step;uniform float amount;in vec2 vUv;out vec4 fragColor;float weight[8]=float[8](0.118,0.113,0.100,0.082,0.061,0.042,0.027,0.016);void main(){vec2 o=1.0/resolution;vec3 r;if(step<0.5){r=texture(inputB,vUv).rgb*weight[0];for(int i=1;i<8;++i){r+=texture(inputB,vUv+vec2(o.x*float(i),0.0)).rgb*weight[i];r+=texture(inputB,vUv-vec2(o.x*float(i),0.0)).rgb*weight[i];}r=smoothstep(vec3(0.4),vec3(0.75),r)*0.18;fragColor=vec4(r,1.0);}else{r=texture(inputA,vUv).rgb*weight[0];for(int i=1;i<8;++i){r+=texture(inputA,vUv+vec2(0.0,o.y*float(i))).rgb*weight[i];r+=texture(inputA,vUv-vec2(0.0,o.y*float(i))).rgb*weight[i];}vec4 b=texture(inputB,vUv);fragColor=vec4(r+b.rgb,1.0);}}`;
     var m6 = `#version 300 es
 precision highp float;precision highp int;uniform Screen{vec2 resolution;};uniform sampler2D inputA;uniform sampler2D inputB;uniform float amount;in vec2 vUv;out vec4 fragColor;void main(){vec4 a=texture(inputA,vUv);vec3 b=texture(inputB,vUv).rgb;b=b*b;fragColor.w=a.w;fragColor.xyz=b*amount+a.xyz;}`;
     var d6 = `#version 300 es
@@ -13703,6 +13709,20 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             }), ht[40] = kn({
                 vertex: fh.vert,
                 fragment: fh.frag.replace("if(b.a<c){discard;};", "if(b.a<c){discard;};b.a=min(1.0,b.a*2.0);"),
+                cullFace: null,
+                instanced: [{
+                    name: "instPos",
+                    size: 4
+                }, {
+                    name: "instNorm",
+                    size: 3
+                }],
+                globalUniforms: xn,
+                transparent: !0,
+                attributeLocations: t.foliage
+            }), ht[41] = kn({
+                vertex: preFolVS,
+                fragment: preFolFS.replace("#SHADOWS", oe.shadows ? 1 : 0),
                 cullFace: null,
                 instanced: [{
                     name: "instPos",
@@ -29462,6 +29482,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         },
         classicWaterLoc = new Map,
         classicWaterFade = 2.5,
+        classicWaterChunkBoost = 200,
         classicWaterCache = new Map,
         classicWaterCacheAt = 0,
         classicWaterColAt = (cx, cz) => {
@@ -29500,6 +29521,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                             ddz = qz + .5 - pz,
                             w = Math.exp(-(ddx * ddx + ddz * ddz) / s2);
                         if (w < .01) continue;
+                        classicWaterChunkCols.has(qx + qz * (T.chunkAmount || 100)) && (w *= classicWaterChunkBoost);
                         for (let j = 0; j < 3; ++j)
                             for (let i = 0; i < 3; ++i) acc[j * 3 + i] += c[j][i] * w;
                         tw += w;
@@ -32780,12 +32802,13 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             return x1(l) + x1(3 - l - a) + x1(a) + x1(0)
         };
     var F7 = t => {
-        let e = 0,
+        let one = oe.faivelRetexture && t.cell != null,
+            e = 0,
             n = 0,
             o = 0;
         for (let u = 0; u < t.nodes.length; ++u) {
             let p = t.nodes[u],
-                g = oe.faivelRetexture ? 1 : p.leafCount,
+                g = one ? 1 : p.leafCount,
                 v = p.points.length / 2;
             e += v * 3 * g, n += v * 2 * g, o += Math.max(0, (v - 2) * 3) * g, p.geotype === 1 && (o += 3 * g * Math.min(1, p.points.length))
         }
@@ -32818,7 +32841,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 } = p,
                 R = p.points.length / 2,
                 O = Math.PI * 2 / (y === 2 ? 4 : y);
-            for (let W = 0; W < (oe.faivelRetexture ? 1 : y); ++W) {
+            for (let W = 0; W < (one ? 1 : y); ++W) {
                 let U = W * O + _f(-D, D),
                     $ = E + _f(-L, L),
                     G = F * _f(1 - V, 1),
@@ -32838,8 +32861,8 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                         let ue = $ + M * ce;
                         $e = Math.sin(ue) * ce, ye = Math.cos(ue) * ce, Oe = xe
                     } else $e = ce, ye = M * (Math.abs(ce) + Math.abs(xe)), Oe = xe;
-                    let ze = oe.faivelRetexture ? Oe : $e * Math.cos(U) - Oe * Math.sin(U),
-                        Ne = oe.faivelRetexture ? $e : $e * Math.sin(U) + Oe * Math.cos(U);
+                    let ze = one ? Oe : $e * Math.cos(U) - Oe * Math.sin(U),
+                        Ne = one ? $e : $e * Math.sin(U) + Oe * Math.cos(U);
                     s[l] = ze * G + Math.cos(U) * de, s[l + 1] = be + ye * G, s[l + 2] = Ne * G + Math.sin(U) * de, i[a] = se, i[a + 1] = 1 - fe, l += 3, a += 2
                 }
                 if (b === 0)
@@ -33203,14 +33226,59 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             1235: [[4, 122], [8, 71]],
             1238: [[3, 55], [7, 18]]
         },
+        oldFolGsGrass = [[35, 14, 0], [36, 61, 0], [37, 62, 0], [40, 45, 0], [41, 54, 1]],
+        oldFolWorldLists = {},
+        oldFolBaseScale = 1,
+        oldFolBaseGen = (t, lists, perCell) => {
+            let ct = t.ct;
+            if (!ct || !ct.ids || !ct.w) return 0;
+            let n = ct.n || ct.ids.length,
+                tex = ct.ids.map(i => ctPalette[i] ? ctPalette[i].texture : -1),
+                ox = t.origin[0],
+                oz = t.origin[2],
+                placed = 0;
+            for (let c = 0; c < 64; ++c)
+                for (let f = 0; f < 64; ++f) {
+                    if (oldFolInt() % 100 > S1) continue;
+                    let x = c + ox,
+                        z = f + oz;
+                    if (T.getNormal(x, z)[1] < .6 || cm(t, c, f) > ii(t, c, f) - .1) continue;
+                    let v = c + f * 64,
+                        sum = 0;
+                    for (let j = 0; j < n; ++j) sum += ct.w[v * n + j];
+                    if (!sum) continue;
+                    let r = oldFolRand() * sum,
+                        pick = -1;
+                    for (let j = 0; j < n; ++j)
+                        if ((r -= ct.w[v * n + j]) < 0) {
+                            pick = tex[j];
+                            break;
+                        }
+                    let list = lists[pick];
+                    if (!list) continue;
+                    let D = P7[c + f * 64];
+                    for (let q of list) {
+                        if (oldFolInt() % 255 > q[1] || q[2] && D <= 0 || !Ec.has(q[0])) continue;
+                        let px = Math.max(0, Math.min(64, c - .25 + oldFolRand() * .5)),
+                            pz = Math.max(0, Math.min(64, f - .25 + oldFolRand() * .5)),
+                            sz = (q[2] ? .5 + Math.min(1.4, D * 1.5) : .5 + oldFolRand()) * oldFolBaseScale;
+                        if (t.__folRecord) {
+                            t.__folRecord(Math.floor(px), Math.floor(pz), q[0], sz);
+                            continue;
+                        }
+                        perCell.has(q[0]) || perCell.set(q[0], []), perCell.get(q[0]).push(px, pz, sz), placed++;
+                    }
+                }
+            return placed;
+        },
         oldFolScale = .872,
         oldFolDoubleCells = [1, 2, 3, 7, 8, 9, 11, 13, 14],
         oldFolDoubleTex = {
             1213: [0]
         },
         oldFolDenseTex = [1227, 1232, 1235],
-        oldFolDensity = 1.8,
-        oldFolInterior = .35,
+        oldFolDensity = 2.6,
+        oldFolInterior = .5,
         oldFolTexScale = {},
         oldFolTexSheets = {
             1232: 1213
@@ -33272,7 +33340,104 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 lz = Math.floor(z - ch.origin[2]);
             return ctPalette[ch.ct.rawDom[Math.min(63, lx) + Math.min(63, lz) * 64]].texture;
         },
+        oldFolPre05 = !0,
+        oldFolPreDefs = new Map,
+        oldFolPreQuad = null,
+        oldFolPreDef = sheet => {
+            if (oldFolPreDefs.has(sheet)) return oldFolPreDefs.get(sheet);
+            if (!Pc.has(sheet)) return oldFolPreDefs.set(sheet, null), null;
+            let id = oldFolNext++;
+            for (; Ec.has(id);) id = oldFolNext++;
+            Ec.set(id, {
+                id,
+                texture: sheet,
+                type: 0,
+                pre05: !0,
+                nodes: []
+            });
+            oldFolPreQuad || (oldFolPreQuad = On({
+                position: {
+                    size: 3,
+                    data: new Float32Array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+                },
+                uv: {
+                    size: 2,
+                    data: new Float32Array([0, 0, 1, 0, 0, 1, 1, 1])
+                },
+                index: {
+                    type: 5125,
+                    data: new Uint32Array([0, 2, 1, 1, 2, 3])
+                }
+            }));
+            P1.set(id, oldFolPreQuad);
+            return oldFolPreDefs.set(sheet, id), id;
+        },
+        oldFolPreCol = (x, z) => {
+            let v = oldFolShownCt(x, z);
+            if (v === 1227 || v === 1232) {
+                let mm = Math.max(meadowMaskAt(x + .5, z + .5, null), meadowMaskAt(x + .5, z + .5, null, "gsMeadow", "gsmeadow")) / 255;
+                mm * meadowMossStrength > .5 && (v = 1235);
+            }
+            return v;
+        },
+        oldFolPreGen = t => {
+            let fid = oldFolPreDef(oldFolSheet(chunkWorldOf(t)));
+            if (fid == null || !t.ct) return !1;
+            let tries = Math.floor(70 * S1 / 2),
+                ox = t.origin[0],
+                oz = t.origin[2],
+                list = [],
+                pm = 1,
+                xy = () => pm = 16807 * pm % 2147483647,
+                wy = () => (xy() - 1) / 2147483647,
+                edgeAt = (col, x, z) => {
+                    if (x < 0 || z < 0 || x >= T.bounds || z >= T.bounds) return !0;
+                    let v = oldFolPreCol(x, z);
+                    return v == null ? (t.folGap = !0, !0) : v !== col;
+                };
+            pm = (t.id + 1e3) % 2147483647, pm <= 0 && (pm += 2147483646), t.folGap = !1;
+            for (let k = 0; k < tries; ++k) {
+                let e = xy() % 64,
+                    i = xy() % 64,
+                    n = e + ox,
+                    a = i + oz;
+                if (T.getNormal(n, a)[1] < .8) continue;
+                let col = oldFolPreCol(n, a),
+                    c = col != null && oldFolLists[col] || [],
+                    d = edgeAt(col, n + 2, a) || edgeAt(col, n - 2, a) || edgeAt(col, n, a + 2) || edgeAt(col, n, a - 2);
+                if (d || wy() > .8)
+                    for (let q = 0; q < c.length; ++q) {
+                        if (list.length / 6 >= tries) continue;
+                        let f = c[q];
+                        if (xy() % 255 > f[1]) continue;
+                        let o = e - .5 + wy(),
+                            r = i - .5 + wy();
+                        if (o < 0 || o >= 64 || r < 0 || r >= 64) continue;
+                        let l = (.6 * wy() + .7) * (d ? .8 : .5),
+                            u = ii(t, o, r) + .8 * l - .1;
+                        list.push(o, u, r, l, f[0], xy() % 2 ? -1 : 1);
+                    }
+            }
+            E7(t);
+            let geo = t.geometry.foliage = {
+                instances: [HN(0)],
+                folIds: [fid]
+            },
+                def = Ec.get(fid);
+            C7.has(def.texture) || (C7.add(def.texture), Ao(def.texture, r => {
+                A0(r, 16), ws(r), Ly.set(def.texture, r)
+            }));
+            let U = geo.instances[0].attributes.inst.data,
+                cnt = 0;
+            for (let j = 0; j < list.length && cnt < S7; j += 6) {
+                let $ = cnt++ * 7;
+                U[$] = list[j] + ox, U[$ + 1] = list[j + 1], U[$ + 2] = list[j + 2] + oz, U[$ + 3] = list[j + 3], U[$ + 4] = list[j + 4], U[$ + 5] = list[j + 5], U[$ + 6] = 0;
+            }
+            T0(geo.instances[0], cnt), Po(geo.instances[0], geo.instances[0].attributes.inst), geo.instances[0].bounds = t.geometry.terrain.bounds;
+            return !0;
+        },
         oldFolGenerate = t => {
+            if (oldFolPre05 && !t.__folRecord && oldFolPreGen(t)) return !0;
             let world = chunkWorldOf(t),
                 sheet = oldFolSheet(world),
                 tries = Math.floor(70 * S1 / 2 * oldFolDensity),
@@ -33288,7 +33453,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     a = i + oz;
                 if (T.getNormal(n, a)[1] < .8 || cm(t, e, i) > ii(t, e, i) - .1) continue;
                 let own = oldFolShownCt(n, a),
-                    list = own != null && oldFolLists[own] || [],
+                    list = own != null && !(oldFolWorldLists[world] && oldFolWorldLists[world][own]) && oldFolLists[own] || [],
                     other = (x, z) => {
                         let v = oldFolShownCt(x, z),
                             nc = v != null && T.getChunkFromWorld(x, z);
@@ -33298,7 +33463,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     d = other(n + 2, a) || other(n - 2, a) || other(n, a + 2) || other(n, a - 2);
                 let dense = oldFolDenseTex.indexOf(own) >= 0;
                 if (!dense && oldFolRand() > 1 / oldFolDensity) continue;
-                if (!(d || oldFolRand() > 1 - (dense ? oldFolInterior : .2))) continue;
+                if (!(d || oldFolRand() > 1 - (dense ? oldFolInterior : .32))) continue;
                 for (let c = 0; c < list.length; ++c) {
                     if (placed >= tries) continue;
                     let entry = list[c];
@@ -33317,6 +33482,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     perCell.has(fid) || perCell.set(fid, []), perCell.get(fid).push(x, z, size * oldFolScale), placed++;
                 }
             }
+            oldFolWorldLists[world] && oldFolBaseGen(t, oldFolWorldLists[world], perCell);
             if (t.__folRecord) return !0;
             E7(t);
             let ids = [...perCell.keys()].slice(0, 32),
@@ -33550,7 +33716,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     for (let f = 0; f < c.folIds.length; ++f) {
                         let u = c.folIds[f],
                             p = o.indexOf(u);
-                        p < 0 && (o.push(u), s.push([]), i.push(Ec.get(u).type === 0 ? Ec.get(u).alphaDouble ? 40 : 13 : 14), p = o.length - 1), s[p].push(c.instances[f])
+                        p < 0 && (o.push(u), s.push([]), i.push(Ec.get(u).pre05 ? 41 : Ec.get(u).type === 0 ? Ec.get(u).alphaDouble ? 40 : 13 : 14), p = o.length - 1), s[p].push(c.instances[f])
                     }
                 }
             }
@@ -38556,9 +38722,9 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     ["step", 0]
                 ]), Sf(37, null, e, n, [
                     ["step", 1],
-                    ["amount", ht[31].uniforms.amount.value * (classicPlain ? 1 : .8)]
+                    ["amount", ht[31].uniforms.amount.value]
                 ])) : Sf(39, null, n, null, [
-                    ["amount", ht[31].uniforms.amount.value * (classicPlain ? 1 : .8)]
+                    ["amount", ht[31].uniforms.amount.value]
                 ])
             } else V1(n, null, N.COLOR_BUFFER_BIT)
         },
