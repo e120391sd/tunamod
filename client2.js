@@ -1843,6 +1843,28 @@ precision highp float;precision highp int;uniform Screen{vec2 resolution;};unifo
         fogOn = !0,
         fogDistance = ee(100),
         fogDistMul = 1,
+        realmFog = {
+            guardstone: .85,
+            headless: .5,
+            faivel: 1
+        },
+        realmFogTravel = 40,
+        realmFogCur = 1,
+        realmFogMul = null,
+        realmFogPos = null,
+        realmFogTick = () => {
+            let p = !classicPlain && T && T.player && T.player.pos;
+            if (!p) return realmFogMul || 1;
+            let ch = T.getChunkFromWorld(p[0], p[2]),
+                tgt = ch && ch.data ? realmFog[chunkWorldOf(ch)] : void 0;
+            if (realmFogMul === null) return tgt === void 0 ? 1 : (realmFogPos = [p[0], p[2]], realmFogMul = tgt);
+            let d = Math.hypot(p[0] - realmFogPos[0], p[2] - realmFogPos[1]);
+            realmFogPos = [p[0], p[2]];
+            if (tgt === void 0) return realmFogMul;
+            if (d > 30) return realmFogMul = tgt;
+            let step = d / realmFogTravel;
+            return realmFogMul += Math.max(-step, Math.min(step, tgt - realmFogMul));
+        },
         fogDistRow = null,
         blockSpecialSelling = ee(!0),
         sellRow = null,
@@ -7737,7 +7759,7 @@ void main() {
             meshOverrides.set(1639, {
                 model: 1554,
                 texture: 1222,
-                scale: [6.33, 3.34],
+                scale: [8.67, 3.34],
                 groundSink: !0,
                 offset: {
                     y: -2
@@ -13107,10 +13129,10 @@ void main() {
         treeDirtSkipModels = [1555],
         treeDirtHuge = {},
         treeDirtTrunk = {
-            1639: 23.4
+            1639: 32
         },
         treeDirtCenter = {
-            1639: [2.77, 1.91]
+            1639: [3.8, 2.62]
         },
         treeDirtBigScale = {
             guardstone: [3, 1.25, 8]
@@ -32341,7 +32363,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         let r = on.sky.data;
         Bi(r.skycolors, 0, bn.skytop[s], bn.skytop[i], o), Bi(r.skycolors, 3, bn.skymid[s], bn.skymid[i], o), Bi(r.skycolors, 6, bn.skybot[s], bn.skybot[i], o), Bi(r.skycolors, 9, bn.horizon[s], bn.horizon[i], o), Bi(r.skycolors, 12, bn.clouds[s], bn.clouds[i], o), Bi(r.suncolor, 0, bn.sun[s], bn.sun[i], o), ut(vf, gf), vf[1] = Math.abs(Math.sin(t * 6.282)), go(vf, vf);
         let l = on.environment.data;
-        Bi(l.worldlight, 0, bn.direct[s], bn.direct[i], o), Bi(l.worldlight, 3, bn.ambient[s], bn.ambient[i], o), l.worldlight[6] = gf[0], l.worldlight[7] = gf[1], l.worldlight[8] = gf[2], Bi(l.fog, 0, bn.fog[s], bn.fog[i], o), l.fog[3] = n > 0 ? -100 : fy, l.fog[4] = n > 0 ? uy : Ts, fogOn ? n > 0 || (l.fog[3] *= fogDistMul, l.fog[4] *= fogDistMul) : (l.fog[3] = 1e5, l.fog[4] = 2e5), l.daycycle[0] = t, l.time[0] = e % 3600, ht[31].uniforms.amount.value = qu(o, bn.bloom[s], bn.bloom[i])
+        Bi(l.worldlight, 0, bn.direct[s], bn.direct[i], o), Bi(l.worldlight, 3, bn.ambient[s], bn.ambient[i], o), l.worldlight[6] = gf[0], l.worldlight[7] = gf[1], l.worldlight[8] = gf[2], Bi(l.fog, 0, bn.fog[s], bn.fog[i], o), l.fog[3] = n > 0 ? -100 : fy, l.fog[4] = n > 0 ? uy : Ts, fogOn ? n > 0 || (realmFogCur = fogDistMul * realmFogTick(), l.fog[3] *= realmFogCur, l.fog[4] *= realmFogCur) : (l.fog[3] = 1e5, l.fog[4] = 2e5), l.daycycle[0] = t, l.time[0] = e % 3600, ht[31].uniforms.amount.value = qu(o, bn.bloom[s], bn.bloom[i])
     };
     var RN = [],
         zN = [],
