@@ -8930,6 +8930,7 @@ void main() {
                     offset: o.offset,
                     ground: o.ground,
                     uvScale: o.uvScale,
+                    uvFit: o.uvFit,
                     dropUv: o.dropUv,
                     flatUv: o.flatUv
                 }), V0;
@@ -8986,6 +8987,12 @@ void main() {
                     }
                 if (o.uvScale && geo.uv)
                     for (let s = 0, u = geo.uv.data; s < u.length; ++s) u[s] *= o.uvScale;
+                if (o.uvFit && geo.uv)
+                    for (let s = 0, u = geo.uv.data, f = o.uvFit, t = f[4] || [0, 0, 1, 1]; s < u.length; s += 2) {
+                        let a = (u[s] - f[0]) / (f[2] - f[0]),
+                            b = (u[s + 1] - f[1]) / (f[3] - f[1]);
+                        f[5] && ([a, b] = [b, a]), u[s] = t[0] + a * (t[2] - t[0]), u[s + 1] = t[1] + b * (t[3] - t[1]);
+                    }
                 if (flat.length) {
                     let n = geo.position.data.length / 3,
                         ix = new Uint32Array(geo.index.data),
@@ -29268,14 +29275,18 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         classicCellMeshCell = 43,
         classicCellMeshUv = {
             1527: 2.4,
-            1529: 2.4,
-            1530: 2.4,
-            1531: 2.4,
-            1532: 2.4,
-            1537: 2.4,
-            1489: 0.1,
+            1529: 1.8,
+            1530: 1.8,
+            1531: 1.8,
+            1532: 1.8,
+            1537: 1.8,
+            1489: 1.6,
         },
         classicCellMesh1489 = 33,
+        classicRuinUv = 2.5,
+        classicRuinPhase = .025,
+        classicRuinOffset = {1529: 0.0919, 1530: 0.1053, 1531: 0.1098, 1532: 0.1191, 1537: 0.096, 1527: 0.1319, 1610: 0.1057, 1611: 0.1807, 1612: 0.0708},
+        classicBoneTex = (base, tex) => tex,
         classicCellMeshDrop = {
             1610: [
                 [0, .357, .39, .504]
@@ -29306,9 +29317,10 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             let use = (id, cell, uv) => Ys.has(id) && Ys.set(id, {
                 ...Ys.get(id),
                 texture: 12180 + cell,
-                ...((uv || classicCellMeshDrop[id] || classicCellMeshFlat[id]) && Ys.get(id).geometry ? {
+                ...((uv || classicCellMeshDrop[id] || classicCellMeshFlat[id] || classicRuinOffset[id] != null) && Ys.get(id).geometry ? {
                     geometry: addDerivedGeometry(Ys.get(id).geometry, {
-                        uvScale: uv,
+                        uvScale: classicRuinOffset[id] != null ? null : uv,
+                        uvFit: classicRuinOffset[id] != null ? [0, 0, 1, 1, [0, classicRuinOffset[id] + classicRuinPhase, classicRuinUv, classicRuinOffset[id] + classicRuinPhase + classicRuinUv]] : null,
                         dropUv: classicCellMeshDrop[id],
                         flatUv: classicCellMeshFlat[id] && {
                             ...classicCellMeshFlat[id],
@@ -29326,7 +29338,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     }
                 })
             });
-            classicCellMeshIds.forEach(id => use(id, classicCellMeshCell, classicCellMeshUv[id])), use(1489, classicCellMesh1489);
+            classicCellMeshIds.forEach(id => use(id, classicCellMeshCell, classicCellMeshUv[id])), use(1489, classicCellMesh1489, classicCellMeshUv[1489]);
             for (let id of classicCellMeshIds.concat(1528)) {
                 let m = Ys.get(id);
                 if (!m) continue;
@@ -30155,7 +30167,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 b && Ys.set(d.id, {
                     ...b,
                     id: d.id,
-                    texture: d.texture,
+                    texture: classicPlain ? d.texture : classicBoneTex(d.base, d.texture),
                     shader: d.shader == null ? b.shader : d.shader,
                     collisionGeometry: 0
                 });
@@ -31705,9 +31717,10 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         YE = t => {
             if (!classicPlain) {
                 let size = Math.max(20, classicFogFar),
-                    step = size * 2 / Math.max(1, GE),
-                    a = [...tn.position].map(v => Math.floor(v / step) * step),
-                    yaw = Math.atan2(gf[0], gf[1]);
+                    yaw = Math.atan2(gf[0], gf[1]),
+                    prev = Fa[0].__anchor,
+                    a = prev && prev[3] === size && Math.hypot(tn.position[0] - prev[0], tn.position[1] - prev[1], tn.position[2] - prev[2]) <= 15 ? prev.slice(0, 3) : [...tn.position];
+                Fa[0].__anchor = [...a, size];
                 for (let s = 0; s < Fa.length; ++s) {
                     let i = Fa[s];
                     (!H3(i.transform.position, a) || i.__size !== size) && (ut(i.transform.position, a), J(i.transform.rotation, -Math.PI / 2, yaw, 0), i.far = size * 2, i.near = -size * 2, Z3(i, -size, size, -size, size), mc(i, !0), gd(i), i.__size = size, hf = !0);
