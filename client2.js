@@ -1765,7 +1765,7 @@
         classicAoB = null,
         ssao = ee(!1),
         classicSsaoFrag = `#version 300 es
-precision highp float;precision highp int;uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};uniform sampler2D aoDepth;uniform float aoSeed;in vec2 vUv;out vec4 fragColor;const int zr=16;const vec3 Rs[zr]=vec3[](vec3(0.5381,0.1856,-0.4319),vec3(0.1379,0.2486,0.4430),vec3(0.3371,0.5679,-0.0057),vec3(-0.6999,-0.0451,-0.0019),vec3(0.0689,-0.1598,-0.8547),vec3(0.0560,0.0069,-0.1843),vec3(-0.0146,0.1402,0.0762),vec3(0.0100,-0.1924,-0.0344),vec3(-0.3577,-0.5301,-0.4358),vec3(-0.3169,0.1063,0.0158),vec3(0.0103,-0.5869,0.0046),vec3(-0.0897,-0.4940,0.3287),vec3(0.7119,-0.0154,-0.0918),vec3(-0.0533,0.0596,-0.5411),vec3(0.0352,-0.0631,0.5460),vec3(-0.4776,0.2847,-0.0271));const float R=1.6;float lz(vec2 uv){float d=texture(aoDepth,uv).r;float n=projectionMatrix[3][2]/(projectionMatrix[2][2]-1.0);float f=projectionMatrix[3][2]/(projectionMatrix[2][2]+1.0);return 2.0*n*f/(f+n-(2.0*d-1.0)*(f-n));}vec3 vp(vec2 uv){float z=lz(uv);return vec3((uv*2.0-1.0)*vec2(z/projectionMatrix[0][0],z/projectionMatrix[1][1]),-z);}void main(){float dRaw=texture(aoDepth,vUv).r;if(dRaw>=0.99999){fragColor=vec4(1.0);return;}vec2 px=1.0/vec2(textureSize(aoDepth,0));vec3 P=vp(vUv);vec3 pr=vp(vUv+vec2(px.x,0.0)),pl=vp(vUv-vec2(px.x,0.0)),pu=vp(vUv+vec2(0.0,px.y)),pd=vp(vUv-vec2(0.0,px.y));vec3 dx=abs(pr.z-P.z)<abs(P.z-pl.z)?pr-P:P-pl;vec3 dy=abs(pu.z-P.z)<abs(P.z-pd.z)?pu-P:P-pd;vec3 Nm=normalize(cross(dx,dy));if(dot(Nm,P)>0.0)Nm=-Nm;float ign=fract(52.9829189*fract(dot(gl_FragCoord.xy+aoSeed*5.588238,vec2(0.06711056,0.00583715))));float ang=ign*6.2831853;vec3 uH=normalize(vec3(cos(ang),sin(ang),ign*2.0-1.0));float occ=0.0;for(int i=0;i<zr;i++){vec3 k=reflect(Rs[i],uH);k*=sign(dot(k,Nm));vec3 S=P+(Nm*0.15+k)*R;vec4 c=projectionMatrix*vec4(S,1.0);vec2 suv=c.xy/c.w*0.5+0.5;if(suv.x<0.0||suv.y<0.0||suv.x>1.0||suv.y>1.0)continue;float sz=-lz(suv);float rc=smoothstep(0.0,1.0,R/max(abs(P.z-sz),1e-3));occ+=(sz>=S.z+0.05?1.0:0.0)*rc;}occ/=float(zr);occ*=1.0-smoothstep(120.0,180.0,-P.z);float QE=clamp(1.0-pow(occ,1.3)*1.15,0.0,1.0);fragColor=vec4(mix(worldlight[1]*0.2,vec3(1.0),QE),1.0);}`,
+precision highp float;precision highp int;uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};uniform sampler2D aoDepth;uniform float aoSeed;in vec2 vUv;out vec4 fragColor;const int zr=16;const vec3 Rs[zr]=vec3[](vec3(0.5381,0.1856,-0.4319),vec3(0.1379,0.2486,0.4430),vec3(0.3371,0.5679,-0.0057),vec3(-0.6999,-0.0451,-0.0019),vec3(0.0689,-0.1598,-0.8547),vec3(0.0560,0.0069,-0.1843),vec3(-0.0146,0.1402,0.0762),vec3(0.0100,-0.1924,-0.0344),vec3(-0.3577,-0.5301,-0.4358),vec3(-0.3169,0.1063,0.0158),vec3(0.0103,-0.5869,0.0046),vec3(-0.0897,-0.4940,0.3287),vec3(0.7119,-0.0154,-0.0918),vec3(-0.0533,0.0596,-0.5411),vec3(0.0352,-0.0631,0.5460),vec3(-0.4776,0.2847,-0.0271));const float R=1.6;float lz(vec2 uv){float d=texture(aoDepth,uv).r;float n=projectionMatrix[3][2]/(projectionMatrix[2][2]-1.0);float f=projectionMatrix[3][2]/(projectionMatrix[2][2]+1.0);return 2.0*n*f/(f+n-(2.0*d-1.0)*(f-n));}vec3 vp(vec2 uv){float z=lz(uv);return vec3((uv*2.0-1.0)*vec2(z/projectionMatrix[0][0],z/projectionMatrix[1][1]),-z);}void main(){float dRaw=texture(aoDepth,vUv).r;if(dRaw>=0.99999){fragColor=vec4(1.0);return;}vec2 px=1.0/vec2(textureSize(aoDepth,0));vec3 P=vp(vUv);vec3 pr=vp(vUv+vec2(px.x,0.0)),pl=vp(vUv-vec2(px.x,0.0)),pu=vp(vUv+vec2(0.0,px.y)),pd=vp(vUv-vec2(0.0,px.y));vec3 dx=abs(pr.z-P.z)<abs(P.z-pl.z)?pr-P:P-pl;vec3 dy=abs(pu.z-P.z)<abs(P.z-pd.z)?pu-P:P-pd;vec3 Nm=normalize(cross(dx,dy));if(dot(Nm,P)>0.0)Nm=-Nm;float ign=fract(52.9829189*fract(dot(gl_FragCoord.xy+aoSeed*5.588238,vec2(0.06711056,0.00583715))));float ang=ign*6.2831853;vec3 uH=normalize(vec3(cos(ang),sin(ang),ign*2.0-1.0));float occ=0.0;for(int i=0;i<zr;i++){vec3 k=reflect(Rs[i],uH);k*=sign(dot(k,Nm));vec3 S=P+(Nm*0.15+k)*R;vec4 c=projectionMatrix*vec4(S,1.0);vec2 suv=c.xy/c.w*0.5+0.5;if(suv.x<0.0||suv.y<0.0||suv.x>1.0||suv.y>1.0)continue;float sz=-lz(suv);float rc=smoothstep(0.0,1.0,R/max(abs(P.z-sz),1e-3));occ+=(sz>=S.z+0.05?1.0:0.0)*rc;}occ/=float(zr);occ*=1.0-smoothstep(120.0,180.0,-P.z);float QE=clamp(1.0-occ*1.7,0.0,1.0);fragColor=vec4(mix(worldlight[1]*0.2,vec3(1.0),QE),1.0);}`,
         classicAoTemporalFrag = `#version 300 es
 precision highp float;precision highp int;uniform Screen{vec2 resolution;};uniform sampler2D inputA;uniform sampler2D inputB;uniform sampler2D aoDepth;uniform mat4 invPV;uniform mat4 prevPV;uniform float aoKeep;in vec2 vUv;out vec4 fragColor;void main(){vec3 cur=texture(inputA,vUv).rgb;vec2 px=1.0/resolution;vec3 mn=cur,mx=cur;for(int y=-1;y<=1;++y)for(int x=-1;x<=1;++x){vec3 c=texture(inputA,vUv+vec2(x,y)*px).rgb;mn=min(mn,c);mx=max(mx,c);}float d=texture(aoDepth,vUv).r;vec4 w=invPV*vec4(vUv*2.0-1.0,d*2.0-1.0,1.0);w/=w.w;vec4 p=prevPV*w;vec2 puv=p.xy/p.w*0.5+0.5;float k=aoKeep;if(p.w<=0.0||puv.x<0.0||puv.y<0.0||puv.x>1.0||puv.y>1.0)k=0.0;vec3 h=clamp(texture(inputB,puv).rgb,mn,mx);fragColor=vec4(mix(cur,h,k),1.0);}`,
         classicAoHist = null,
@@ -13110,7 +13110,7 @@ void main() {
             1639: [2.77, 1.91]
         },
         treeDirtBigScale = {
-            guardstone: [3, 1.75, 10]
+            guardstone: [3, 1.25, 8]
         },
         gloomDirtChance = 1.5,
         gloomDirtSize = 1.35,
@@ -13198,7 +13198,7 @@ void main() {
         gloomConeReach = 60,
         gloomConeExp = 3,
         gloomRoundAreas = [
-            [3697, 4179, 100]
+            [3674, 4205, 72]
         ],
         gloomGrassTextures = [1227, 1235],
         gloomGrassTexture = 1232,
@@ -13223,6 +13223,9 @@ void main() {
         meadowMossBreakScale = 4.5,
         meadowMossBreakCut = .38,
         meadowMossStrength = .85,
+        meadowRoughScale = 2.2,
+        meadowSpeckle = .16,
+        meadowWash = .2,
         meadowPatchTint = [1, 1, 1],
         meadowPatchSpacing = 7.07,
         meadowPatchChance = .3,
@@ -13258,7 +13261,14 @@ void main() {
         meadowPathClear = 5,
         meadowPathShare = .5,
         meadowContourStretch = .9,
-        meadowPatchFlow = .6;
+        meadowPatchFlow = .6,
+        meadowFade = {
+            reach: 4,
+            scale: 1.1,
+            cut: .4,
+            amount: .85,
+            holes: .8
+        };
     let gloomNoiseGlsl = "float gloomH(ivec2 c){uint h=uint(c.x)*374761393u+uint(c.y)*668265263u;h=(h^(h>>13u))*1274126177u;h^=h>>16u;return float(h)/4294967296.0;}float gloomN(vec2 p){vec2 i=floor(p);vec2 f=p-i;vec2 u=f*f*(3.0-2.0*f);ivec2 c=ivec2(i);return mix(mix(gloomH(c),gloomH(c+ivec2(1,0)),u.x),mix(gloomH(c+ivec2(0,1)),gloomH(c+ivec2(1,1)),u.x),u.y);}";
     let gloomFragCode = `gloomT=vec4(0.0);gloomA=0.0;if(max(max(layerFlags.x,layerFlags.y),max(layerFlags.z,layerFlags.w))>0.0){vec2 gq=vWorldPos.xz;vec2 gv=gq-vec2(${gloomX.toFixed(2)},${gloomZ.toFixed(2)});float glen=length(gv);float gcone=${gloomConeReach.toFixed(2)}*pow(max(0.0,gv.x/max(glen,0.0001)),${gloomConeExp.toFixed(2)});float gd=glen+(gloomN(gq/${gloomShapeNoiseScale.toFixed(4)}+vec2(41.3,17.9))-0.5)*${(2 * gloomShapeNoise).toFixed(4)}+(gloomN(gq/${gloomEdgeNoiseScale.toFixed(4)}+vec2(5.3,31.7))-0.5)*${(2 * gloomEdgeNoise).toFixed(4)}+(gloomN(gq/${gloomDetailNoiseScale.toFixed(4)}+vec2(23.1,8.9))-0.5)*${(2 * gloomDetailNoise).toFixed(4)}+(gloomN(gq/${gloomOutNoiseScale.toFixed(4)}+vec2(7.7,53.1))-0.5)*${(2 * gloomOutNoise).toFixed(4)}-gcone;gloomA=1.0-smoothstep(${(gloomRadius - gloomFade).toFixed(2)},${gloomRadius.toFixed(2)},gd);${gloomRoundAreas.map(a => `gloomA=max(gloomA,1.0-smoothstep(${(a[2] - gloomFade).toFixed(2)},${a[2].toFixed(2)},length(gq-vec2(${a[0].toFixed(2)},${a[1].toFixed(2)}))));`).join("")}gloomT=texture(gloomGrass,vec2(-gq.x,gq.y)/4.0*${gloomUvScale.toFixed(4)});}`;
     let gsHardGlsl = `float gsHard(float m,vec2 s1,vec2 s2){if(m<=0.0)return 0.0;float hn=0.6*sandNoise(vWorldPos.xz/${(3.2*gsPatchNoiseScale).toFixed(4)}+s1)+0.4*sandNoise(vWorldPos.xz/${(1.1*gsPatchNoiseScale).toFixed(4)}+s2);return smoothstep(${gsPatchHardLo.toFixed(4)},${gsPatchHardHi.toFixed(4)},m*${(1+gsPatchNoiseAmount*.5).toFixed(4)}+(hn-0.5)*${gsPatchNoiseAmount.toFixed(4)}*min(1.0,m*3.0));}`;
@@ -14776,12 +14786,15 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             type: 1
         })
     });
+    var enrageFxColor = Object.assign([.14, .08, .06, .45], {
+        eyes: [1, .5, .08, 1]
+    });
     var fF = new ve({
         id: 72,
         icon: "ui/skills/17",
         fx: {
             stick: 18,
-            color: [.9, .3, .1, .7]
+            color: enrageFxColor
         },
         custom: [
             [t => t * 12, "% increased damage"]
@@ -33155,21 +33168,27 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         };
     var oldFolLists = {
             1225: [[7, 30]],
-            1226: [[6, 30], [12, 18]],
+            1226: [[3, 45]],
             1227: [[0, 73], [5, 103], [4, 84], [6, 109], [13, 4], [15, 47]],
             1228: [[8, 16]],
             1232: [[0, 122], [3, 126]],
             1233: [[7, 22]],
-            1234: [[6, 30], [12, 18]],
+            1234: [[3, 57]],
             1235: [[4, 122], [8, 71]],
-            1238: [[6, 30], [12, 18]]
+            1238: [[3, 55], [7, 18]]
         },
         oldFolScale = .872,
         oldFolDoubleCells = [1, 2, 3, 7, 8, 9, 11, 13, 14],
+        oldFolDoubleTex = {
+            1213: [0]
+        },
+        oldFolDenseTex = [1227, 1232, 1235],
         oldFolDensity = 1.8,
         oldFolInterior = .35,
         oldFolTexScale = {},
-        oldFolTexSheets = {},
+        oldFolTexSheets = {
+            1232: 1213
+        },
         oldFolSheets = {
             guardstone: 1214
         },
@@ -33196,7 +33215,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             return Ec.set(id, Object.assign(foliageExtras(gridCellFoliage(Object.assign({}, base, {
                 id
             }), o), o), {
-                alphaDouble: oldFolDoubleCells.indexOf(cell) >= 0
+                alphaDouble: oldFolDoubleCells.indexOf(cell) >= 0 || (oldFolDoubleTex[tex] || []).indexOf(cell) >= 0
             })), oldFolIds.set(key, id), id;
         },
         oldFolSeed = 1,
@@ -33251,7 +33270,9 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                         return v == null ? (x >= 0 && z >= 0 && x < T.bounds && z < T.bounds && (t.folGap = !0), !1) : v !== own;
                     },
                     d = other(n + 2, a) || other(n - 2, a) || other(n, a + 2) || other(n, a - 2);
-                if (!(d || oldFolRand() > 1 - oldFolInterior)) continue;
+                let dense = oldFolDenseTex.indexOf(own) >= 0;
+                if (!dense && oldFolRand() > 1 / oldFolDensity) continue;
+                if (!(d || oldFolRand() > 1 - (dense ? oldFolInterior : .2))) continue;
                 for (let c = 0; c < list.length; ++c) {
                     if (placed >= tries) continue;
                     let entry = list[c];
@@ -35151,7 +35172,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             oe.faivelRetexture && (buildStoneStrips(t), stoneUnderLookup(t), softUnderLookup(t), fvPathWorld(t) && faivelPathLookup(t));
             if (dirtPatchEnabled) {
                 chWorld !== "headless" && (gsChunk ? terrainDeferred(t, "gsdirt6", buildGsDirtMask) : terrainDeferred(t, "dirtmask", buildDirtMask));
-                gsChunk ? (terrainDeferred(t, "gsstone7", buildGsStoneMask), gsStoneFringeLookup(t), terrainDeferred(t, "gsmeadow", buildGsMeadowMask), terrainDeferred(t, "gsbigdirt", buildGsBigDirtMask)) : terrainDeferred(t, "meadowmask", buildMeadowMask);
+                gsChunk ? (terrainDeferred(t, "gsstone7", buildGsStoneMask), gsStoneFringeLookup(t), terrainDeferred(t, "gsmeadow", buildGsMeadowMask), terrainDeferred(t, "gsbigdirt", buildGsBigDirtMask)) : meadowLookup(t);
             }
             shoreShaderEnabled && buildSteepMask(t);
             oe.faivelRetexture && (buildHeadlessStone(t), buildHeadlessBank(t), shoreShaderEnabled && buildHeadlessSteep(t));
@@ -36881,7 +36902,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 sn = Math.max(0, o.shapeNoise),
                 bl = o.blend,
                 pull = Math.min(1, Math.max(0, o.propPull)),
-                reach = (o.maxReach || o.maxRadius) * (1 + sn) + o.propRange * pull + (o.crowd ? o.crowd.radius : 0),
+                reach = (o.maxReach || o.maxRadius) * (1 + sn) + o.propRange * pull + (o.crowd ? o.crowd.radius : 0) + (o.fade ? o.fade.reach : 0),
                 x0 = t.origin[0] - reach - S,
                 z0 = t.origin[2] - reach - S,
                 x1 = t.origin[0] + 64 + reach + S,
@@ -36991,6 +37012,8 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 },
                 grids = new Map;
             pn = noiseGrid(1), grids.set(1, pn);
+            let fr = o.fade ? o.fade.reach : 0,
+                fg = o.fade ? noiseGrid(o.fade.scale) : null;
             for (let k = 0; k < patches.length; k += 4) {
                 let px = patches[k],
                     pz = patches[k + 1],
@@ -37000,7 +37023,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     pg = grids.get(nsc[k / 4]) || (grids.set(nsc[k / 4], noiseGrid(nsc[k / 4])), grids.get(nsc[k / 4])),
                     st = sh ? sh[2] : 1,
                     ph = flow ? T.getHeight(px, pz) : 0,
-                    R = r * (1 + sn) * st,
+                    R = (r * (1 + sn) + fr) * st,
                     i0 = Math.max(0, Math.ceil((px - R - ox) / h)),
                     i1 = Math.min(NN - 1, Math.floor((px + R - ox) / h)),
                     j0 = Math.max(0, Math.ceil((pz - R - oz) / h)),
@@ -37020,10 +37043,26 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                         let n = j * NN + i,
                             dd = dist + (pg[n] - .5) * 2 * sn * nam[k / 4] * r * (o.rimNoise ? Math.min(1, dist / r) : 1);
                         if (flow) dd += Math.abs(flow[n] - ph) * o.flow / st;
-                        if (dd >= r) continue;
-                        let u = (dd - a) / (r - a || 1e-6);
-                        u = u < 0 ? 0 : u > 1 ? 1 : u;
-                        let v = 1 - u * u * (3 - 2 * u);
+                        let v;
+                        if (fg) {
+                            let sp = (fg[n] - o.fade.cut) / (1 - o.fade.cut);
+                            sp = sp < 0 ? 0 : sp > 1 ? 1 : sp * sp * (3 - 2 * sp);
+                            if (dd >= r) {
+                                if (dd >= r + fr) continue;
+                                let t = 1 - (dd - r) / fr;
+                                v = t * t * sp * o.fade.amount;
+                            } else {
+                                let u = (dd - a) / (r - a || 1e-6);
+                                u = u < 0 ? 0 : u > 1 ? 1 : u;
+                                let core = 1 - u * u * (3 - 2 * u);
+                                v = Math.max(core * (1 - u * (1 - sp) * o.fade.holes), sp * o.fade.amount);
+                            }
+                        } else {
+                            if (dd >= r) continue;
+                            let u = (dd - a) / (r - a || 1e-6);
+                            u = u < 0 ? 0 : u > 1 ? 1 : u;
+                            v = 1 - u * u * (3 - 2 * u);
+                        }
                         v > m[n] && (m[n] = v, any = !0);
                     }
             }
@@ -37367,7 +37406,32 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             noiseScale: meadowPatchNoiseScale,
             keep: (x, z) => !nearGsBase(x, z, gsMeadowMaxRadius)
         }),
+        meadowPartial = new Set,
+        meadowNbMissing = t => {
+            for (let dz = -1; dz <= 1; ++dz)
+                for (let dx = -1; dx <= 1; ++dx) {
+                    if (!dx && !dz) continue;
+                    let nb = T.getChunk(t.x + dx, t.z + dz);
+                    if (!nb || !nb.deserialized) return !0;
+                }
+            return !1;
+        },
+        meadowLookup = t => {
+            for (let dz = -1; dz <= 1; ++dz)
+                for (let dx = -1; dx <= 1; ++dx) {
+                    if (!dx && !dz) continue;
+                    let nb = T.getChunk(t.x + dx, t.z + dz),
+                        key = nb && terrainCacheKey(nb, "meadowmask");
+                    if (!key || !meadowPartial.has(key) || !terrainPassCache.has(key) || meadowNbMissing(nb)) continue;
+                    meadowPartial.delete(key);
+                    for (let k of ["meadowmask", "meadowmain", "meadowrim"]) terrainPassCache.delete(terrainCacheKey(nb, k));
+                    let id = nb.id;
+                    nb.state >= 5 && nb.state !== 8 && terrainJobs.push(() => nb.id === id && nb.state >= 5 && nb.state !== 8 && K7(nb, !1, !0));
+                }
+            return terrainDeferred(t, "meadowmask", buildMeadowMask);
+        },
         buildMeadowMask = t => {
+            meadowNbMissing(t) ? meadowPartial.add(terrainCacheKey(t, "meadowmask")) : meadowPartial.delete(terrainCacheKey(t, "meadowmask"));
             let gloomKeep = gloomNear(t) ? (x, z) => gloomWeight(x, z) <= 0 && gloomEdge(x, z) > meadowPatchMaxRadius * (1 + meadowPatchShapeNoise) : null,
                 terrain = chunkWorldOf(t) === "faivel",
                 edges = new Map,
@@ -37389,6 +37453,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 shapeNoise: meadowPatchShapeNoise,
                 noiseScale: meadowPatchNoiseScale,
                 rimNoise: !0,
+                fade: meadowFade,
                 flow: terrain ? meadowPatchFlow : 0,
                 keep: terrain ? (x, z) => (!gloomKeep || gloomKeep(x, z)) && !meadowNearPath(x, z) && dirtHash(Math.floor(x * 8), Math.floor(z * 8), 71) < (edgeAt(x, z)[0] >= meadowEdgeMin ? meadowEdgeChance : meadowAnyChance) : gloomKeep,
                 patchAt: terrain ? (x, z, r) => {
@@ -37470,7 +37535,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                         for (let i = 0; i < 8; ++i) dens += meadowMaskAt(x + meadowMossFillReach * Math.cos(i * Math.PI / 4), z + meadowMossFillReach * Math.sin(i * Math.PI / 4), t, field, key) / 255;
                         dens /= 9;
                         let fill = Math.max(0, Math.min(1, (dens - meadowMossFillMin) / .3));
-                        if (rim <= 0 && fill <= 0) continue;
+                        if (rim <= 0 && fill <= 0 && dens <= .02) continue;
                         let side = 0;
                         if (rim > 0) {
                             let dir = stoneUnderNoise(x / meadowMossDirScale, z / meadowMossDirScale) * Math.PI * 4,
@@ -37481,8 +37546,10 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                             edge = rim * side * (.8 + .4 * n) * 1.6 - .2,
                             under = fill * fill * (3 - 2 * fill) * (.55 + .45 * n) * meadowMossFillStrength,
                             br = Math.max(0, Math.min(1, (stoneUnderNoise(x / meadowMossBreakScale + 17.9, z / meadowMossBreakScale + 83.1) - meadowMossBreakCut) / .18)),
-                            v = Math.max(0, Math.min(1, Math.max(edge, under) * clump * br * br * (3 - 2 * br))),
+                            rough = .55 + .7 * stoneUnderNoise(x / meadowRoughScale + 33.1, z / meadowRoughScale + 61.7),
+                            v = Math.max(0, Math.min(1, Math.max(edge, under) * clump * br * br * (3 - 2 * br) * rough)),
                             a = meadowMossStrength * v * v * (3 - 2 * v);
+                        a = Math.max(a * (dirtHash(Math.floor(x), Math.floor(z), 191) < meadowSpeckle ? .3 : 1), meadowWash * Math.min(1, dens * 3) * clump * stoneUnderNoise(x / 6 + 5.5, z / 6 + 12.2));
                         a > .02 && (out[q * 9216 + f * 96 + u] = Math.round(a * 255), any = !0);
                     }
             return any ? out : null;
@@ -38460,9 +38527,9 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     ["step", 0]
                 ]), Sf(37, null, e, n, [
                     ["step", 1],
-                    ["amount", ht[31].uniforms.amount.value]
+                    ["amount", ht[31].uniforms.amount.value * (classicPlain ? 1 : .8)]
                 ])) : Sf(39, null, n, null, [
-                    ["amount", ht[31].uniforms.amount.value]
+                    ["amount", ht[31].uniforms.amount.value * (classicPlain ? 1 : .8)]
                 ])
             } else V1(n, null, N.COLOR_BUFFER_BIT)
         },
@@ -39899,7 +39966,9 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         }
         updateMeshColor(e) {
             let n = e.data.color;
+            let eye = e.data.skin && e.data.skin.bid === 1;
             Sl(n, e.data.basecolor), this.colors.forEach(o => {
+                eye && o.eyes && (o = o.eyes);
                 let s = o[3],
                     i = 1 - s;
                 n[0] = n[0] * i + o[0] * s, n[1] = n[1] * i + o[1] * s, n[2] = n[2] * i + o[2] * s
@@ -40234,7 +40303,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             b1(this.aabb, this.pos, this.size, this.size, this.size)
         }
         preFixed(e, n, o) {
-            super.preFixed(e, n, o), this.buffs.tick(e, n, o), this.stats.tick(e, n), this.emote !== 0 && (!this.stats.alive || this.steer[0] || this.steer[1] || this.emoteEnd > 0 && n >= this.emoteEnd) && this.setEmote(0, 0), this.skills.tick(e, n, o), this.setSize((this.stats.getStat(27) || 100) / 100)
+            super.preFixed(e, n, o), this.buffs.tick(e, n, o), this.stats.tick(e, n), this.emote !== 0 && (!this.stats.alive || this.steer[0] || this.steer[1] || this.emoteEnd > 0 && n >= this.emoteEnd) && this.setEmote(0, 0), this.skills.tick(e, n, o), this.setSize(!classicPlain && this.type === 0 ? 1 : (this.stats.getStat(27) || 100) / 100)
         }
         getStatBasedMoveSpeed() {
             return Math.max(Math.min(65534, this.stats.getStat(15)))
