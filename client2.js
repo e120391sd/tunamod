@@ -1087,7 +1087,7 @@
     }
 
     function B3(t) {
-        let e, n, o, s, i, r;
+        let e, n, o, s, i, r, f;
         return n = new z3({}), {
             c() {
                 e = h("div"), Z(n.$$.fragment), o = h("h2"), s = A(t[0]), i = h("small"), i.innerHTML = '<img alt="Hordes.io" class="svgicon" src="/data/ui/icon.svg?v=9001382"/> 0.51.9001 Live', Fe(o, "margin-top", "100px"), m(i, "class", "version textgrey textcenter svelte-aoht7k"), m(e, "class", "l-ui container svelte-aoht7k")
@@ -1099,13 +1099,19 @@
                 (!r || a & 1) && j(s, l[0])
             },
             i(l) {
-                r || (S(n.$$.fragment, l), r = !0)
+                r || (S(n.$$.fragment, l), En(() => {
+                    r && (f || (f = jg(e, nu, {
+                        duration: 300
+                    }, !0)), f.run(1))
+                }), r = !0)
             },
             o(l) {
-                I(n.$$.fragment, l), r = !1
+                I(n.$$.fragment, l), f || (f = jg(e, nu, {
+                    duration: 300
+                }, !1)), f.run(0), r = !1
             },
             d(l) {
-                l && w(e), K(n)
+                l && w(e), K(n), l && f && f.end()
             }
         }
     }
