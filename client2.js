@@ -1832,6 +1832,66 @@ precision highp float;precision highp int;uniform Screen{vec2 resolution;};unifo
             target.insertBefore(row, anchor || null);
             return () => (off(), row.remove());
         },
+        classicTreeIds = [1636, 1637, 1638, 1639, 1640, 1641, 1642, 1643, 1644, 1645, 1646, 1647, 1648, 1649, 1613, 1614, 1615, 1616, 1661, 1662, 1663, 1664],
+        classicTreeDefaults = new Map,
+        classicTreeUser = () => {
+            try {
+                let v = JSON.parse(localStorage.getItem("classicTreeScales") || "{}");
+                return v && typeof v == "object" ? v : {};
+            } catch (e) {
+                return {};
+            }
+        },
+        classicTreeUserApply = () => {
+            let u = typeof window != "undefined" && window.__hordesEditor ? classicTreeUser() : {};
+            for (let id of classicTreeIds) {
+                let o = meshOverrides.get(id);
+                if (!o || !o.scale) continue;
+                classicTreeDefaults.has(id) || classicTreeDefaults.set(id, Array.isArray(o.scale) ? o.scale[0] : o.scale);
+                let v = +u[id];
+                v > 0 && (o.scale = [v, v]);
+            }
+        },
+        classicTreeWindow = () => {
+            let old = document.getElementById("classicTreeWin");
+            if (old) return old.remove();
+            let u = classicTreeUser(),
+                w = document.createElement("div"),
+                list = document.createElement("div"),
+                bar = document.createElement("div"),
+                inputs = new Map;
+            w.id = "classicTreeWin", w.style.cssText = "position:fixed;right:20px;top:80px;z-index:100000;background:#10131d;border:1px solid #444;padding:10px;color:#ddd;font:13px sans-serif;max-height:70vh;overflow:auto;min-width:280px";
+            w.innerHTML = "<div style='font-weight:bold;margin-bottom:4px'>Tree sizes</div><div style='opacity:.7;margin-bottom:8px'>Scale per tree mesh. Saved in this browser, applied after reload.</div>";
+            list.style.cssText = "display:grid;grid-template-columns:auto auto 70px;gap:4px 10px;align-items:center";
+            for (let id of classicTreeIds) {
+                let o = meshOverrides.get(id);
+                if (!o) continue;
+                let dv = classicTreeDefaults.has(id) ? classicTreeDefaults.get(id) : Array.isArray(o.scale) ? o.scale[0] : o.scale,
+                    a = document.createElement("span"),
+                    b = document.createElement("span"),
+                    inp = document.createElement("input");
+                a.textContent = id + " (model " + o.model + ")", b.textContent = "default " + dv, b.style.opacity = ".6";
+                inp.type = "number", inp.step = "0.05", inp.min = "0.05", inp.value = u[id] > 0 ? u[id] : dv, inp.style.width = "64px";
+                inputs.set(id, [inp, dv]), list.append(a, b, inp);
+            }
+            let mk = (t, f) => {
+                    let e = document.createElement("button");
+                    return e.textContent = t, e.onclick = f, e.style.marginRight = "6px", bar.append(e), e;
+                },
+                save = () => {
+                    let out = {};
+                    inputs.forEach(([inp, dv], id) => {
+                        let v = +inp.value;
+                        v > 0 && Math.abs(v - dv) > 1e-6 && (out[id] = v);
+                    });
+                    try {
+                        localStorage.setItem("classicTreeScales", JSON.stringify(out));
+                    } catch (e) {}
+                };
+            bar.style.marginTop = "8px";
+            mk("Save", save), mk("Save & reload", () => (save(), location.reload())), mk("Reset all", () => inputs.forEach(([inp, dv]) => inp.value = dv)), mk("Close", () => w.remove());
+            w.append(list, bar), document.body.append(w);
+        },
         mouseOverTarget = ee(!1),
         modRowsUi = null,
         modTargetUi = null,
@@ -1843,28 +1903,6 @@ precision highp float;precision highp int;uniform Screen{vec2 resolution;};unifo
         fogOn = !0,
         fogDistance = ee(100),
         fogDistMul = 1,
-        realmFog = {
-            guardstone: .85,
-            headless: .5,
-            faivel: 1
-        },
-        realmFogTravel = 40,
-        realmFogCur = 1,
-        realmFogMul = null,
-        realmFogPos = null,
-        realmFogTick = () => {
-            let p = !classicPlain && T && T.player && T.player.pos;
-            if (!p) return realmFogMul || 1;
-            let ch = T.getChunkFromWorld(p[0], p[2]),
-                tgt = ch && ch.data ? realmFog[chunkWorldOf(ch)] : void 0;
-            if (realmFogMul === null) return tgt === void 0 ? 1 : (realmFogPos = [p[0], p[2]], realmFogMul = tgt);
-            let d = Math.hypot(p[0] - realmFogPos[0], p[2] - realmFogPos[1]);
-            realmFogPos = [p[0], p[2]];
-            if (tgt === void 0) return realmFogMul;
-            if (d > 30) return realmFogMul = tgt;
-            let step = d / realmFogTravel;
-            return realmFogMul += Math.max(-step, Math.min(step, tgt - realmFogMul));
-        },
         fogDistRow = null,
         blockSpecialSelling = ee(!0),
         sellRow = null,
@@ -7732,7 +7770,7 @@ void main() {
             meshOverrides.set(1636, {
                 model: 1554,
                 texture: 1222,
-                scale: [2.245, 2.777],
+                scale: [1.52, 1.52],
                 groundSink: !0,
                 offset: {
                     y: -2
@@ -7742,7 +7780,7 @@ void main() {
             meshOverrides.set(1637, {
                 model: 1554,
                 texture: 1222,
-                scale: [2.45, 2.613],
+                scale: [2.29, 2.29],
                 groundSink: !0,
                 offset: {
                     y: -2
@@ -7752,7 +7790,7 @@ void main() {
             meshOverrides.set(1638, {
                 model: 1554,
                 texture: 1222,
-                scale: [2.636, 2.726],
+                scale: [1.94, 1.94],
                 groundSink: !0,
                 offset: {
                     y: -2
@@ -7762,7 +7800,7 @@ void main() {
             meshOverrides.set(1639, {
                 model: 1554,
                 texture: 1222,
-                scale: [8.67, 3.34],
+                scale: [9.8, 9.8],
                 groundSink: !0,
                 offset: {
                     y: -2
@@ -7772,14 +7810,14 @@ void main() {
             meshOverrides.set(1640, {
                 model: 1553,
                 texture: 1221,
-                scale: [1.34, 1.584],
+                scale: [1.19, 1.19],
                 groundSink: !0,
                 ground: true
             })
             meshOverrides.set(1641, {
                 model: 1554,
                 texture: 1222,
-                scale: [2.681, 3.15],
+                scale: [1.97, 1.97],
                 groundSink: !0,
                 offset: {
                     y: -2
@@ -7789,7 +7827,7 @@ void main() {
             meshOverrides.set(1642, {
                 model: 1555,
                 texture: 1223,
-                scale: [1, 1],
+                scale: [0.6, 0.6],
                 groundSink: !0,
                 offset: {
                     y: -2
@@ -7799,7 +7837,7 @@ void main() {
             meshOverrides.set(1643, {
                 model: 1555,
                 texture: 1223,
-                scale: [1.5, 1.5],
+                scale: [0.9, 0.9],
                 groundSink: !0,
                 offset: {
                     y: -2
@@ -7809,7 +7847,7 @@ void main() {
             meshOverrides.set(1644, {
                 model: 1555,
                 texture: 1223,
-                scale: [1, 1],
+                scale: [0.6, 0.6],
                 groundSink: !0,
                 offset: {
                     y: -2
@@ -7819,7 +7857,7 @@ void main() {
             meshOverrides.set(1645, {
                 model: 1555,
                 texture: 1223,
-                scale: [1.5, 1.5],
+                scale: [0.9, 0.9],
                 groundSink: !0,
                 offset: {
                     y: -2
@@ -7829,7 +7867,7 @@ void main() {
             meshOverrides.set(1646, {
                 model: 1555,
                 texture: 1223,
-                scale: [1.5, 1.5],
+                scale: [0.9, 0.9],
                 groundSink: !0,
                 offset: {
                     y: -2
@@ -7839,7 +7877,7 @@ void main() {
             meshOverrides.set(1647, {
                 model: 1555,
                 texture: 1223,
-                scale: [1, 1],
+                scale: [0.6, 0.6],
                 groundSink: !0,
                 offset: {
                     y: -2
@@ -7849,7 +7887,7 @@ void main() {
             meshOverrides.set(1648, {
                 model: 1555,
                 texture: 1223,
-                scale: [1, 1],
+                scale: [0.6, 0.6],
                 groundSink: !0,
                 offset: {
                     y: -2
@@ -7859,7 +7897,7 @@ void main() {
             meshOverrides.set(1649, {
                 model: 1555,
                 texture: 1223,
-                scale: [1, 1],
+                scale: [0.6, 0.6],
                 groundSink: !0,
                 offset: {
                     y: -2
@@ -7899,6 +7937,7 @@ void main() {
             oe.faivelRetexture && oldTiledMeshes.forEach(([m, k]) => meshOverrides.has(m) || meshOverrides.set(m, {
                 uvScale: k
             }));
+            classicTreeUserApply();
             applyMeshOverrides();
             Ys.has(shrubMesh) && Ys.set(shrubPlainKey, Object.assign({}, Ys.get(shrubMesh), {
                 id: shrubPlainKey,
@@ -13127,7 +13166,7 @@ void main() {
     let hlSteepTexture = 1228,
         hlSteepFrom = [1238],
         treeDirtTexture = 1237,
-        treeDirtWorlds = ["faivel", "guardstone"],
+        treeDirtWorlds = ["faivel"],
         treeDirtShare = .7,
         treeDirtWorldScale = {
             faivel: .575
@@ -13141,10 +13180,10 @@ void main() {
         treeDirtSkipModels = [1555],
         treeDirtHuge = {},
         treeDirtTrunk = {
-            1639: 32
+            1639: 36
         },
         treeDirtCenter = {
-            1639: [3.8, 2.62]
+            1639: [4.3, 2.96]
         },
         treeDirtBigScale = {
             guardstone: [3, 1.25, 8]
@@ -32437,7 +32476,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         let r = on.sky.data;
         Bi(r.skycolors, 0, bn.skytop[s], bn.skytop[i], o), Bi(r.skycolors, 3, bn.skymid[s], bn.skymid[i], o), Bi(r.skycolors, 6, bn.skybot[s], bn.skybot[i], o), Bi(r.skycolors, 9, bn.horizon[s], bn.horizon[i], o), Bi(r.skycolors, 12, bn.clouds[s], bn.clouds[i], o), Bi(r.suncolor, 0, bn.sun[s], bn.sun[i], o), ut(vf, gf), vf[1] = Math.abs(Math.sin(t * 6.282)), go(vf, vf);
         let l = on.environment.data;
-        Bi(l.worldlight, 0, bn.direct[s], bn.direct[i], o), Bi(l.worldlight, 3, bn.ambient[s], bn.ambient[i], o), l.worldlight[6] = gf[0], l.worldlight[7] = gf[1], l.worldlight[8] = gf[2], Bi(l.fog, 0, bn.fog[s], bn.fog[i], o), l.fog[3] = n > 0 ? -100 : fy, l.fog[4] = n > 0 ? uy : classicPlain ? Ts : classicFogFar, fogOn ? n > 0 || (realmFogCur = fogDistMul * realmFogTick(), l.fog[3] *= realmFogCur, l.fog[4] *= realmFogCur) : (l.fog[3] = 1e5, l.fog[4] = 2e5), l.daycycle[0] = t, l.time[0] = e % 3600, ht[31].uniforms.amount.value = qu(o, bn.bloom[s], bn.bloom[i])
+        Bi(l.worldlight, 0, bn.direct[s], bn.direct[i], o), Bi(l.worldlight, 3, bn.ambient[s], bn.ambient[i], o), l.worldlight[6] = gf[0], l.worldlight[7] = gf[1], l.worldlight[8] = gf[2], Bi(l.fog, 0, bn.fog[s], bn.fog[i], o), l.fog[3] = n > 0 ? -100 : fy, l.fog[4] = n > 0 ? uy : classicPlain ? Ts : classicFogFar, fogOn ? n > 0 || (l.fog[3] *= fogDistMul, l.fog[4] *= fogDistMul) : (l.fog[3] = 1e5, l.fog[4] = 2e5), l.daycycle[0] = t, l.time[0] = e % 3600, ht[31].uniforms.amount.value = qu(o, bn.bloom[s], bn.bloom[i])
     };
     var RN = [],
         zN = [],
@@ -33427,7 +33466,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         oldFolPreCol = (x, z) => {
             let v = oldFolShownCt(x, z);
             if (v === 1227 || v === 1232) {
-                let mm = Math.max(meadowMaskAt(x + .5, z + .5, null), meadowMaskAt(x + .5, z + .5, null, "gsMeadow", "gsmeadow")) / 255;
+                let mm = meadowMaskAt(x + .5, z + .5, null) / 255;
                 mm * meadowMossStrength > .5 && (v = 1235);
             }
             return v;
@@ -35446,7 +35485,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             oe.faivelRetexture && (buildStoneStrips(t), stoneUnderLookup(t), softUnderLookup(t), fvPathWorld(t) && faivelPathLookup(t));
             if (dirtPatchEnabled) {
                 chWorld !== "headless" && (gsChunk ? terrainDeferred(t, "gsdirt6", buildGsDirtMask) : terrainDeferred(t, "dirtmask", buildDirtMask));
-                gsChunk ? (terrainDeferred(t, "gsstone7", buildGsStoneMask), gsStoneFringeLookup(t), terrainDeferred(t, "gsmeadow", buildGsMeadowMask), terrainDeferred(t, "gsbigdirt", buildGsBigDirtMask)) : meadowLookup(t);
+                gsChunk ? (terrainDeferred(t, "gsstone7", buildGsStoneMask), gsStoneFringeLookup(t), terrainDeferred(t, "gsbigdirt", buildGsBigDirtMask)) : meadowLookup(t);
             }
             shoreShaderEnabled && buildSteepMask(t);
             oe.faivelRetexture && (buildHeadlessStone(t), buildHeadlessBank(t), shoreShaderEnabled && buildHeadlessSteep(t));
