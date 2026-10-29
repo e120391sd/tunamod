@@ -1842,26 +1842,52 @@ precision highp float;precision highp int;uniform Screen{vec2 resolution;};unifo
                 return {};
             }
         },
+        classicTreeScales = {},
+        classicTreeGeoId = 79e3,
         classicTreeUserApply = () => {
-            let u = typeof window != "undefined" && window.__hordesEditor ? classicTreeUser() : {};
             for (let id of classicTreeIds) {
                 let o = meshOverrides.get(id);
-                if (!o || !o.scale) continue;
-                classicTreeDefaults.has(id) || classicTreeDefaults.set(id, Array.isArray(o.scale) ? o.scale[0] : o.scale);
-                let v = +u[id];
-                v > 0 && (o.scale = [v, v]);
+                o && o.scale && !classicTreeDefaults.has(id) && classicTreeDefaults.set(id, Array.isArray(o.scale) ? o.scale[0] : o.scale);
             }
+        },
+        classicTreeSet = map => {
+            classicTreeScales = {};
+            for (let id of classicTreeIds) {
+                let dv = classicTreeDefaults.get(id),
+                    m = Ys.get(id),
+                    h = m && embeddedGeometry.get(m.geometry);
+                if (dv == null || !h) continue;
+                let v = +(map || {})[id];
+                v > 0 && Math.abs(v - dv) > 1e-6 ? classicTreeScales[id] = v : v = dv;
+                if (Math.abs(scaleTriple(h.scale)[0] - v) < 1e-6) continue;
+                let g = classicTreeGeoId++;
+                Pc.set(g, {
+                    ext: 0,
+                    id: g,
+                    type: 1
+                }), embeddedGeometry.set(g, {
+                    ...h,
+                    scale: [v, v]
+                }), Ys.set(id, {
+                    ...m,
+                    geometry: g
+                });
+            }
+        },
+        classicTreeReload = () => {
+            if (!T) return;
+            for (let t of T.chunksMap.values()) t && t.state >= 3 && t.state !== 8 && (y7(t), t.state === 7 && (Ry(t), dm(t, !1, !1)), g9(t), zy(t, t.id, t.x, t.z, T.chunkAmount), t.state = 1);
         },
         classicTreeWindow = () => {
             let old = document.getElementById("classicTreeWin");
             if (old) return old.remove();
-            let u = classicTreeUser(),
+            let u = classicTreeScales,
                 w = document.createElement("div"),
                 list = document.createElement("div"),
                 bar = document.createElement("div"),
                 inputs = new Map;
             w.id = "classicTreeWin", w.style.cssText = "position:fixed;right:20px;top:80px;z-index:100000;background:#10131d;border:1px solid #444;padding:10px;color:#ddd;font:13px sans-serif;max-height:70vh;overflow:auto;min-width:280px";
-            w.innerHTML = "<div style='font-weight:bold;margin-bottom:4px'>Tree sizes</div><div style='opacity:.7;margin-bottom:8px'>Scale per tree mesh. Saved in this browser, applied after reload.</div>";
+            w.innerHTML = "<div style='font-weight:bold;margin-bottom:4px'>Tree sizes</div><div style='opacity:.7;margin-bottom:8px'>Scale per tree mesh. Stored in the world file when you save it.</div>";
             list.style.cssText = "display:grid;grid-template-columns:auto auto 70px;gap:4px 10px;align-items:center";
             for (let id of classicTreeIds) {
                 let o = meshOverrides.get(id);
@@ -1884,12 +1910,10 @@ precision highp float;precision highp int;uniform Screen{vec2 resolution;};unifo
                         let v = +inp.value;
                         v > 0 && Math.abs(v - dv) > 1e-6 && (out[id] = v);
                     });
-                    try {
-                        localStorage.setItem("classicTreeScales", JSON.stringify(out));
-                    } catch (e) {}
+                    classicTreeSet(out), classicTreeReload();
                 };
             bar.style.marginTop = "8px";
-            mk("Save", save), mk("Save & reload", () => (save(), location.reload())), mk("Reset all", () => inputs.forEach(([inp, dv]) => inp.value = dv)), mk("Close", () => w.remove());
+            mk("Apply", save), mk("Reset all", () => inputs.forEach(([inp, dv]) => inp.value = dv)), mk("Close", () => w.remove());
             w.append(list, bar), document.body.append(w);
         },
         mouseOverTarget = ee(!1),
@@ -30227,7 +30251,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             for (let id in h.waterChunkColors || {}) ok(h.waterChunkColors[id]) && classicWaterChunkCols.set(+id, h.waterChunkColors[id]);
             for (let id in h.waterAreaColors || {}) ok(h.waterAreaColors[id]) && classicWaterAreaCols.set(+id, h.waterAreaColors[id]);
             for (let w in h.waterDefaults || {}) ok(h.waterDefaults[w]) && (classicWaterDefaults[w] = h.waterDefaults[w]);
-            h.creatures && h.creatures.rules && (ocData = h.creatures, ocBossData = null), classicWorldExtras(h);
+            h.creatures && h.creatures.rules && (ocData = h.creatures, ocBossData = null), classicWorldExtras(h), classicTreeSet(h.treeScales);
             classicEnvCache.clear();
             if (!T || T.file !== classicWorld.source) return;
             for (let id of classicWorld.chunks.keys()) {
