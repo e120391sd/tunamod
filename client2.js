@@ -1101,13 +1101,13 @@
             i(l) {
                 r || (S(n.$$.fragment, l), En(() => {
                     r && (f || (f = jg(e, nu, {
-                        duration: 300
+                        duration: 150
                     }, !0)), f.run(1))
                 }), r = !0)
             },
             o(l) {
                 I(n.$$.fragment, l), f || (f = jg(e, nu, {
-                    duration: 300
+                    duration: 150
                 }, !1)), f.run(0), r = !1
             },
             d(l) {
