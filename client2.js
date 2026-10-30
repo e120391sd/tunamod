@@ -38860,7 +38860,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         },
         pW = () => {
             let t = Cf;
-            if (classicPlain && (N.enable(N.POLYGON_OFFSET_FILL), N.polygonOffset(1.3, 3)), hf) {
+            if (N.enable(N.POLYGON_OFFSET_FILL), N.polygonOffset(1.3, 3), hf) {
                 for (let e = 1; e >= 0; --e) {
                     let n = Kc[e],
                         o = Fa[e];
