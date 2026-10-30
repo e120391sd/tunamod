@@ -1973,9 +1973,7 @@ precision highp float;precision highp int;uniform Screen{vec2 resolution;};unifo
             return () => (off(), row.remove());
         },
         dayTime = e => {
-            let o = classicPlain ? (e / 3600 + .9) % 1 : (Date.now() / 6e5 + .9) % 1,
-                ss = (a, b, v) => (v = Math.max(0, Math.min(1, (v - a) / (b - a))), v * v * (3 - 2 * v));
-            classicPlain || (o = o < .85 ? .5 * ss(0, .85, o) : .5 + .5 * ss(.85, 1, o));
+            let o = classicPlain ? (e / 3600 + .9) % 1 : (Date.now() / 6e5 + .9) % 1;
             return oe.timeSlider ? oe.timeSlider / 1e3 : o;
         };
     var hc = `#version 300 es
@@ -8243,6 +8241,12 @@ void main() {
         ocInArea = (a, x, z) => {
             if (a.shape === "world") return !!(T && T.getAreaId) && areaWorlds[T.getAreaId(x, z)] === a.world;
             if (a.shape === "circle") return Math.hypot(x - a.x, z - a.z) <= a.r;
+            if (a.shape === "poly") {
+                let P = a.pts || [],
+                    inside = !1;
+                for (let i = 0, j = P.length - 1; i < P.length; j = i++) P[i][1] > z != P[j][1] > z && x < (P[j][0] - P[i][0]) * (z - P[i][1]) / (P[j][1] - P[i][1]) + P[i][0] && (inside = !inside);
+                return inside;
+            }
             let dx = x - a.x,
                 dz = z - a.z,
                 c = Math.cos(a.angle || 0),
@@ -9097,9 +9101,10 @@ void main() {
                         let r = JL$m(b64ToBuffer(h.b64), k);
                         return transformGeometry(r[0], h), void e(...(eV$m[k] = r));
                     }
-                    return void tp("data/assets/", M0(h.from), eV$m, JL$m, (geo, dec) => {
+                    let done = (geo, dec) => {
                         e(...(eV$m[k] = [transformGeometry(cloneGeometry(geo), h), dec]));
-                    });
+                    };
+                    return void(embeddedGeometry.has(h.from) ? Wr(h.from, done) : tp("data/assets/", M0(h.from), eV$m, JL$m, done));
                 }
                 tp("data/assets/", M0(t), eV$m, JL$m, e);
         };
@@ -13450,6 +13455,13 @@ precision highp float;precision highp int;uniform Screen{vec2 resolution;};unifo
 precision highp float;precision highp int;uniform Screen{vec2 resolution;};uniform sampler2D inputA;uniform sampler2D inputB;uniform float step;uniform float amount;in vec2 vUv;out vec4 fragColor;float weight[8]=float[8](0.118,0.113,0.100,0.082,0.061,0.042,0.027,0.016);void main(){vec2 o=1.0/resolution;vec3 r;if(step<0.5){r=texture(inputB,vUv).rgb*weight[0];for(int i=1;i<8;++i){r+=texture(inputB,vUv+vec2(o.x*float(i),0.0)).rgb*weight[i];r+=texture(inputB,vUv-vec2(o.x*float(i),0.0)).rgb*weight[i];}r=smoothstep(vec3(0.4),vec3(0.75),r)*0.18;fragColor=vec4(r,1.0);}else{r=texture(inputA,vUv).rgb*weight[0];for(int i=1;i<8;++i){r+=texture(inputA,vUv+vec2(0.0,o.y*float(i))).rgb*weight[i];r+=texture(inputA,vUv-vec2(0.0,o.y*float(i))).rgb*weight[i];}vec4 b=texture(inputB,vUv);fragColor=vec4(r+b.rgb,1.0);}}`;
     var m6 = `#version 300 es
 precision highp float;precision highp int;uniform Screen{vec2 resolution;};uniform sampler2D inputA;uniform sampler2D inputB;uniform float amount;in vec2 vUv;out vec4 fragColor;void main(){vec4 a=texture(inputA,vUv);vec3 b=texture(inputB,vUv).rgb;b=b*b;fragColor.w=a.w;fragColor.xyz=b*amount+a.xyz;}`;
+    var classicFxaaFrag = `#version 300 es
+precision highp float;uniform Screen{vec2 resolution;};uniform sampler2D inputA;in vec2 vUv;out vec4 fragColor;
+#define texTop(t, p) texture(t, p, 0.0)
+#define texOff(t, p, o, r) texture(t, p + (o * r), 0.0)
+vec4 FxaaPixelShader(vec2 pos,sampler2D tex,vec2 fxaaQualityRcpFrame,float fxaaQualitySubpix,float fxaaQualityEdgeThreshold,float fxaaQualityEdgeThresholdMin){vec2 posM;posM.x=pos.x;posM.y=pos.y;vec4 rgbyM=texTop(tex,posM);
+#define lumaM rgbyM.y
+float lumaS=texOff(tex,posM,vec2(0.0,1.0),fxaaQualityRcpFrame.xy).y;float lumaE=texOff(tex,posM,vec2(1.0,0.0),fxaaQualityRcpFrame.xy).y;float lumaN=texOff(tex,posM,vec2(0.0,-1.0),fxaaQualityRcpFrame.xy).y;float lumaW=texOff(tex,posM,vec2(-1.0,0.0),fxaaQualityRcpFrame.xy).y;float maxSM=max(lumaS,lumaM);float minSM=min(lumaS,lumaM);float maxESM=max(lumaE,maxSM);float minESM=min(lumaE,minSM);float maxWN=max(lumaN,lumaW);float minWN=min(lumaN,lumaW);float rangeMax=max(maxWN,maxESM);float rangeMin=min(minWN,minESM);float rangeMaxScaled=rangeMax*fxaaQualityEdgeThreshold;float range=rangeMax-rangeMin;float rangeMaxClamped=max(fxaaQualityEdgeThresholdMin,rangeMaxScaled);bool earlyExit=range<rangeMaxClamped;if(earlyExit)return rgbyM;float lumaNW=texOff(tex,posM,vec2(-1.0,-1.0),fxaaQualityRcpFrame.xy).y;float lumaSE=texOff(tex,posM,vec2(1.0,1.0),fxaaQualityRcpFrame.xy).y;float lumaNE=texOff(tex,posM,vec2(1.0,-1.0),fxaaQualityRcpFrame.xy).y;float lumaSW=texOff(tex,posM,vec2(-1.0,1.0),fxaaQualityRcpFrame.xy).y;float lumaNS=lumaN+lumaS;float lumaWE=lumaW+lumaE;float subpixRcpRange=1.0/range;float subpixNSWE=lumaNS+lumaWE;float edgeHorz1=(-2.0*lumaM)+lumaNS;float edgeVert1=(-2.0*lumaM)+lumaWE;float lumaNESE=lumaNE+lumaSE;float lumaNWNE=lumaNW+lumaNE;float edgeHorz2=(-2.0*lumaE)+lumaNESE;float edgeVert2=(-2.0*lumaN)+lumaNWNE;float lumaNWSW=lumaNW+lumaSW;float lumaSWSE=lumaSW+lumaSE;float edgeHorz4=(abs(edgeHorz1)*2.0)+abs(edgeHorz2);float edgeVert4=(abs(edgeVert1)*2.0)+abs(edgeVert2);float edgeHorz3=(-2.0*lumaW)+lumaNWSW;float edgeVert3=(-2.0*lumaS)+lumaSWSE;float edgeHorz=abs(edgeHorz3)+edgeHorz4;float edgeVert=abs(edgeVert3)+edgeVert4;float subpixNWSWNESE=lumaNWSW+lumaNESE;float lengthSign=fxaaQualityRcpFrame.x;bool horzSpan=edgeHorz>=edgeVert;float subpixA=subpixNSWE*2.0+subpixNWSWNESE;if(!horzSpan)lumaN=lumaW;if(!horzSpan)lumaS=lumaE;if(horzSpan)lengthSign=fxaaQualityRcpFrame.y;float subpixB=(subpixA*(1.0/12.0))-lumaM;float gradientN=lumaN-lumaM;float gradientS=lumaS-lumaM;float lumaNN=lumaN+lumaM;float lumaSS=lumaS+lumaM;bool pairN=abs(gradientN)>=abs(gradientS);float gradient=max(abs(gradientN),abs(gradientS));if(pairN)lengthSign=-lengthSign;float subpixC=clamp(abs(subpixB)*subpixRcpRange,0.0,1.0);vec2 posB;posB.x=posM.x;posB.y=posM.y;vec2 offNP;offNP.x=(!horzSpan)? 0.0 : fxaaQualityRcpFrame.x;offNP.y=(horzSpan)? 0.0 : fxaaQualityRcpFrame.y;if(!horzSpan)posB.x+=lengthSign*0.5;if(horzSpan)posB.y+=lengthSign*0.5;vec2 posN;posN.x=posB.x-offNP.x;posN.y=posB.y-offNP.y;vec2 posP;posP.x=posB.x+offNP.x;posP.y=posB.y+offNP.y;float subpixD=((-2.0)*subpixC)+3.0;float lumaEndN=texTop(tex,posN).y;float subpixE=subpixC*subpixC;float lumaEndP=texTop(tex,posP).y;if(!pairN)lumaNN=lumaSS;float gradientScaled=gradient*1.0/4.0;float lumaMM=lumaM-lumaNN*0.5;float subpixF=subpixD*subpixE;bool lumaMLTZero=lumaMM<0.0;lumaEndN-=lumaNN*0.5;lumaEndP-=lumaNN*0.5;bool doneN=abs(lumaEndN)>=gradientScaled;bool doneP=abs(lumaEndP)>=gradientScaled;if(!doneN)posN.x-=offNP.x*1.5;if(!doneN)posN.y-=offNP.y*1.5;bool doneNP=(!doneN)||(!doneP);if(!doneP)posP.x+=offNP.x*1.5;if(!doneP)posP.y+=offNP.y*1.5;if(doneNP){if(!doneN)lumaEndN=texTop(tex,posN.xy).y;if(!doneP)lumaEndP=texTop(tex,posP.xy).y;if(!doneN)lumaEndN=lumaEndN-lumaNN*0.5;if(!doneP)lumaEndP=lumaEndP-lumaNN*0.5;doneN=abs(lumaEndN)>=gradientScaled;doneP=abs(lumaEndP)>=gradientScaled;if(!doneN)posN.x-=offNP.x*2.0;if(!doneN)posN.y-=offNP.y*2.0;doneNP=(!doneN)||(!doneP);if(!doneP)posP.x+=offNP.x*2.0;if(!doneP)posP.y+=offNP.y*2.0;if(doneNP){if(!doneN)lumaEndN=texTop(tex,posN.xy).y;if(!doneP)lumaEndP=texTop(tex,posP.xy).y;if(!doneN)lumaEndN=lumaEndN-lumaNN*0.5;if(!doneP)lumaEndP=lumaEndP-lumaNN*0.5;doneN=abs(lumaEndN)>=gradientScaled;doneP=abs(lumaEndP)>=gradientScaled;if(!doneN)posN.x-=offNP.x*4.0;if(!doneN)posN.y-=offNP.y*4.0;doneNP=(!doneN)||(!doneP);if(!doneP)posP.x+=offNP.x*4.0;if(!doneP)posP.y+=offNP.y*4.0;if(doneNP){if(!doneN)lumaEndN=texTop(tex,posN.xy).y;if(!doneP)lumaEndP=texTop(tex,posP.xy).y;if(!doneN)lumaEndN=lumaEndN-lumaNN*0.5;if(!doneP)lumaEndP=lumaEndP-lumaNN*0.5;doneN=abs(lumaEndN)>=gradientScaled;doneP=abs(lumaEndP)>=gradientScaled;if(!doneN)posN.x-=offNP.x*12.0;if(!doneN)posN.y-=offNP.y*12.0;doneNP=(!doneN)||(!doneP);if(!doneP)posP.x+=offNP.x*12.0;if(!doneP)posP.y+=offNP.y*12.0;}}}float dstN=posM.x-posN.x;float dstP=posP.x-posM.x;if(!horzSpan)dstN=posM.y-posN.y;if(!horzSpan)dstP=posP.y-posM.y;bool goodSpanN=(lumaEndN<0.0)!=lumaMLTZero;float spanLength=(dstP+dstN);bool goodSpanP=(lumaEndP<0.0)!=lumaMLTZero;float spanLengthRcp=1.0/spanLength;bool directionN=dstN<dstP;float dst=min(dstN,dstP);bool goodSpan=directionN ? goodSpanN : goodSpanP;float subpixG=subpixF*subpixF;float pixelOffset=(dst*(-spanLengthRcp))+0.5;float subpixH=subpixG*fxaaQualitySubpix;float pixelOffsetGood=goodSpan ? pixelOffset : 0.0;float pixelOffsetSubpix=max(pixelOffsetGood,subpixH);if(!horzSpan)posM.x+=pixelOffsetSubpix*lengthSign;if(horzSpan)posM.y+=pixelOffsetSubpix*lengthSign;return vec4(texTop(tex,posM).xyz,lumaM);}void main(){vec4 col=FxaaPixelShader(vUv,inputA,1.0/resolution,0.5,0.2,0.0833);fragColor=col;}`;
     var d6 = `#version 300 es
 precision highp float;precision highp int;uniform Screen{vec2 resolution;};uniform sampler2D inputA;in vec2 vUv;out vec4 fragColor;
 #define a  4.0
@@ -13997,7 +14009,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 attributeLocations: t.ribbon
             }), ht[32] = kn({
                 vertex: hc,
-                fragment: v2.frag,
+                fragment: classicPlain ? v2.frag : classicFxaaFrag,
                 depthWrite: !1,
                 depthTest: !1,
                 globalUniforms: xn,
@@ -29572,6 +29584,12 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         classicExpHidden = () => !!(T && T.player && T.player.level >= 45);
     classicCssApply();
     var classicWaterChunkCols = new Map,
+        classicWaterChunkCol = id => {
+            if (!classicWorld || T.file === classicWorld.source) return classicWaterChunkCols.get(id);
+            let w = classicActiveWorld(),
+                c = w && (w.header.waterChunkColors || {})[id];
+            return Array.isArray(c) && c.length === 3 ? c : null;
+        },
         classicWaterAreaCols = new Map,
         classicWaterDefaults = {},
         classicWaterWorldOf = id => {
@@ -29597,7 +29615,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             if (classicWaterCache.has(id)) return classicWaterCache.get(id);
             let x = cx * 64 + 32,
                 z = cz * 64 + 32,
-                c = classicWaterChunkCols.get(id) || classicWaterAreaCols.get(T.getAreaId(x, z)) || classicWaterRealmCols(x, z) || null;
+                c = classicWaterChunkCol(id) || classicWaterAreaCols.get(T.getAreaId(x, z)) || classicWaterRealmCols(x, z) || null;
             return classicWaterCache.set(id, c), c;
         },
         classicWaterCornerCache = new Map,
@@ -29624,7 +29642,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                             ddz = qz + .5 - pz,
                             w = Math.exp(-(ddx * ddx + ddz * ddz) / s2);
                         if (w < .01) continue;
-                        classicWaterChunkCols.has(qx + qz * (T.chunkAmount || 100)) && (w *= classicWaterChunkBoost);
+                        classicWaterChunkCol(qx + qz * (T.chunkAmount || 100)) && (w *= classicWaterChunkBoost);
                         for (let j = 0; j < 3; ++j)
                             for (let i = 0; i < 3; ++i) acc[j * 3 + i] += c[j][i] * w;
                         tw += w;
@@ -29824,20 +29842,26 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             }
         },
         classicWorldHead = u8 => u8.length < 12 || u8[0] !== 72 || u8[1] !== 87 || u8[2] !== 76 || u8[3] !== 68 ? null : new DataView(u8.buffer, u8.byteOffset).getUint32(8, !0),
-        classicWorldUse = async u8 => {
+        classicWorldParse = async u8 => {
             let len = classicWorldHead(u8);
-            if (len == null) return console.warn("classic world: not a .hworld file"), null;
+            if (len == null) return null;
             let text = new TextDecoder().decode(u8.subarray(12, 12 + len)),
                 header = JSON.parse(text),
                 base = 12 + len,
                 chunks = new Map,
                 deflate = header.compression === "deflate";
             for (let [id, off, n] of header.chunks || []) chunks.set(id, classicRead(await classicInflate(u8.subarray(base + off, base + off + n), deflate)));
-            return classicWorld = {
+            return {
                 header,
                 chunks,
-                source: header.source || "main"
-            }, classicWorldApply(), text;
+                source: header.source || "main",
+                text
+            };
+        },
+        classicWorldUse = async u8 => {
+            let w = await classicWorldParse(u8);
+            if (!w) return console.warn("classic world: not a .hworld file"), null;
+            return classicWorld = w, classicWorldApply(), w.text;
         },
         classicWorldParts = async u8 => {
             let len = classicWorldHead(u8);
@@ -29884,6 +29908,39 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             } finally {
                 classicWorldLoading = !1;
             }
+        },
+        classicArenas = new Map,
+        classicArenaT0 = new Map,
+        classicArenaLoad = f => {
+            let dir = classicWorldUrl.slice(0, classicWorldUrl.lastIndexOf("/") + 1);
+            classicArenaT0.set(f, Date.now()), classicArenas.set(f, (async () => {
+                try {
+                    let res = await fetch(dir + f + ".hworld?t=" + Date.now(), {
+                        cache: "no-store"
+                    });
+                    if (!res.ok) return null;
+                    let w = await classicWorldParse(await classicWorldParts(new Uint8Array(await res.arrayBuffer())));
+                    return w && (w.header.source || f) === f ? (w.source = f, w) : null;
+                } catch (e) {
+                    return console.warn("classic world: could not load " + f, e), null;
+                }
+            })().then(w => (classicArenas.set(f, w), w && Pc.size && Ys.size && classicWorldRegister(w.header), w)));
+        },
+        classicArenaWait = () => {
+            if (!T || !T.file || classicIsEditor() || worldOverrideOff || typeof fetch == "undefined" || T.file === "main" || classicWorld && T.file === classicWorld.source) return !1;
+            classicArenas.has(T.file) || classicArenaLoad(T.file);
+            return classicArenas.get(T.file) instanceof Promise && Date.now() - classicArenaT0.get(T.file) < 15e3;
+        },
+        classicActiveWorld = () => {
+            if (!T) return null;
+            if (classicWorld && T.file === classicWorld.source) return classicWorldApplied ? classicWorld : null;
+            let w = classicArenas.get(T.file);
+            return w && !(w instanceof Promise) ? w : null;
+        },
+        classicWorldRegFor = null,
+        classicWorldEnsureReg = () => {
+            let w = classicActiveWorld();
+            w && w.header !== classicWorldRegFor && classicWorldRegister(w.header);
         },
         classicFolLook = {
             coverage: 2,
@@ -30212,10 +30269,8 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             classicSignBases.clear();
             for (let d of h.meshes || []) d.base === classicSignMesh && classicSignBases.add(d.id);
         },
-        classicWorldApply = () => {
-            if (!classicWorld || classicWorldApplied || !Pc.size || !Ys.size || !Ec.size) return;
-            classicWorldApplied = !0;
-            let h = classicWorld.header;
+        classicWorldRegister = h => {
+            classicWorldRegFor = h;
             for (let d of h.textures || []) {
                 let b = Pc.get(d.file);
                 if (!b) continue;
@@ -30241,6 +30296,12 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     collisionGeometry: 0
                 });
             }
+        },
+        classicWorldApply = () => {
+            if (!classicWorld || classicWorldApplied || !Pc.size || !Ys.size || !Ec.size) return;
+            classicWorldApplied = !0;
+            let h = classicWorld.header;
+            classicWorldRegister(h);
             classicFolPal = (h.foliagePalette || []).map(e => {
                 if (e && typeof e == "object" && e.old) return oldFolCellId(e.cell, e.sheet || 1213);
                 if (e && typeof e == "object") return classicFolMake(e.cell, e.sheet || e.tex || 1213, e.custom ? e.light : null);
@@ -30281,7 +30342,8 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             water: c.water.slice()
         }),
         classicChunkFor = (e, t) => {
-            let c = classicWorldApplied && T && T.file === classicWorld.source && classicWorld.chunks.get(e.id),
+            let aw = classicActiveWorld(),
+                c = aw && aw.chunks.get(e.id),
                 live = kc.chunk.decode(t);
             return e.liveShape = null, c ? (e.liveShape = {
                 data: live,
@@ -31786,13 +31848,15 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         YE = t => {
             if (!classicPlain) {
                 let size = Math.max(20, classicFogFar),
-                    yaw = Math.atan2(gf[0], gf[1]),
+                    now = performance.now() / 1e3,
                     prev = Fa[0].__anchor,
-                    a = prev && prev[3] === size && Math.hypot(tn.position[0] - prev[0], tn.position[1] - prev[1], tn.position[2] - prev[2]) <= 15 ? prev.slice(0, 3) : [...tn.position];
-                Fa[0].__anchor = [...a, size];
+                    keep = prev && prev[3] === size && now - prev[4] <= 10 && Math.hypot(tn.position[0] - prev[0], tn.position[1] - prev[1], tn.position[2] - prev[2]) <= 15,
+                    a = keep ? prev.slice(0, 3) : [...tn.position],
+                    dl = Math.hypot(gf[0], gf[1], gf[2]) || 1;
+                keep || (Fa[0].__anchor = [...a, size, now]);
                 for (let s = 0; s < Fa.length; ++s) {
                     let i = Fa[s];
-                    (!H3(i.transform.position, a) || i.__size !== size) && (ut(i.transform.position, a), J(i.transform.rotation, -Math.PI / 2, yaw, 0), i.far = size * 2, i.near = -size * 2, Z3(i, -size, size, -size, size), mc(i, !0), gd(i), i.__size = size, hf = !0);
+                    !keep && (J(i.transform.position, gf[0] / dl * size, gf[1] / dl * size, gf[2] / dl * size), Tl(i.transform, [0, 0, 0], !0, [0, 1, 0]), i.transform.position[0] += a[0], i.transform.position[1] += a[1], i.transform.position[2] += a[2], i.far = size * 2, i.near = .1, Z3(i, -size, size, -size, size), mc(i, !0), gd(i), i.__size = size, hf = !0);
                 }
                 let sd = on.shadows.data,
                     fe = on.environment.data;
@@ -38358,7 +38422,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 }
             t.state = 0
         },
-        b9 = t => t.state >= 2 || classicWorldWait() || classicMapFetchDelay(t) ? !1 : (t.state = 2, cW(t), !0),
+        b9 = t => t.state >= 2 || classicWorldWait() || classicArenaWait() || classicMapFetchDelay(t) ? !1 : (classicWorldEnsureReg(), t.state = 2, cW(t), !0),
         cW = async t => {
             try {
                 t.abort = new AbortController;
@@ -38796,7 +38860,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         },
         pW = () => {
             let t = Cf;
-            if (N.enable(N.POLYGON_OFFSET_FILL), N.polygonOffset(1.3, 3), hf) {
+            if (classicPlain && (N.enable(N.POLYGON_OFFSET_FILL), N.polygonOffset(1.3, 3)), hf) {
                 for (let e = 1; e >= 0; --e) {
                     let n = Kc[e],
                         o = Fa[e];
