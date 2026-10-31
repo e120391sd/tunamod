@@ -34550,8 +34550,8 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             };
             t.fvPath = fvPathWorld(t) ? faivelPathLookup(t) : null;
             buildStoneStrips(t);
-            t.stoneUnder = stoneUnderLookup(t);
-            t.softUnder = softUnderLookup(t);
+            t.stoneUnder = null;
+            t.softUnder = null;
             t.topGrass = topGrassLookup(t);
             t.steepMask = buildSteepMask(t);
             t.hlStone = buildHeadlessStone(t);
@@ -35589,7 +35589,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             let chWorld = oe.faivelRetexture ? chunkWorldOf(t) : null,
                 gsChunk = chWorld === "guardstone";
             oe.faivelRetexture && (chWorld = chunkRetextureWorld(t));
-            oe.faivelRetexture && (buildStoneStrips(t), stoneUnderLookup(t), softUnderLookup(t), fvPathWorld(t) && faivelPathLookup(t));
+            oe.faivelRetexture && (buildStoneStrips(t), fvPathWorld(t) && faivelPathLookup(t));
             if (dirtPatchEnabled) {
                 chWorld !== "headless" && (gsChunk ? terrainDeferred(t, "gsdirt6", buildGsDirtMask) : terrainDeferred(t, "dirtmask", buildDirtMask));
                 gsChunk ? (terrainDeferred(t, "gsstone7", buildGsStoneMask), gsStoneFringeLookup(t), terrainDeferred(t, "gsbigdirt", buildGsBigDirtMask)) : meadowLookup(t);
