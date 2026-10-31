@@ -38582,7 +38582,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 res(null);
             }
         }),
-        classicMapKey = id => "v7:" + T.file + ":" + id,
+        classicMapKey = id => "v8:" + T.file + ":" + id,
         classicMapWorld = null,
         classicMapSince = 0,
         classicMapLook = 7,
@@ -38665,10 +38665,15 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 W = [..._t.worldPosition],
                 tp = [...tn.position];
             J(tn.position, cx, a[1], cz), classicMapCapturing = !0;
+            let livePal = {};
+            for (let w in classicPalettesDefault) livePal[w] = classicPalettes[w], classicPalettes[w] = classicPalettesDefault[w];
+            classicEnvCache.clear();
             try {
                 o7(.25, 0, smooth, new Set);
             } finally {
                 classicMapCapturing = !1;
+                for (let w in livePal) classicPalettes[w] = livePal[w];
+                classicEnvCache.clear();
             }
             let env = on.environment.data;
             env.fog[3] = 1e5, env.fog[4] = 2e5, ko(on.environment);
