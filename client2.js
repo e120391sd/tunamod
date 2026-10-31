@@ -30318,7 +30318,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             for (let id in h.waterChunkColors || {}) ok(h.waterChunkColors[id]) && classicWaterChunkCols.set(+id, h.waterChunkColors[id]);
             for (let id in h.waterAreaColors || {}) ok(h.waterAreaColors[id]) && classicWaterAreaCols.set(+id, h.waterAreaColors[id]);
             for (let w in h.waterDefaults || {}) ok(h.waterDefaults[w]) && (classicWaterDefaults[w] = h.waterDefaults[w]);
-            h.creatures && h.creatures.rules && (ocData = h.creatures, ocBossData = null), classicWorldExtras(h), classicTreeSet(h.treeScales);
+            h.creatures && h.creatures.rules && (ocData = h.creatures, ocBossData = null), classicWorldExtras(h), classicTreeSet(h.treeScales), classicRealmLightSet(h.realmLight);
             classicEnvCache.clear();
             if (!T || T.file !== classicWorld.source) return;
             for (let id of classicWorld.chunks.keys()) {
@@ -32353,6 +32353,19 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
     var worldAmbientTint = {
     };
     var classicEnvCache = new Map;
+    var classicPalettesDefault = JSON.parse(JSON.stringify(classicPalettes)),
+        classicRealmLightSet = rl => {
+            for (let w in classicPalettesDefault) {
+                let v = rl && rl[w];
+                classicPalettes[w] = Array.isArray(v) && v.length === 3 && v.every(p => Array.isArray(p) && p.length === 4 && p.every(c => Number.isFinite(c))) ? v.map(p => p.slice()) : classicPalettesDefault[w].map(p => p.slice());
+            }
+            classicEnvCache.clear();
+        },
+        classicRealmLightOut = () => {
+            let o = {};
+            for (let w in classicPalettesDefault) JSON.stringify(classicPalettes[w]) !== JSON.stringify(classicPalettesDefault[w]) && (o[w] = classicPalettes[w].map(p => p.slice()));
+            return o;
+        };
     var classicClamp01 = v => Math.max(0, Math.min(1, v)),
         classicHex = n => [(n >> 16 & 255) / 255, (n >> 8 & 255) / 255, (n & 255) / 255],
         classicLum = c => c[0] * .299 + c[1] * .587 + c[2] * .114,
@@ -32580,7 +32593,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 o = Gu.get(T.getAreaId(tn.position[0], tn.position[2])),
                 i = t > .5 ? o.ambientnight : o.ambientday,
                 r = 5;
-            e > 0 && (i = 167, r = .5), i7(RN, n, r, i, !1), i7(zN, n, 5, o.music, !0)
+            e > 0 && (i = 167, r = .5), i7(RN, n, r, classicIsEditor() ? 0 : i, !1), i7(zN, n, 5, o.music, !0)
         },
         i7 = (t, e, n, o, s) => {
             let i = !1;
@@ -40716,7 +40729,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             b1(this.aabb, this.pos, this.size, this.size, this.size)
         }
         preFixed(e, n, o) {
-            super.preFixed(e, n, o), this.buffs.tick(e, n, o), this.stats.tick(e, n), this.emote !== 0 && (!this.stats.alive || this.steer[0] || this.steer[1] || this.emoteEnd > 0 && n >= this.emoteEnd) && this.setEmote(0, 0), this.skills.tick(e, n, o), this.setSize(!classicPlain && this.type === 0 ? 1 : (this.stats.getStat(27) || 100) / 100)
+            super.preFixed(e, n, o), this.buffs.tick(e, n, o), this.stats.tick(e, n), this.emote !== 0 && (!this.stats.alive || this.steer[0] || this.steer[1] || this.emoteEnd > 0 && n >= this.emoteEnd) && this.setEmote(0, 0), this.skills.tick(e, n, o), this.setSize(!classicPlain && this.type === 0 && ![...this.buffs.buffs.keys()].some(k => { let l = ma.get(k); return l && l.fx && l.fx.visual; }) ? 1 : (this.stats.getStat(27) || 100) / 100)
         }
         getStatBasedMoveSpeed() {
             return Math.max(Math.min(65534, this.stats.getStat(15)))
