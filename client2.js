@@ -32787,6 +32787,9 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 e.triangleGrid = e.visualGrid;
                 try {
                     this.handleColliderGeometry(e, s.index, s, new Map);
+                    e.triangleGrid = e.cameraGrid;
+                    let m = new Map;
+                    this.handleColliderGeometry(e, s.index, s, m), this.handleColliderGeometry(e, s.indexInvisible, s, m);
                 } finally {
                     e.triangleGrid = g;
                 }
@@ -41679,7 +41682,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             for (let u = 0; u < c.length; ++u) {
                 let p = c[u];
                 Qi(_t, l, p), rn(a, l, i), Xn(l, tn.position, a);
-                let g = T.triangleGrid.queryRay(l, o, s),
+                let g = T.cameraGrid.queryRay(l, o, s),
                     v = 1;
                 for (let _ = 0; _ < g.length; ++_) {
                     let b = g[_];
@@ -41766,7 +41769,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     array: [],
                     map: new Map,
                     type: {}
-                }, t3.forEach((e, n) => this.entities.type[n] = []), this.mode = Uh.normal, this.chunksMap = new Map, this.chunksArray = [], this.finishedLoadingChunks = new Set, this.time = this.accum = -0, this.timestep = 1 / 60, this.tickId = 0, this.data = void 0, this.triangleGrid = new R1, this.visualGrid = new R1
+                }, t3.forEach((e, n) => this.entities.type[n] = []), this.mode = Uh.normal, this.chunksMap = new Map, this.chunksArray = [], this.finishedLoadingChunks = new Set, this.time = this.accum = -0, this.timestep = 1 / 60, this.tickId = 0, this.data = void 0, this.triangleGrid = new R1, this.visualGrid = new R1, this.cameraGrid = new R1
             }
             load(e, n) {
                 this.id = e, this.file = n, this.sourceFile = void 0, jv.forEach(o => {
@@ -41904,10 +41907,10 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 this.setMode(), e || (this.chunkAmount = this.data.chunkAmount, this.bounds = 64 * this.chunkAmount, this.setGrids(), this.finishedLoadingChunks.clear(), this.createChunks())
             }
             setGrids() {
-                this.triangleGrid.setDimensions(this.bounds, this.bounds, this.bounds, 15, 15, 15), this.visualGrid.setDimensions(this.bounds, this.bounds, this.bounds, 15, 15, 15)
+                this.triangleGrid.setDimensions(this.bounds, this.bounds, this.bounds, 15, 15, 15), this.visualGrid.setDimensions(this.bounds, this.bounds, this.bounds, 15, 15, 15), this.cameraGrid.setDimensions(this.bounds, this.bounds, this.bounds, 15, 15, 15)
             }
             rebuildTriangleOctree() {
-                this.triangleGrid.clear(), this.visualGrid.clear(), this.chunksMap.forEach(e => {
+                this.triangleGrid.clear(), this.visualGrid.clear(), this.cameraGrid.clear(), this.chunksMap.forEach(e => {
                     for (let n = 0; n < e.props.length; ++n) {
                         let o = e.props[n];
                         o.loaded = !1, o.loadGeometry(this, e)
@@ -42409,7 +42412,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             }
             this.chunksMap.clear(), this.chunksArray.length = 0;
             for (let e = this.entities.array.length - 1; e >= 0; e--) this.removeEntity(this.entities.array[e]);
-            this.data = void 0, this.bounds = 1, this.triangleGrid.clear(), this.visualGrid.clear(), L9(this), X9(this)
+            this.data = void 0, this.bounds = 1, this.triangleGrid.clear(), this.visualGrid.clear(), this.cameraGrid.clear(), L9(this), X9(this)
         }
         setPlayer(e) {
             this.player = e, bl.set(!0), jI()
