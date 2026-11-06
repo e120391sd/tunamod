@@ -4044,6 +4044,7 @@ void main() {
         },
         ex = t => {
             if (Jo !== void 0 || Cv) return;
+            if (!classicIsEditor() && !worldOverrideOff && (classicWorldLoading || classicWorld && !classicWorldApplied) && Date.now() - classicWorldT0 < 6e4) return void(ex.wait || (ex.wait = setTimeout(() => (ex.wait = 0, ex(t)), 100)));
             let e = "game1.hordes.io";
             Jo = new WebSocket(`wss://${e}:` + t + "/play"), Jo.binaryType = "arraybuffer", Jo.onerror = $L, Jo.onopen = NL, Jo.onclose = WL, Jo.onmessage = jL
         },
