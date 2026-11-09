@@ -1678,7 +1678,8 @@
             alpha: !1,
             antialias: !1,
             powerPreference: "high-performance",
-            preserveDrawingBuffer: !1
+            preserveDrawingBuffer: !1,
+            desynchronized: typeof process != "undefined" && !!process.argv && process.argv.includes("--classic-desync")
         }),
         Ln = document.createElement("canvas"),
         Oo = Ln.getContext("2d", {
@@ -10786,15 +10787,17 @@ void main() {
     var tM = () => {
             Oo.font = "bold 18px hordes", Oo.fillText("Hordes", 0, 0)
         },
-        hudK = () => window.devicePixelRatio || 1,
+        hudKv = typeof window != "undefined" && window.devicePixelRatio || 1,
+        hudK = () => hudKv,
         Qr = (t, e, n = 1, o = 1, s = 1, i = 1, r = 0, l = 0, a = .5, c = .5) => {
             Oo.globalAlpha = oe.nameplateShowTransparency ? n : 1;
             let h = t.__hs || 1,
                 f = t.width / h * o,
                 u = t.height / h * o,
-                p = Math.round(f * s),
-                g = Math.round(u * i);
-            return p === 0 || g === 0 || Oo.drawImage(t, 0, 0, Math.round(t.width * s), Math.round(t.height * i), Math.round(e[0] - f * a + r * o), Math.round(e[1] - u * c + l * o), p, g), p
+                K = hudKv,
+                p = Math.round(f * s * K) / K,
+                g = Math.round(u * i * K) / K;
+            return p === 0 || g === 0 || Oo.drawImage(t, 0, 0, Math.round(t.width * s), Math.round(t.height * i), Math.round((e[0] - f * a + r * o) * K) / K, Math.round((e[1] - u * c + l * o) * K) / K, p, g), p
         },
         Xr = (t, e, n, o, s, i = 0, r = 0, l = .5, a = .5) => Qr(xp(e, n), t, o, s, 1, 1, i, r, l, a),
         wp = (t, e, n, o, s = 0, i = 0, r = .5, l = .5) => Qr(e, t, n, o, 1, 1, s, i, r, l),
@@ -11006,15 +11009,16 @@ void main() {
             size: n,
             stroke: o,
             strokeWidth: s
-        }) => {
-            let i = `${t}:${e}:${n}:${o}:${s}`;
+        }, k = 1) => {
+            let i = `${t}:${e}:${n}:${o}:${s}@${k}`;
             if (G_[i]) return G_[i];
             let r = document.createElement("canvas"),
                 l = r.getContext("2d");
             l.font = "bold " + n + "px hordes";
             let a = Math.ceil(s) + 2,
-                c = Math.ceil(n * 1.2 + 5);
-            return r.width = Math.max(1, Math.ceil(l.measureText(t).width)) + a * 2, r.height = c + a * 2, H_(l, n, e), l.shadowColor = "transparent", l.strokeStyle = o, l.lineWidth = s, l.lineJoin = "round", l.strokeText(t, a, c - 6 + a), l.fillText(t, a, c - 6 + a), G_[i] = r, r
+                c = Math.ceil(n * 1.2 + 5),
+                w = Math.max(1, Math.ceil(l.measureText(t).width)) + a * 2;
+            return r.width = Math.ceil(w * k), r.height = Math.ceil((c + a * 2) * k), l.scale(k, k), H_(l, n, e), l.shadowColor = "transparent", l.strokeStyle = o, l.lineWidth = s, l.lineJoin = "round", l.strokeText(t, a, c - 6 + a), l.fillText(t, a, c - 6 + a), r.__hs = k, G_[i] = r, r
         },
         jo = (t, e, n, o, s, i, r) => {
             t || (t = document.createElement("canvas"), t.width = n, t.height = o);
@@ -12896,7 +12900,8 @@ void main() {
             return e
         },
         aa = t => {
-            N.bindBufferBase(N.UNIFORM_BUFFER, t.layout.index, t.buffer)
+            let u = lt.ubo || (lt.ubo = []);
+            u[t.layout.index] !== t.buffer && (N.bindBufferBase(N.UNIFORM_BUFFER, t.layout.index, t.buffer), u[t.layout.index] = t.buffer)
         },
         hr = (t, e, n, o = 0) => {
             o === 0 && (o = e.length);
@@ -29680,7 +29685,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             let n = T.chunkAmount || 100;
             if (cx < 0 || cz < 0 || cx >= n || cz >= n) return null;
             let now = performance.now();
-            now - classicWaterCacheAt > 2e3 && (classicWaterCache.clear(), classicWaterCacheAt = now);
+            now - classicWaterCacheAt > (classicIsEditor() ? 2e3 : 1e4) && (classicWaterCache.clear(), classicWaterCacheAt = now);
             let id = cx + cz * n;
             if (classicWaterCache.has(id)) return classicWaterCache.get(id);
             let x = cx * 64 + 32,
@@ -29751,7 +29756,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     o = r && classicOldWaterOrigins[r];
                 if (o)
                     for (let [type, , , , , sp, vis, ox, oz] of classicOldWaterBodies) type === 0 && ox === o[0] && oz === o[1] && (sea = sea || [sp, vis]);
-                if (!T || r === null) return sea || [5, 65];
+                if (!T) return sea || [5, 65];
             }
             return out = out || sea || [5, 65], classicWaterParamCache.set(k, out), out;
         },
@@ -29770,10 +29775,16 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 N.uniform1f(L.speed, wp[0]), L.vis && N.uniform1f(L.vis, wp[1]);
             }
             if (!L.on) return;
-            let c = classicWaterColAt(t.x, t.z),
+            let ws = t.__wst;
+            (!ws || ws.at !== classicWaterCacheAt || ws.id !== t.id) && (ws = t.__wst = {
+                at: classicWaterCacheAt,
+                id: t.id,
+                c: classicWaterColAt(t.x, t.z)
+            }, ws.v = ws.c && classicWaterCorners(t.x, t.z, ws.c));
+            let c = ws.c,
                 v = e.uniforms.classicWCols && e.uniforms.classicWCols.value;
             e.uniforms.classicWOn && (e.uniforms.classicWOn.value = c ? 1 : 0);
-            c && v && v.set(classicWaterCorners(t.x, t.z, c));
+            c && v && v.set(ws.v);
             N.uniform1f(L.on, c ? 1 : 0), c && v && N.uniform3fv(L.cols, v);
         };
     var classicWorldUrl = "https://raw.githubusercontent.com/e120391sd/tunamod/refs/heads/main/world.hworld",
@@ -31611,7 +31622,9 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                             g = s[f][l],
                             v = r * u.size,
                             _ = v + u.size;
-                        for (let b = v, y = 0; b < _; ++b, ++y) p[b] = g[y]
+                        if (g.length === u.size && ArrayBuffer.isView(g)) p.set(g, v);
+                        else
+                            for (let b = v, y = 0; b < _; ++b, ++y) p[b] = g[y]
                     }
                     r++
                 }
@@ -31666,11 +31679,14 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         DE = t => {
             kr.forEach(LE), kr.length = 0
         },
+        ribbonInView = e => nv(_t, e.positions, 12),
         VE = () => {
             for (let t = 0; t < kr.length; ++t) {
-                let e = kr[t],
-                    alpha = fxAlphaFor(e.fx, oe.fxAlphaRibbon);
-                e.mesh.transform.visible && (e.colStartA != null && (e.mesh.uniformData.colStart[3] = e.colStartA * alpha, e.mesh.uniformData.colEnd[3] = e.colEndA * alpha), ks(e.mesh, ht[e.mesh.program]))
+                let e = kr[t];
+                if (!e.mesh.transform.visible || !e.geometry.drawRangeCount || !ribbonInView(e)) continue;
+                e.posDirty && (e.posDirty = !1, Po(e.geometry, e.geometry.attributes.position));
+                let alpha = oe.fxAlphaOverride ? fxAlphaFor(e.fx, oe.fxAlphaRibbon) : 1;
+                e.colStartA != null && (e.mesh.uniformData.colStart[3] = e.colStartA * alpha, e.mesh.uniformData.colEnd[3] = e.colEndA * alpha), ks(e.mesh, ht[e.mesh.program])
             }
         },
         yy = class {
@@ -31712,7 +31728,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     if (this.mesh.transform.visible = this.parent.visible && (!this.parent.parent || this.parent.parent.visible), !this.mesh.transform.visible) return;
                     this.mesh.transform.visible && this.timeoutSteps == 0 && (this.positions.set(Bo(Ct, this.a, this.parent.worldMatrix), 0), this.positions.set(Bo(Ct, this.b, this.parent.worldMatrix), 3))
                 }
-                this.stepTimer.done(n) && (this.stepTimer.reset(n), this.step()), Po(this.geometry, this.geometry.attributes.position);
+                this.stepTimer.done(n) && (this.stepTimer.reset(n), this.step()), this.posDirty = !0;
                 let o = this.stepTimer.fraction(n);
                 this.mesh.uniformData.offset[0] = (1 - o) / this.maxSteps
             }
@@ -31810,7 +31826,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     b = a * 2,
                     y = a * 3,
                     k = a * 4;
-                n[y] = f[0], n[y + 1] = f[1], n[y + 2] = f[2], s[k] = u[0], s[k + 1] = u[1], s[k + 2] = u[2], s[k + 3] = u[3], o[b] = p[0], o[b + 1] = p[1], i[k] = g[0], i[k + 1] = g[1], i[k + 2] = g[2], i[k + 3] = g[3], r[k] = v[0], r[k + 1] = v[1], r[k + 2] = v[2], r[k + 3] = v[3] * fxAlphaFor(c.fx, oe.fxAlphaSprite), l[k] = _[0], l[k + 1] = _[1], l[k + 2] = _[2], l[k + 3] = _[3]
+                n[y] = f[0], n[y + 1] = f[1], n[y + 2] = f[2], s[k] = u[0], s[k + 1] = u[1], s[k + 2] = u[2], s[k + 3] = u[3], o[b] = p[0], o[b + 1] = p[1], i[k] = g[0], i[k + 1] = g[1], i[k + 2] = g[2], i[k + 3] = g[3], r[k] = v[0], r[k + 1] = v[1], r[k + 2] = v[2], r[k + 3] = v[3] * (oe.fxAlphaOverride ? fxAlphaFor(c.fx, oe.fxAlphaSprite) : 1), l[k] = _[0], l[k + 1] = _[1], l[k + 2] = _[2], l[k + 3] = _[3]
             }
         },
         zE = t => {
@@ -32739,8 +32755,9 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             p = Math.min(s, Math.max(i, a), Math.max(r, c), Math.max(l, f));
         return !(p < 0 || u > p)
     };
-    var m7 = (t, e, n) => {
-        let o = [0, 0, 0];
+    var m7o = [0, 0, 0],
+        m7 = (t, e, n) => {
+        let o = m7o;
         for (let s = 0; s < 6; ++s) {
             let i = e[s],
                 r = n[s];
@@ -38520,7 +38537,9 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             t.meshes.waterProps = h ? waterPropsTexture(h) : null;
         },
         r9 = t => {
-            let e = ht[20];
+            let e = ht[20],
+                wn = performance.now();
+            wn - classicWaterCacheAt > (classicIsEditor() ? 2e3 : 1e4) && (classicWaterCache.clear(), classicWaterCacheAt = wn);
             zc(e, lt.currentProgram === e.id);
             for (let n = 0, o = t.length; n < o; ++n) {
                 let s = t[n];
@@ -39167,6 +39186,11 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         C9 = !t
     });
     var T9 = () => {
+            let hk = window.devicePixelRatio || 1;
+            if (hk !== hudKv) {
+                hudKv = hk;
+                for (let a = 1; a < $9.length; ++a) $9[a] = sh(kW[a], B9[a], hk);
+            }
             let t = Math.round(window.innerWidth * Tf * hudK()),
                 e = Math.round(window.innerHeight * Tf * hudK());
             ik(t, e)
@@ -39384,7 +39408,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         }],
         $9 = [],
         N9 = () => {
-            for (let a = 1; a < B9.length; ++a) $9[a] = sh(kW[a], B9[a]);
+            for (let a = 1; a < B9.length; ++a) $9[a] = sh(kW[a], B9[a], hudK());
             _m = document.createElement("canvas"), _m.width = 28, _m.height = 28;
             let t = _m.getContext("2d");
             t.translate(14, 25), t.beginPath(), t.moveTo(0, 0), t.lineTo(-9, -18), t.lineTo(0, -14), t.lineTo(9, -18), t.closePath(), t.fillStyle = bt("primary"), t.strokeStyle = bt("black"), t.lineWidth = 1.5, t.lineJoin = "round", t.fill(), t.stroke();
@@ -39401,7 +39425,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         wW = t => {
             let e = [];
             return T.entities.array.forEach((n, o) => {
-                !n.visual || !n.visual.transform.visible || n.stats && !n.stats.alive || n.id !== fo && n.visual.cDist && n.visual.cDist > 60 || n.type === 3 && (n.id !== Sn || t > 0 && jy(n, t)) || (ut(n.hudPos, n.visualPosition || n.pos), n.type !== 3 && (n.hudPos[1] += n.visual.getTopAbsolute(), n.mount !== void 0 && (n.hudPos[1] += 1)), la(n.hudPos, n.hudPos) && (n.id === T.playerId && (n.hudPos[0] = Math.round(.5 * Ln.width), n.hudPos[1] = Math.round(.5 * Ln.height)), e.push(n)))
+                !n.visual || !n.visual.transform.visible || n.stats && !n.stats.alive || n.id !== fo && n.visual.cDist && n.visual.cDist > 60 || n.type === 3 && (n.id !== Sn || t > 0 && jy(n, t)) || (ut(n.hudPos, n.visualPosition || n.pos), n.type !== 3 && (n.hudPos[1] += n.visual.getTopAbsolute(), n.mount !== void 0 && (n.hudPos[1] += 1)), la(n.hudPos, n.hudPos) && (n.id === T.playerId && (n.hudPos[0] = Math.round(.5 * Ln.width / hudK()), n.hudPos[1] = Math.round(.5 * Ln.height / hudK())), e.push(n)))
             }), e.sort((n, o) => o.hudPos[2] - n.hudPos[2])
         },
         xW = (t, e, n) => e ? 4 : n === 0 ? oe.classColorBars && t.type === 0 ? 8 + t.class : 1 : T.player.canCombatInteract(t) ? n === 2 ? oe.classColorBars ? 8 + t.class : 5 : t.type === 1 && t.aggroMode === 0 ? 2 : 3 : 6,
