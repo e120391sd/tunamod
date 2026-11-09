@@ -9658,7 +9658,7 @@ void main() {
         },
         sp = 0,
         ip = (t, e) => {
-            To(z0, 2 * (t * oe.resolutionScale / an.width) - 1, 2 * (1 - e * oe.resolutionScale / an.height) - 1), To(Nc, ~~(t * oe.resolutionScale), ~~(e * oe.resolutionScale))
+            To(z0, 2 * (t * oe.resolutionScale * hudK() / an.width) - 1, 2 * (1 - e * oe.resolutionScale * hudK() / an.height) - 1), To(Nc, ~~(t * oe.resolutionScale), ~~(e * oe.resolutionScale))
         },
         a_ = (t, e) => {
             let n = Mt(t, -100, 100),
@@ -10430,8 +10430,8 @@ void main() {
                 }
             } else if (!lo.active || (e = lo.resolve(e), e === void 0)) return;
             if (g_ = e, t && Un.visible && Un.id === Q.dropId && (Q.step === Ms || Q.step === Js)) {
-                let p = window.innerWidth / Ln.width,
-                    g = window.innerHeight / Ln.height;
+                let p = window.innerWidth * hudK() / Ln.width,
+                    g = window.innerHeight * hudK() / Ln.height;
                 en.visible = !0, en.x = Un.x * p, en.y = Un.y * g, en.width = Un.width * p, en.height = Un.height * g, en.angle = 0, en.glow = !0, en.point = !1, en.below = !1
             }
             let [n, o, s] = e;
@@ -10786,17 +10786,19 @@ void main() {
     var tM = () => {
             Oo.font = "bold 18px hordes", Oo.fillText("Hordes", 0, 0)
         },
+        hudK = () => window.devicePixelRatio || 1,
         Qr = (t, e, n = 1, o = 1, s = 1, i = 1, r = 0, l = 0, a = .5, c = .5) => {
             Oo.globalAlpha = oe.nameplateShowTransparency ? n : 1;
-            let f = t.width * o,
-                u = t.height * o,
+            let h = t.__hs || 1,
+                f = t.width / h * o,
+                u = t.height / h * o,
                 p = Math.round(f * s),
                 g = Math.round(u * i);
             return p === 0 || g === 0 || Oo.drawImage(t, 0, 0, Math.round(t.width * s), Math.round(t.height * i), Math.round(e[0] - f * a + r * o), Math.round(e[1] - u * c + l * o), p, g), p
         },
         Xr = (t, e, n, o, s, i = 0, r = 0, l = .5, a = .5) => Qr(xp(e, n), t, o, s, 1, 1, i, r, l, a),
         wp = (t, e, n, o, s = 0, i = 0, r = .5, l = .5) => Qr(e, t, n, o, 1, 1, s, i, r, l),
-        la = (t, e, n = !1) => (n ? (e[0] = t[0], e[1] = t[1]) : Bo(e, t, _t.projectionViewMatrix), n || e[2] < 1 && e[0] > -1 && e[0] < 1 ? (e[1] = Math.max(-1, Math.min(e[1], 1)), e[0] = Math.round((e[0] * .5 + .5) * Ln.width), e[1] = Math.round((e[1] * -.5 + .5) * Ln.height), e[1] = Math.max(30, e[1]), e) : !1),
+        la = (t, e, n = !1) => (n ? (e[0] = t[0], e[1] = t[1]) : Bo(e, t, _t.projectionViewMatrix), n || e[2] < 1 && e[0] > -1 && e[0] < 1 ? (e[1] = Math.max(-1, Math.min(e[1], 1)), e[0] = Math.round((e[0] * .5 + .5) * Ln.width / hudK()), e[1] = Math.round((e[1] * -.5 + .5) * Ln.height / hudK()), e[1] = Math.max(30, e[1]), e) : !1),
         H_ = (t, e, n) => {
             t.font = "bold " + e + "px hordes", t.shadowColor = "#000", t.shadowOffsetX = 1, t.shadowOffsetY = 1, t.fillStyle = n
         },
@@ -10985,11 +10987,18 @@ void main() {
             size: n,
             wrap: o = 0
         }) => {
-            let s = t + e + n;
+            let k = o > 0 ? 1 : hudK(),
+                s = t + e + n + "@" + k;
             if (j_[s]) return j_[s];
             let i = document.createElement("canvas"),
                 r = i.getContext("2d");
-            return r.font = "bold " + n + "px hordes", o > 0 ? yq(i, r, t, 0, 0, o, n, e) : (i.width = Math.max(1, Math.ceil(r.measureText(t).width)) + 5, i.height = Math.ceil(n * 1.2 + 5), H_(r, n, e), r.fillText(t, 0, i.height - 6)), j_[s] = i, i
+            if (r.font = "bold " + n + "px hordes", o > 0) yq(i, r, t, 0, 0, o, n, e);
+            else {
+                let w = Math.max(1, Math.ceil(r.measureText(t).width)) + 5,
+                    h = Math.ceil(n * 1.2 + 5);
+                i.width = Math.ceil(w * k), i.height = Math.ceil(h * k), r.scale(k, k), H_(r, n, e), r.shadowOffsetX = r.shadowOffsetY = k, r.fillText(t, 0, h - 6), i.__hs = k;
+            }
+            return j_[s] = i, i
         },
         G_ = {},
         sh = (t, {
@@ -14357,8 +14366,8 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         },
         lz = () => {
             Qi(_t, Zr, z0), rn(Zr, Zr, _t.worldPosition), go(Zr, Zr);
-            let t = Ln.width,
-                e = Ln.height,
+            let t = Ln.width / hudK(),
+                e = Ln.height / hudK(),
                 n = Sn,
                 o = 20,
                 s = !1;
@@ -39139,7 +39148,11 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         C9 = !1,
         F9 = [256, 512, 1024, 2048][oe.shadowmapResolution] || 1024,
         S9 = () => {
-            an.addEventListener("webglcontextlost", gW), T9(), x9(F9), l9(F9), A9(lt.width, lt.height), Ln.className = "l-canvas", an.className = "l-canvas", an.style.pointerEvents = "all", window.addEventListener("resize", P9, !1)
+            an.addEventListener("webglcontextlost", gW), T9(), x9(F9), l9(F9), A9(lt.width, lt.height), Ln.className = "l-canvas", an.className = "l-canvas", an.style.pointerEvents = "all", window.addEventListener("resize", P9, !1), (function dprWatch() {
+                matchMedia("(resolution: " + (window.devicePixelRatio || 1) + "dppx)").addEventListener("change", () => (P9(), dprWatch()), {
+                    once: !0
+                })
+            })()
         },
         gW = t => {
             window.reportClientError("webgl", "WebGL context lost", "", t.statusMessage || "")
@@ -39154,13 +39167,13 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         C9 = !t
     });
     var T9 = () => {
-            let t = window.innerWidth * Tf,
-                e = window.innerHeight * Tf;
+            let t = Math.round(window.innerWidth * Tf * hudK()),
+                e = Math.round(window.innerHeight * Tf * hudK());
             ik(t, e)
         },
         P9 = () => {
-            let t = window.innerWidth * Tf,
-                e = window.innerHeight * Tf;
+            let t = Math.round(window.innerWidth * Tf * hudK()),
+                e = Math.round(window.innerHeight * Tf * hudK());
             T9(), WM(t, e), A9(t, e)
         },
         A9 = (t, e) => {
@@ -39332,7 +39345,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     c = 0;
                 r.forEach((f, u) => {
                     f.hudTextImg || (f.hudTextImg = xp(f.name, $t[f.color]));
-                    let p = f.hudTextImg.width,
+                    let p = f.hudTextImg.width / (f.hudTextImg.__hs || 1),
                         g = Math.round(r.pos[0] + c - l * .5) - 2,
                         v = Math.round(r.pos[1] - a * 20) - 8;
                     if (f.uiTimeout === 0) {
@@ -39443,7 +39456,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             tM(), N9()
         },
         CW = () => {
-            Oo.clearRect(0, 0, Ln.width, Ln.height)
+            Oo.setTransform(1, 0, 0, 1, 0, 0), Oo.clearRect(0, 0, Ln.width, Ln.height), Oo.setTransform(hudK(), 0, 0, hudK(), 0, 0)
         },
         SW = t => {
             classicHudTick(), it.shift.down ? Gy(t, 1 / 0) : (W9(t, oe.itemLabelRange ** 2), oe.itemLabelRange > 0 ? Gy(t, oe.itemLabelRange) : Pf.clear()), D9(t)
