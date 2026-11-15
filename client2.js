@@ -13658,9 +13658,11 @@ precision highp float;precision highp int;uniform Environment{vec3 worldlight[3]
             c = "xyzw" [k & 3];
         return `if(n>${k}){float v=w${L}.${c};if(v>bw){bw=v;bs=vec3(ctInfo[${k}].x,ctLayer[${L}].${c},ctInfo[${k}].w);}if(v>0.1)cc(ct(ctInfo[${k}].x,ctLayer[${L}].${c}),v,ctInfo[${k}]);}`;
     }).join("");
+    var classicSteepView = [0, -1, 0],
+        classicSteepLoc = null;
     var ctTerrainFrag = `#version 300 es
-precision highp float;precision highp int;uniform Circle{vec4 circlePos;vec4 circleInfo;};precision highp sampler2DShadow;uniform Shadows{uniform mat4 shadowPVMatrix[2];uniform vec3 shadowRange;};const int a=
-#SHADOWS;uniform sampler2DShadow shadowMaps[2];uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};in float vCameraDistance;in vec4 vWorldPos;uniform MeshTerrain{mat4 modelMatrix;vec4 ctInfo[16];vec4 ctLayer[4];vec4 ctMeta;int quadrant;};precision highp sampler2DArray;uniform sampler2DArray atlas;uniform sampler2DArray ctWeights;uniform sampler2DArray ctDiffuse;uniform float ctUvMul;in vec3 vLight;in vec3 vNormal;in vec3 vViewDir;in vec3 vUvChannel;in vec2 vCt;vec4 R;float D;vec2 ut;vec2 gx;vec2 gy;void cc(vec4 c,float v,vec4 i){float b=max(max(c.r,c.g),c.b);float w=pow(smoothstep(i.y,max(i.z,i.y+0.001),b)*v,2.5);D+=i.w*w;R+=vec4(c.rgb*min(1.0,v*0.5+0.7)*w,w);}vec4 ct(float sc,float ly){return textureGrad(ctDiffuse,vec3(ut*sc,ly),gx*sc,gy*sc);}out vec4 fragColor;void main(){ut=vec2(-vWorldPos.x,vWorldPos.z)/(4.0*max(ctUvMul,1.0));gx=dFdx(ut)*${classicTerrainBlur.toFixed(2)};gy=dFdy(ut)*${classicTerrainBlur.toFixed(2)};if(vCameraDistance>fog[1][1]){fragColor=vec4(fog[0],1.0);return;}vec4 x=textureLod(atlas,vUvChannel,0.0);if(x.r==1.0&&x.g==1.0&&x.b==1.0)discard;R=vec4(0.0);D=0.0;int n=int(ctMeta.y+0.5);float bw=-1.0;vec3 bs=vec3(1.0,0.0,0.0);vec4 w0=textureLod(ctWeights,vec3(vCt,ctMeta.x),0.0);vec4 w1=n>4?textureLod(ctWeights,vec3(vCt,ctMeta.x+1.0),0.0):vec4(0.0);vec4 w2=n>8?textureLod(ctWeights,vec3(vCt,ctMeta.x+2.0),0.0):vec4(0.0);vec4 w3=n>12?textureLod(ctWeights,vec3(vCt,ctMeta.x+3.0),0.0):vec4(0.0);${ctSlotsGlsl}if(R.a<1e-5){vec4 c=ct(bs.x,bs.y);R=vec4(c.rgb,1.0);D=bs.z;}vec3 col=R.rgb/(R.a*0.85);float det=D/R.a;float y=1.0;if(a==1&&vCameraDistance<shadowRange[2]){float az=smoothstep(shadowRange[1],shadowRange[2],vCameraDistance);if(vCameraDistance>shadowRange[0]){vec4 aa=shadowPVMatrix[1]*(vWorldPos);vec3 ab=(aa.xyz/aa.w)*0.5+0.5;y=texture(shadowMaps[1],ab);}else{vec4 aa=shadowPVMatrix[0]*(vWorldPos);vec3 ab=(aa.xyz/aa.w)*0.5+0.5;y=texture(shadowMaps[0],ab);}y=max(y,az);}vec3 nm=normalize(vNormal);float lam=max(0.0,dot(nm,worldlight[2]));float sc=0.0;if(lam>0.0){lam=min(clamp(lam,0.0,1.0),y);sc=pow(max(dot(reflect(-worldlight[2],nm),vViewDir),0.0),8.5)*2.0;}float db=length(col)*3.0*det;float lb=db-0.5;float li=lb*lb*lb*0.7+0.25;float sb=max(lb*lam,0.0);float sp=sb*sb*sb*1.2;if(db>1.2){sp*=1.3;li*=1.3;}sc*=sp*(ctUvMul>1.5?0.0:1.0);vec3 r=col*worldlight[1]+col*worldlight[0]*lam*0.65+vec3(sc)*0.15+vLight*li;float ac=distance(vWorldPos.xz,circlePos.xz);float ad=min(1.0,max(0.0,4.0-abs(vWorldPos.y-circlePos.y)));if(ac<circlePos.w+0.1&&ad>0.0){r=mix(r,circleInfo.rgb,ad*circleInfo.a*((ac<circlePos.w?ac/circlePos.w*0.5:0.0)+max(0.,(0.1-abs(circlePos.w-ac))/0.1)));}float ae=(1.0-smoothstep(fog[1][0],fog[1][1],vCameraDistance));fragColor=vec4(mix(fog[0],r,ae),1.0);}`;
+precision highp float;precision highp int;uniform vec3 steepView;uniform Circle{vec4 circlePos;vec4 circleInfo;};precision highp sampler2DShadow;uniform Shadows{uniform mat4 shadowPVMatrix[2];uniform vec3 shadowRange;};const int a=
+#SHADOWS;uniform sampler2DShadow shadowMaps[2];uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};in float vCameraDistance;in vec4 vWorldPos;uniform MeshTerrain{mat4 modelMatrix;vec4 ctInfo[16];vec4 ctLayer[4];vec4 ctMeta;int quadrant;};precision highp sampler2DArray;uniform sampler2DArray atlas;uniform sampler2DArray ctWeights;uniform sampler2DArray ctDiffuse;uniform float ctUvMul;in vec3 vLight;in vec3 vNormal;in vec3 vViewDir;in vec3 vUvChannel;in vec2 vCt;vec4 R;float D;vec2 ut;vec2 gx;vec2 gy;void cc(vec4 c,float v,vec4 i){float b=max(max(c.r,c.g),c.b);float w=pow(smoothstep(i.y,max(i.z,i.y+0.001),b)*v,2.5);D+=i.w*w;R+=vec4(c.rgb*min(1.0,v*0.5+0.7)*w,w);}vec4 ct(float sc,float ly){return textureGrad(ctDiffuse,vec3(ut*sc,ly),gx*sc,gy*sc);}out vec4 fragColor;void main(){ut=vec2(-vWorldPos.x,vWorldPos.z)/(4.0*max(ctUvMul,1.0));gx=dFdx(ut)*${classicTerrainBlur.toFixed(2)};gy=dFdy(ut)*${classicTerrainBlur.toFixed(2)};if(vCameraDistance>fog[1][1]){fragColor=vec4(fog[0],1.0);return;}vec4 x=textureLod(atlas,vUvChannel,0.0);if(x.r==1.0&&x.g==1.0&&x.b==1.0)discard;R=vec4(0.0);D=0.0;int n=int(ctMeta.y+0.5);float bw=-1.0;vec3 bs=vec3(1.0,0.0,0.0);vec4 w0=textureLod(ctWeights,vec3(vCt,ctMeta.x),0.0);vec4 w1=n>4?textureLod(ctWeights,vec3(vCt,ctMeta.x+1.0),0.0):vec4(0.0);vec4 w2=n>8?textureLod(ctWeights,vec3(vCt,ctMeta.x+2.0),0.0):vec4(0.0);vec4 w3=n>12?textureLod(ctWeights,vec3(vCt,ctMeta.x+3.0),0.0):vec4(0.0);${ctSlotsGlsl}if(R.a<1e-5){vec4 c=ct(bs.x,bs.y);R=vec4(c.rgb,1.0);D=bs.z;}vec3 col=R.rgb/(R.a*0.85);float det=D/R.a;float y=1.0;if(a==1&&vCameraDistance<shadowRange[2]){float az=smoothstep(shadowRange[1],shadowRange[2],vCameraDistance);if(vCameraDistance>shadowRange[0]){vec4 aa=shadowPVMatrix[1]*(vWorldPos);vec3 ab=(aa.xyz/aa.w)*0.5+0.5;y=texture(shadowMaps[1],ab);}else{vec4 aa=shadowPVMatrix[0]*(vWorldPos);vec3 ab=(aa.xyz/aa.w)*0.5+0.5;y=texture(shadowMaps[0],ab);}y=max(y,az);}vec3 nm=normalize(vNormal);float lam=max(0.0,dot(nm,worldlight[2]));float sc=0.0;if(lam>0.0){lam=min(clamp(lam,0.0,1.0),y);sc=pow(max(dot(reflect(-worldlight[2],nm),vViewDir),0.0),8.5)*2.0;}float db=length(col)*3.0*det;float lb=db-0.5;float li=lb*lb*lb*0.7+0.25;float sb=max(lb*lam,0.0);float sp=sb*sb*sb*1.2;if(db>1.2){sp*=1.3;li*=1.3;}sc*=sp*(ctUvMul>1.5?0.0:1.0);vec3 r=col*worldlight[1]+col*worldlight[0]*lam*0.65+vec3(sc)*0.15+vLight*li;float ac=distance(vWorldPos.xz,circlePos.xz);float ad=min(1.0,max(0.0,4.0-abs(vWorldPos.y-circlePos.y)));if(ac<circlePos.w+0.1&&ad>0.0){r=mix(r,circleInfo.rgb,ad*circleInfo.a*((ac<circlePos.w?ac/circlePos.w*0.5:0.0)+max(0.,(0.1-abs(circlePos.w-ac))/0.1)));}if(steepView.x>0.5){float st=length(normalize(vNormal).xz);float bw=max(steepView.z,0.02);float sb=st/bw;float q=(floor(sb)+0.5)*bw;vec3 hc=mix(vec3(0.42,0.6,0.46),vec3(0.74,0.68,0.44),smoothstep(0.0,0.35,q));hc=mix(hc,vec3(0.74,0.4,0.36),smoothstep(0.35,0.75,q));r=mix(r,hc,0.55);float fr=fract(sb),ln=1.0-smoothstep(0.0,fwidth(sb)*1.3,min(fr,1.0-fr));r=mix(r,vec3(0.42),ln*0.75);}float ae=(1.0-smoothstep(fog[1][0],fog[1][1],vCameraDistance));fragColor=vec4(mix(fog[0],r,ae),1.0);}`;
     var ctTerrainVert = `#version 300 es
 precision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};out float vCameraDistance;out vec4 vWorldPos;uniform Pointlights{vec4 lightCols[16];vec3 lightPos[16];int lightCount;};out vec3 vLight;uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform MeshTerrain{mat4 modelMatrix;vec4 ctInfo[16];vec4 ctLayer[4];vec4 ctMeta;int quadrant;};in vec3 position;in vec3 normal;out vec3 vNormal;out vec3 vUvChannel;out vec2 vCt;out vec3 vViewDir;void main(){vNormal=normal;vWorldPos=modelMatrix*vec4(position,1.0);vUvChannel=vec3(position[0],position[2],0.0)/32.0;int c=quadrant%2;int d=int(quadrant%4);if(c==1)vUvChannel.x-=1.0;if(d>1)vUvChannel.y-=1.0;vUvChannel.z=float(quadrant);vCt=(position.xz+0.5)/65.0;vLight=vec3(0.0);for(int f=0;f<lightCount;++f){vec3 g=lightPos[f]-vWorldPos.xyz;float h=lightCols[f].w-dot(g,g);if(h>0.0){h/=(lightCols[f].w);h=h*h;vLight+=0.25*lightCols[f].rgb*h;}}vViewDir=-normalize(vWorldPos.xyz-cameraPosition);vCameraDistance=length(cameraPosition-vWorldPos.xyz);gl_Position=projectionViewMatrix*vWorldPos;}`;
     var baseTerrainFrag = `#version 300 es
@@ -30438,6 +30440,54 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             d.aabb && d.aabb.length === 6 && (d.aabb[1] = Math.min(d.aabb[1], lo * hu), d.aabb[4] = Math.max(d.aabb[4], hi * hu));
             return d;
         },
+        classicFreshTex = (d, id) => {
+            let t = {},
+                n = T && T.chunkAmount || 100,
+                best = null,
+                bw = 0;
+            for (let a of d.area || []) {
+                let w = areaWorlds[a];
+                w && w !== "water" && (t[w] = (t[w] || 0) + 1);
+            }
+            for (let k in t) t[k] > bw && (bw = t[k], best = k);
+            if (!best) {
+                let r = classicRealmAt(id % n * 64 + 32, Math.floor(id / n) * 64 + 32);
+                best = r === "h" ? "headless" : "faivel";
+            }
+            return best === "headless" ? 1238 : 1227;
+        },
+        classicFreshHlTex = [1845, 1858, 1860, 1862, 1865, 1869, 1871, 1872, 1875, 2101, 2102, 2103, 2104, 2105, 2106, 2107, 2108, 2110, 2111, 2112, 2113, 2114, 2115, 2116],
+        classicFreshCt = (d, id) => {
+            let ar = new Set(d.area || []),
+                hlA = [11, 12, 13, 14, 25],
+                edge = ar.has(25) || hlA.some(a => ar.has(a)) && [...ar].some(a => a && hlA.indexOf(a) < 0);
+            if (!edge || !d.texture || !d.textureid) return {
+                ids: [classicFreshTex(d, id)],
+                w: new Uint8Array(4096).fill(255)
+            };
+            let hl = d.textureid.map(q => q.map(t => {
+                    let r = Ac.get(t);
+                    return r && classicFreshHlTex.indexOf(r.texture) >= 0 ? 1 : 0;
+                })),
+                w = new Uint8Array(8192);
+            for (let v = 0; v < 4096; ++v) {
+                let x = v & 63,
+                    z = v >> 6,
+                    q = (x >= 32 ? 1 : 0) + (z >= 32 ? 2 : 0),
+                    e = d.texture[q][(z % 32 * 3 + 1) * 96 + x % 32 * 3 + 1],
+                    a = e & 31,
+                    b = e >> 5 & 31,
+                    c = e >> 10 & 31,
+                    f = Math.max(0, 31 - a - b - c),
+                    h = (a * hl[q][0] + b * hl[q][1] + c * hl[q][2] + f * hl[q][3]) / 31,
+                    k = Math.max(0, Math.min(1, (h - .35) / .3));
+                k = k * k * (3 - 2 * k), w[v * 2] = Math.round(255 * (1 - k)), w[v * 2 + 1] = 255 - w[v * 2];
+            }
+            return {
+                ids: [1227, 1238],
+                w
+            };
+        },
         classicChunkFor = (e, t) => {
             let aw = classicActiveWorld(),
                 c = aw && aw.chunks.get(e.id),
@@ -30445,7 +30495,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             return e.liveShape = null, c ? (e.liveShape = {
                 data: live,
                 normals: new Float32Array(3456)
-            }, b7(e.liveShape), classicCloneChunk(c)) : classicBasePatch(e.id, live);
+            }, b7(e.liveShape), classicCloneChunk(c)) : (aw && aw.header && aw.header.freshBase && (live.ctw = classicFreshCt(live, e.id)), classicBasePatch(e.id, live));
         },
         classicLiveColliders = t => {
             let L = t.liveShape;
@@ -31512,13 +31562,13 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         bE = -1 / 0,
         iN = (t, e, n) => {
             if (t = Math.floor(t / 64) * 2, e = Math.floor(e / 64) * 2, t !== _E || e !== bE) {
-                ll = t - yr, Jp = t + yr, al = e - yr, em = e + yr, Kh = Math.min(Math.max(0, Math.floor(ll / 2)), n - 1), Zh = Math.min(Math.max(0, Math.ceil(Jp / 2)), n - 1), Jh = Math.min(Math.max(0, Math.floor(al / 2)), n - 1), e1 = Math.min(Math.max(0, Math.ceil(em / 2)), n - 1), gE = Math.floor(t / 2), vE = Math.floor(e / 2), _E = t, bE = e, ya.length = 0;
+                ll = t - yr, Jp = t + yr, al = e - yr, em = e + yr, Kh = Math.min(Math.max(0, Math.floor(ll / 2) - 2), n - 1), Zh = Math.min(Math.max(0, Math.ceil(Jp / 2) + 2), n - 1), Jh = Math.min(Math.max(0, Math.floor(al / 2) - 2), n - 1), e1 = Math.min(Math.max(0, Math.ceil(em / 2) + 2), n - 1), gE = Math.floor(t / 2), vE = Math.floor(e / 2), _E = t, bE = e, ya.length = 0;
                 let o = new Map,
                     s = 0;
                 for (let i = Kh; i <= Zh; ++i)
                     for (let r = Jh; r <= e1; ++r) {
                         let l = (i - gE) ** 2 + (r - vE) ** 2;
-                        l > ((yr + 1) / 2) ** 2 || (l = ~~l | 0, o.has(l) || o.set(l, []), o.get(l).push(r * n + i, i, r), l > s && (s = l))
+                        l > ((yr + 1) / 2 + 1.5) ** 2 || (l = ~~l | 0, o.has(l) || o.set(l, []), o.get(l).push(r * n + i, i, r), l > s && (s = l))
                     }
                 for (let i = 0; i <= s; ++i)
                     if (o.has(i)) {
@@ -32834,14 +32884,17 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                         c = n.liveShape ? 0 : cv,
                         collide = () => {
                             if (!c && n.liveShape && cv && !e.finishedLoadingChunks.has(n.id)) return void Wr(cv, (s, i) => {
+                                if (this.dead) return;
                                 this.addVisual(e, n, i), this.postGeometryLoad(e, n);
                             });
                             if (!c || e.finishedLoadingChunks.has(n.id)) return this.postGeometryLoad(e, n);
                             Wr(c, (s, i) => {
+                                if (this.dead) return;
                                 this.addCollider(e, n, s, i), this.postGeometryLoad(e, n);
                             });
                         };
                     this.loaded = !0, o.geometry === 0 ? collide() : Wr(o.geometry, (s, i) => {
+                        if (this.dead) return;
                         let r = !e.finishedLoadingChunks.has(n.id);
                         this.geoExtent = geometryExtentOf(s);
                         this.addMesh(e, n), r && c === o.geometry ? (this.addCollider(e, n, s, i), this.postGeometryLoad(e, n)) : collide();
@@ -32851,7 +32904,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             onUpdate(e, n, o) {}
             addMesh() {}
             postGeometryLoad(e, n) {
-                n.loadingProps--
+                this.dead || (this.reloading ? this.reloading = !1 : n.loadingProps > 0 && n.loadingProps--)
             }
             handleColliderGeometry(e, n, o, s) {
                 let i = this.matrix,
@@ -32917,7 +32970,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             this.setWorldMatrix(this.mesh.worldMatrix, e), Xn(this.mesh.position, e, this.pos), J(this.mesh.rotation, this.rot[0], this.rot[1], this.rot[2]), J(this.mesh.scale, this.scale * this.sw, this.scale * this.sh, this.scale * this.sw), this.mesh.data.multi && (this.mesh.data.multi.needsUpdate = !0)
         }
         onRemove(e) {
-            super.onRemove(e), Ys.get(this.id).effects.length && this.deleteEffects(), this.mesh && (this.mesh.data.multi ? oi(this.mesh.data.multi, this.mesh) : Ws(this.mesh), this.mesh = void 0)
+            this.dead = !0, super.onRemove(e), this.deleteEffects(), this.mesh && (this.mesh.data.multi ? oi(this.mesh.data.multi, this.mesh) : Ws(this.mesh), this.mesh = void 0)
         }
         addMesh(e, n) {
             if (this.mesh === void 0) {
@@ -32934,7 +32987,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             this.mesh && this.mesh.data && this.mesh.data.interiorlight && (classicWorld && T.file === classicWorld.source ? bo(this.mesh.data.interiorlight, 0, 0, 0, 0) : T.getInteriorLight(this.mesh.data.interiorlight, b1(Oi, this.mesh.position, 3, 3, 3)))
         }
         createEffects() {
-            if (this.isEffectProp = !0, !this.effectsCreated) {
+            if (this.isEffectProp = !0, !this.effectsCreated && this.mesh && Ys.has(this.id)) {
                 let e = Ys.get(this.id).effects;
                 for (let n = 0; n < e.length; ++n) {
                     let o = e[n],
@@ -32971,7 +33024,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             t.id = e, t.x = n, t.z = o, t.origin[0] = n * 64, t.origin[2] = o * 64, t.deserialized = !1, t.props.length = 0, t.data = void 0, t.ct = null, t.ctKey = null, t.folGap = !1, t.loadingProps = 0, t.__world = void 0, t.gsStoneMask = null, t.gsMeadowMask = null, t.gsBigDirtMask = null, t.pathBand = null
         },
         _7 = (t, e) => {
-            classicHlSwap(e), t.data = e, b7(t), e.ctw || (scatterRidgePlants(t), scatterPathPlants(t)), NN(t, !0), t.deserialized = !0
+            classicHlSwap(e), t.data = e, b7(t), NN(t, !0), t.deserialized = !0
         },
         ii = (t, e, n) => {
             e /= 2.6666666666666665, n /= 2.6666666666666665;
@@ -38326,7 +38379,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             }
             if (!worldOverrideOff && (!e.active || !ctDiffuseReady())) return;
             if (!worldOverrideOff) {
-            N.useProgram(e.program), lt.currentProgram = e.id, N.uniform1f(classicMapUvLoc || (classicMapUvLoc = N.getUniformLocation(e.program, "ctUvMul")), classicMapCapturing ? classicMapUvScale : 1), Oc(e), Bc(e), Gn("ctDiffuse", ctDiffuse, 0, e);
+            N.useProgram(e.program), lt.currentProgram = e.id, N.uniform1f(classicMapUvLoc || (classicMapUvLoc = N.getUniformLocation(e.program, "ctUvMul")), classicMapCapturing ? classicMapUvScale : 1), N.uniform3fv(classicSteepLoc || (classicSteepLoc = N.getUniformLocation(e.program, "steepView")), classicMapCapturing ? [0, -1, 0] : classicSteepView), Oc(e), Bc(e), Gn("ctDiffuse", ctDiffuse, 0, e);
             let n, w, s = classicMapCapturing ? 9 : 1;
             for (let r = 0; r < t.length; ++r) {
                 let l = t[r],
@@ -38563,10 +38616,11 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         },
         Cf = [],
         u9 = t => {
-            Cf.push(t)
+            Cf.indexOf(t) < 0 && Cf.push(t)
         },
         Ry = t => {
-            Cf.splice(Cf.indexOf(t), 1)
+            let i = Cf.indexOf(t);
+            i >= 0 && Cf.splice(i, 1)
         },
         p9 = t => {
             t9(t), classicMapCapturing || (BE(), $7(), L7(t))
@@ -38651,7 +38705,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             if (n === 0 || n === 3) {
                 if (t.inRange) {
                     n === 0 && (t.state = 1);
-                    let o = t.loadingProps === 0;
+                    let o = t.loadingProps <= 0;
                     for (let s = 0; s < t.neighbors.length; ++s) {
                         let i = e.chunksMap.get(t.neighbors[s]);
                         i ? i.state < 3 && (i.state === 0 && (i.state = 1), o = !1) : o = !1
@@ -38671,9 +38725,14 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         }, uW = (t, e, n, o, s, i, r) => {
             h9(t, e, n, o, s, i, r);
         }, Oy = t => {
-            y7(t);
             let e = t.state === 2;
-            t.state === 7 && (Ry(t), dm(t, !1, !1), t.state = 6), g9(t), t.state = 8, e && t.abort.abort()
+            t.state === 7 && (Ry(t), dm(t, !1, !1), t.state = 6), t.state = 8;
+            try {
+                y7(t)
+            } catch (err) {
+                t.props.length = 0, console.warn("chunk " + t.id + " prop cleanup failed", err)
+            }
+            g9(t), e && t.abort.abort()
         };
     var classicMapCapturing = !1,
         classicMapEnvMemo = new Map,
@@ -39053,6 +39112,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             let o = [];
             for (let s = 0; s < t.length; ++s) {
                 let i = t[s];
+                if (!i.data) continue;
                 m7(i.data.aabb, e.frustum, e.frustumConstants) ? (o.push(i), dm(i, !0, n)) : dm(i, !1, n)
             }
             return o
@@ -42100,7 +42160,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 this.triangleGrid.clear(), this.visualGrid.clear(), this.cameraGrid.clear(), this.chunksMap.forEach(e => {
                     for (let n = 0; n < e.props.length; ++n) {
                         let o = e.props[n];
-                        o.loaded = !1, o.loadGeometry(this, e)
+                        o.loaded = !1, o.reloading = !0, o.loadGeometry(this, e)
                     }
                     e.deserialized && classicLiveColliders(e)
                 })
