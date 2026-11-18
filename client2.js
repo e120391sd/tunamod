@@ -1090,10 +1090,10 @@
         let e, n, o, s, i, r, f;
         return n = new z3({}), {
             c() {
-                e = h("div"), Z(n.$$.fragment), o = h("h2"), s = A(t[0]), i = h("small"), i.innerHTML = '<img alt="Hordes.io" class="svgicon" src="/data/ui/icon.svg?v=9001382"/> 0.51.9001 Live', Fe(o, "margin-top", "100px"), m(i, "class", "version textgrey textcenter svelte-aoht7k"), m(e, "class", "l-ui container svelte-aoht7k")
+                e = h("div"), Z(n.$$.fragment), o = h("h5"), s = A(t[0]), i = A(" — 0.51.9001 Live"), m(o, "class", "version textgrey svelte-aoht7k"), m(e, "class", "l-ui container svelte-aoht7k")
             },
             m(l, a) {
-                x(l, e, a), X(n, e, null), d(e, o), d(o, s), d(e, i), r = !0
+                x(l, e, a), X(n, e, null), d(e, o), d(o, s), d(o, i), r = !0
             },
             p(l, a) {
                 (!r || a & 1) && j(s, l[0])
@@ -1821,6 +1821,7 @@ precision highp float;precision highp int;uniform Screen{vec2 resolution;};unifo
         sortParty = ee(!1),
         classColorParty = ee(!1),
         disablePartyNameplates = ee(!1),
+        uncapNameplates = ee(!1),
         revUnfriendly = ee(!1),
         nextFriendlyIgnoreBots = ee(!1),
         losTarget = ee(!1),
@@ -4112,6 +4113,10 @@ void main() {
             partycreate: {},
             time: {},
             bosslog: {},
+            bosslogs: {
+                client: !0,
+                fun: () => classicBossLogOpen()
+            },
             dance: {},
             sit: {},
             wave: {},
@@ -19825,7 +19830,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 x(ne, e, Le), d(e, o), d(e, s), d(e, i), d(e, r), x(ne, l, Le);
                 for (let oo = 0; oo < Mo.length; oo += 1) Mo[oo] && Mo[oo].m(l, null);
                 Vn(l, t[18], !0), x(ne, a, Le), x(ne, c, Le), x(ne, f, Le), x(ne, u, Le), x(ne, p, Le), x(ne, g, Le), x(ne, v, Le), x(ne, _, Le), x(ne, b, Le), X(y, ne, Le), x(ne, k, Le), x(ne, C, Le), x(ne, E, Le), x(ne, F, Le), Ge(F, t[19]), x(ne, M, Le), X(L, ne, Le), x(ne, V, Le), X(D, ne, Le), x(ne, z, Le), X(q, ne, Le), x(ne, R, Le), X(O, ne, Le), x(ne, W, Le), X(U, ne, Le), x(ne, $, Le), X(G, ne, Le), x(ne, de, Le), X(be, ne, Le), x(ne, le, Le), X(se, ne, Le), x(ne, fe, Le), X(ke, ne, Le), x(ne, we, Le), x(ne, ce, Le), x(ne, xe, Le), d(xe, ye), d(xe, Oe), d(xe, ze), d(ze, Ne), x(ne, ue, Le), Ge(ue, t[20]), x(ne, _e, Le), X(pe, ne, Le), x(ne, he, Le), d(he, Ie), d(he, We), d(he, te), d(te, H), d(te, He), x(ne, Ve, Le), Ge(Ve, t[21]), x(ne, Be, Le), d(Be, je), d(Be, st), d(Be, at), d(at, ot), d(at, Wt), x(ne, Ee, Le), Ge(Ee, t[22]), x(ne, et, Le), d(et, gt), d(et, Ke), d(et, wt), x(ne, pt, Le), Ge(pt, t[23]), x(ne, qe, Le), x(ne, Tt, Le), x(ne, Ut, Le), X(Ze, ne, Le), x(ne, tt, Le), X(nt, ne, Le), x(ne, Lt, Le), X(Xe, ne, Le), x(ne, yt, Le), X(kt, ne, Le), x(ne, Pt, Le), x(ne, mo, Le), x(ne, Lo, Le), d(Lo, Ht), d(Lo, ri), d(Lo, li), X(xo, ne, Le), x(ne, Fr, Le), X(Es, ne, Le), x(ne, ai, Le), X(Is, ne, Le), x(ne, pn, Le), d(pn, un), d(pn, Ea), d(pn, Lf), d(Lf, Fg), d(Lf, s3), x(ne, Ls, Le), Ge(Ls, t[24]), x(ne, Ia, Le), d(Ia, i3), d(Ia, r3), d(Ia, Df), d(Df, Cg), d(Df, l3), x(ne, Ds, Le), Ge(Ds, t[25]), x(ne, km, Le), x(ne, ci, Le), Ge(ci, t[26]), x(ne, wm, Le), x(ne, fi, Le), Ge(fi, t[27]), x(ne, xm, Le), X(La, ne, Le), x(ne, Vf, Le), x(ne, Sg, Le), x(ne, Mm, Le), X(Da, ne, Le), x(ne, Fm, Le), X(Va, ne, Le), x(ne, Cm, Le), X(qa, ne, Le), x(ne, Sm, Le), x(ne, ui, Le), Ge(ui, t[28]), x(ne, qf, Le), x(ne, Tg, Le), x(ne, Tm, Le), X(Ra, ne, Le), x(ne, Pm, Le), X(za, ne, Le), x(ne, Rf, Le), x(ne, Pg, Le), x(ne, Ba, Le), d(Ba, a3), d(Ba, c3), d(Ba, zf), d(zf, Ag), d(zf, f3), x(ne, pi, Le), Ge(pi, t[29]), x(ne, Oa, Le), d(Oa, u3), d(Oa, p3), d(Oa, Am), d(Am, Eg), x(ne, mi, Le), Ge(mi, t[30]), x(ne, Bf, Le), x(ne, Ig, Le), x(ne, Ua, Le), d(Ua, m3), d(Ua, d3), d(Ua, Em), d(Em, Lg), x(ne, di, Le), Ge(di, t[31]), x(ne, $a, Le), d($a, h3), d($a, g3), d($a, Im), d(Im, Dg), x(ne, hi, Le), Ge(hi, t[32]), x(ne, Of, Le), x(ne, Vg, Le), x(ne, Lm, Le), X(Na, ne, Le), Qo = !0, qg || (v3 = [Y(l, "change", t[53]), Y(l, "change", t[35]), Y(u, "click", z_), Y(g, "click", B_), Y(F, "change", t[54]), Y(F, "input", t[54]), Y(ue, "change", t[55]), Y(ue, "input", t[55]), Y(Ve, "change", t[56]), Y(Ve, "input", t[56]), Y(Ve, "change", t[35]), Y(Ee, "change", t[57]), Y(Ee, "input", t[57]), Y(Ee, "change", t[35]), Y(pt, "input", t[58]), Y(pt, "change", t[35]), Y(Ls, "change", t[59]), Y(Ls, "input", t[59]), Y(Ds, "change", t[60]), Y(Ds, "input", t[60]), Y(ci, "input", t[61]), Y(fi, "input", t[62]), Y(ui, "change", t[63]), Y(ui, "input", t[63]), Y(pi, "change", t[64]), Y(pi, "input", t[64]), Y(mi, "change", t[65]), Y(mi, "input", t[65]), Y(di, "change", t[66]), Y(di, "input", t[66]), Y(hi, "change", t[67]), Y(hi, "input", t[67])], qg = !0)
-                storageMount(ne, Le), mapMount(ne, k), sellRow && sellRow(), sellRow = checkRow("Block selling charms & upgraded items", blockSpecialSelling, ne, null), overrideRow && overrideRow(), overrideRow = checkRow("Disable world override", disableWorldOverride, ne, null), modRowsUi && modRowsUi.forEach(f => f()), modRowsUi = [sliderRow("Party frame height", partyHeight, ne, qf, 0, 100), checkRow("Sort party by class", sortParty, ne, qf), checkRow("Class-color party HP bars", classColorParty, ne, qf), checkRow("Disable blue partied nameplates", disablePartyNameplates, ne, qf), headerRow("Buffs", ne, null), checkRow("Hide irrelevant buffs", hideBuffs, ne, null), checkRow("Hide class buffs", hideClassBuffs, ne, null), checkRow("Make all buffs stackable", stackSameBuffs, ne, null), headerRow("CC indicators", ne, null), checkRow("Enable CC indicators", CCIndicator, ne, null), checkRow("Flash CC indicator color", flashCCIndicator, ne, null), checkRow("Show on nameplates", CCIndicatorOnNameplates, ne, null)], skillbarRowsUi && skillbarRowsUi.forEach(f => f()), skillbarRowsUi = [headerRow("Skillbar", ne, null), sliderRow("Columns", skillbarCols, ne, null, 0, 24), sliderRow("Rows", skillbarRows, ne, null, 0, 6)];
+                storageMount(ne, Le), mapMount(ne, k), sellRow && sellRow(), sellRow = checkRow("Block selling charms & upgraded items", blockSpecialSelling, ne, null), overrideRow && overrideRow(), overrideRow = checkRow("Disable world override", disableWorldOverride, ne, null), modRowsUi && modRowsUi.forEach(f => f()), modRowsUi = [sliderRow("Party frame height", partyHeight, ne, qf, 0, 100), checkRow("Sort party by class", sortParty, ne, qf), checkRow("Class-color party HP bars", classColorParty, ne, qf), checkRow("Disable blue partied nameplates", disablePartyNameplates, ne, qf), checkRow("Uncap nameplate draw distance", uncapNameplates, ne, qf), headerRow("Buffs", ne, null), checkRow("Hide irrelevant buffs", hideBuffs, ne, null), checkRow("Hide class buffs", hideClassBuffs, ne, null), checkRow("Make all buffs stackable", stackSameBuffs, ne, null), headerRow("CC indicators", ne, null), checkRow("Enable CC indicators", CCIndicator, ne, null), checkRow("Flash CC indicator color", flashCCIndicator, ne, null), checkRow("Show on nameplates", CCIndicatorOnNameplates, ne, null)], skillbarRowsUi && skillbarRowsUi.forEach(f => f()), skillbarRowsUi = [headerRow("Skillbar", ne, null), sliderRow("Columns", skillbarCols, ne, null, 0, 24), sliderRow("Rows", skillbarRows, ne, null, 0, 6)];
             },
             p(ne, Le) {
                 if (Le[1] & 8) {
@@ -19975,10 +19980,10 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             }
         }), {
             c() {
-                e = h("div"), e.textContent = `${P.ui.settings.resolution}`, n = h("input"), o = h("div"), o.textContent = `${P.ui.settings.viewrange}`, s = h("input"), i = h("div"), l = A(r), a = Qe(), c = h("span"), f = A(t[7]), u = h("input"), p = h("div"), v = A(g), _ = h("br"), b = h("small"), b.textContent = `${P.ui.settings.reload}`, y = h("input"), k = h("div"), E = A(C), F = h("br"), M = h("small"), M.textContent = `${P.ui.settings.reload}`, L = h("input"), V = h("div"), V.textContent = `${P.ui.settings.fxaa}`, Z(D.$$.fragment), z = h("div"), z.textContent = `${P.ui.settings.bloom}`, Z(q.$$.fragment), R = h("div"), W = A(O), U = h("br"), $ = h("small"), $.textContent = `${P.ui.settings.offscreendesc}`, Z(G.$$.fragment), de = h("div"), de.textContent = `${P.ui.settings.particles}`, Z(be.$$.fragment), le = h("div"), le.textContent = `${P.ui.settings.fogpattern}`, Z(se.$$.fragment), fe = h("div"), fe.textContent = `${P.ui.settings.shadows}`, ke = h("div"), we = h("div"), xe = A(ce), $e = h("br"), ye = h("small"), ye.textContent = `${P.ui.settings.reload}`, Z(Oe.$$.fragment), ze = h("div"), ue = A(Ne), _e = h("br"), pe = h("small"), pe.textContent = `${P.ui.settings.reload}`, he = h("input"), m(n, "type", "range"), m(n, "min", "30"), m(n, "step", "10"), m(s, "type", "range"), m(s, "min", "30"), m(c, "class", "textgrey"), m(u, "type", "range"), m(u, "min", "50"), m(u, "max", "100"), m(b, "class", "textgrey"), m(y, "type", "range"), m(y, "min", "0"), m(y, "max", "4"), m(M, "class", "textgrey"), m(L, "type", "range"), m(L, "min", "0"), m(L, "max", "100"), m($, "class", "textgrey"), m(fe, "class", "textprimary"), m(ye, "class", "textgrey"), m(pe, "class", "textgrey"), m(he, "type", "range"), m(he, "min", "0"), m(he, "max", "3")
+                e = h("div"), e.textContent = `${P.ui.settings.resolution}`, n = h("input"), o = h("div"), o.textContent = `${P.ui.settings.viewrange}`, s = h("input"), i = h("div"), l = A(r), a = Qe(), c = h("span"), f = A(t[7]), u = h("input"), p = h("div"), v = A(g), _ = h("br"), b = h("small"), b.textContent = `${P.ui.settings.reload}`, y = h("input"), k = h("div"), E = A(C), F = h("br"), M = h("small"), M.textContent = `${P.ui.settings.reload}`, L = h("input"), V = h("div"), V.textContent = `${P.ui.settings.fxaa}`, Z(D.$$.fragment), z = h("div"), z.textContent = `${P.ui.settings.bloom}`, Z(q.$$.fragment), R = h("div"), W = A(O), U = h("br"), $ = h("small"), $.textContent = `${P.ui.settings.offscreendesc}`, Z(G.$$.fragment), de = h("div"), de.textContent = `${P.ui.settings.particles}`, Z(be.$$.fragment), le = h("div"), le.textContent = `${P.ui.settings.fogpattern}`, Z(se.$$.fragment), fe = h("div"), fe.textContent = `${P.ui.settings.shadows}`, ke = h("div"), we = h("div"), xe = A(ce), $e = h("br"), ye = h("small"), ye.textContent = `${P.ui.settings.reload}`, Z(Oe.$$.fragment), ze = h("div"), ue = A(Ne), _e = h("br"), pe = h("small"), pe.textContent = `${P.ui.settings.reload}`, he = h("input"), m(n, "type", "range"), m(n, "min", "30"), m(n, "step", "10"), m(s, "type", "range"), m(s, "min", "30"), m(c, "class", "textgrey"), m(u, "type", "range"), m(u, "min", "50"), m(u, "max", "100"), m(b, "class", "textgrey"), m(y, "type", "range"), m(y, "min", "0"), m(y, "max", "4"), m(M, "class", "textgrey"), m(L, "type", "range"), m(L, "min", "0"), m(L, "max", worldOverrideOff ? "300" : "100"), m($, "class", "textgrey"), m(fe, "class", "textprimary"), m(ye, "class", "textgrey"), m(pe, "class", "textgrey"), m(he, "type", "range"), m(he, "min", "0"), m(he, "max", "3")
             },
             m(te, H) {
-                x(te, e, H), x(te, n, H), Ge(n, t[5]), x(te, o, H), x(te, s, H), Ge(s, t[6]), x(te, i, H), d(i, l), d(i, a), d(i, c), d(c, f), x(te, u, H), Ge(u, t[7]), x(te, p, H), d(p, v), d(p, _), d(p, b), x(te, y, H), Ge(y, t[8]), x(te, k, H), d(k, E), d(k, F), d(k, M), x(te, L, H), Ge(L, t[9]), x(te, V, H), X(D, te, H), x(te, z, H), X(q, te, H), z.style.display = "none", z.nextElementSibling && (z.nextElementSibling.style.display = "none"), x(te, R, H), fogRow && fogRow(), fogRow = checkRow("Fog", fogSetting, te, R), fogDistRow && fogDistRow(), fogDistRow = sliderRow("Fog distance (%)", fogDistance, te, R, 25, 400), timeRows = [sliderRow("Time", timeSlider, te, R, 0, 1e3, !0), checkRow("Override effect alpha", fxAlphaOverride, te, R), textRow("Effect alpha skill IDs", fxAlphaSkills, te, R), sliderRow("Missile effect alpha", fxAlphaSprite, te, R, 0, 100), sliderRow("Ribbon effect alpha", fxAlphaRibbon, te, R, 0, 100), sliderRow("Mesh effect alpha", fxAlphaModel, te, R, 0, 100)], d(R, W), d(R, U), d(R, $), X(G, te, H), x(te, de, H), X(be, te, H), x(te, le, H), X(se, te, H), x(te, fe, H), x(te, ke, H), x(te, we, H), d(we, xe), d(we, $e), d(we, ye), X(Oe, te, H), x(te, ze, H), d(ze, ue), d(ze, _e), d(ze, pe), x(te, he, H), Ge(he, t[10]), ie = !0, Ie || (We = [Y(n, "change", t[38]), Y(n, "input", t[38]), Y(s, "change", t[39]), Y(s, "input", t[39]), Y(u, "change", t[40]), Y(u, "input", t[40]), Y(y, "change", t[41]), Y(y, "input", t[41]), Y(y, "change", t[35]), Y(L, "change", t[42]), Y(L, "input", t[42]), Y(L, "change", t[35]), Y(he, "change", t[43]), Y(he, "input", t[43]), Y(he, "change", t[35])], Ie = !0)
+                x(te, e, H), x(te, n, H), Ge(n, t[5]), x(te, o, H), x(te, s, H), Ge(s, t[6]), x(te, i, H), d(i, l), d(i, a), d(i, c), d(c, f), x(te, u, H), Ge(u, t[7]), x(te, p, H), d(p, v), d(p, _), d(p, b), x(te, y, H), Ge(y, t[8]), x(te, k, H), d(k, E), d(k, F), d(k, M), x(te, L, H), Ge(L, t[9]), grassValueLabel(L, k), x(te, V, H), X(D, te, H), x(te, z, H), X(q, te, H), z.style.display = "none", z.nextElementSibling && (z.nextElementSibling.style.display = "none"), x(te, R, H), timeRows = [sliderRow("Time", timeSlider, te, R, 0, 1e3, !0), checkRow("Override effect alpha", fxAlphaOverride, te, R), textRow("Effect alpha skill IDs", fxAlphaSkills, te, R), sliderRow("Missile effect alpha", fxAlphaSprite, te, R, 0, 100), sliderRow("Ribbon effect alpha", fxAlphaRibbon, te, R, 0, 100), sliderRow("Mesh effect alpha", fxAlphaModel, te, R, 0, 100)], d(R, W), d(R, U), d(R, $), X(G, te, H), x(te, de, H), X(be, te, H), x(te, le, H), X(se, te, H), x(te, fe, H), x(te, ke, H), x(te, we, H), d(we, xe), d(we, $e), d(we, ye), X(Oe, te, H), x(te, ze, H), d(ze, ue), d(ze, _e), d(ze, pe), x(te, he, H), Ge(he, t[10]), ie = !0, Ie || (We = [Y(n, "change", t[38]), Y(n, "input", t[38]), Y(s, "change", t[39]), Y(s, "input", t[39]), Y(u, "change", t[40]), Y(u, "input", t[40]), Y(y, "change", t[41]), Y(y, "input", t[41]), Y(y, "change", t[35]), Y(L, "change", t[42]), Y(L, "input", t[42]), Y(L, "change", t[35]), Y(he, "change", t[43]), Y(he, "input", t[43]), Y(he, "change", t[35])], Ie = !0)
             },
             p(te, H) {
                 H[0] & 32 && Ge(n, te[5]), H[0] & 64 && Ge(s, te[6]), (!ie || H[0] & 128) && j(f, te[7]), H[0] & 128 && Ge(u, te[7]), H[0] & 256 && Ge(y, te[8]), H[0] & 512 && Ge(L, te[9]), H[0] & 1024 && Ge(he, te[10])
@@ -23490,6 +23495,1061 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         qh = t => {
             ti.set("gold", (ti.get("gold") || 0) + t)
         };
+    var bossLogUi = (() => {
+        const SLOTS = [
+                ["weapon", {
+                    0: "sword",
+                    1: "staff",
+                    2: "bow",
+                    3: "hammer"
+                }],
+                ["armlet", "armlet"],
+                ["armor", "armor"],
+                ["bag", "bag"],
+                ["boot", "boot"],
+                ["glove", "glove"],
+                ["ring", "ring"],
+                ["amulet", "amulet"],
+                ["offhand", {
+                    0: "shield",
+                    1: "orb",
+                    2: "quiver",
+                    3: "totem"
+                }]
+            ],
+            SLOT_NAMES = {
+                weapon: "Weapon",
+                armlet: "Armlet",
+                armor: "Armor",
+                bag: "Bag",
+                boot: "Boots",
+                glove: "Gloves",
+                ring: "Ring",
+                amulet: "Amulet",
+                offhand: "Off-hand"
+            },
+            TYPE_SLOT = {
+                sword: "weapon",
+                staff: "weapon",
+                bow: "weapon",
+                hammer: "weapon",
+                armlet: "armlet",
+                armor: "armor",
+                bag: "bag",
+                boot: "boot",
+                glove: "glove",
+                ring: "ring",
+                amulet: "amulet",
+                shield: "offhand",
+                orb: "offhand",
+                quiver: "offhand",
+                totem: "offhand"
+            },
+            TIER45 = {
+                sword: 7,
+                staff: 7,
+                bow: 7,
+                hammer: 7,
+                armlet: 5,
+                armor: 4,
+                bag: 2,
+                boot: 5,
+                glove: 5,
+                ring: 4,
+                amulet: 4,
+                shield: 4,
+                orb: 4,
+                quiver: 4,
+                totem: 4
+            },
+            CAL_SVG = "data:image/svg+xml," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#dae8ea"><path d="M7 2h2v2h6V2h2v2h3a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3zM5 9v10h14V9zm2 2h3v3H7z"/></svg>'),
+            STAT_IDS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+            CLASS_NAMES = ["Warrior", "Mage", "Archer", "Shaman"],
+            QCOL = ["white", "green", "blue", "purp"],
+            QNAME = ["Common", "Uncommon", "Rare", "Epic"],
+            qb = q => q >= 90 ? 3 : q >= 70 ? 2 : q >= 50 ? 1 : 0,
+            isPurum = it => it.type === "rune" && it.tier === 5,
+            isGear = it => !!TYPE_SLOT[it.type] && it.quality != null,
+            el = (tag, cls, txt) => {
+                const e = document.createElement(tag);
+                return cls && (e.className = cls), txt != null && (e.textContent = txt), e;
+            },
+            num = n => n == null ? "-" : Math.round(n).toLocaleString("en-US"),
+            fmtDate = iso => {
+                const d = new Date(iso);
+                return d.toLocaleDateString("en-GB", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric"
+                }) + " " + d.toLocaleTimeString(void 0, {
+                    hour: "2-digit",
+                    minute: "2-digit"
+                });
+            },
+            fmtDur = sec => {
+                const t = Math.round(sec);
+                return t < 60 ? t + "s" : Math.floor(t / 60) + "m " + t % 60 + "s";
+            },
+            dayKey = iso => {
+                const d = new Date(iso);
+                return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+            };
+        let metric = "DPS",
+            batchToken = 0,
+            env = null,
+            root = null,
+            parts = null,
+            tip = null,
+            menu = null,
+            st = {
+                char: null,
+                view: "overview",
+                filtersOpen: !1,
+                statsOpen: !1,
+                selSlots: [],
+                pickStat: 0,
+                positive: !0,
+                date: "",
+                minItems: 0,
+                minQual: 0,
+                minDps: 0,
+                bisOnly: !1,
+                sort: null,
+                reverse: !1,
+                normalize: !0,
+                range: "All time",
+                jump: null
+            };
+        const store = {
+            get(key, def) {
+                try {
+                    const v = JSON.parse(localStorage.getItem(key));
+                    return v == null ? def : v;
+                } catch (e) {
+                    return def;
+                }
+            },
+            set(key, v) {
+                try {
+                    localStorage.setItem(key, JSON.stringify(v));
+                } catch (e) {}
+            }
+        };
+        const filtersAll = () => store.get("bossLogFilters", {}),
+            filtersOf = name => filtersAll()[name] || {},
+            saveFilters = (name, f) => {
+                const all = filtersAll();
+                all[name] = f, store.set("bossLogFilters", all);
+            },
+            slotCfg = (f, slot) => f[slot] || (f[slot] = {
+                minQ: 80,
+                pos: [],
+                neg: []
+            });
+        const usable = (it, f) => {
+            if (!isGear(it)) return !1;
+            const cfg = f[TYPE_SLOT[it.type]];
+            if (!cfg || !cfg.pos.length && !cfg.neg.length) return !1;
+            if (it.quality < cfg.minQ) return !1;
+            const stats = new Map((it.stats || []).map(s => [s.id, s]));
+            if (cfg.neg.some(id => stats.has(id))) return !1;
+            return !cfg.pos.length || cfg.pos.some(p => stats.has(p.id) && (stats.get(p.id).rollPercent || 0) >= p.minQ);
+        };
+        const characters = kills => {
+            const m = new Map;
+            return kills.forEach(k => {
+                const n = k.player || "Unknown",
+                    c = m.get(n) || m.set(n, {
+                        name: n,
+                        cls: k.playerClass,
+                        level: k.playerLevel,
+                        kills: []
+                    }).get(n);
+                c.kills.push(k), c.cls = k.playerClass, c.level = k.playerLevel;
+            }), [...m.values()].sort((a, b) => b.kills.length - a.kills.length);
+        };
+        const offv = (k, key) => k.official && k.official[key] != null ? k.official[key] : null;
+        const prep = c => {
+            metric = c.cls === 3 ? "HPS" : "DPS";
+            const f = filtersOf(c.name),
+                kills = c.kills.slice().sort((a, b) => a.date < b.date ? 1 : -1);
+            kills.forEach(k => {
+                k._items = (k.items || []).map(it => Object.assign({}, it, {
+                    _purum: isPurum(it),
+                    _usable: usable(it, f),
+                    _kill: k
+                })), k._usable = k._items.some(i => i._usable), k._purum = k._items.some(i => i._purum), k._gearCount = k._items.filter(i => !i._purum).length, k._v = metric === "HPS" ? offv(k, "hps") || k.myHps || 0 : offv(k, "dps") || k._v, k._mps = c.cls === 0 ? offv(k, "mps") : null;
+            });
+            return {
+                f,
+                kills
+            };
+        };
+        const median = a => {
+            if (!a.length) return 0;
+            const s = a.slice().sort((x, y) => x - y),
+                h = s.length >> 1;
+            return s.length % 2 ? s[h] : (s[h - 1] + s[h]) / 2;
+        };
+        const icon = (it, size) => {
+            const img = el("img", "bl-ic");
+            return img.src = env.iconUrl(it.type, it.tier, isGear(it) ? qb(it.quality) : 0), size && (img.style.width = img.style.height = size + "px"), img.onerror = () => img.style.visibility = "hidden", img;
+        };
+        const itemSlot = it => {
+            const s = el("div", "bl-slot border " + (isGear(it) ? QCOL[qb(it.quality)] : "white"));
+            s.appendChild(icon(it)), it.stacks != null && it.gained != null && s.appendChild(el("span", "bl-stack", String(it.gained)));
+            return s.onmouseenter = e => showTip(it, e), s.onmousemove = moveTip, s.onmouseleave = hideTip, s;
+        };
+        const tipNode = it => {
+            const q = isGear(it) ? qb(it.quality) : 0,
+                box = el("div", "slotdescription border " + QCOL[q] + " bl-tip"),
+                c = el("div", "container"),
+                head = el("div", "pack"),
+                title = el("div", "slottitle text" + QCOL[q], (isGear(it) ? "T" + (it.tier + 1) + " " : "") + (it.name || env.itemName(it.type, it.tier) || it.type));
+            it.upgrade && title.appendChild(el("span", "textprimary", " +" + it.upgrade)), head.appendChild(title);
+            const type = el("div", "type textwhite", (isGear(it) ? QNAME[q] + " " : "") + it.type + " ");
+            isGear(it) && type.appendChild(el("span", null, it.quality + "%")), it.stacks != null && type.appendChild(el("span", "textgrey", " x" + it.stacks + (it.gained != null ? " (+" + it.gained + " from this kill)" : "")));
+            const small = el("small");
+            it.gearScore > 0 && (small.appendChild(el("span", "textgreen", "GS: " + it.gearScore)), small.appendChild(document.createTextNode(" "))), it.dbid && small.appendChild(el("span", "textgrey", "ID: " + it.dbid)), type.appendChild(document.createElement("br")), type.appendChild(small), head.appendChild(type), c.appendChild(head);
+            if (isGear(it) && (it.stats || []).length) {
+                const p = el("div", "pack"),
+                    stats = it.stats.slice(),
+                    mn = stats.find(s => s.id === 10),
+                    mx = stats.find(s => s.id === 11);
+                if (mn && mx) {
+                    const d = el("div");
+                    d.append(el("span", "text" + QCOL[qb(mn.rollPercent)], String(mn.value)), document.createTextNode(" - "), el("span", "text" + QCOL[qb(mx.rollPercent)], String(mx.value)), document.createTextNode(" "), el("span", "text" + QCOL[qb(Math.min(mn.rollPercent, mx.rollPercent))], "Damage")), p.appendChild(d);
+                }
+                stats.filter(s => !(mn && mx && (s.id === 10 || s.id === 11))).forEach(s => {
+                    const d = el("div", "text" + QCOL[qb(s.rollPercent || 0)], (s.type === "bonus" ? "+ " : "") + s.value + " " + (s.name || env.statName(s.id)));
+                    d.appendChild(el("small", "textgrey", " " + (s.rollPercent == null ? "" : s.rollPercent.toFixed(1) + "%"))), p.appendChild(d);
+                }), c.appendChild(p);
+            }
+            const foot = el("div", "pack textgrey bl-tipfoot", fmtDate(it.time || it._kill.date) + (it._usable ? "  ·  usable" : ""));
+            return c.appendChild(foot), box.appendChild(c), box;
+        };
+        const showTip = (it, e) => {
+            hideTip(), tip = tipNode(it), document.body.appendChild(tip), moveTip(e);
+        };
+        const moveTip = e => {
+            if (!tip) return;
+            const w = tip.offsetWidth,
+                h = tip.offsetHeight;
+            let x = e.clientX + 16,
+                y = e.clientY + 12;
+            x + w > innerWidth - 4 && (x = e.clientX - w - 12), y + h > innerHeight - 4 && (y = innerHeight - h - 4), tip.style.left = x + "px", tip.style.top = Math.max(4, y) + "px";
+        };
+        const hideTip = () => {
+            tip && tip.remove(), tip = null;
+        };
+        const closeMenu = () => {
+            menu && menu.remove(), menu = null;
+        };
+        const openMenu = (e, choices) => {
+            closeMenu(), menu = el("div", "panel context border grey bl-menu");
+            choices.forEach(([label, fn]) => {
+                const c = el("div", "choice", label);
+                c.onclick = () => (closeMenu(), fn()), menu.appendChild(c);
+            }), menu.style.left = e.clientX + "px", menu.style.top = e.clientY + "px", document.body.appendChild(menu);
+            setTimeout(() => addEventListener("mousedown", function off(ev) {
+                menu && !menu.contains(ev.target) && closeMenu(), removeEventListener("mousedown", off);
+            }), 0);
+        };
+        const button = (txt, cls, fn) => {
+            const b = el("div", "btn " + cls, txt);
+            return b.onclick = fn, b;
+        };
+        const leftPanel = chars => {
+            const box = el("div", "bl-left panel-black scrollbar");
+            box.appendChild(el("div", "textprimary bl-head", "Characters"));
+            chars.forEach(c => {
+                const row = el("div", "bl-char" + (st.char === c.name ? " selected" : "")),
+                    ci = el("img", "bl-cls"),
+                    txt = el("div", "bl-chartxt");
+                ci.src = env.classIcon(c.cls), ci.onerror = () => ci.style.visibility = "hidden", txt.append(el("div", "textwhite", c.name), el("div", "textgrey", "Lv. " + (c.level || "?") + " · " + c.kills.length + " kills")), row.append(ci, txt);
+                row.onclick = () => (st.char !== c.name && (st.selSlots = []), st.char = c.name, st.filtersOpen || (st.view = "overview"), render());
+                row.oncontextmenu = e => (e.preventDefault(), openMenu(e, [
+                    ["Configure stat filters", () => (st.char !== c.name && (st.selSlots = []), st.char = c.name, st.filtersOpen = !0, render())]
+                ]));
+                box.appendChild(row);
+            });
+            return chars.length || box.appendChild(el("div", "textgrey bl-empty", "No kills logged yet.")), box;
+        };
+        const statBox = (label, value, cls) => {
+            const b = el("div", "bl-stat");
+            return b.append(el("div", "textgrey", label), el("div", cls || "textwhite", value)), b;
+        };
+        const statGrid = (kills, withLast) => {
+            const dps = kills.map(k => k._v),
+                mps = kills.map(k => k._mps).filter(v => v != null),
+                avg = dps.length ? dps.reduce((a, b) => a + b, 0) / dps.length : 0,
+                top = kills.map(k => k._items.filter(i => isGear(i) && i.quality >= 99).length),
+                usableCount = kills.reduce((a, k) => a + k._items.filter(i => i._usable).length, 0),
+                purumKills = kills.filter(k => k._purum).length,
+                grid = el("div", "bl-statgrid");
+            const last = el("div", "bl-stat bl-lastuse"),
+                strip = el("div", "bl-strip"),
+                recent = kills.flatMap(k => k._items.filter(it => it._usable)).sort((x, y) => x._kill.date < y._kill.date ? 1 : -1).slice(0, 5);
+            recent.forEach(it => {
+                const cell = el("div", "bl-cell usable");
+                cell.appendChild(itemSlot(it)), strip.appendChild(cell);
+            }), last.append(el("div", "textgrey", "Last Usable Items"), recent.length ? strip : el("div", "textwhite", "-"));
+            return grid.append(statBox("Total kills", num(kills.length), "textprimary"), statBox("Usable items", num(usableCount), "textprimary"), statBox("Average " + metric, num(avg), "textgreen"), statBox("Highest " + metric, num(Math.max(0, ...dps)), "textgreen"), ...mps.length ? [statBox("Average MPS", num(mps.reduce((a, b) => a + b, 0) / mps.length), "textgreen"), statBox("Highest MPS", num(Math.max(...mps)), "textgreen")] : [], statBox("Items per kill (99%+)", String(median(top)), "textpurp"), statBox("Purum chance", purumKills + " / " + kills.length + (kills.length ? "  (" + (purumKills / kills.length * 100).toFixed(1) + "%)" : ""), "textblue"), ...withLast ? [last] : []), grid;
+        };
+        const RANGES = [["1d", 864e5], ["7d", 6048e5], ["30d", 2592e6], ["1yr", 31536e6], ["All time", 0]];
+        const overview = (c, P) => {
+            const box = el("div", "bl-over"),
+                cv = el("canvas", "bl-chart"),
+                span = (RANGES.find(r => r[0] === st.range) || RANGES[4])[1],
+                since = span ? Date.now() - span : -Infinity,
+                kills = P.kills.filter(k => new Date(k.date).getTime() >= since).reverse(),
+                head = el("div", "bl-chead"),
+                rb = el("div", "bl-ranges");
+            RANGES.forEach(([n]) => rb.appendChild(button(n, (st.range === n ? "blue" : "grey") + " bl-rbtn", () => st.range !== n && (st.range = n, render()))));
+            head.append(button("Normalize", (st.normalize ? "blue" : "grey") + " bl-rbtn", () => (st.normalize = !st.normalize, render())), el("div", "textgrey bl-sub", num(kills.length) + " kills"), rb);
+            const ts = kills.map(k => new Date(k.date).getTime()),
+                tB = Date.now(),
+                tA = span ? tB - span : ts.length ? Math.min(ts[0], tB - 36e5) : tB - 864e5,
+                redraw = hover => drawDps(cv, kills, hover, ts, tA, tB);
+            cv.onmousemove = e => {
+                if (!ts.length) return;
+                const r = cv.getBoundingClientRect(),
+                    x = (e.clientX - r.left) / r.width * cv.width,
+                    t = tA + (x - 70) / (cv.width - 110) * ((cv._tB || tB) - tA);
+                let a = 0,
+                    b = ts.length - 1;
+                for (; b - a > 1;) {
+                    const m = a + b >> 1;
+                    ts[m] < t ? a = m : b = m;
+                }
+                redraw(Math.abs(ts[a] - t) <= Math.abs(ts[b] - t) ? a : b);
+            }, cv.onmouseleave = () => redraw(-1);
+            if (typeof ResizeObserver != "undefined") {
+                const ro = new ResizeObserver(() => cv.isConnected ? redraw(-1) : ro.disconnect());
+                ro.observe(cv);
+            }
+            return box.append(head, cv, statGrid(P.kills, !0)), requestAnimationFrame(() => redraw(-1)), box;
+        };
+        const axisTicks = (tA, tB, max, force) => {
+            const H = 36e5,
+                D = 864e5,
+                steps = [["h", 1], ["h", 2], ["h", 3], ["h", 6], ["h", 12], ["d", 1], ["d", 2], ["w", 1], ["w", 2], ["m", 1], ["m", 2], ["m", 3], ["m", 6], ["m", 12]],
+                approx = ([u, n]) => n * (u === "h" ? H : u === "d" ? D : u === "w" ? 7 * D : 30.4 * D),
+                pick = force || steps.find(st => (tB - tA) / approx(st) <= max) || steps[steps.length - 1],
+                [u, n] = pick,
+                out = [],
+                lim = tB + approx(pick) * 1.05,
+                d = new Date(tA);
+            if (u === "h") {
+                d.setMinutes(0, 0, 0);
+                for (; d.getTime() <= lim; d.setHours(d.getHours() + 1)) d.getTime() >= tA && d.getHours() % n === 0 && out.push(d.getTime());
+            } else if (u === "m") {
+                d.setHours(0, 0, 0, 0), d.setDate(1);
+                for (; d.getTime() <= lim; d.setMonth(d.getMonth() + 1)) d.getTime() >= tA && (d.getFullYear() * 12 + d.getMonth()) % n === 0 && out.push(d.getTime());
+            } else {
+                d.setHours(0, 0, 0, 0);
+                for (; d.getTime() <= lim; d.setDate(d.getDate() + 1)) {
+                    const day = Math.round((d.getTime() - d.getTimezoneOffset() * 6e4) / D);
+                    d.getTime() >= tA && (u === "d" ? day % n === 0 : d.getDay() === 1 && Math.floor(day / 7) % n === 0) && out.push(d.getTime());
+                }
+            }
+            const two = v => String(v).padStart(2, "0"),
+                fmt = ms => {
+                    const x = new Date(ms);
+                    return u === "h" ? x.getHours() === 0 ? two(x.getDate()) + "/" + two(x.getMonth() + 1) : two(x.getHours()) + ":00" : u === "m" ? two(x.getDate()) + "/" + two(x.getMonth() + 1) + (n > 1 ? "/" + String(x.getFullYear()).slice(2) : "") : two(x.getDate()) + "/" + two(x.getMonth() + 1);
+                };
+            const res = out.filter(t => t <= tB).map(t => [t, fmt(t)]);
+            return res.end = tB, res;
+        };
+        const drawDps = (cv, kills, hover, ts, tA, tB) => {
+            const cw = Math.max(100, Math.round(cv.clientWidth * 2)),
+                ch = Math.max(80, Math.round(cv.clientHeight * 2));
+            (cv.width !== cw || cv.height !== ch) && (cv.width = cw, cv.height = ch);
+            const g = cv.getContext("2d"),
+                W = cv.width,
+                H = cv.height,
+                vals = kills.map(k => k._v),
+                tk = axisTicks(tA, tB, Math.max(2, Math.floor((W - 110) / 120)), st.range === "1yr" ? ["m", 1] : null);
+            tB = cv._tB = tk.end;
+            if (g.clearRect(0, 0, W, H), g.font = "20px hordes, sans-serif", !vals.length) return g.fillStyle = "#5b858e", void (g.textAlign = "center", g.fillText(st.range === "All time" ? "No kills yet" : "No kills in this range", W / 2, H / 2), g.textAlign = "start");
+            const norm = st.normalize,
+                sorted = vals.slice().sort((a, b) => a - b),
+                pct = q => sorted[Math.min(sorted.length - 1, Math.max(0, Math.round(q * (sorted.length - 1))))],
+                lo0 = pct(.02),
+                hi0 = pct(.98),
+                pad = Math.max(10, (hi0 - lo0) * .08),
+                lo = norm ? Math.max(0, lo0 - pad) : 0,
+                hi = norm ? hi0 + pad : Math.max(10, sorted[sorted.length - 1]) * 1.1,
+                win = Math.max(1, Math.round(vals.length / 40)),
+                avg = vals.map((v, i) => {
+                    let a = 0, n = 0;
+                    for (let j = Math.max(0, i - win); j <= Math.min(vals.length - 1, i + win); ++j) a += vals[j], ++n;
+                    return a / n;
+                }),
+                X = i => 70 + (W - 110) * Math.max(0, Math.min(1, (ts[i] - tA) / Math.max(1, tB - tA))),
+                Y = v => 12 + (H - 34) * (1 - Math.max(0, Math.min(1, (v - lo) / (hi - lo))));
+            g.strokeStyle = "rgba(91,133,142,.35)", g.fillStyle = "#5b858e", g.lineWidth = 1;
+            for (let i = 0; i <= 4; ++i) {
+                const y = 12 + (H - 34) * i / 4;
+                g.beginPath(), g.moveTo(70, y), g.lineTo(W - 40, y), g.stroke(), g.fillText(num(hi - (hi - lo) * i / 4), 0, y + 6);
+            }
+            let lastEnd = -1e9;
+            tk.forEach(([t, lbl]) => {
+                const x = 70 + (W - 110) * (t - tA) / Math.max(1, tB - tA),
+                    w = g.measureText(lbl).width,
+                    lx = Math.max(70, Math.min(W - 2 - w, x - w / 2));
+                g.strokeStyle = "rgba(91,133,142,.18)", g.lineWidth = 1, g.beginPath(), g.moveTo(x, 12), g.lineTo(x, H - 22), g.stroke(), lx > lastEnd + 8 && (g.fillStyle = "#5b858e", g.fillText(lbl, lx, H - 2), lastEnd = lx + w);
+            });
+            g.strokeStyle = norm ? "rgba(52,203,73,.28)" : "#34cb49", g.lineWidth = norm ? 1.5 : 2, g.beginPath(), vals.forEach((v, i) => i ? g.lineTo(X(i), Y(v)) : g.moveTo(X(i), Y(v))), g.stroke();
+            vals.length <= 60 && (g.fillStyle = "#34cb49", vals.forEach((v, i) => (g.beginPath(), g.arc(X(i), Y(v), 4, 0, 6.283), g.fill())));
+            norm && (g.strokeStyle = "#34cb49", g.lineWidth = 3, g.beginPath(), avg.forEach((v, i) => i ? g.lineTo(X(i), Y(v)) : g.moveTo(X(i), Y(v))), g.stroke());
+            if (hover < 0 || hover >= vals.length) return;
+            const k = kills[hover],
+                x = X(hover),
+                y = Y(vals[hover]);
+            g.strokeStyle = "rgba(245,194,71,.6)", g.lineWidth = 2, g.setLineDash([6, 6]), g.beginPath(), g.moveTo(x, 12), g.lineTo(x, H - 22), g.stroke(), g.setLineDash([]), g.fillStyle = "#f5c247", g.beginPath(), g.arc(x, y, 8, 0, 6.283), g.fill();
+            const l1 = num(vals[hover]) + " " + metric + (k._mps != null ? "  ·  " + num(k._mps) + " MPS" : ""),
+                l2 = fmtDate(k.date) + "  ·  kill #" + (hover + 1) + (k._items && k._items.length ? "  ·  " + k._items.length + " items" : ""),
+                tw = Math.max(g.measureText(l2).width, (g.font = "bold 24px hordes, sans-serif", g.measureText(l1).width)) + 20,
+                bx = Math.min(W - tw - 4, Math.max(74, x + 14)),
+                by = Math.max(4, Math.min(H - 70, y - 70));
+            g.fillStyle = "rgba(16,19,29,.92)", g.strokeStyle = "#f5c247", g.lineWidth = 2, g.fillRect(bx, by, tw, 62), g.strokeRect(bx, by, tw, 62), g.fillStyle = "#34cb49", g.fillText(l1, bx + 10, by + 28), g.font = "20px hordes, sans-serif", g.fillStyle = "#a6dcd5", g.fillText(l2, bx + 10, by + 52);
+        };
+        const SORTS = [["dps", "Value", (a, b) => b._v - a._v], ["items", "Items", (a, b) => b._gearCount - a._gearCount], ["purum", "Purum", (a, b) => b._purum - a._purum], ["time", "Time", (a, b) => (a.fightSeconds || 1e9) - (b.fightSeconds || 1e9)]];
+        const filterKills = (P, onlyItems) => {
+            const ks = P.kills.filter(k => (!st.date || dayKey(k.date) === st.date) && (onlyItems || k._gearCount >= st.minItems) && (k._v) >= st.minDps && (!st.bisOnly || k._usable)),
+                srt = SORTS.find(x => x[0] === st.sort);
+            return srt && ks.sort((a, b) => srt[2](a, b) || (a.date < b.date ? 1 : -1)), st.reverse ? ks.reverse() : ks;
+        };
+        const slider = (iconEl, title, min, max, step, value, fmt, set) => {
+            const box = el("div", "bl-range"),
+                s = el("input"),
+                v = el("span", "textwhite bl-rval", fmt(value));
+            return s.type = "range", s.min = min, s.max = max, s.step = step, s.value = value, s.oninput = () => v.textContent = fmt(+s.value), s.onchange = () => (set(+s.value), render()), box.append(iconEl, s, v), box;
+        };
+        const topBar = (c, P, onlyItems) => {
+            const bar = el("div", "bl-bar panel-black"),
+                cal = el("label", "btn grey bl-sq bl-cal" + (st.date ? " active" : "")),
+                calImg = el("img", "svgicon"),
+                date = el("input");
+            calImg.src = CAL_SVG, date.type = "date", date.value = st.date, date.oninput = () => (st.date = date.value, render()), cal.append(calImg, date), cal.onclick = () => { try { date.showPicker() } catch (e) {} }, cal.oncontextmenu = e => (e.preventDefault(), st.date && (st.date = "", render()));
+            const mImg = el("img", "bl-cls");
+            mImg.src = env.classIcon(c.cls);
+            const items = onlyItems ? slider(el("span", "textpurp bl-dpslbl", "%"), "Minimum item quality", 0, 110, 1, st.minQual, v => v + "%", v => st.minQual = v) : slider(mImg, "Minimum items per kill", 0, 4, 1, st.minItems, v => String(v), v => st.minItems = v);
+            const bis = el("div", "btn grey bl-sq bl-bis" + (st.bisOnly ? " active" : ""), "BIS");
+            bis.onclick = () => (st.bisOnly = !st.bisOnly, render());
+            bar.append(cal, items);
+            {
+                const top = Math.max(100, Math.ceil(Math.max(0, ...P.kills.map(k => k._v)) / 50) * 50),
+                    dLbl = el("span", "textgreen bl-dpslbl", metric);
+                bar.appendChild(slider(dLbl, "Minimum " + metric, 0, top, 25, Math.min(st.minDps, top), v => v ? num(v) : "0", v => st.minDps = v));
+            }
+            const close = el("img", "btn black svgicon bl-close");
+            return close.src = env.ui("icons/cross.svg"), close.onclick = () => (st.view = "overview", render()), bar.append(bis, close), bar;
+        };
+        const sortRow = () => {
+            const row = el("div", "bl-sortrow");
+            return row.appendChild(el("span", "textgrey", "Sort by")), SORTS.forEach(([k, n]) => row.appendChild(button(k === "dps" ? metric : n, (st.sort === k ? "blue" : "grey") + " bl-rbtn", () => (st.sort = st.sort === k ? null : k, render())))), row.append(el("span", "bl-grow"), button(st.reverse ? "Z - A" : "A - Z", "grey bl-rbtn", () => (st.reverse = !st.reverse, render()))), row;
+        };
+        const killsList = (c, P, mode) => {
+            const wrap = el("div", "bl-listwrap"),
+                onlyItems = mode !== "kills",
+                ks = filterKills(P, onlyItems),
+                onlyUsable = mode === "usable",
+                pick = i => !i._purum && (!onlyUsable || i._usable),
+                items = [];
+            ks.forEach(k => k._items.forEach(i => pick(i) && (!onlyItems || (i.quality || 0) >= st.minQual) && items.push(i)));
+            const counts = el("div", "bl-counts");
+            onlyItems ? counts.append(el("span", null, num(items.length) + " / " + num(P.kills.reduce((a, k) => a + k._items.filter(pick).length, 0)) + (onlyUsable ? " Usable Items" : " Items")), el("span", null, num(ks.length) + " Kills")) : counts.append(el("span", null, num(ks.length) + " / " + num(P.kills.length) + " Kills"), el("span", null, num(items.length) + " Items"));
+            const list = el("div", "bl-list scrollbar"),
+                rows = [];
+            if (onlyItems) {
+                items.length || list.appendChild(el("div", "textgrey bl-empty", "Nothing found."));
+                items.forEach(it => rows.push(() => {
+                    const row = el("div", "bl-irow" + (it._usable ? " usable" : it._purum ? " purum" : "")),
+                        info = el("div", "bl-iinfo");
+                    info.append(el("div", "text" + (isGear(it) ? QCOL[qb(it.quality)] : "white") + " bl-iname", (it.name || env.itemName(it.type, it.tier) || it.type) + (it.upgrade ? " +" + it.upgrade : "") + (isGear(it) ? "  " + it.quality + "%" : it.gained != null ? "  +" + it.gained : "")), el("div", "textgrey bl-imeta", fmtDate(it._kill.date) + "  ·  " + c.name + "  ·  " + num(it._kill._v) + " " + metric));
+                    const kid = button("#" + (it._kill.serverKillId || it._kill.killId), "grey bl-rbtn bl-kid", () => (st.view = "kills", st.jump = it._kill.killId, render()));
+                    row.append(itemSlot(it), info, el("span", "bl-grow"), kid);
+                    return row;
+                }));
+            } else {
+                if (st.jump && !ks.some(k => k.killId === st.jump) && (st.date || st.minItems || st.minDps || st.bisOnly)) return st.date = "", st.minItems = 0, st.minDps = 0, st.bisOnly = !1, killsList(c, P, mode);
+                ks.length || list.appendChild(el("div", "textgrey bl-empty", "No kills match."));
+                const best = Math.max(1, ...P.kills.map(k => k._v));
+                ks.forEach(k => rows.push(() => {
+                    const row = el("div", "bl-kill" + (k._usable ? " usable" : k._purum ? " purum" : ""));
+                    row.dataset.kill = k.killId;
+                    const
+                        head = el("div", "bl-khead"),
+                        hp = el("div", "bl-pbar"),
+                        fill = el("div", "progressBar bgc" + (k.playerClass != null ? k.playerClass : c.cls));
+                    head.append(el("span", "textwhite", fmtDate(k.date)), el("span", "textgrey", fmtDur(k.fightSeconds || 0)), el("span", "bl-grow"), ...k._mps != null ? [el("span", "textblue", num(k._mps) + " MPS")] : [], el("span", "textgrey", metric === "HPS" ? num(offv(k, "hpstotal") || k.myHealing || 0) + " heal" : num(offv(k, "dpstotal") || k.myDamage) + " dmg")), fill.style.width = Math.max(1, (k._v) / best * 100) + "%", fill.append(el("span", "bl-pl", k.player || c.name), el("span", "bl-pr", num(k.myDps))), hp.appendChild(fill), row.append(head, hp);
+                    if (k._items.length) {
+                        const strip = el("div", "bl-strip");
+                        k._items.filter(i => !i._purum).slice(0, 4).concat(k._items.filter(i => i._purum).slice(0, 1)).forEach(it => {
+                            const cell = el("div", "bl-cell" + (it._usable ? " usable" : it._purum ? " purum" : ""));
+                            cell.appendChild(itemSlot(it)), strip.appendChild(cell);
+                        }), row.appendChild(strip);
+                    }
+                    return row;
+                }));
+            }
+            const token = ++batchToken,
+                pump = (from, n) => {
+                    if (token !== batchToken || !list.isConnected && from) return;
+                    const frag = document.createDocumentFragment(),
+                        end = Math.min(rows.length, from + n);
+                    for (let i = from; i < end; ++i) frag.appendChild(rows[i]());
+                    list.appendChild(frag), end < rows.length && setTimeout(() => pump(end, 80), 0);
+                };
+            const jump = !onlyItems && st.jump,
+                at = jump ? ks.findIndex(k => k.killId === jump) : -1;
+            st.jump = null, pump(0, Math.max(25, at + 6)), at >= 0 && requestAnimationFrame(() => {
+                const r = [...list.children].find(x => x.dataset && x.dataset.kill === jump);
+                r && (r.scrollIntoView({
+                    block: "center"
+                }), r.classList.add("flash"), setTimeout(() => r.classList.remove("flash"), 1600));
+            });
+            wrap.append(topBar(c, P, onlyItems), sortRow(), counts, list);
+            const foot = el("div", "bl-foot");
+            if (onlyItems) foot.appendChild(button("Stat filters", st.filtersOpen ? "blue" : "grey", () => (st.filtersOpen = !st.filtersOpen, render())));
+            else {
+                foot.appendChild(button("Stats", st.statsOpen ? "blue" : "grey", () => (st.statsOpen = !st.statsOpen, render())));
+                if (st.statsOpen) {
+                    const drawer = el("div", "bl-drawer");
+                    drawer.appendChild(statGrid(ks)), wrap.appendChild(drawer);
+                }
+            }
+            return wrap.appendChild(foot), wrap;
+        };
+        const middle = chars => {
+            const box = el("div", "bl-mid panel-black"),
+                c = chars.find(x => x.name === st.char);
+            if (!c) return box.appendChild(el("div", "textgrey bl-empty", chars.length ? "Select a character on the left." : "Kill Gloomfury to start logging.")), box;
+            const P = prep(c),
+                body = el("div", "bl-midbody"),
+                nav = el("div", "bl-nav");
+            body.appendChild(st.view === "overview" ? overview(c, P) : killsList(c, P, st.view));
+            return [
+                ["kills", "Kills"],
+                ["items", "Items"],
+                ["usable", "Usable items"]
+            ].forEach(([k, l]) => nav.appendChild(button(l, st.view === k ? "blue" : "grey", () => (st.view = st.view === k ? "overview" : k, render())))), box.append(body, nav), box;
+        };
+        const slotType = (slot, cls) => {
+            const t = SLOTS.find(s => s[0] === slot)[1];
+            return typeof t == "string" ? t : t[cls] || t[0];
+        };
+        const rightPanel = chars => {
+            const c = chars.find(x => x.name === st.char);
+            if (!st.filtersOpen || !c) return null;
+            const box = el("div", "bl-right panel-black"),
+                f = filtersOf(c.name),
+                save = () => (saveFilters(c.name, f), render()),
+                head = el("div", "bl-fhead");
+            const fclose = el("img", "btn black svgicon bl-close");
+            fclose.src = env.ui("icons/cross.svg"), ffclose.onclick = () => (st.filtersOpen = !1, render()), head.append(el("div", "textprimary", "Stat filters · " + c.name), el("div", "bl-grow"), fclose);
+            const ctrl = el("div", "bl-ctrl"),
+                pick = el("select", "bl-select");
+            STAT_IDS.forEach(id => {
+                const o = el("option", null, env.statName(id));
+                o.value = id, id === st.pickStat && (o.selected = !0), pick.appendChild(o);
+            }), pick.onchange = () => st.pickStat = +pick.value;
+            const sign = button(st.positive ? "+" : "-", (st.positive ? "green" : "red") + " bl-sign", () => (st.positive = !st.positive, render()));
+            const targets = () => st.selSlots;
+            ctrl.append(button("Reset all", "grey", () => st.selSlots.length && (st.selSlots.forEach(slot => delete f[slot]), save())), pick, button("Add", "grey", () => {
+                const id = +pick.value;
+                targets().forEach(slot => {
+                    const cfg = slotCfg(f, slot);
+                    cfg.pos = cfg.pos.filter(p => p.id !== id), cfg.neg = cfg.neg.filter(n => n !== id), st.positive ? cfg.pos.push({
+                        id,
+                        minQ: 80
+                    }) : cfg.neg.push(id);
+                }), save();
+            }), button("Remove", "grey", () => {
+                const id = +pick.value;
+                targets().forEach(slot => {
+                    const cfg = f[slot];
+                    cfg && (cfg.pos = cfg.pos.filter(p => p.id !== id), cfg.neg = cfg.neg.filter(n => n !== id));
+                }), save();
+            }), sign);
+            const frame = el("div", "bl-gear");
+            SLOTS.forEach(([slot]) => {
+                const t = slotType(slot, c.cls),
+                    s = el("div", "bl-gslot" + (st.selSlots.includes(slot) ? " on" : "")),
+                    inner = el("div", "slot border purp");
+                inner.appendChild(icon({
+                    type: t,
+                    tier: TIER45[t],
+                    quality: 99
+                })), s.appendChild(inner);
+                s.onclick = () => (st.selSlots = st.selSlots.includes(slot) ? st.selSlots.filter(x => x !== slot) : st.selSlots.concat(slot), render()), frame.appendChild(s);
+            });
+            const detail = el("div", "bl-detail scrollbar");
+            SLOTS.map(s => s[0]).filter(s => st.selSlots.includes(s)).forEach(slot => {
+                const cfg = slotCfg(f, slot),
+                    blk = el("div", "bl-blk"),
+                    title = el("div", "bl-blkhead"),
+                    mq = el("input"),
+                    mqv = el("span", "textwhite bl-val", cfg.minQ + "%");
+                title.append(el("span", "textprimary bl-sname", SLOT_NAMES[slot]), el("span", "textgrey", "Min quality")), mq.type = "range", mq.min = 0, mq.max = 110, mq.value = cfg.minQ, mq.oninput = () => mqv.textContent = mq.value + "%", mq.onchange = () => (cfg.minQ = +mq.value, save()), title.append(mq, mqv), blk.appendChild(title);
+                cfg.pos.forEach(p => {
+                    const r = el("div", "bl-srow"),
+                        s = el("input"),
+                        v = el("span", "textwhite bl-val", p.minQ + "%");
+                    s.type = "range", s.min = 0, s.max = 110, s.value = p.minQ, s.oninput = () => v.textContent = s.value + "%", s.onchange = () => (p.minQ = +s.value, save()), r.append(el("span", "textgreen bl-sname", "+ " + env.statName(p.id)), s, v, button("x", "black bl-x", () => (cfg.pos = cfg.pos.filter(x => x !== p), save()))), blk.appendChild(r);
+                });
+                cfg.neg.forEach(id => {
+                    const r = el("div", "bl-srow");
+                    r.append(el("span", "textred bl-sname", "- " + env.statName(id)), button("x", "black bl-x", () => (cfg.neg = cfg.neg.filter(x => x !== id), save()))), blk.appendChild(r);
+                }), detail.appendChild(blk);
+            });
+            return box.append(head, ctrl, frame, detail), box;
+        };
+        const render = () => {
+            if (!root) return;
+            hideTip();
+            const chars = characters(env.load() || []);
+            !st.char && chars.length && (st.char = chars[0].name);
+            const right = rightPanel(chars);
+            parts.body.replaceChildren(leftPanel(chars), middle(chars), ...right ? [right] : []);
+        };
+        const css = `.bl-pos{position:absolute;left:50%;top:60px;transform:translateX(-50%);z-index:20;pointer-events:all}
+.bl-win{display:flex;flex-direction:column;height:600px;max-height:calc(100vh - 80px)}
+.bl-win .titleframe{line-height:1em;display:flex;gap:4px;align-items:center;padding:4px 0;letter-spacing:.5px;cursor:move;user-select:none}
+.bl-win .title{flex-grow:1;font-weight:700;padding-left:4px}
+.bl-body{display:flex;gap:4px;flex:1;min-height:0}
+.bl-left{width:170px;padding:4px;display:flex;flex-direction:column;gap:2px}
+.bl-head{font-size:13px;padding:2px 2px 4px}
+.bl-char{display:flex;gap:6px;align-items:center;padding:3px;border-radius:3px;cursor:pointer;user-select:none}
+.bl-char:hover{background:#f5c24722}
+.bl-char.selected{background:#f5c24733;box-shadow:inset 0 0 0 1px #f5c247}
+.bl-chartxt{font-size:12px;line-height:1.25;min-width:0}
+.bl-chartxt>div:first-child{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bl-cls{width:24px;height:24px;flex-shrink:0}
+.bl-cls.big{width:36px;height:36px}
+.bl-mid{width:540px;display:flex;flex-direction:column;padding:6px}
+.bl-midbody{flex:1;min-height:0;display:flex;flex-direction:column}
+.bl-nav{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-top:6px}
+.bl-nav .btn,.bl-foot .btn{text-align:center}
+.bl-over{display:flex;flex-direction:column;gap:6px;flex:1;min-height:0}
+.bl-charhead{display:flex;gap:8px;align-items:center}
+.bl-name{font-size:18px;font-weight:700}
+.bl-statgrid{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.bl-stat{background:#10131dcc;border-radius:3px;padding:5px 7px;font-size:12px}
+.bl-stat>div:last-child{font-size:16px;font-weight:700;margin-top:1px}
+.bl-statgrid .bl-lastuse{grid-column:1/3}
+.bl-lastuse .bl-strip{margin-top:3px}
+.bl-sub{font-size:12px}
+.bl-chead{display:flex;align-items:center;gap:6px}
+.bl-chead .bl-sub{flex:1}
+.bl-ranges{display:flex;gap:3px}
+.bl-rbtn{padding:2px 6px;font-size:12px}
+.bl-chart{width:100%;flex:1;min-height:120px;background:#10131dcc;border-radius:3px;cursor:crosshair}
+.bl-listwrap{display:flex;flex-direction:column;gap:4px;flex:1;min-height:0}
+.bl-bar{display:flex;gap:6px;align-items:center;padding:4px}
+.bl-bar .btn{display:flex;align-items:center;justify-content:center;box-sizing:border-box}
+.bl-bar .bl-sq{width:28px;height:28px;flex:0 0 28px;padding:0}
+.bl-cal{position:relative}
+.bl-cal img{width:16px;height:16px}
+.bl-cal input{position:absolute;inset:0;opacity:0;pointer-events:none}
+.bl-bis{font-size:10px;letter-spacing:0;color:#dae8ea}
+.bl-range{display:flex;align-items:center;gap:3px;flex:1;min-width:0}
+.bl-range input{flex:1;min-width:30px;accent-color:#f5c247}
+.bl-rval{font-size:12px;min-width:14px;text-align:right}
+.bl-dpslbl{font-size:12px;font-weight:700}
+.bl-counts{display:flex;justify-content:space-between;color:#a6dcd5;font-size:12px;padding:0 2px}
+.bl-list{flex:1;min-height:0;overflow-y:scroll;display:flex;flex-direction:column;gap:4px;padding-right:2px}
+.bl-kill{background:#10131dcc;border-radius:3px;padding:3px 5px;border:2px solid transparent;flex-shrink:0}
+.bl-kill.purum{border-color:#0681ea}
+.bl-kill.usable{border-color:#f5c247}
+.bl-kill.flash{box-shadow:0 0 0 2px #f90;background:rgba(255,153,0,.12)}
+.bl-kid{flex-shrink:0;font-size:11px;padding:2px 5px}
+.bl-khead{display:flex;gap:8px;font-size:12px;align-items:baseline}
+.bl-grow{flex:1}
+.bl-pbar{background-color:#2d4247b3;border-radius:1.5px;position:relative;color:#dae8ea;overflow:hidden;text-shadow:1px 1px 2px #10131d;white-space:nowrap;font-weight:700;font-size:15px;height:21px;line-height:21px;margin:2px 0 3px}
+.bl-pbar .progressBar{height:100%;border-radius:1.5px}
+.bl-pl{padding-left:4px;position:relative;z-index:1}
+.bl-pr{position:absolute;right:7px;z-index:1}
+.bl-strip{display:flex;gap:3px}
+.bl-cell{flex:0 0 44px}
+.bl-sortrow{display:flex;gap:4px;align-items:center;font-size:12px;padding:0 2px}
+.bl-win .bl-close.btn{width:24px;height:24px;padding:4px;box-sizing:border-box;flex:0 0 24px;cursor:pointer}
+.bl-slot{position:relative;aspect-ratio:1;box-sizing:border-box;background:#10131d;display:flex;align-items:center;justify-content:center;cursor:default}
+.bl-cell.purum .bl-slot{border-color:#0681ea}
+.bl-cell.usable .bl-slot{border-color:#f5c247}
+.bl-slot:hover{filter:brightness(1.25)}
+.bl-slot .bl-ic{width:100%;height:100%}
+.bl-stack{position:absolute;right:2px;bottom:0;font-size:12px;font-weight:700;color:#dae8ea;text-shadow:0 0 2px #000,0 0 2px #000}
+.bl-irow{display:flex;gap:6px;align-items:center;background:#10131dcc;border-radius:3px;padding:3px;border:2px solid transparent;flex-shrink:0}
+.bl-irow.purum{border-color:#0681ea}
+.bl-irow.usable{border-color:#f5c247}
+.bl-irow .bl-slot{width:38px;flex-shrink:0}
+.bl-iinfo{min-width:0}
+.bl-iname{font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bl-imeta{font-size:11px}
+.bl-foot{display:grid}
+.bl-drawer{padding:4px;background:#0a0d14;border-radius:3px}
+.bl-drawer .bl-stat>div:last-child{font-size:14px}
+.bl-right{width:440px;display:flex;flex-direction:column;gap:6px;padding:6px}
+.bl-fhead{display:flex;align-items:center;gap:4px;font-size:13px;font-weight:700}
+.bl-fhead .btn{padding:0 6px}
+.bl-ctrl{display:flex;gap:4px;align-items:center}
+.bl-ctrl .btn{padding:2px 6px;font-size:13px}
+.bl-win .bl-select{display:inline-block;width:auto;flex:1;min-width:0;height:auto;margin:0;background:#10131d;color:#dae8ea;border:2px solid #10131dcc;border-radius:3px;font:inherit;font-size:12px;padding:2px}
+.bl-sign{width:14px;text-align:center}
+.bl-gear{display:flex;flex-wrap:wrap;gap:3px}
+.bl-gslot{position:relative;padding:2px;cursor:pointer;border-radius:2px;transition:outline .1s;width:44px;box-sizing:border-box}
+.bl-gslot .slot{aspect-ratio:1;box-sizing:border-box;background:#10131d;display:flex}
+.bl-gslot .bl-ic{width:100%;height:100%}
+.bl-gslot:hover{outline:2px solid rgba(255,153,0,.45)}
+.bl-gslot.on,.bl-gslot.on:hover{outline:2px solid #f90;background:rgba(255,153,0,.08)}
+.bl-detail{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:4px}
+.bl-blk{background:#10131dcc;border-radius:3px;padding:4px 6px;display:flex;flex-direction:column;gap:3px}
+.bl-blkhead,.bl-srow{display:flex;gap:6px;align-items:center;font-size:12px}
+.bl-blkhead input,.bl-srow input{width:90px;accent-color:#f5c247}
+.bl-val{width:34px;text-align:right}
+.bl-sname{flex:1;font-weight:700}
+.bl-none{font-size:12px}
+.bl-x{padding:0 5px;font-size:11px}
+.bl-empty{padding:8px;font-size:12px}
+.bl-menu{position:fixed;z-index:1000}
+.bl-tip{position:fixed;z-index:1000;pointer-events:none;background-color:#10131d;padding:6px 8px;font-size:14px;max-width:260px}
+.bl-tip .pack{margin:0 0 6px}
+.bl-tip .pack:last-child{margin:0}
+.bl-tip .slottitle{font-weight:700;font-size:15px}
+.bl-tip .type{text-transform:capitalize}
+.bl-tipfoot{font-size:11px}`;
+        const drag = (handle, box) => handle.addEventListener("mousedown", e => {
+            if (e.target.closest(".btn")) return;
+            const r = box.getBoundingClientRect(),
+                dx = e.clientX - r.left,
+                dy = e.clientY - r.top,
+                move = ev => (box.style.left = ev.clientX - dx + "px", box.style.top = ev.clientY - dy + "px", box.style.transform = "none"),
+                up = () => (removeEventListener("mousemove", move), removeEventListener("mouseup", up));
+            addEventListener("mousemove", move), addEventListener("mouseup", up);
+        });
+        const exportData = () => {
+            const now = new Date(),
+                data = {
+                    format: "hordes-bosslog",
+                    version: 1,
+                    exported: now.toISOString(),
+                    kills: env.load() || [],
+                    filters: filtersAll()
+                },
+                a = document.createElement("a");
+            a.href = URL.createObjectURL(new Blob([JSON.stringify(data)], {
+                type: "application/json"
+            })), a.download = "bosslog-" + dayKey(now.toISOString()) + ".json", document.body.appendChild(a), a.click(), setTimeout(() => (URL.revokeObjectURL(a.href), a.remove()), 1e3);
+        };
+        const importData = () => {
+            const inp = document.createElement("input");
+            inp.type = "file", inp.accept = ".json,application/json", inp.onchange = async () => {
+                const f = inp.files && inp.files[0];
+                if (!f) return;
+                let data;
+                try {
+                    data = JSON.parse(await f.text());
+                } catch (e) {
+                    return alert("This file is not a boss log export.");
+                }
+                const kills = Array.isArray(data) ? data : data && Array.isArray(data.kills) ? data.kills : null;
+                if (!kills) return alert("This file is not a boss log export.");
+                const cur = env.load() || [],
+                    have = new Set(cur.map(k => k.killId)),
+                    add = kills.filter(k => k && k.killId && k.date && !have.has(k.killId));
+                if (data.filters && typeof data.filters == "object") {
+                    const all = filtersAll();
+                    for (const n in data.filters) all[n] || (all[n] = data.filters[n]);
+                    store.set("bossLogFilters", all);
+                }
+                env.save ? (env.save(cur.concat(add).sort((a, b) => a.date < b.date ? -1 : 1)), render(), alert("Imported " + add.length + " kill" + (add.length === 1 ? "" : "s") + (kills.length - add.length ? ", skipped " + (kills.length - add.length) + " already logged" : "") + ".")) : alert("Importing is not available here.");
+            }, inp.click();
+        };
+        const settingsMenu = () => [
+            ["Configure Stat Filters", () => st.char && (st.filtersOpen = !0, render())],
+            ["Import Data", importData],
+            ["Export Data", exportData],
+            ["UI Quickbutton" + (env.quickGet() ? " (on)" : " (off)"), () => env.quickSet && env.quickSet(!env.quickGet())]
+        ];
+        const open = (opts, parent) => {
+            if (env = Object.assign({
+                    load: () => [],
+                    itemName: () => null,
+                    statName: id => "Stat " + id,
+                    iconUrl: () => "",
+                    classIcon: () => "",
+                    ui: p => "/data/ui/" + p,
+                    save: null,
+                    quickGet: () => !1,
+                    quickSet: null
+                }, opts || {}), root) return render(), root;
+            document.getElementById("bossLogCss") || document.head.appendChild(Object.assign(document.createElement("style"), {
+                id: "bossLogCss",
+                textContent: css
+            }));
+            root = el("div", "bl-pos");
+            const win = el("div", "window panel-black bl-win"),
+                title = el("div", "titleframe"),
+                cog = el("img", "btn black svgicon"),
+                close = el("img", "btn black svgicon"),
+                body = el("div", "bl-body");
+            cog.src = env.ui("icons/cog.svg"), cog.onclick = e => (e.stopPropagation(), openMenu(e, settingsMenu())), close.src = env.ui("icons/cross.svg"), close.onclick = () => api.close(), title.append(el("div", "textprimary title", "Boss Log"), cog, close), win.append(title, body), root.appendChild(win), parts = {
+                body
+            }, (parent || document.body).appendChild(root), drag(title, root), render();
+            return root;
+        };
+        const api = {
+            open,
+            close() {
+                hideTip(), closeMenu(), root && root.remove(), root = null, parts = null;
+            },
+            toggle(opts, parent) {
+                root ? api.close() : open(opts, parent);
+            },
+            refresh() {
+                root && render();
+            },
+            isOpen: () => !!root
+        };
+        return api;
+    })();
+
+    var grassValueLabel = (inp, lbl) => {
+        let sp = document.createElement("span"),
+            up = () => sp.textContent = " " + inp.value + (worldOverrideOff ? " / 300" : " / 100");
+        sp.className = "textprimary", lbl.insertBefore(sp, lbl.childNodes[1] || null), up(), inp.addEventListener("input", up), inp.addEventListener("change", up), setTimeout(up);
+    };
+    var classicBossLogOpen = () => bossLogUi.toggle({
+        load: () => classicBossLoad(),
+        itemName: (t, e) => {
+            try {
+                return vk(t, e, P).name
+            } catch (n) {
+                return null
+            }
+        },
+        statName: t => P.ui.stats.array[t] || "Stat " + t,
+        iconUrl: (t, e, n) => Hs(t, e, void 0, n),
+        classIcon: t => Ti(t || 0),
+        ui: t => "/data/ui/" + t + "?v=9001382",
+        save: t => classicBossSave(t),
+        quickGet: () => classicBossQuickOn(),
+        quickSet: t => {
+            try {
+                localStorage.setItem("bossLogQuick", JSON.stringify(!!t));
+            } catch (e) {}
+            classicBossQuickSync();
+        }
+    }),
+    classicBossQuickOn = () => {
+        try {
+            return JSON.parse(localStorage.getItem("bossLogQuick")) === !0;
+        } catch (e) {
+            return !1;
+        }
+    },
+    classicBossQuickBar = null,
+    classicBossQuickSync = () => {
+        let bar = classicBossQuickBar,
+            old = bar && bar.querySelector(".classic-bosslog");
+        if (!bar) return;
+        if (!classicBossQuickOn()) return old && old.remove();
+        if (old) return;
+        let b = document.createElement("div"),
+            find = bar.querySelector(".classic-findparty");
+        b.className = "btn orange classic-bosslog", b.textContent = "Boss Log", b.onclick = () => classicBossLogOpen(), find && find.nextSibling ? bar.insertBefore(b, find.nextSibling) : bar.appendChild(b);
+    };
+    var classicBossIds = new Set([28]),
+        classicBossKey = "classicBossKills",
+        classicBossFights = new Map,
+        classicBossOpen = null,
+        classicBossPrevSlot = new Map,
+        classicBossIs = t => !!t && t.type === 1 && (classicBossIds.has(t.creatureId) || /gloomfury/i.test(t.originalName || t.name || "")),
+        classicBossLoad = () => {
+            try {
+                let v = JSON.parse(localStorage.getItem(classicBossKey) || "[]");
+                return Array.isArray(v) ? v : [];
+            } catch (e) {
+                return [];
+            }
+        },
+        classicBossSave = list => {
+            try {
+                localStorage.setItem(classicBossKey, JSON.stringify(list));
+            } catch (e) {
+                console.warn("boss log could not be saved", e);
+            }
+        },
+        classicBossFightOf = t => {
+            let f = classicBossFights.get(t.id);
+            return f || classicBossFights.set(t.id, f = {
+                start: T.time,
+                started: Date.now(),
+                last: T.time,
+                mine: 0,
+                myFirst: null,
+                myLast: null,
+                total: 0
+            }), f;
+        },
+        classicBossHit = (t, src, dmg) => {
+            if (!classicBossIs(t) || !(dmg > 0)) return;
+            let f = classicBossFightOf(t);
+            f.last = T.time, f.total += dmg;
+            src && src === T.player && (f.mine += dmg, f.myFirst == null && (f.myFirst = T.time), f.myLast = T.time);
+        },
+        classicBossDeath = t => {
+            if (!classicBossIs(t)) return;
+            let f = classicBossFights.get(t.id) || {
+                    start: T.time,
+                    started: Date.now(),
+                    mine: 0,
+                    myFirst: null,
+                    myLast: null,
+                    total: 0
+                },
+                now = Date.now(),
+                myTime = f.myFirst == null ? 0 : Math.max(1, T.time - f.myFirst),
+                rec = {
+                    killId: now.toString(36) + "-" + t.id + "-" + Math.floor(Math.random() * 1e6).toString(36),
+                    date: new Date(now).toISOString(),
+                    boss: t.originalName || t.name,
+                    creatureId: t.creatureId,
+                    entityId: t.id,
+                    level: t.level,
+                    world: T.file,
+                    pos: [Math.round(t.pos[0]), Math.round(t.pos[1]), Math.round(t.pos[2])],
+                    player: T.player ? T.player.name : null,
+                    playerClass: T.player ? T.player.class : null,
+                    playerLevel: T.player ? T.player.level : null,
+                    fightSeconds: Math.round((T.time - f.start) * 10) / 10,
+                    myDamage: Math.round(f.mine),
+                    myDps: myTime ? Math.round(f.mine / myTime) : 0,
+                    myActiveSeconds: Math.round(myTime * 10) / 10,
+                    observedDamage: Math.round(f.total),
+                    items: []
+                };
+            classicBossFights.delete(t.id);
+            let list = classicBossLoad();
+            list.push(rec), classicBossSave(list), classicBossOpen = {
+                killId: rec.killId,
+                until: now + 18e4
+            }, setTimeout(() => classicBossAsk(rec.killId, 0), 5e3);
+        },
+        classicBossPending = null,
+        classicBossAsk = (localId, tries) => {
+            if (!T || !T.player) return;
+            let mine = {
+                id: localId,
+                tries
+            };
+            classicBossPending = mine;
+            try {
+                St("bosslog", "");
+            } catch (e) {}
+            setTimeout(() => {
+                classicBossPending === mine && (classicBossPending = null, classicBossRetry(localId, tries));
+            }, 8e3);
+        },
+        classicBossRetry = (localId, tries) => {
+            tries < 4 && setTimeout(() => classicBossAsk(localId, tries + 1), [15e3, 45e3, 12e4, 3e5][tries]);
+        },
+        classicBossOfficial = async (localId, serverId, tries) => {
+            let list = classicBossLoad(),
+                rec = list.find(k => k.killId === localId);
+            if (!rec || rec.serverKillId === serverId) return;
+            if (list.some(k => k.serverKillId === serverId)) return classicBossRetry(localId, tries);
+            let rows = null;
+            try {
+                let r = await fetch("/api/pve/getbosskillplayerlogs", {
+                    method: "POST",
+                    body: JSON.stringify({
+                        killid: serverId,
+                        sort: "dps"
+                    })
+                });
+                rows = r.ok ? await r.json() : null;
+            } catch (e) {}
+            let me = Array.isArray(rows) ? rows.find(x => x && x.name === rec.player) : null;
+            if (!me || Math.abs(new Date(me.time).getTime() - new Date(rec.date).getTime()) > 6e5) return classicBossRetry(localId, tries);
+            list = classicBossLoad(), rec = list.find(k => k.killId === localId);
+            if (!rec) return;
+            rec.serverKillId = serverId, rec.official = {
+                logId: me.id,
+                dps: me.dps,
+                hps: me.hps,
+                ehps: me.ehps,
+                ohps: me.ohps,
+                mps: me.mps,
+                dpstotal: me.dpstotal,
+                hpstotal: me.hpstotal,
+                mpstotal: me.mpstotal,
+                duration: me.duration,
+                active: me.active,
+                deaths: me.deaths,
+                perfdps: me.perfdps,
+                perfhps: me.perfhps,
+                perfmit: me.perfmit,
+                gs: me.gs,
+                patch: me.patch
+            }, me.duration > 0 && (rec.fightSeconds = me.duration), classicBossSave(list);
+            try {
+                bossLogUi.refresh();
+            } catch (e) {}
+        },
+        classicBossKillReply = serverId => {
+            let p = classicBossPending;
+            if (!p) return !1;
+            return classicBossPending = null, classicBossOfficial(p.id, serverId, p.tries), !0;
+        },
+        classicBossBeforeSet = slot => {
+            let o = T.player && T.player.inventory && T.player.inventory.slots.get(slot);
+            o && o.type ? classicBossPrevSlot.set(slot, [o.type, o.tier, o.stacks || 0]) : classicBossPrevSlot.delete(slot);
+        },
+        classicBossItem = (it, reason, slot) => {
+            if (!classicBossOpen || Date.now() > classicBossOpen.until || !it || !it.type || reason !== 1 && reason !== 13) return;
+            let prev = classicBossPrevSlot.get(slot),
+                gained = it.stacks != null && prev && prev[0] === it.type && prev[1] === it.tier ? it.stacks - prev[2] : it.stacks;
+            classicBossPrevSlot.delete(slot);
+            let names = P.ui && P.ui.stats && P.ui.stats.array || [],
+                stats = [];
+            it.stats && it.stats.forEach((v, id) => stats.push({
+                id,
+                name: names[id] || String(id),
+                type: v.type,
+                value: v.value,
+                rollPercent: Math.round(v.qual * 100) / 100
+            }));
+            let list = classicBossLoad(),
+                rec = list.find(r => r.killId === classicBossOpen.killId);
+            if (!rec) return;
+            rec.items.push({
+                time: new Date().toISOString(),
+                reason,
+                slot,
+                dbid: it.dbid,
+                type: it.type,
+                tier: it.tier,
+                name: (() => {
+                    try {
+                        return Jt(it.type, it.tier);
+                    } catch (e) {
+                        return null;
+                    }
+                })(),
+                quality: it.quality,
+                upgrade: it.upgrade,
+                bound: it.bound,
+                gearScore: it.gs,
+                stacks: it.stacks == null ? null : it.stacks,
+                gained: gained == null ? null : gained,
+                rolls: Array.isArray(it.rolls) ? it.rolls.slice() : null,
+                stats
+            }), classicBossSave(list);
+        };
     var UT = (t, e, n) => {
             if (t && t.type) switch (e) {
                 case 13:
@@ -23545,7 +24605,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             super(e)
         }
         hydrate(e) {
-            super.hydrate(e), e.store ? e.store.set(this) : console.error("no store for item", e), UT(this, this.reason, e.slot)
+            super.hydrate(e), e.store ? e.store.set(this) : console.error("no store for item", e), UT(this, this.reason, e.slot), classicBossItem(this, this.reason, e.slot)
         }
         equipReasons(e) {
             let n = [];
@@ -29554,7 +30614,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     opts
                 }),
                 sync = () => {
-                    find.textContent = "Find " + (party.membercount < 2 ? "party" : "members"), find.className = "btn border green textwhite" + (open ? " active" : "");
+                    find.textContent = "Find " + (party.membercount < 2 ? "party" : "members"), find.className = "btn border green textwhite classic-findparty" + (open ? " active" : "");
                 };
             queue.className = "btn purp", queue.textContent = P.ui.party.startQueue || "Queue";
             queue.onclick = e => {
@@ -29568,10 +30628,10 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 menu(e, opts);
             };
             find.onclick = () => _s.update(v => !v);
-            bar.append(queue, find);
+            bar.append(queue, find), classicBossQuickBar = bar, classicBossQuickSync();
             let a = ho.subscribe(v => (party = v || {}, sync())),
                 b = _s.subscribe(v => (open = !!v, sync()));
-            classicPartyOff = () => (a(), b(), queue.remove(), find.remove(), classicPartyOff = null);
+            classicPartyOff = () => (a(), b(), queue.remove(), find.remove(), bar.querySelector(".classic-bosslog") && bar.querySelector(".classic-bosslog").remove(), classicBossQuickBar === bar && (classicBossQuickBar = null), classicPartyOff = null);
         },
         classicSocialBar = target => {
             let bar = document.createElement("div"),
@@ -29667,10 +30727,10 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             localStorage.getItem(from) !== null && localStorage.getItem(to) === null && localStorage.setItem(to, localStorage.getItem(from)), localStorage.removeItem(from);
         } catch (e) {}
     });
-    fw("mapEnabled", mapEnabled), fw("ssao", ssao), ssao.set(!1), wd.set(!0), fw("timeSlider", timeSlider), fw("markOwnRevs", markOwnRevs), [["CCIndicator", CCIndicator], ["flashCCIndicator", flashCCIndicator], ["CCIndicatorOnNameplates", CCIndicatorOnNameplates], ["hideBuffs", hideBuffs], ["hideClassBuffs", hideClassBuffs], ["stackSameBuffs", stackSameBuffs], ["partyHeight", partyHeight], ["sortParty", sortParty], ["classColorParty", classColorParty], ["disablePartyNameplates", disablePartyNameplates], ["revUnfriendly", revUnfriendly], ["nextFriendlyIgnoreBots", nextFriendlyIgnoreBots], ["losTarget", losTarget], ["fxAlphaOverride", fxAlphaOverride], ["fxAlphaSprite", fxAlphaSprite], ["fxAlphaRibbon", fxAlphaRibbon], ["fxAlphaModel", fxAlphaModel], ["fxAlphaSkills", fxAlphaSkills], ["mouseOverTarget", mouseOverTarget]].forEach(([k, st]) => fw(k, st)), (() => {
+    fw("mapEnabled", mapEnabled), fw("ssao", ssao), ssao.set(!1), wd.set(!0), fw("timeSlider", timeSlider), fw("markOwnRevs", markOwnRevs), [["CCIndicator", CCIndicator], ["flashCCIndicator", flashCCIndicator], ["CCIndicatorOnNameplates", CCIndicatorOnNameplates], ["hideBuffs", hideBuffs], ["hideClassBuffs", hideClassBuffs], ["stackSameBuffs", stackSameBuffs], ["partyHeight", partyHeight], ["sortParty", sortParty], ["classColorParty", classColorParty], ["disablePartyNameplates", disablePartyNameplates], ["uncapNameplates", uncapNameplates], ["revUnfriendly", revUnfriendly], ["nextFriendlyIgnoreBots", nextFriendlyIgnoreBots], ["losTarget", losTarget], ["fxAlphaOverride", fxAlphaOverride], ["fxAlphaSprite", fxAlphaSprite], ["fxAlphaRibbon", fxAlphaRibbon], ["fxAlphaModel", fxAlphaModel], ["fxAlphaSkills", fxAlphaSkills], ["mouseOverTarget", mouseOverTarget]].forEach(([k, st]) => fw(k, st)), (() => {
         let was;
         sortParty.subscribe(v => (was !== void 0 && v && !was && partyOrderSave({}), was = v));
-    })(), fw("blockSpecialSelling", blockSpecialSelling), fw("bloomBlur", bloomBlur), bloomBlur.set(!0), bloomBlur.subscribe(v => bloomBlurOn = v), fw("fogEnabled", fogSetting), fogSetting.subscribe(v => fogOn = v), fw("fogDistance", fogDistance), fogDistance.subscribe(v => fogDistMul = (+v || 100) / 100), fw("skillbarCols", skillbarCols), fw("skillbarRows", skillbarRows), skillbarCols.subscribe(() => setTimeout(skillbarLayout)), skillbarRows.subscribe(() => setTimeout(skillbarLayout)), fw("disableWorldOverride", disableWorldOverride), disableWorldOverride.subscribe(v => !!v !== worldOverrideOff && typeof location != "undefined" && location.reload());
+    })(), fw("blockSpecialSelling", blockSpecialSelling), fw("bloomBlur", bloomBlur), bloomBlur.set(!0), bloomBlur.subscribe(v => bloomBlurOn = v), fw("fogEnabled", fogSetting), fogSetting.set(!0), fogSetting.subscribe(v => fogOn = v), fw("fogDistance", fogDistance), fogDistance.set(100), fogDistance.subscribe(v => fogDistMul = (+v || 100) / 100), fw("skillbarCols", skillbarCols), fw("skillbarRows", skillbarRows), skillbarCols.subscribe(() => setTimeout(skillbarLayout)), skillbarRows.subscribe(() => setTimeout(skillbarLayout)), fw("disableWorldOverride", disableWorldOverride), disableWorldOverride.subscribe(v => !!v !== worldOverrideOff && typeof location != "undefined" && location.reload());
     mapEnabled.subscribe(v => (typeof document != "undefined" && document.documentElement.classList.toggle("classic-map", !!v || !!il || worldOverrideOff)));
     var classicCss = "@font-face{font-family:hordes;font-style:normal;font-weight:400;font-display:swap;src:local(\"Quicksand Medium\"),local(\"Quicksand-Medium\"),url(https://fonts.gstatic.com/s/quicksand/v9/6xKodSZaM9iE8KbpRA_p2HcYT8L_.woff2) format(\"woff2\");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}@font-face{font-family:hordes;font-style:normal;font-weight:700;font-display:swap;src:local(\"Quicksand Bold\"),local(\"Quicksand-Bold\"),url(https://fonts.gstatic.com/s/quicksand/v9/6xKodSZaM9iE8KbpRA_pkHEYT8L_.woff2) format(\"woff2\");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}body{font-family:hordes}body{overflow-y:scroll;background-color:#10131d;padding:0;margin:0;box-sizing:border-box;color:#a6dcd5}:root{--primary: #F5C247;--secondary: #a6dcd5;--fame: #FE48FC;--exp: #FAA244;--pvp: #EA00FF;--yell: #d64417;--party: #2ED3F6;--mana: #026EF4;--grey: #5b858e;--panel: rgba(16, 19, 29, .8);--name: #DAE8EA;--spell: #E7D510;--item: #E7D510;--enemy: #F42929;--health: #33D123;--f0: #458BD9;--f1: #C32929;--f2: #A2A2A2;--c0: #C7966F;--c1: #21A9E1;--c2: #98CE64;--c3: #1C51FF;--c4: #A35AC2;--c5: #AD4F4F;--clan: #EE960B;--global: #FFCB9D;--purp: #9E3BF9;--blue: #0681EA;--green: #34CB49;--black: #10131d}:root{--primary:#F5C247;--secondary:#a6dcd5;--fame:#FE48FC;--exp:#FAA244;--pvp:#EA00FF;--party:#2ED3F6;--mana:#026EF4;--grey:#5b858e;--panel:rgba(16, 19, 29, 0.8);--name:#DAE8EA;--spell:#E7D510;--item:#E7D510;--enemy:#F42929;--health:#33D123;--f0:#458BD9;--f1:#C32929;--f2:#A2A2A2;--c0:#C7966F;--c1:#21A9E1;--c2:#98CE64;--c3:#1C51FF;--c4:#A35AC2;--c5:#AD4F4F;--clan:#EE960B;--global:#FFCB9D;--purp:#9E3BF9;--blue:#0681EA;--green:#34CB49}.bgf0{background:linear-gradient(0deg,#458BD9 0%,#3a73b3 49%,#458BD9 50%)}.bgf0{background:linear-gradient(0deg, #458BD9 0%, #3a73b3 49%, #458BD9 50%)}.bgf1{background:linear-gradient(0deg,#C32929 0%,#9f2527 49%,#C32929 50%)}.bgf1{background:linear-gradient(0deg, #C32929 0%, #9f2527 49%, #C32929 50%)}.bgf2{background:linear-gradient(0deg,#A2A2A2 0%,#858587 49%,#A2A2A2 50%)}.bgf2{background:linear-gradient(0deg, #A2A2A2 0%, #858587 49%, #A2A2A2 50%)}.bgc0{background:linear-gradient(0deg,#C7966F 0%,#a27c5f 49%,#C7966F 50%)}.bgc0{background:linear-gradient(0deg, #C7966F 0%, #a27c5f 49%, #C7966F 50%)}.bgc1{background:linear-gradient(0deg,#21A9E1 0%,#1e8bba 49%,#21A9E1 50%)}.bgc1{background:linear-gradient(0deg, #21A9E1 0%, #1e8bba 49%, #21A9E1 50%)}.bgc2{background:linear-gradient(0deg,#98CE64 0%,#7da956 49%,#98CE64 50%)}.bgc2{background:linear-gradient(0deg, #98CE64 0%, #7da956 49%, #98CE64 50%)}.bgc3{background:linear-gradient(0deg,#1C51FF 0%,#1a45d2 49%,#1C51FF 50%)}.bgc3{background:linear-gradient(0deg, #1C51FF 0%, #1a45d2 49%, #1C51FF 50%)}.bgc4{background:linear-gradient(0deg,#A35AC2 0%,#864ca1 49%,#A35AC2 50%)}.bgc4{background:linear-gradient(0deg, #A35AC2 0%, #864ca1 49%, #A35AC2 50%)}.bgc5{background:linear-gradient(0deg,#AD4F4F 0%,#8e4345 49%,#AD4F4F 50%)}.bgc5{background:linear-gradient(0deg, #AD4F4F 0%, #8e4345 49%, #AD4F4F 50%)}.bgenemy{background:linear-gradient(0deg,#F42929 0%,#c62527 49%,#F42929 50%)}.bgenemy{background:linear-gradient(0deg, #F42929 0%, #c62527 49%, #F42929 50%)}.bgmana{background:linear-gradient(0deg,#026EF4 0%,#055cc9 49%,#026EF4 50%)}.bgmana{background:linear-gradient(0deg, #026EF4 0%, #055cc9 49%, #026EF4 50%)}.bghealth{background:linear-gradient(0deg,#33D123 0%,#2cab22 49%,#33D123 50%)}.bghealth{background:linear-gradient(0deg, #33D123 0%, #2cab22 49%, #33D123 50%)}.bgexp{background:linear-gradient(0deg,#FAA244 0%,#cb853c 49%,#FAA244 50%)}.bgexp{background:linear-gradient(0deg, #FAA244 0%, #cb853c 49%, #FAA244 50%)}.bggrey{background:linear-gradient(0deg,#5b858e 0%,#4c6e77 49%,#5b858e 50%)}.bggrey{background:linear-gradient(0deg, #5b858e 0%, #4c6e77 49%, #5b858e 50%)}.bgblack{background:linear-gradient(0deg,rgba(16,19,29,.8) 0%,rgba(16,19,29,.84) 49%,rgba(16,19,29,.8) 50%)}.bgblack{background:linear-gradient(0deg, rgba(16, 19, 29, 0.8) 0%, rgba(16, 19, 29, 0.84) 49%, rgba(16, 19, 29, 0.8) 50%)}.bgspell{background:linear-gradient(0deg,rgba(231,213,16,.5) 49%,rgba(207,191,14,.5) 50%)}.bgspell{background:linear-gradient(0deg, rgba(231, 213, 16, 0.5) 49%, rgba(207, 191, 14, 0.5) 50%)}.bgtut{background:linear-gradient(0deg,#F5C247 0%,#c79f3f 49%,#F5C247 50%)}.bgtut{background:linear-gradient(0deg, #F5C247 0%, #c79f3f 49%, #F5C247 50%)}.bgpurp{background:linear-gradient(0deg,#9E3BF9 0%,#8233cd 49%,#9E3BF9 50%)}.bgpurp{background:linear-gradient(0deg, #9E3BF9 0%, #8233cd 49%, #9E3BF9 50%)}.btn,kbd,.card,.panel,.panel-friend,.panel-bright,.panel-black,select option{padding:4px;border-radius:3px;pointer-events:all}.border{border-radius:3px}.border{border-radius:3px}.border.auto{border:3px solid #f3e551}.border.auto{border:3px solid #f3e551}.border.party{border:3px solid #0ac8f1}.border.party{border:3px solid #0ac8f1}.border.primary{border:3px solid #F5C247}.border.primary{border:3px solid #F5C247}.border.secondary{border:3px solid #11b59c}.border.secondary{border:3px solid #11b59c}.border.white{border:3px solid #5b858e}.border.white{border:3px solid #5b858e}.border.white.glow{box-shadow:inset 0 0 0 3px #323232,inset 0 0 6px 7px #354e53}.border.white.glow{box-shadow:inset 0 0 0px 3px #323232, inset 0 0 6px 7px #354e53}.border.green{border:3px solid #34CB49}.border.green{border:3px solid #34CB49}.border.green.glow{box-shadow:inset 0 0 0 3px #162818,inset 0 0 6px 7px #185d22}.border.green.glow{box-shadow:inset 0 0 0px 3px #162818, inset 0 0 6px 7px #185d22}.border.blue{border:3px solid #0681EA}.border.blue{border:3px solid #0681EA}.border.blue.glow{box-shadow:inset 0 0 0 3px #0d283f,inset 0 0 6px 7px #034278}.border.blue.glow{box-shadow:inset 0 0 0px 3px #0d283f, inset 0 0 6px 7px #034278}.border.purp{border:3px solid #9E3BF9}.border.purp{border:3px solid #9E3BF9}.border.purp.glow{box-shadow:inset 0 0 0 3px #42176a,inset 0 0 6px 7px #5e05af}.border.purp.glow{box-shadow:inset 0 0 0px 3px #42176a, inset 0 0 6px 7px #5e05af}.border.teal{border:3px solid #2db393}.border.teal{border:3px solid #2db393}.border.red{border:3px solid #a72929}.border.red{border:3px solid #a72929}.border.red.glow{box-shadow:inset 0 0 0 3px #271515,inset 0 0 6px 7px #511414}.border.red.glow{box-shadow:inset 0 0 0px 3px #271515, inset 0 0 6px 7px #511414}.border.yellow{border:3px solid #E7D510}.border.yellow{border:3px solid #E7D510}.border.orange{border:3px solid #EE960B}.border.orange{border:3px solid #EE960B}.border.cyan{border:3px solid #3BCFE5}.border.cyan{border:3px solid #3BCFE5}.border.grey{border:3px solid #293c40}.border.grey{border:3px solid #293c40}.border.grey.glow{box-shadow:inset 0 0 0 3px #000,inset 0 0 6px 7px #070b0b}.border.grey.glow{box-shadow:inset 0 0 0px 3px black, inset 0 0 6px 7px #070b0b}.border.black{border:3px solid rgba(16,19,29,.8)}.border.black{border:3px solid rgba(16, 19, 29, 0.8)}.border.f0{border:3px solid #458BD9}.border.f0{border:3px solid #458BD9}.border.f1{border:3px solid #C32929}.border.f1{border:3px solid #C32929}.border.f2{border:3px solid #A2A2A2}.border.f2{border:3px solid #A2A2A2}.border.c0{border:3px solid #C7966F}.border.c0{border:3px solid #C7966F}.border.c1{border:3px solid #21A9E1}.border.c1{border:3px solid #21A9E1}.border.c2{border:3px solid #98CE64}.border.c2{border:3px solid #98CE64}.border.c3{border:3px solid #1C51FF}.border.c3{border:3px solid #1C51FF}.border.c4{border:3px solid #A35AC2}.border.c4{border:3px solid #A35AC2}.border.c5{border:3px solid #AD4F4F}.border.c5{border:3px solid #AD4F4F}.chatItem{pointer-events:all;cursor:pointer;font-weight:700}.chatItem.textgrey{background-color:#0006}.chatItem.textgrey:hover{background-color:#00000080}.chatItem.textwhite{background-color:#151f2166}.chatItem.textwhite:hover{background-color:#01020280}.chatItem.textred{background-color:#18060666}.chatItem.textred:hover{background-color:#00000080}.chatItem.textblue{background-color:#02213c66}.chatItem.textblue:hover{background-color:#00060a80}.chatItem.textpurp{background-color:#43047e66}.chatItem.textpurp:hover{background-color:#29024c80}.chatItem.textgreen{background-color:#103d1666}.chatItem.textgreen:hover{background-color:#05140780}.panel,.panel-friend,.panel-bright,.panel-black,select option{color:#a6dcd5}.panel{border-radius:3px;pointer-events:all;color:#a6dcd5}.textright{text-align:right}.textright{text-align:right}.panel-black,select option{background-color:#10131dcc}.panel-black{border-radius:3px;pointer-events:all;color:#a6dcd5;background-color:rgba(16, 19, 29, 0.8)}select option{border-radius:3px;pointer-events:all;color:#a6dcd5;background-color:rgba(16, 19, 29, 0.8)}.panel-bright{background-color:#19202d}.panel-bright{border-radius:3px;pointer-events:all;color:#a6dcd5;background-color:#19202d}.panel-friend{background-color:#1e2737}.panel-friend:hover{background-color:#242e41}.panel-black.selected{background-color:#5b858e33;box-shadow:0 0 4px #eae41b,inset 0 0 9px 2px #f1c421}.panel-black.selected{background-color:rgba(91, 133, 142, 0.2);box-shadow:0 0 4px 0px #eae41b, inset 0 0 9px 2px #f1c421}.card{background-color:#10131d80;padding:24px}.card{border-radius:3px;pointer-events:all;background-color:rgba(16, 19, 29, 0.5)}.cardinfo{margin-top:4px}.cardinfo:not(:last-child){margin-bottom:12px}kbd{background-color:#5b858e66;color:#fff;padding:0 3px;font-family:inherit}kbd{border-radius:3px;pointer-events:all;background-color:rgba(91, 133, 142, 0.4);color:#fff;font-family:inherit}.inlinetag{color:#bc72ff;background-color:#3e3193;padding:.25em .7em;font-size:.75em;margin-inline-end:.5em;letter-spacing:.08em;border-radius:4px;font-weight:400;display:inline-block}.btn{padding:3px;cursor:pointer;border:3px solid rgba(0,0,0,0);color:#10131d;transition:background-color .15s,color .15s,border .15s;font-weight:700;white-space:nowrap;text-overflow:ellipsis;overflow:hidden}.btn{border-radius:3px;pointer-events:all;cursor:pointer;border:3px solid rgba(0, 0, 0, 0);color:#DAE8EA;transition:background-color 0.15s, color 0.15s, border 0.15s;font-weight:bold}.btn.auto{background-color:#f3e551}.btn.auto{background-color:#f3e551}.btn.auto:hover{border:3px solid white;background-color:#f5e968}.btn.auto:hover{border:3px solid white;background-color:#f5e968}.btn.party{background-color:#0ac8f1}.btn.party{background-color:#0ac8f1}.btn.party:hover{border:3px solid #fbfeff;background-color:#1fd0f5}.btn.party:hover{border:3px solid #fbfeff;background-color:#1fd0f5}.btn.primary{background-color:#f5c247}.btn.primary{background-color:#F5C247}.btn.primary:hover{border:3px solid white;background-color:#f6ca5f}.btn.primary:hover{border:3px solid white;background-color:#f6ca5f}.btn.secondary{background-color:#11b59c}.btn.secondary{background-color:#11b59c}.btn.secondary:hover{border:3px solid #cbfaf3;background-color:#13ccb0}.btn.secondary:hover{border:3px solid #cbfaf3;background-color:#13ccb0}.btn.white{background-color:#5b858e}.btn.white{background-color:#5b858e}.btn.white:hover{border:3px solid #f2f6f6;background-color:#66939d}.btn.white:hover{border:3px solid #f2f6f6;background-color:#66939d}.btn.green{background-color:#34cb49}.btn.green{background-color:#34CB49}.btn.green:hover{border:3px solid white;background-color:#48d05b}.btn.green:hover{border:3px solid white;background-color:#48d05b}.btn.blue{background-color:#0681ea}.btn.blue{background-color:#0681EA}.btn.blue:hover{border:3px solid aliceblue;background-color:#118ef9}.btn.blue:hover{border:3px solid aliceblue;background-color:#118ef9}.btn.purp{background-color:#9e3bf9}.btn.purp{background-color:#9E3BF9}.btn.purp:hover{border:3px solid white;background-color:#aa54fa}.btn.purp:hover{border:3px solid white;background-color:#aa54fa}.btn.teal{background-color:#2db393}.btn.teal{background-color:#2db393}.btn.teal:hover{border:3px solid #e6f9f4;background-color:#32c7a4}.btn.teal:hover{border:3px solid #e6f9f4;background-color:#32c7a4}.btn.red{background-color:#a72929}.btn.red{background-color:#a72929}.btn.red:hover{border:3px solid #f6dada;background-color:#bb2f2f}.btn.red:hover{border:3px solid #f6dada;background-color:#bb2f2f}.btn.yellow{background-color:#e7d510}.btn.yellow{background-color:#E7D510}.btn.yellow:hover{border:3px solid #fefef8;background-color:#f0de21}.btn.yellow:hover{border:3px solid #fefef8;background-color:#f0de21}.btn.orange{background-color:#ee960b}.btn.orange{background-color:#EE960B}.btn.orange:hover{border:3px solid #fffdf9;background-color:#f5a11e}.btn.orange:hover{border:3px solid #fffdf9;background-color:#f5a11e}.btn.cyan{background-color:#3bcfe5}.btn.cyan{background-color:#3BCFE5}.btn.cyan:hover{border:3px solid white;background-color:#52d5e8}.btn.cyan:hover{border:3px solid white;background-color:#52d5e8}.btn.grey{background-color:#293c40}.btn.grey:hover{border:3px solid #a4bfc5;background-color:#334b50}.btn.grey:hover{border:3px solid #a4bfc5;background-color:#334b50}.btn.black{background-color:#10131dcc}.btn.black{background-color:rgba(16, 19, 29, 0.8)}.btn.black:hover{border:3px solid rgba(120,134,180,.8);background-color:#191e2dcc}.btn.black:hover{border:3px solid rgba(120, 134, 180, 0.8);background-color:rgba(25, 30, 45, 0.8)}.btn.f0{background-color:#458bd9}.btn.f0{background-color:#458BD9}.btn.f0:hover{border:3px solid white;background-color:#5a98dd}.btn.f0:hover{border:3px solid white;background-color:#5a98dd}.btn.f1{background-color:#c32929}.btn.f1{background-color:#C32929}.btn.f1:hover{border:3px solid #fcefef;background-color:#d43232}.btn.f1:hover{border:3px solid #fcefef;background-color:#d43232}.btn.f2{background-color:#a2a2a2}.btn.f2{background-color:#A2A2A2}.btn.f2:hover{border:3px solid white;background-color:#afafaf}.btn.f2:hover{border:3px solid white;background-color:#afafaf}.btn.c0{background-color:#c7966f}.btn.c0{background-color:#C7966F}.btn.c0:hover{border:3px solid white;background-color:#cea381}.btn.c0:hover{border:3px solid white;background-color:#cea381}.btn.c1{background-color:#21a9e1}.btn.c1{background-color:#21A9E1}.btn.c1:hover{border:3px solid white;background-color:#37b2e4}.btn.c1:hover{border:3px solid white;background-color:#37b2e4}.btn.c2{background-color:#98ce64}.btn.c2{background-color:#98CE64}.btn.c2:hover{border:3px solid white;background-color:#a5d477}.btn.c2:hover{border:3px solid white;background-color:#a5d477}.btn.c3{background-color:#1c51ff}.btn.c3{background-color:#1C51FF}.btn.c3:hover{border:3px solid white;background-color:#3665ff}.btn.c3:hover{border:3px solid white;background-color:#3665ff}.btn.c4{background-color:#a35ac2}.btn.c4{background-color:#A35AC2}.btn.c4:hover{border:3px solid white;background-color:#ad6dc9}.btn.c4:hover{border:3px solid white;background-color:#ad6dc9}.btn.c5{background-color:#ad4f4f}.btn.c5{background-color:#AD4F4F}.btn.c5:hover{border:3px solid #fefdfd;background-color:#b65f5f}.btn.c5:hover{border:3px solid #fefdfd;background-color:#b65f5f}.btn.small{font-size:13px;font-weight:700}.btn.small{font-weight:bold}.btn.grey{color:#dae8ea}.btn.grey{background-color:#293c40}.btn.minibtn{font-size:13px;font-weight:700;padding:0}.btn.minibtn{font-weight:bold}.btn.active{border:3px solid rgba(255,255,255,.8);color:#dae8ea}.btn.active{border:3px solid rgba(255, 255, 255, 0.8);color:#DAE8EA}.btn kbd{margin-right:3px}.btn.disabled{color:#364c56;border:3px solid #364c56;cursor:auto;pointer-events:none}.btn.disabled{color:#364c56;border:3px solid #364c56;cursor:auto;pointer-events:none}.btn.checkbox{width:.5em;height:.5em;display:inline-block;vertical-align:text-top;cursor:pointer;border:3px solid #5b858e}.btn.checkbox{cursor:pointer;border:3px solid #5b858e}.btn.checkbox.active{background-color:#dae8ea;border:3px solid #DAE8EA;box-shadow:inset 0 0 0 3px #5b858e}.btn.checkbox.active{background-color:#DAE8EA;border:3px solid #DAE8EA;box-shadow:inset 0px 0px 0px 3px #5b858e}.btn.invi{border:none;padding:0}.btn.nocursor{cursor:default}.hidden{visibility:hidden}@keyframes wobble{0%,to{border-color:#10131d}50%{border-color:#f5c247}}.flashing-border{animation:wobble 1s infinite ease-in-out}@keyframes active-indicator{0%{left:0;top:0}25%{left:100%;top:0}50%{left:100%;top:100%}75%{left:0;top:100%}to{left:0;top:0}}.active-indicator{box-sizing:border-box;position:absolute;width:5px;height:5px;border-radius:50%;animation:active-indicator 2s cubic-bezier(.8,.5,.2,.5) infinite;z-index:12;transform:translate(-50%,-50%);background-color:#faf3b0d9;box-shadow:0 0 3px 2px #f5e968a6;pointer-events:none}.tab-bar>.tab{border-radius:4px 4px 0 0;pointer-events:all;background-color:#10131dcc;padding:8px 11px;transition:background-color .15s;cursor:pointer;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;font-weight:700}.tab-bar>.tab.active{background-color:#19202d;color:#f5c247}.tab-bar>.tab:hover{background-color:#222c3d}.tab-bar>.tab.disabled{color:#364c56;cursor:auto;pointer-events:none}.tab-bar>.tab.equal{flex:1}.tab-bar>.tab.small{font-size:13px}.tab-bar.flex{display:flex}.btnbar{display:flex}.btnbar .btn{float:left}input,.input,textarea,select{font:inherit;pointer-events:auto;box-sizing:border-box;border-radius:3px;border:0;margin:0;display:block;width:100%;background-color:#3d595f;outline:none;border:3px solid #a4bfc5;color:#dae8ea;transition:background-color .3s,border .2s}input{font:inherit;pointer-events:auto;border-radius:3px;border:0;background-color:#3d595f;outline:none;border:3px solid #a4bfc5;color:#DAE8EA;transition:background-color 0.3s, border 0.2s}.input{font:inherit;pointer-events:auto;border-radius:3px;border:0;background-color:#3d595f;outline:none;border:3px solid #a4bfc5;color:#DAE8EA;transition:background-color 0.3s, border 0.2s}input.focus,input:focus,.input.focus,.input:focus,textarea.focus,textarea:focus,select.focus,select:focus{border:3px solid #e2ebec;background-color:#27353f}input.focus{border:3px solid #e2ebec;background-color:#27353f}input:focus{border:3px solid #e2ebec;background-color:#27353f}.input.focus{border:3px solid #e2ebec;background-color:#27353f}.input:focus{border:3px solid #e2ebec;background-color:#27353f}textarea.focus{border:3px solid #e2ebec;background-color:#27353f}textarea:focus{border:3px solid #e2ebec;background-color:#27353f}select.focus{border:3px solid #e2ebec;background-color:#27353f}select:focus{border:3px solid #e2ebec;background-color:#27353f}input::-webkit-outer-spin-button,input::-webkit-inner-spin-button,.input::-webkit-outer-spin-button,.input::-webkit-inner-spin-button,textarea::-webkit-outer-spin-button,textarea::-webkit-inner-spin-button,select::-webkit-outer-spin-button,select::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}input::-webkit-outer-spin-button{-webkit-appearance:none}input::-webkit-inner-spin-button{-webkit-appearance:none}.input::-webkit-outer-spin-button{-webkit-appearance:none}.input::-webkit-inner-spin-button{-webkit-appearance:none}textarea::-webkit-outer-spin-button{-webkit-appearance:none}textarea::-webkit-inner-spin-button{-webkit-appearance:none}select::-webkit-outer-spin-button{-webkit-appearance:none}select::-webkit-inner-spin-button{-webkit-appearance:none}input[type=number],.input[type=number],textarea[type=number],select[type=number]{-moz-appearance:textfield}.input[type=number]{-moz-appearance:textfield}textarea[type=number]{-moz-appearance:textfield}select[type=number]{-moz-appearance:textfield}input.disabled,.input.disabled,textarea.disabled,select.disabled{color:#5b858e;border:3px solid #364c56;cursor:auto;pointer-events:none}input.disabled{color:#5b858e;border:3px solid #364c56;cursor:auto;pointer-events:none}.input.disabled{color:#5b858e;border:3px solid #364c56;cursor:auto;pointer-events:none}textarea.disabled{color:#5b858e;border:3px solid #364c56;cursor:auto;pointer-events:none}select.disabled{color:#5b858e;border:3px solid #364c56;cursor:auto;pointer-events:none}textarea{resize:none}::placeholder{color:#759ea7}::placeholder{color:#759ea7}.formatted,input[type=number],input[type=text],input[type=search],textarea,select{padding:5px 8px}input[type=number]{-moz-appearance:textfield}textarea{font:inherit;pointer-events:auto;border-radius:3px;border:0;background-color:#3d595f;outline:none;border:3px solid #a4bfc5;color:#DAE8EA;transition:background-color 0.3s, border 0.2s;resize:none}.big{padding:10px 15px}.context{position:absolute;z-index:12;background-color:#10131d;padding:4px 0;min-width:160px}.context{background-color:#10131d}.choice{color:#f5c247;cursor:pointer;padding:0 4px}.choice{color:#F5C247;cursor:pointer}.choice:hover{color:#dae8ea;background-color:#f5c24733}.choice:hover{color:#DAE8EA;background-color:rgba(245, 194, 71, 0.2)}.choice:active,.choice.active{color:#dae8ea;background-color:#f5c2471a}.choice:active{color:#DAE8EA;background-color:rgba(245, 194, 71, 0.1)}.choice.active{color:#DAE8EA;background-color:rgba(245, 194, 71, 0.1)}.choice.disabled{color:#5b858e;cursor:auto;pointer-events:none}.choice.disabled{color:#5b858e;cursor:auto;pointer-events:none}.texticon{height:1em;vertical-align:-.23em}.texticon:not(:last-child){padding-right:.15em}.bold{font-weight:700}.bold{font-weight:bold}.textshadow{font-weight:700;text-shadow:1px 1px 1px rgba(0,0,0,.5882352941)}.svgicon{height:1.15em;vertical-align:-.2em;padding:0}.svgicon.big{transform:scale(1.3)}.round{border-radius:50%}.round{border-radius:50%}.capitalize{text-transform:capitalize}.capitalize{text-transform:capitalize}.absCentered{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}.textcenter{text-align:center}.textcenter{text-align:center}a{color:#f5c247;text-decoration:none;transition:.2s color}a{color:#F5C247;text-decoration:none;transition:0.2s color}a:hover{color:#fae2a8}a:hover{color:#fae2a8}.btn.textGM,.textGM{color:#00ffa1}.btn.textGM{color:#00ffa1}.textGM{color:#00ffa1}.btn.textnotice,.textnotice{color:#9de74d}.btn.textnotice{color:#9DE74D}.textnotice{color:#9DE74D}.btn.textsystem,.textsystem{color:#4de751}.btn.textsystem{color:#4DE751}.textsystem{color:#4DE751}.btn.texterror,.texterror{color:#f42929}.btn.texterror{color:#F42929}.texterror{color:#F42929}.btn.textparty,.textparty{color:#2ed3f6}.btn.textparty{color:#2ED3F6}.textparty{color:#2ED3F6}.btn.textpvp,.textpvp{color:#ea00ff}.btn.textpvp{color:#EA00FF}.textpvp{color:#EA00FF}.btn.textyell,.textyell{color:#d64417}.btn.textexp,.textexp{color:#faa244}.btn.textexp{color:#FAA244}.textexp{color:#FAA244}.btn.textwhisper,.textwhisper,.btn.textto,.textto,.btn.textfrom,.textfrom{color:#ef3eff}.btn.textwhisper{color:#EF3EFF}.textwhisper{color:#EF3EFF}.btn.textto{color:#EF3EFF}.textto{color:#EF3EFF}.btn.textfrom{color:#EF3EFF}.textfrom{color:#EF3EFF}.btn.textfaction,.textfaction{color:#f68e7a}.btn.textfaction{color:#F68E7A}.textfaction{color:#F68E7A}.btn.textglobal,.textglobal{color:#ffcb9d}.btn.textglobal{color:#FFCB9D}.textglobal{color:#FFCB9D}.btn.textlog,.textlog,.btn.textcombat,.textcombat{color:#dae8ea}.btn.textlog{color:#DAE8EA}.textlog{color:#DAE8EA}.btn.textcombat{color:#DAE8EA}.textcombat{color:#DAE8EA}.btn.textlvlup,.textlvlup{color:#ee960b}.btn.textlvlup{color:#EE960B}.textlvlup{color:#EE960B}.btn.textprestige,.textprestige{color:#eab379}.btn.textprestige{color:#eab379}.textprestige{color:#eab379}.btn.textfame,.textfame{color:#fe48fc}.btn.textfame{color:#FE48FC}.textfame{color:#FE48FC}.btn.textprimary,.textprimary{color:#f5c247}.btn.textprimary{color:#F5C247}.textprimary{color:#F5C247}.btn.textsecondary,.textsecondary{color:#a6dcd5}.btn.textsecondary{color:#a6dcd5}.textsecondary{color:#a6dcd5}.btn.textgreen,.textgreen{color:#34cb49}.btn.textgreen{color:#34CB49}.textgreen{color:#34CB49}.btn.textblue,.textblue{color:#0681ea}.btn.textblue{color:#0681EA}.textblue{color:#0681EA}.btn.textred,.textred{color:#f42929}.btn.textred{color:#F42929}.textred{color:#F42929}.btn.textyellow,.textyellow{color:#e7d510}.btn.textyellow{color:#E7D510}.textyellow{color:#E7D510}.btn.textorange,.textorange{color:#ee960b}.btn.textorange{color:#EE960B}.textorange{color:#EE960B}.btn.textgrey,.textgrey{color:#5b858e}.btn.textgrey{color:#5b858e}.textgrey{color:#5b858e}.btn.textcyan,.textcyan{color:#3bcfe5}.btn.textcyan{color:#3BCFE5}.textcyan{color:#3BCFE5}.btn.textpurp,.textpurp{color:#9e3bf9}.btn.textpurp{color:#9E3BF9}.textpurp{color:#9E3BF9}.btn.textwhite,.textwhite{color:#dae8ea}.btn.textwhite{color:#DAE8EA}.textwhite{color:#DAE8EA}.btn.textgreen-l,.textgreen-l{color:#6dda7c}.btn.textblue-l,.textblue-l{color:#3da3fa}.btn.textred-l,.textred-l{color:#f76d6d}.btn.textyellow-l,.textyellow-l{color:#f3e54c}.btn.textorange-l,.textorange-l{color:#f7b44a}.btn.textgrey-l,.textgrey-l{color:#82a7af}.btn.textcyan-l,.textcyan-l{color:#7adeed}.btn.textpurp-l,.textpurp-l{color:#c080fb}.btn.textblack,.textblack{color:#10131d}.btn.textblack{color:#10131d}.textblack{color:#10131d}.btn.textf0,.textf0{color:#458bd9}.btn.textf0{color:#458BD9}.textf0{color:#458BD9}.btn.textf1,.textf1{color:#c32929}.btn.textf1{color:#C32929}.textf1{color:#C32929}.btn.textf2,.textf2{color:#a2a2a2}.btn.textf2{color:#A2A2A2}.textf2{color:#A2A2A2}.btn.textc0,.textc0{color:#c7966f}.btn.textc0{color:#C7966F}.textc0{color:#C7966F}.btn.textc1,.textc1{color:#21a9e1}.btn.textc1{color:#21A9E1}.textc1{color:#21A9E1}.btn.textc2,.textc2{color:#98ce64}.btn.textc2{color:#98CE64}.textc2{color:#98CE64}.btn.textc3,.textc3{color:#4f78ff}.btn.textc3{color:#4f78ff}.textc3{color:#4f78ff}.btn.textc4,.textc4{color:#a35ac2}.btn.textc4{color:#A35AC2}.textc4{color:#A35AC2}.btn.textc5,.textc5{color:#ad4f4f}.btn.textc5{color:#AD4F4F}.textc5{color:#AD4F4F}.btn.textclan,.textclan{color:#ee960b}.btn.textclan{color:#EE960B}.textclan{color:#EE960B}.btn.textgold,.textgold{color:#fbd08d}.btn.textgold{color:#FBD08D}.textgold{color:#FBD08D}.btn.textsilver,.textsilver{color:#b9d5eb}.btn.textsilver{color:#B9D5EB}.textsilver{color:#B9D5EB}.btn.textcopper,.textcopper{color:#e5bdaf}.btn.textcopper{color:#E5BDAF}.textcopper{color:#E5BDAF}.btn.textsub,.textsub{color:#0ceccd}.btn.textsub{color:#0ceccd}.textsub{color:#0ceccd}.btn.textsocial,.textsocial{color:#e47200}canvas{display:block}@media (max-width: 600px),(max-height: 450px){.uiscaled{transform:scale(.9)}}@media (max-width: 550px),(max-height: 400px){.uiscaled{transform:scale(.8)}}@media (max-width: 500px),(max-height: 350px){.uiscaled{transform:scale(.7)}}@media (max-width: 450px),(max-height: 300px){.uiscaled{transform:scale(.65)}}@media (max-width: 400px),(max-height: 280px){.uiscaled{transform:scale(.6)}}table{border-collapse:collapse;width:100%;color:#5b858e}table{border-collapse:collapse;color:#5b858e}table.dense{font-size:13px}table.dense tbody>tr>td{padding-top:3px;padding-bottom:3px}th,td{padding:8px;text-align:left;max-width:40px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.2em;border-left:1px dotted #10131d;border-right:1px dotted #10131d}td{text-align:left;border-left:1px dotted #10131d;border-right:1px dotted #10131d}tr{padding:4px}tr.striped:nth-child(odd){background-color:#151b26}tr.striped:nth-child(odd){background-color:#151b26}tr.striped:hover{background-color:#1e2737}tr.striped:hover{background-color:#1e2737}tr.selected{color:#dae8ea;background-color:#f5c24733}tr.selected{color:#DAE8EA;background-color:rgba(245, 194, 71, 0.2)}tr.selected:nth-child(odd){background-color:#f5c24740}tr.selected:nth-child(odd){background-color:rgba(245, 194, 71, 0.25)}tr.selected:hover{background-color:#f5c24766}tr.selected:hover{background-color:rgba(245, 194, 71, 0.4)}label{margin-bottom:8px;font-weight:700;display:block}label{font-weight:bold}.grid{display:grid;grid-gap:4px}.grid.two{grid-template-columns:1fr 1fr}.grid.three{grid-template-columns:1fr 1fr 1fr}.grid.four{grid-template-columns:1fr 1fr 1fr 1fr}.marg-top{margin-top:4px}.marg-bot{margin-bottom:4px}.marg-right{margin-right:4px}.subnav{display:flex;gap:4px}.subnav input,.subnav select{width:auto}.subnav:not(:first-child){margin-top:8px}select{font-size:.9em}select{font:inherit;pointer-events:auto;border-radius:3px;border:0;background-color:#3d595f;outline:none;border:3px solid #a4bfc5;color:#DAE8EA;transition:background-color 0.3s, border 0.2s}th,tr{cursor:pointer}th{text-align:left;border-left:1px dotted #10131d;border-right:1px dotted #10131d;cursor:pointer}tr{cursor:pointer}.fadeIn{animation:fadein .5s}.fadeIn{animation:svelte-1vbnriq-fadein 0.5s}@keyframes fadein{0%{opacity:0}to{opacity:1}}.video{position:relative;padding-bottom:56.25%;height:0;border-radius:6px;overflow:hidden}.video{border-radius:6px}.video iframe{position:absolute;top:0;left:0;width:100%;height:100%}.scrollbar{scrollbar-width:thin;scrollbar-color:#5b858e rgba(0,0,0,0);overflow-y:auto}.scrollbar{scrollbar-width:thin;scrollbar-color:#5b858e #0000}.scrollbar-fix{overflow-y:scroll}.scrollbar::-webkit-scrollbar-thumb{background-color:#5b858e;border-radius:3px}.scrollbar::-webkit-scrollbar-thumb{background-color:#5b858e;border-radius:3px}.scrollbar::-webkit-scrollbar{width:6px}.statnumber{font-weight:700;justify-self:end}.statnumber{font-weight:bold}.finder{max-height:calc(1.25em + 16px)}.finder input{background-color:unset!important;border:unset!important}.finder input{background-color:unset !important;border:unset !important}.finder .focus{z-index:12}.finder .results{position:absolute;top:100%;left:0}.finder .result{padding:5px 8px;cursor:pointer}.finder .result{cursor:pointer}.finder .result:hover{background-color:#3e3625}.finder .result:hover{background-color:#3e3625}.finder .sel{background-color:#55482a}.finder .sel{background-color:#55482a}.finder .divider{margin:5px 8px;border-bottom:1px solid rgba(91,133,142,.1)}.finder .divider{border-bottom:1px solid rgba(91, 133, 142, 0.1)}.finder .container{position:relative}.l-menu{position:absolute;width:100%;height:100%;z-index:2}.l-canvas,.l-ui{position:absolute;width:100%;height:100%;pointer-events:none}.l-ui{z-index:2;user-select:none;-moz-user-select:none;overflow:hidden}.l-ui{pointer-events:none;user-select:none;-moz-user-select:none}.l-canvas{z-index:0}.l-canvas{pointer-events:none}.l-corner-lr,.l-corner-ll,.l-corner-ul,.l-corner-ur{padding:4px;position:absolute}.l-corner-ur{right:0;top:0;transform-origin:top right}.l-corner-ul{left:0;top:0;transform-origin:top left}.l-corner-ll{left:0;bottom:0;transform-origin:bottom left}.l-corner-lr{right:0;bottom:0;transform-origin:bottom right}.l-upperLeftModal{position:absolute;margin:87px 4px 0;left:0;right:0;z-index:10;transform-origin:top left}.minimap{border-radius:6px;border-width:4px!important;pointer-events:all;background-color:#000}.minimap.enlarged{cursor:grab}.spinner.svelte-twvoek.svelte-twvoek{position:absolute;left:50%;top:50%;width:35px;height:10px;margin:-7px -17px;display:flex;justify-content:space-between}.spinner.svelte-twvoek>div.svelte-twvoek{width:10px;height:10px;background-color:#5b858e;border-radius:100%;animation:svelte-twvoek-sk-bouncedelay 1.4s infinite ease-in-out both}.spinner.svelte-twvoek>div.svelte-twvoek{background-color:#5b858e;border-radius:100%;animation:svelte-twvoek-sk-bouncedelay 1.4s infinite ease-in-out both}.spinner.svelte-twvoek .bounce1.svelte-twvoek{animation-delay:-.32s}.spinner.svelte-twvoek .bounce1.svelte-twvoek{animation-delay:-0.32s}.spinner.svelte-twvoek .bounce2.svelte-twvoek{animation-delay:-.16s}.spinner.svelte-twvoek .bounce2.svelte-twvoek{animation-delay:-0.16s}@keyframes svelte-twvoek-sk-bouncedelay{0%,80%,100%{transform:scale(0)}40%{transform:scale(1)}}.container.svelte-aoht7k{display:flex;justify-content:center;align-items:center;z-index:100;background-color:#10131d}.container.svelte-aoht7k{background-color:#10131d}.version.svelte-aoht7k{position:absolute;bottom:8px}.version.svelte-aoht7k{text-transform:capitalize}.container.svelte-fc7xg3{position:absolute;z-index:14;pointer-events:none;width:40px;height:40px;background-color:#10131d}.container.svelte-fc7xg3{pointer-events:none;background-color:#10131d}.name.svelte-erbdzy{margin-right:.35em;font-weight:700}.name.svelte-erbdzy{font-weight:bold}.icon.svelte-erbdzy{height:1.1em;vertical-align:-.23em}.time.svelte-7c1tlw{font-size:11px;color:#5b858e;width:2.8em;display:inline-block}.content.svelte-7c1tlw{display:inline;white-space:nowrap}.sender.svelte-7c1tlw{pointer-events:all;cursor:pointer}.sender.svelte-7c1tlw:hover{background-color:#10131d80}.line.svelte-7c1tlw{pointer-events:none;text-shadow:1px 1px #000;margin-right:.35em;overflow:hidden;direction:ltr}.linewrap.svelte-7c1tlw{display:inline;border-radius:3px;background-color:#10131d4d;padding:0 3px}.textGM.svelte-7c1tlw,.textworld.svelte-7c1tlw{background-color:#10131dcc}.inputcontainer.svelte-c6ga6k.svelte-c6ga6k{display:grid;grid-template-columns:auto 1fr;grid-gap:4px;align-items:center}.inputcontainer.svelte-c6ga6k input.svelte-c6ga6k{background-color:unset;border:none}.inputcontainer.svelte-c6ga6k input.svelte-c6ga6k{background-color:unset;border:none}.inputcontainer.svelte-c6ga6k input.svelte-c6ga6k:focus{border:none}.inputcontainer.svelte-c6ga6k input.svelte-c6ga6k:focus{border:none}.lowercontainer.svelte-c6ga6k.svelte-c6ga6k{position:relative}.command.svelte-c6ga6k.svelte-c6ga6k{text-transform:capitalize;padding:3px 5px;font-weight:700}.command.svelte-c6ga6k.svelte-c6ga6k{text-transform:capitalize;font-weight:bold}.chatsection.svelte-c6ga6k.svelte-c6ga6k{position:relative}.commandlist.svelte-c6ga6k.svelte-c6ga6k{position:absolute;left:0;bottom:100%;margin-bottom:4px}.frame.svelte-c6ga6k.svelte-c6ga6k{flex:1 1 auto;overflow-y:scroll;overflow-x:hidden;direction:rtl;scrollbar-width:none}.frame.svelte-c6ga6k.svelte-c6ga6k{direction:rtl;scrollbar-width:none}.frame.svelte-c6ga6k.svelte-c6ga6k::-webkit-scrollbar{display:none}.container.svelte-c6ga6k.svelte-c6ga6k{height:240px;width:450px;max-height:50%;max-width:50%;min-width:300px;display:grid;grid-template-rows:1fr auto auto;z-index:2;font-size:14px}@media (max-width: 1300px){.container.svelte-c6ga6k.svelte-c6ga6k{margin-bottom:110px}}.channel.svelte-c6ga6k.svelte-c6ga6k{display:inline-block;background-color:#10131d66}.channel.svelte-c6ga6k.svelte-c6ga6k{background-color:rgba(16, 19, 29, 0.4)}.textGM.svelte-c6ga6k.svelte-c6ga6k,.textworld.svelte-c6ga6k.svelte-c6ga6k{background-color:#10131dcc}.textGM.svelte-c6ga6k.svelte-c6ga6k{background-color:rgba(16, 19, 29, 0.8)}.textworld.svelte-c6ga6k.svelte-c6ga6k{background-color:rgba(16, 19, 29, 0.8)}.channelselect.svelte-c6ga6k.svelte-c6ga6k{position:absolute;top:0;opacity:.15;display:flex;margin-bottom:4px;pointer-events:all}.channelselect.svelte-c6ga6k.svelte-c6ga6k{opacity:0.15;pointer-events:all}.channelselect.svelte-c6ga6k>small.svelte-c6ga6k{line-height:1em;margin-right:4px}.channelselect.svelte-c6ga6k.svelte-c6ga6k:hover{opacity:1}.channelselect.svelte-c6ga6k.svelte-c6ga6k:hover{opacity:1}.titleframe.svelte-1f1v3u3{line-height:1em;display:flex;gap:4px;align-items:center;position:relative;padding-top:4px;padding-bottom:4px}.titleframe.svelte-1f1v3u3{letter-spacing:0.5px}.title.svelte-1f1v3u3{flex-grow:1;font-weight:700;pointer-events:none}.title.svelte-1f1v3u3{padding-left:4px;font-weight:bold}.titleicon.svelte-1f1v3u3{margin:3px;pointer-events:none}.window.svelte-1f1v3u3{padding:0 5px 5px;height:100%;display:grid;grid-template-rows:auto 1fr;transform-origin:inherit;min-width:fit-content;width:max-content}.window.svelte-1f1v3u3{grid-gap:4px}.slot.svelte-1f1v3u3{min-height:0}.slot.svelte-zp79uy.svelte-zp79uy{position:relative}.slot.svelte-zp79uy img.svelte-zp79uy{max-width:100%;pointer-events:none}.slot.svelte-zp79uy img.svelte-zp79uy{pointer-events:none}.overlay.svelte-zp79uy.svelte-zp79uy{bottom:0;left:0;width:100%;height:100%;position:absolute;z-index:10;pointer-events:none}.overlay.cd.svelte-zp79uy.svelte-zp79uy{background-color:#00000080;border-top:2px solid rgba(218,232,234,.5)}.overlay.cd.svelte-zp79uy.svelte-zp79uy{background-color:rgba(0, 0, 0, 0.5);border-top:2px solid rgba(218, 232, 234, 0.5)}.overlay.offCd.svelte-zp79uy.svelte-zp79uy{animation-timing-function:ease-out;animation-name:svelte-zp79uy-animoffCd;animation-duration:.4s}.overlay.offCd.svelte-zp79uy.svelte-zp79uy{animation-timing-function:ease-out;animation-name:svelte-zp79uy-animoffCd;animation-duration:0.4s}.overlay.queued.svelte-zp79uy.svelte-zp79uy{box-shadow:inset 0 0 3px 3px #e7d51080}.overlay.queued.svelte-zp79uy.svelte-zp79uy{box-shadow:inset 0 0 3px 3px rgba(231, 213, 16, 0.5)}.overlay.oom.svelte-zp79uy.svelte-zp79uy{background-color:#026ef466}.overlay.oom.svelte-zp79uy.svelte-zp79uy{background-color:rgba(2, 110, 244, 0.4)}.overlay.range.svelte-zp79uy.svelte-zp79uy{background-color:#f429294d}.overlay.range.svelte-zp79uy.svelte-zp79uy{background-color:rgba(244, 41, 41, 0.3)}.overlay.combat.svelte-zp79uy.svelte-zp79uy{background-color:#000000a6}.overlay.combat.svelte-zp79uy.svelte-zp79uy{background-color:rgba(0, 0, 0, 0.65)}@keyframes svelte-zp79uy-animoffCd{0%{background-color:#92CAFF00}20%{background-color:#92CAFF99}100%{background-color:#92CAFF00}}.slottext{pointer-events:none;position:absolute;line-height:8px;font-size:13px;background-color:#10131dcc;padding:2px 1px 3px;border-radius:2px;font-weight:700}.slottext{pointer-events:none;background-color:rgba(16, 19, 29, 0.8);border-radius:2px;z-index:10;font-weight:bold}.slottext.key.svelte-zp79uy.svelte-zp79uy{color:#5b858e;right:3px;top:3px}.slottext.stacks.svelte-zp79uy.svelte-zp79uy{color:#dae8ea;right:3px;bottom:3px}.slottext:empty{padding:0}.slotdescription{position:absolute;width:max-content;padding:8px;z-index:12;pointer-events:none;background-color:#10131d;color:#a6dcd5}.slotdescription{pointer-events:none;background-color:#10131d;color:#a6dcd5}.icon.svelte-zp79uy.svelte-zp79uy{display:block}.filled.svelte-zp79uy.svelte-zp79uy{cursor:pointer}.filled.svelte-zp79uy.svelte-zp79uy{cursor:pointer}.filled.hover.svelte-zp79uy>.overlay.svelte-zp79uy{box-shadow:inset 0 0 1px 3px #272929a6,inset 0 0 6px 3px #6bd1f499}.time.svelte-zp79uy.svelte-zp79uy{color:#e7d510;font-size:18px;background-color:#0007;z-index:12}.time.svelte-zp79uy.svelte-zp79uy{color:#E7D510;background-color:#00000077}.name.svelte-1k0gstd{font-weight:700}.container.svelte-1k0gstd{width:400px;min-height:350px;padding:12px}.subtitle.svelte-1k0gstd{font-weight:700;margin:12px 0 4px}.rewards.svelte-1k0gstd{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:4px 12px;margin-bottom:12px;cursor:default}.reward-item.svelte-1k0gstd{width:46px;height:46px}.bar.svelte-i7i7g5{background-color:#2d4247b3;border-radius:1.5px;position:relative;color:#dae8ea;overflow:hidden;text-shadow:1px 1px 2px #10131d;white-space:nowrap;text-transform:capitalize;font-weight:700}.bar.svelte-i7i7g5{background-color:rgba(45, 66, 71, 0.7);border-radius:1.5px;color:#DAE8EA;text-shadow:1px 1px 2px #10131d;text-transform:capitalize;font-weight:bold}.bar.dark.svelte-i7i7g5{background:rgba(27,78,90,.88)}.bar.dark.svelte-i7i7g5{background:rgba(27, 78, 90, 0.88)}.progressBar{border-radius:1.5px;height:100%}.progressBar{border-radius:1.5px}.bgexp.svelte-i7i7g5{border-right:3px solid #fdd3a7}.bgexp.svelte-i7i7g5{border-right:3px solid #fdd3a7}.bgtut.svelte-i7i7g5{transition:width .3s}.bgtut.svelte-i7i7g5{transition:width 0.3s}.right.svelte-i7i7g5{position:absolute;right:7px;z-index:1}.left.svelte-i7i7g5{padding-left:4px;position:relative;z-index:1}.slot.svelte-1nn7wcb{position:relative;box-shadow:none;overflow:hidden;cursor:pointer}.slot.svelte-1nn7wcb{box-shadow:none}.slot.positive.svelte-1nn7wcb{border:2px solid #161E32}.slot.positive.svelte-1nn7wcb{border:2px solid #161E32}.slot.negative.svelte-1nn7wcb{border:2px solid #960808}.slot.negative.svelte-1nn7wcb{border:2px solid #960808}.slot.own.svelte-1nn7wcb{border:2px solid #34CB49}.icon.svelte-1nn7wcb{display:block}.time.svelte-1nn7wcb{color:#e7d510;font-size:14px;background-color:#0007}.time.svelte-1nn7wcb{color:#E7D510;background-color:#00000077;z-index:11}.container.svelte-1nn7wcb{color:#fff}.container.svelte-1nn7wcb{color:#fff}.soon.svelte-1nn7wcb{opacity:.5}.soon.svelte-1nn7wcb{opacity:0.5}.stacks.svelte-1nn7wcb{right:1px;bottom:0;font-size:12px}.overlay.svelte-1nn7wcb{top:0;left:0;width:100%;position:absolute}.overlay.svelte-1nn7wcb{z-index:9}.bars.svelte-g292qg.svelte-g292qg.svelte-g292qg{position:relative;grid-area:ba}.barsInner.svelte-g292qg.svelte-g292qg.svelte-g292qg{padding:3px;box-shadow:0 0 0 2px #fff0}.barsInner.targetable.svelte-g292qg.svelte-g292qg.svelte-g292qg:hover{background-color:#1f2437cc;box-shadow:0 0 0 2px #fff5;cursor:pointer}.barsInner.target.svelte-g292qg.svelte-g292qg.svelte-g292qg{box-shadow:0 0 0 2px #fff7;background-color:#1b2031cc}.barsInner.target.svelte-g292qg.svelte-g292qg.svelte-g292qg:hover{background-color:#20263bcc;box-shadow:0 0 0 2px #fff9}.grid.svelte-g292qg.svelte-g292qg.svelte-g292qg{display:grid;grid-gap:3px;pointer-events:all;grid-gap:0px}.grid.left.svelte-g292qg.svelte-g292qg.svelte-g292qg{grid-template:\"i ba\" auto/2em 1fr}.grid.left.svelte-g292qg>.iconcontainer.svelte-g292qg>.pclass.svelte-g292qg{right:0}.grid.left.svelte-g292qg>.bars.svelte-g292qg>.tag.svelte-g292qg{left:-15px}.grid.left.svelte-g292qg>.bars.svelte-g292qg>.combat.svelte-g292qg{left:-28px}.grid.right.svelte-g292qg.svelte-g292qg.svelte-g292qg{grid-template:\"ba i\" auto/1fr 2em}.grid.right.svelte-g292qg>.iconcontainer.svelte-g292qg>.pclass.svelte-g292qg{left:0}.grid.right.svelte-g292qg>.bars.svelte-g292qg>.tag.svelte-g292qg{right:-15px}.grid.right.svelte-g292qg>.bars.svelte-g292qg>.combat.svelte-g292qg{right:-28px}.icon.svelte-g292qg.svelte-g292qg.svelte-g292qg{box-sizing:border-box;display:block;background-clip:content-box;position:absolute}.iconcontainer.svelte-g292qg.svelte-g292qg.svelte-g292qg{position:relative;width:auto;height:100%;grid-area:i;z-index:0}.tag.svelte-g292qg.svelte-g292qg.svelte-g292qg{width:1.6em;box-shadow:none;z-index:4;top:-10px}.combat.svelte-g292qg.svelte-g292qg.svelte-g292qg{background-color:#f42929;top:-5px;width:15px;height:15px}.pclass.svelte-g292qg.svelte-g292qg.svelte-g292qg{z-index:3;height:2em}.deco.svelte-g292qg.svelte-g292qg.svelte-g292qg{position:absolute;top:1em;left:1em;transform:translate(-50%,-50%) rotate(45deg);width:2em;height:2em;z-index:2;background-color:#10131dcc;border-radius:3px}.buffarray.svelte-g292qg.svelte-g292qg.svelte-g292qg{position:absolute;bottom:100%;width:100%;margin-bottom:3px;display:flex}.buffarray.party.svelte-g292qg.svelte-g292qg.svelte-g292qg{left:100%;top:0;margin-left:3px}.buffarray.default.svelte-g292qg.svelte-g292qg.svelte-g292qg{left:0;flex-wrap:wrap-reverse}.castbar.svelte-g292qg.svelte-g292qg.svelte-g292qg{position:absolute;top:0;left:0;font-size:.7em;height:100%;border-right:3px solid #f1e239}.hpdelta.svelte-g292qg.svelte-g292qg.svelte-g292qg{position:absolute;top:0;left:0;font-size:1.3em;height:100%;transition:width .2s;transition-delay:.1s;z-index:-1}.hpdelta.bghealth.svelte-g292qg.svelte-g292qg.svelte-g292qg{background:#F42929}.hpdelta.bghealth.svelte-g292qg.svelte-g292qg.svelte-g292qg{background:#F42929}.hpdelta.bgenemy.svelte-g292qg.svelte-g292qg.svelte-g292qg{background:#FFE010}.hpdelta.bgenemy.svelte-g292qg.svelte-g292qg.svelte-g292qg{background:#FFE010}.targetframes.svelte-17up9g6{display:grid;grid-gap:5px;z-index:3;align-items:end;margin:0 auto 4px;max-width:600px;grid-template-columns:1fr 1fr}.container.svelte-14w0l4b{max-width:260px}.pad.svelte-14w0l4b{padding-top:8px}.slottitle{font-size:20px;font-weight:700;margin-top:4px}.slottitle{font-weight:bold}.type.svelte-h3wg5.svelte-h3wg5{text-transform:capitalize}.type.svelte-h3wg5{text-transform:capitalize}.pack.svelte-h3wg5.svelte-h3wg5{margin:8px 0}.description.svelte-h3wg5.svelte-h3wg5{font-size:13px;font-weight:700;color:#5b858e}.description.svelte-h3wg5{font-weight:bold;color:#5b858e}.container.svelte-h3wg5.svelte-h3wg5{max-width:240px}.comparecontainer.svelte-h3wg5.svelte-h3wg5{position:absolute;right:100%;top:-3px;margin-right:8px}.value.svelte-h3wg5.svelte-h3wg5{background-color:#19202d}.value.svelte-h3wg5{background-color:#19202d}.itemCostTable.svelte-h3wg5.svelte-h3wg5{display:grid;grid-gap:4px;grid-template-columns:auto 20px 1fr}.itemCostTable.svelte-h3wg5>img.svelte-h3wg5{max-width:100%}.slotskill{border-radius:3px;height:100%}.slotskill{border-radius:3px}.bar.svelte-1v6qmvo{pointer-events:all;display:grid;grid-gap:2px;grid-auto-rows:46px;grid-auto-columns:46px;grid-auto-flow:column}.bar.svelte-1v6qmvo{pointer-events:all}.slotcontainer.svelte-ha50yv{grid-auto-rows:46px;right:4px;pointer-events:all;display:grid;grid-gap:3px;margin:4px 0}.slotcontainer.svelte-ha50yv{pointer-events:all}.filter.svelte-ha50yv{font-size:13px}.gold.svelte-ha50yv{padding:4px 8px;background-color:#10131d;float:right}.gold.svelte-ha50yv{background-color:#10131d}.wrapper.svelte-hjyujf{width:230px;cursor:pointer}.wrapper.svelte-hjyujf{cursor:pointer}.buttons.svelte-hjyujf{line-height:1;font-size:13px}.text.svelte-as7pul{position:absolute;width:100%;text-align:center;text-shadow:2px 2px 0px #000}.text.svelte-as7pul{text-align:center;text-shadow:2px 2px 0px #000}.location.svelte-as7pul{margin-top:15vh;font-size:30px;top:10vh;text-transform:capitalize}.location.svelte-as7pul{text-transform:capitalize}.error.svelte-as7pul{font-size:20px;font-weight:700;bottom:33vh}.error.svelte-as7pul{font-weight:bold}.quest.svelte-as7pul{color:#ffe404;font-size:18px;font-weight:700;position:relative;margin:0 0 4px}.rewards.svelte-as7pul{display:flex;justify-content:center;gap:8px;margin-top:3px}.gold-reward.svelte-as7pul{color:#fbd08d}.quest-messages.svelte-as7pul{position:absolute;top:15vh;width:100%}.container.svelte-1uywqr8{min-width:200px;text-align:center;padding:12px}.container.svelte-1uywqr8{text-align:center}.unavailable.svelte-1uywqr8{pointer-events:none}.unavailable.svelte-1uywqr8{pointer-events:none}.notification.svelte-9nlpzp{text-align:center;position:absolute;top:150px;left:50%;transform:translate(-50%);padding:16px 24px;cursor:pointer}.notification.svelte-9nlpzp{text-align:center;cursor:pointer}.icon.svelte-9nlpzp{position:absolute;top:-45px;transform:translate(-50%)}.btnbar.svelte-133q4bd{float:right}.divide.svelte-13nnce4{width:700px;height:500px;display:grid;grid-gap:16px;grid-template-columns:150px 1fr}.menu.svelte-13nnce4{padding-left:12px}.settings.svelte-13nnce4{display:grid;grid-template-columns:1fr 1fr;grid-gap:8px;align-items:center}.skilllist.svelte-1e0alkc{display:grid;grid-template-columns:auto auto auto;grid-gap:4px}.skillbox.svelte-1e0alkc{display:grid;grid-template-columns:46px 120px 1fr;grid-auto-rows:46px;grid-gap:8px;width:230px}.skillpoints.svelte-1e0alkc{display:grid;grid-template-columns:repeat(auto-fit,20px);grid-auto-rows:15px;grid-gap:4px;margin-top:3px}.flexer.svelte-1e0alkc{height:100%;display:flex;flex-direction:column}.name.svelte-1e0alkc{margin-top:3px;white-space:nowrap;text-overflow:ellipsis;overflow:hidden}.bar-top-config.svelte-1e0alkc{display:grid;grid-template-columns:auto 200px auto auto 1fr;grid-gap:4px;margin-bottom:4px}.bar-top-save.svelte-1e0alkc{display:grid;grid-template-columns:1fr 200px auto auto 1fr;grid-gap:4px;margin-bottom:4px}.bar-bot.svelte-1e0alkc{display:grid;grid-template-columns:1fr auto 1fr;grid-gap:4px;align-items:center;margin-top:4px}.incbtn.svelte-1e0alkc{text-align:center;padding:0;border:0!important;font-family:monospace;font-weight:bolder;line-height:1}.incbtn.svelte-1e0alkc{text-align:center;border:0 !important;font-family:monospace;font-weight:bolder}.infocol.svelte-17jb1r5{text-transform:capitalize}.infocol.svelte-17jb1r5{text-transform:capitalize}.result.svelte-17jb1r5{display:grid;grid-template-columns:1fr 70px 70px}.layout.svelte-35lzg4.svelte-35lzg4{width:780px;display:grid;grid-gap:4px;grid-template:\"s s\" auto \"c i\" auto \"p p\" auto/1fr 5fr;height:100%}.choice.svelte-35lzg4.svelte-35lzg4{text-transform:capitalize;font-size:13px}.choice.svelte-35lzg4.svelte-35lzg4{text-transform:capitalize}.search.svelte-35lzg4.svelte-35lzg4{grid-area:s;display:grid;grid-template-columns:400px 1fr auto auto auto;grid-gap:8px;position:relative}.choices.svelte-35lzg4.svelte-35lzg4{grid-area:c;height:44vh}.items.svelte-35lzg4.svelte-35lzg4{grid-area:i;height:44vh}.buytable.svelte-35lzg4.svelte-35lzg4{display:grid;grid-template-rows:auto 1fr;height:100%}.buytblhead.svelte-35lzg4.svelte-35lzg4{display:grid;grid-template-columns:30px 2.5fr .4fr 1.4fr .6fr .9fr .9fr;grid-gap:3px;padding:0;font-size:12px;margin:3px 0}.buy.svelte-35lzg4.svelte-35lzg4{display:grid;grid-template-columns:30px 2.5fr .4fr 1.4fr .6fr 1.8fr;grid-gap:3px;margin-bottom:3px;padding:0}.buy.item.svelte-35lzg4.svelte-35lzg4{grid-template-rows:30px;cursor:pointer}.buy.item.svelte-35lzg4.svelte-35lzg4{cursor:pointer}.buy.item.svelte-35lzg4>span.svelte-35lzg4{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.post.svelte-35lzg4.svelte-35lzg4{grid-area:p;display:grid;grid-template-columns:43px 1fr auto 100px auto;grid-template-rows:43px;grid-gap:8px}.postStacks.svelte-35lzg4.svelte-35lzg4{grid-template-columns:43px 1fr auto 100px auto auto}.confirm.svelte-35lzg4.svelte-35lzg4{grid-area:p;display:grid;grid-template-columns:1fr auto auto;grid-template-rows:43px;grid-gap:8px;justify-items:end}.marg.svelte-35lzg4.svelte-35lzg4{margin:4px 0;align-self:center}.divider.svelte-35lzg4.svelte-35lzg4{margin:5px 8px;border-bottom:1px solid rgba(91,133,142,.1)}.divider.svelte-35lzg4.svelte-35lzg4{border-bottom:1px solid rgba(91, 133, 142, 0.1)}.bar-top-config.svelte-gou6xs{display:grid;grid-template-columns:auto 70px auto 70px 1fr auto;grid-gap:4px;margin-bottom:4px}.slotparent.svelte-gou6xs{display:flex;flex-direction:column;gap:4px}.slotcontainer.svelte-gou6xs{right:4px;pointer-events:all;display:grid;grid-gap:3px;grid-auto-rows:46px}.slotcontainer.svelte-gou6xs{pointer-events:all;margin:4px 0}.gold.svelte-gou6xs{padding:4px 8px}.formelements.svelte-gou6xs{gap:4px;display:flex;justify-content:flex-end}.container.svelte-12uytpc{width:397px}.container.svelte-12uytpc{z-index:5}.slotcontainer.svelte-12uytpc{right:4px;pointer-events:all;display:grid;grid-gap:3px;margin:4px 0;grid-auto-rows:46px;grid-template-columns:repeat(auto-fill,46px)}.slotcontainer.svelte-12uytpc{pointer-events:all}.info.svelte-12uytpc{display:inline-block;margin-bottom:16px}.layout.svelte-3fcblv{display:grid;grid-gap:4px;grid-template-columns:5fr 2fr}.search.svelte-3fcblv{align-items:center}.listing.svelte-3fcblv{padding:8px;cursor:pointer;display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;align-items:center}.listcontainer.svelte-3fcblv{height:45vh}.applied.svelte-3fcblv{background-color:#48a86c33;box-shadow:0 0 4px #34cb4966,inset 0 0 9px 2px #34cb4999}.denied.svelte-3fcblv{background-color:#a8575c33;box-shadow:0 0 4px #f4292966,inset 0 0 9px 2px #f4292999}.layout.svelte-6mz3cb{display:grid;grid-gap:4px;grid-template-columns:3fr 2fr}.listcontainer.svelte-6mz3cb{height:45vh;background-color:#10131d}.accept.svelte-6mz3cb{cursor:pointer;pointer-events:all}.accept.svelte-6mz3cb:hover,.accept.active.svelte-6mz3cb{background-color:#34cb494d}.deny.svelte-6mz3cb{cursor:pointer;pointer-events:all}.deny.svelte-6mz3cb:hover,.deny.active.svelte-6mz3cb{background-color:#f429294d}.container.svelte-6dw5x1{width:750px}.container.svelte-1un9m3d{width:350px}.upgradeslot.svelte-1un9m3d{display:grid;width:46px;height:46px;margin:16px auto 0;text-align:left}.upgradeslot.svelte-1un9m3d{text-align:left}.upgradebutton.svelte-1un9m3d{width:100%}.upgrade.svelte-1un9m3d{display:grid;grid-gap:8px;width:150px;margin:8px auto 16px;justify-items:center;text-align:left}.upgrade.svelte-1un9m3d{text-align:left}.costgrid.svelte-1un9m3d{display:grid;grid-gap:4px;grid-auto-rows:30px}.flash_success.svelte-1un9m3d{animation-timing-function:ease-out;animation-name:svelte-1un9m3d-animUp;animation-duration:1.5s}.flash_success.svelte-1un9m3d{animation-timing-function:ease-out;animation-name:svelte-1un9m3d-animUp;animation-duration:1.5s}@keyframes svelte-1un9m3d-animUp{0%{box-shadow:0px 0px 0px 0px #FFB034}20%{box-shadow:0px 0px 8px 20px #FFF}100%{box-shadow:0px 0px 3px 0px #FFB034}}.flash_fail.svelte-1un9m3d{animation-timing-function:ease-out;animation-name:svelte-1un9m3d-animDown;animation-duration:.8s}.flash_fail.svelte-1un9m3d{animation-timing-function:ease-out;animation-name:svelte-1un9m3d-animDown;animation-duration:0.8s}@keyframes svelte-1un9m3d-animDown{0%{box-shadow:0px 0px 0px 0px #981E18}20%{box-shadow:0px 0px 5px 20px #EA2020}100%{box-shadow:0px 0px 3px 0px #981E18}}@keyframes svelte-1un9m3d-rainbow{0%{color:red}14%{color:orange}28%{color:#ff0}42%{color:green}57%{color:#15fae7}71%{color:#922dda}85%{color:violet}to{color:red}}.textrainbow.svelte-1un9m3d{animation:svelte-1un9m3d-rainbow 1s infinite;text-shadow:0 0 8px #ffcf00;font-weight:700}.items.svelte-rbq5ku{display:grid;grid-gap:4px;max-width:575px;grid-auto-rows:46px;grid-template-columns:repeat(11,46px);margin:4px 0}.stats2.svelte-rbq5ku{font-size:13px}.statcol.svelte-rbq5ku{display:grid;grid-template-columns:auto auto;align-content:start;column-gap:3px;align-items:center}.statbtn.svelte-rbq5ku{pointer-events:all;border:unset!important}.statbtn.svelte-rbq5ku{pointer-events:all;border:unset !important}.statbtn.disabled.svelte-rbq5ku{opacity:.5;background-color:#5b858e}.statbtn.disabled.svelte-rbq5ku{opacity:0.5;background-color:#5b858e}.l-corner-ul.svelte-1f9hkm3{z-index:3}.partyframes.svelte-1f9hkm3{margin-top:4px;display:grid;grid-gap:4px;grid-template-rows:1fr}.pattern.svelte-1m0q37p{position:absolute;left:0;top:0;width:100%;height:100%;background:repeating-linear-gradient(to right,rgba(0,0,0,.2666666667) 0px,rgba(0,0,0,.2666666667) 3px,rgba(0,0,0,0) 3px,rgba(0,0,0,0) 5%)}.pattern.svelte-1m0q37p{background:repeating-linear-gradient(to right, #0004 0px, #0004 3px, #0000 3px, #0000 5%)}.container.svelte-1m0q37p{border-top:3px solid rgba(16,19,29,.8)}.container.svelte-1m0q37p{border-top:3px solid rgba(16, 19, 29, 0.8)}.tut.svelte-1lbwtxg.svelte-1lbwtxg{border:5px solid #F5C247;position:absolute;z-index:99;box-sizing:border-box;animation:svelte-1lbwtxg-indicator 1s;box-shadow:#000 0 0 20px 20px}.tut.guided.svelte-1lbwtxg.svelte-1lbwtxg{pointer-events:none;border-width:3px;box-shadow:#000 0 0 12px 4px}.uiarrow.svelte-1lbwtxg.svelte-1lbwtxg{position:absolute;width:46px;height:46px;transform:translate(-50%,-90%);z-index:100;pointer-events:none;animation:svelte-1lbwtxg-uiArrowLead 1s ease-in-out both,svelte-1lbwtxg-uiArrowJump .4s ease-in-out 1s infinite alternate}.uiarrow.svelte-1lbwtxg svg.svelte-1lbwtxg{display:block;width:100%;height:100%;overflow:visible;transform:rotate(var(--arrow-angle));transform-origin:50% 90%}.uiarrow.svelte-1lbwtxg polygon.svelte-1lbwtxg{fill:#f5c247;stroke:#10131d;stroke-width:2px;stroke-linejoin:round}.uiarrow.svelte-1lbwtxg .label.svelte-1lbwtxg{position:absolute;left:50%;bottom:calc(100% + 5px);margin-left:var(--label-x);transform:translate(-50%);max-width:220px;padding:4px 8px;border-radius:3px;background-color:#19202d;color:#f5c247;border:3px solid #10131d;box-sizing:border-box;font-size:16px;font-weight:700;line-height:1.2;text-align:center;white-space:nowrap;animation:svelte-1lbwtxg-uiArrowInstruction .18s ease-out .82s both}.uiarrow.svelte-1lbwtxg .label.below.svelte-1lbwtxg{top:calc(100% + 5px);bottom:auto}.uiarrow.svelte-1lbwtxg .label.below.up.svelte-1lbwtxg{top:calc(100% + 42px)}.uiarrow.svelte-1lbwtxg kbd.svelte-1lbwtxg{position:absolute;left:calc(100% + 5px);top:50%;transform:translateY(-50%);background-color:#5b858e;border:3px solid #10131d;box-sizing:border-box;min-width:1.2em;padding:2px 5px;text-align:center;font-size:16px;font-weight:700;white-space:nowrap;animation:svelte-1lbwtxg-uiArrowInstruction .18s ease-out .82s both}.uiarrow.svelte-1lbwtxg kbd.up.svelte-1lbwtxg{top:calc(100% + 14px)}.uiarrow.svelte-1lbwtxg kbd.left.svelte-1lbwtxg{left:auto;right:calc(100% + 5px)}@keyframes svelte-1lbwtxg-uiArrowLead{0%{transform:translate(calc(-50% + var(--lead-x)),calc(-90% + var(--lead-y)))}to{transform:translate(-50%,-90%)}}@keyframes svelte-1lbwtxg-uiArrowJump{0%{margin-left:0;margin-top:0}to{margin-left:var(--jump-x);margin-top:var(--jump-y)}}@keyframes svelte-1lbwtxg-uiArrowInstruction{0%{opacity:0}to{opacity:1}}@keyframes svelte-1lbwtxg-indicator{0%{transform:scale(1.5);opacity:0}to{transform:scale(1);opacity:1}}.complete.svelte-1lbwtxg.svelte-1lbwtxg{animation:svelte-1lbwtxg-complete .2s;animation-fill-mode:forwards}@keyframes svelte-1lbwtxg-complete{0%{opacity:1}to{opacity:0}}.navigation-compass.svelte-1v7fm4h{position:fixed;z-index:1;pointer-events:all;cursor:move}.navigation-compass.locked.svelte-1v7fm4h{cursor:default}canvas.svelte-1v7fm4h{display:block}.container.svelte-jnzoj3{width:400px}.reportdescription.svelte-jnzoj3{width:100%;resize:none}.reportdescription.svelte-jnzoj3{resize:none}.panel-black.svelte-6t8hqd{padding:8px}.offline.svelte-6t8hqd{opacity:.5}.offline.svelte-6t8hqd{opacity:0.5}.helmet.svelte-6t8hqd{opacity:.1;top:0;width:250px;pointer-events:none}.helmet.svelte-6t8hqd{opacity:0.1;pointer-events:none}.hero.svelte-6t8hqd{position:relative}label.svelte-7uvqsx{margin-top:16px}.container.svelte-1vwl908{width:630px;height:500px}.container.svelte-1vwl908{z-index:9}.clanView.svelte-1vwl908{margin:8px}.modemenu.svelte-1vwl908{margin:32px}.clanInfoBox.svelte-1vwl908{margin:100px}.container.svelte-100hcdi{width:235px;height:450px;display:grid;grid-gap:4px;grid-template-rows:1fr auto}.userlist.svelte-100hcdi{display:flex;flex-direction:column;gap:4px}.user-row.svelte-100hcdi{display:grid;grid-gap:4px}.friend.svelte-100hcdi,.request.svelte-100hcdi{display:grid;grid-template-columns:1fr auto auto;grid-gap:4px}.block.svelte-100hcdi{display:grid;grid-template-columns:1fr auto;grid-gap:4px}.textnooverflow.svelte-100hcdi{text-overflow:ellipsis;white-space:nowrap;overflow:hidden}.bar-top.svelte-100hcdi{display:grid;grid-template-columns:1fr auto;grid-gap:4px}.layout.svelte-19s383j{display:grid;grid-template-rows:auto 1fr;width:700px;height:500px}.infosmall.svelte-19s383j{font-size:14px;text-align:center;font-weight:700;display:block}.infosmall.svelte-19s383j.svelte-19s383j.svelte-19s383j.svelte-19s383j{text-align:center;font-weight:bold}.infobig.svelte-19s383j{font-size:24px;text-align:center;font-weight:700;display:block}.infobig.svelte-19s383j.svelte-19s383j.svelte-19s383j.svelte-19s383j{text-align:center;font-weight:bold}.container.svelte-voya4q{width:350px}.ranktitle.svelte-voya4q{font-size:1.2em}.stats.svelte-voya4q{font-size:.9em;display:grid;grid-gap:4px;grid-template-columns:2fr 3fr}.container.svelte-1wip79f{position:absolute;bottom:4px;right:4px;box-sizing:border-box}.title.svelte-1wip79f{font-weight:700;font-size:20px}.title.svelte-1wip79f{font-weight:bold}.sparkle.svelte-cbx1m{color:#fff;animation:svelte-cbx1m-sparkleAnim 4s infinite alternate ease-in-out;position:absolute}.sparkle.svelte-cbx1m{color:#fff;animation:svelte-cbx1m-sparkleAnim 4s infinite alternate ease-in-out}@keyframes svelte-cbx1m-sparkleAnim{0%{transform:translate(-50%, 10px)}100%{transform:translate(-50%, -10px)}}.artwork.svelte-cbx1m{transform:translate(-50%,-60%);position:absolute;left:50%;top:50%;width:60%;max-width:160px;animation:svelte-cbx1m-artAnim 4s infinite alternate ease-in-out}.artwork.svelte-cbx1m{animation:svelte-cbx1m-artAnim 4s infinite alternate ease-in-out}@keyframes svelte-cbx1m-artAnim{0%{transform:translate(-50%, -52%) rotate(7deg)}100%{transform:translate(-50%, -48%) rotate(5deg)}}.artcontainer.svelte-cbx1m{position:relative}.split.svelte-cbx1m{display:grid;grid-gap:30px;grid-template-columns:1fr 1fr;margin-bottom:1em}.old.svelte-cbx1m{text-decoration:line-through;color:#5b858e}.old.svelte-cbx1m{text-decoration:line-through;color:#5b858e}.container.svelte-1lv1z23{width:600px}.container.svelte-um60d1{z-index:1000;padding:3px 30px;top:4px;pointer-events:all;position:absolute;font-size:13px;transform-origin:top right;right:50%;transform:translate(50%)}@media (max-width: 1300px){.container.svelte-um60d1{transform:scale(.9) translate(50%)}}@media (max-width: 1250px){.container.svelte-um60d1{transform:scale(.8) translate(50%)}}@media (max-width: 1200px){.container.svelte-um60d1{transform:scale(.7) translate(50%)}}@media (max-width: 1150px){.container.svelte-um60d1{transform:scale(.6) translate(50%)}}@media (max-width: 1100px){.container.svelte-um60d1{transform:scale(.6) translate(50%,40px)}}.name.svelte-13wcf6i{position:absolute;bottom:4px;left:4px;font-size:12px}.textbox.svelte-13wcf6i{background-color:#10131db3;padding:2px;border-radius:3px;line-height:1em}.textbox.svelte-13wcf6i{background-color:rgba(16, 19, 29, 0.7);border-radius:3px}.stream.svelte-13wcf6i{display:block;color:unset;user-select:none;cursor:pointer;border-radius:3px;color:#fff}.stream.svelte-13wcf6i{color:unset;user-select:none;cursor:pointer;border-radius:3px;color:#fff}.viewcount.svelte-13wcf6i{font-size:12px;position:absolute;top:4px;right:4px}.preview.svelte-13wcf6i{width:100%;height:70px;overflow:hidden;border-radius:3px;position:relative;background-position:center;background-color:#10131d;background-size:cover;box-sizing:border-box}.preview.svelte-13wcf6i{border-radius:3px;background-position:center;background-color:#10131d;background-size:cover}.bar.svelte-nijy6x{font-family:monospace;font-size:12px;float:right;line-height:1em;margin-right:4px;background-color:#00000070;letter-spacing:-.05em;padding:1px}.bar.svelte-nijy6x{font-family:monospace;background-color:#00000070;letter-spacing:-0.05em}.minimapcontainer.svelte-1khf45q{position:relative;float:right;clear:right}.warIcon.svelte-1khf45q{position:absolute;left:-9px;bottom:-9px;padding:0}.tracker.svelte-1tfw1hn{position:absolute;top:260px;right:0;transform:translateY(max(0px,50vh - 260px - 50%));width:280px;display:grid;border-radius:3px;grid-template-columns:minmax(0,1fr);gap:4px;padding:4px 8px;box-sizing:border-box;background-color:#10131d66;font-size:16px;text-shadow:1px 1px #10131d}.quest.svelte-1tfw1hn{display:block;min-width:0;width:100%}.title.svelte-1tfw1hn{display:flex;align-items:center;gap:4px;min-width:0;width:100%;overflow:hidden;white-space:nowrap}.quest-name.svelte-1tfw1hn{min-width:0;flex:1 1 0;display:block;overflow:hidden;text-overflow:ellipsis}.quest-level.svelte-1tfw1hn{flex:none}.objective.svelte-1tfw1hn{margin-left:12px}.search.svelte-1tfw1hn{flex:none;pointer-events:all;cursor:pointer;border-radius:3px}.search.svelte-1tfw1hn:hover{background-color:#10131db3}.search.unavailable.svelte-1tfw1hn{opacity:.5}.stick.svelte-1n6apdt.svelte-1n6apdt{position:fixed;width:104px;height:104px;margin:-52px;box-sizing:border-box;border:3px solid rgba(218,232,234,.45);border-radius:50%;background:rgba(16,19,29,.35);pointer-events:none;z-index:20}.knob.svelte-1n6apdt.svelte-1n6apdt{position:absolute;left:29px;top:29px;width:40px;height:40px;border:3px solid rgba(218,232,234,.7);border-radius:50%;background:rgba(91,133,142,.75)}.jump.svelte-1n6apdt.svelte-1n6apdt{position:fixed;right:env(safe-area-inset-right,0px);bottom:calc(env(safe-area-inset-bottom,0px) + var(--mobile-action-height) + 30px);width:52px;height:52px;padding:11px;border:3px solid rgba(218,232,234,.55);border-radius:50%;background:rgba(16,19,29,.7);touch-action:none;pointer-events:all;z-index:20}.jump.svelte-1n6apdt img.svelte-1n6apdt{display:block;width:100%;height:100%}.mobile-chat.svelte-1n6apdt.svelte-1n6apdt{position:fixed;left:env(safe-area-inset-left,0px);top:env(safe-area-inset-top,0px);width:30px;box-sizing:border-box;color:#a6dcd5;text-align:center;touch-action:manipulation;pointer-events:all;z-index:20}.rotate-device.svelte-1n6apdt.svelte-1n6apdt{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#dae8ea;font-size:24px;font-weight:700;background:rgba(16,19,29,.72);text-shadow:0 2px 4px #000;pointer-events:none;z-index:30}.rotate-symbol.svelte-1n6apdt.svelte-1n6apdt{font-size:64px;line-height:1}html.mobile-controls,html.mobile-controls body{width:100dvw;height:100dvh}html.mobile-controls{--mobile-map-size:min(200px, 30dvh);--mobile-quest-width:min(168px, 27vw);--mobile-unit-width:clamp(166px, 26vw, 221px);--mobile-skill-size:46px;--mobile-action-height:102px;--mobile-layout-gap:4px;--mobile-chat-width:30px}html.mobile-controls .l-canvas,html.mobile-controls #skillbar{touch-action:none}html.mobile-controls .uiscaled{transform:none}html.mobile-controls .l-corner-ll{width:38vw!important;min-width:0!important;height:140px!important;bottom:max(125px,env(safe-area-inset-bottom))!important;padding:0;padding-left:env(safe-area-inset-left,0px);box-sizing:border-box;margin-bottom:0!important;opacity:1;pointer-events:none}html.mobile-controls .l-corner-ll #chat{overflow-y:auto;touch-action:none;pointer-events:all}html.mobile-controls .l-corner-ll .lowercontainer{position:static;display:block;width:100%}html.mobile-controls .l-corner-ll .chatsection.hidden{visibility:visible;opacity:0;pointer-events:none}html.mobile-controls .l-corner-ll .chatsection.hidden *{pointer-events:none!important}html.mobile-controls .l-corner-ll .chatsection{opacity:1;pointer-events:all}html.mobile-controls .l-corner-ll .channelselect{display:none}html.mobile-controls .l-corner-ul{padding:0;padding-top:env(safe-area-inset-top,0px);padding-left:env(safe-area-inset-left,0px)}html.mobile-controls .l-ui:has(.chatsection:not(.hidden)) .l-corner-ul{display:none}html.mobile-controls .l-corner-ul>.btnbar{margin-left:calc(var(--mobile-chat-width) + var(--mobile-layout-gap))}html.mobile-controls .l-corner-ur{left:0;padding:0;padding-top:env(safe-area-inset-top,0px);padding-right:env(safe-area-inset-right,0px);bottom:calc(var(--mobile-action-height) + env(safe-area-inset-bottom,0px));box-sizing:border-box;display:grid;grid-template-columns:minmax(0,1fr) var(--mobile-map-size);grid-template-rows:var(--mobile-map-size) minmax(0,1fr);column-gap:var(--mobile-layout-gap);align-items:start}html.mobile-controls .l-corner-ur>.btnbar{grid-column:1;grid-row:1;justify-self:end}html.mobile-controls .l-corner-ur>:not(.btnbar):not(#minimapcontainer):not(.tracker){display:none}html.mobile-controls .actionbarcontainer{left:auto;right:env(safe-area-inset-right,0px);bottom:0;margin:0;transform:none;display:flex;align-items:flex-end;gap:var(--mobile-layout-gap)}html.mobile-controls #skillbar{flex:none;grid-template-columns:repeat(6,var(--mobile-skill-size));grid-template-rows:repeat(2,var(--mobile-skill-size));grid-auto-flow:row}html.mobile-controls #skillbar>:nth-child(n+13){display:none}html.mobile-controls .targetframes{width:calc(var(--mobile-unit-width) * 2 + 5px);max-width:calc(var(--mobile-unit-width) * 2 + 5px);flex:none;margin:0;grid-template-columns:repeat(2,var(--mobile-unit-width));grid-template-rows:auto;align-items:end}html.mobile-controls .targetframes>.grid.left,html.mobile-controls .targetframes>.grid.right{grid-template:\"ba\" auto/minmax(0,1fr)!important}html.mobile-controls .targetframes .iconcontainer{display:none}html.mobile-controls #minimapcontainer{grid-column:2;grid-row:1;width:var(--mobile-map-size);height:var(--mobile-map-size);margin-top:0}html.mobile-controls #minimapcontainer>canvas{width:100%!important;height:100%!important;box-sizing:border-box}html.mobile-controls .tracker{position:static;grid-column:2;grid-row:2;width:var(--mobile-quest-width);min-height:0;height:100%;margin-top:var(--mobile-layout-gap);padding:var(--mobile-layout-gap);box-sizing:border-box;transform:none;justify-self:end;align-content:start;overflow-y:auto;font-size:13px;line-height:1.15}html.mobile-controls .slotdescription,html.mobile-controls .slottext.key{display:none}html.mobile-controls .window-pos{position:fixed!important;inset:30px 300px 0 0!important;display:block;pointer-events:none}html.mobile-controls .window-pos:has(.filter+.slotcontainer){left:calc(100% - 300px)!important;right:0!important;top:30px!important;bottom:124px!important;display:flex;align-items:flex-end}html.mobile-controls .window{width:max-content!important;min-width:0!important;max-width:100%;max-height:100%;box-sizing:border-box;pointer-events:all}html.mobile-controls .window>.slot{overflow:hidden}html.mobile-controls .window-pos:has(.interaction) .interaction{display:flex;flex-direction:column;height:100%;min-height:0;box-sizing:border-box}html.mobile-controls .window-pos:has(.interaction) .interaction-text{flex:1;min-height:0}html.mobile-controls .window-pos:has(.interaction) .interaction-actions{flex-shrink:0}html.mobile-controls .window-pos:has(.tab-bar+.layout) .container{width:min(600px,100vw - 310px)!important;height:100%;display:grid;grid-template-rows:auto minmax(0,1fr)}html.mobile-controls .window-pos:has(.tab-bar+.layout) .container>.layout{height:100%;min-height:0}html.mobile-controls .window-pos:has(.tab-bar+.layout) .listcontainer{height:auto!important;min-height:0}html.mobile-controls .window-pos:has(#skilllist) .window{width:100%!important}html.mobile-controls .window-pos:has(#skilllist) .flexer{min-height:0}html.mobile-controls #skilllist{flex:1;min-height:0;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))!important}html.mobile-controls #skilllist .skillbox{width:auto!important;grid-template-columns:46px minmax(0,1fr) 44px!important}html.mobile-controls .window-pos:has(.divide) .divide{width:min(700px,100vw - 310px)!important;height:100%!important;min-height:0}html.mobile-controls .window-pos:has(.divide) .menu{min-height:0}html.mobile-controls .window-pos:has(.filter+.slotcontainer) .slotcontainer{grid-template-columns:repeat(6,minmax(0,1fr))!important}html.mobile-controls .window-pos:has(.filter+.slotcontainer) .slotcontainer>.slot{width:100%;min-width:0;box-sizing:border-box}html.mobile-controls .window-pos:has(.filter+.slotcontainer) .window{width:100%!important;height:fit-content!important}html.mobile-controls .window-pos:has(.filter+.slotcontainer) .window>.slot{overflow-y:auto}.layout.svelte-k3qmu8{display:grid;grid-template-rows:1fr auto}.container.svelte-k3qmu8{position:relative;transform-origin:bottom}.actionbarcontainer.svelte-k3qmu8{margin-bottom:4px;position:absolute;transform:translate(-50%);bottom:0;left:50%;z-index:3}body{overscroll-behavior:none;overflow:hidden;font-size:15px}body{overscroll-behavior:none;background-color:#10131d;font-family:\"hordes\", sans-serif}.btnbar :not(:last-child){margin-right:3px}input[type=\"number\"]{padding:5px 8px}input[type=\"text\"]{padding:5px 8px}input[type=\"search\"]{padding:5px 8px}@media(max-width: 600px), (max-height: 450px){.uiscaled{transform:scale(0.9)}}@media(max-width: 550px), (max-height: 400px){.uiscaled{transform:scale(0.8)}}@media(max-width: 500px), (max-height: 350px){.uiscaled{transform:scale(0.7)}}@media(max-width: 450px), (max-height: 300px){.uiscaled{transform:scale(0.65)}}@media(max-width: 400px), (max-height: 280px){.uiscaled{transform:scale(0.6)}}tr.striped{transition:0.1s background-color}.navbtn:not(:last-child){margin-right:8px}.hidden.svelte-c6ga6k.svelte-c6ga6k{visibility:hidden}.time.svelte-c6ga6k.svelte-c6ga6k{font-size:11px;color:#5b858e;width:2.8em;display:inline-block}.content.svelte-c6ga6k.svelte-c6ga6k{display:inline;white-space:nowrap}.sender.svelte-c6ga6k.svelte-c6ga6k{pointer-events:all;cursor:pointer}.sender.svelte-c6ga6k.svelte-c6ga6k:hover{background-color:rgba(16, 19, 29, 0.5)}.line.svelte-c6ga6k.svelte-c6ga6k{pointer-events:none;text-shadow:1px 1px #000;margin-right:0.35em;overflow:hidden;direction:ltr}.linewrap.svelte-c6ga6k.svelte-c6ga6k{display:inline;border-radius:3px;background-color:rgba(16, 19, 29, 0.3);padding:0 3px}.container.svelte-hjyujf{z-index:6}.container.svelte-ha50yv{z-index:7}.container.svelte-1khf45q{float:right;clear:right}.container.svelte-13nnce4{z-index:9}.bar.svelte-1e0alkc{display:grid;grid-template-columns:1fr auto auto;grid-gap:4px;align-items:center;margin-bottom:4px}.container.svelte-gou6xs{display:flex}.container.svelte-19s383j.svelte-19s383j.svelte-19s383j.svelte-19s383j{z-index:9}.statboard.svelte-19s383j.svelte-19s383j.svelte-19s383j.svelte-19s383j{font-size:13px}.statboard.svelte-19s383j tbody.svelte-19s383j>tr.svelte-19s383j>td.svelte-19s383j{padding-top:3px;padding-bottom:3px}.overlay.hidden.svelte-zp79uy.svelte-zp79uy{display:none}.slottext.key{color:#5b858e;right:3px;top:3px}.slottext.stacks{color:#DAE8EA;right:3px;bottom:3px}.filled.svelte-zp79uy.svelte-zp79uy:hover{box-shadow:0 0 5px 2px #0F0F16, inset 0 0 2px 3px #272929, inset 0 0 6px 5px #6e8490}.filled.svelte-zp79uy .autocast.svelte-zp79uy{box-sizing:border-box;position:absolute;width:5px;height:5px;border-radius:50%;animation:svelte-zp79uy-autocast 2s cubic-bezier(0.8, 0.5, 0.2, 0.5) infinite;z-index:11;transform:translate(-50%, -50%);background-color:rgba(250, 243, 176, 0.85);box-shadow:0px 0px 3px 2px rgba(245, 233, 104, 0.65)}@keyframes svelte-1vbnriq-fadein{{opacity:0}{opacity:1}}@keyframes svelte-wv9du9-indicator{0%{transform:scale(1.5);opacity:0}100%{transform:scale(1);opacity:1}}@keyframes svelte-wv9du9-complete{0%{opacity:1}100%{opacity:0}}@keyframes svelte-zp79uy-autocast{0%{left:0;top:0}25%{left:100%;top:0}50%{left:100%;top:100%}75%{left:0;top:100%}100%{left:0;top:0}}",
         classicCssApply = () => {
@@ -32597,9 +33657,32 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             out.horizon = out.fog;
             return out;
         },
+        classicEnv05 = {"2":{"ambient":[[0.324,0.567,0.602],[0.476,0.436,0.64],[0.121,0.23,0.401]],"direct":[[0.362,0.382,0.302],[0.252,0.19,0.19],[0.091,0.239,0.305]],"fog":[[0.07,0.547,0.868],[0.296,0.172,0.592],[0.002,0.173,0.35]],"skytop":[[0.275,0.629,0.689],[0.194,0.13,0.414],[0.069,0.078,0.179]],"skymid":[[0.342,0.739,0.812],[0.416,0.3,0.55],[0.1,0.252,0.364]],"horizon":[[0.313,0.718,0.777],[0.517,0.369,0.591],[0.072,0.153,0.28]],"sun":[[0.627,0.887,0.867],[1,1,1],[0.361,0.69,0.979]],"clouds":[[0.607,0.815,0.881],[0.747,0.559,0.702],[0.007,0.449,0.607]]},"4":{"ambient":[[0.292,0.484,0.634],[0.327,0.389,0.305],[0.196,0.211,0.384]],"direct":[[0.269,0.471,0.384],[0.353,0.325,0.249],[0.253,0.434,0.523]]},"6":{"ambient":[[0.35,0.583,0.916],[0.373,0.394,0.893],[0.104,0.258,0.414]],"direct":[[0.585,0.517,0.417],[0.857,0.549,0.229],[0.067,0.444,0.575]],"fog":[[0.201,0.33,0.593],[0.378,0.353,0.346],[0.106,0.271,0.412]],"skytop":[[0.13,0.283,0.414],[0.17,0.28,0.374],[0.104,0.112,0.178]],"skymid":[[0.233,0.491,0.713],[0.362,0.43,0.488],[0.138,0.348,0.504]],"horizon":[[0.49,0.65,0.734],[0.449,0.443,0.517],[0.22,0.498,0.574]]},"13":{"ambient":[[0.256,0.549,0.566],[0.345,0.365,0.295],[0.107,0.264,0.423]],"direct":[[0.547,0.493,0.345],[0.57,0.491,0.31],[0.067,0.444,0.575]],"fog":[[0.181,0.58,0.653],[0.273,0.467,0.431],[0.106,0.271,0.412]]}},
+        softEnv05 = (id, env) => {
+            let ref = classicEnv05[id],
+                key = "05:" + id,
+                c = classicEnvCache.get(key);
+            if (!ref) return env;
+            if (c && c.__src === env) return c;
+            c = Object.assign({}, env, {
+                __src: env
+            });
+            for (let k in ref) {
+                if (!env[k]) continue;
+                c[k] = env[k].map((n, p) => {
+                    let o = ref[k][p],
+                        lo = classicLum(o),
+                        ln = Math.max(.01, classicLum(n)),
+                        mix = p === 2 ? .55 : .4;
+                    return n.map((v, i) => classicClamp01(v * lo / ln * (1 - mix) + o[i] * mix));
+                });
+            }
+            return classicEnvCache.set(key, c), c;
+        },
         envAt = id => {
-            let env = Ic.get(id),
-                tint = env && worldAmbientTint[classicWorldFor(id)];
+            let env = Ic.get(id);
+            env && worldOverrideOff && (env = softEnv05(id, env));
+            let tint = env && worldAmbientTint[classicWorldFor(id)];
             if (!env || !oe.classicLighting && !oe.classicWaterColors && !tint) return env;
             let ck = id + ":" + classicWorldFor(id),
                 c = classicEnvCache.get(ck);
@@ -33284,7 +34367,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             }
         })
     };
-    var S1 = oe.foliage,
+    var S1 = worldOverrideOff ? Math.min(300, +oe.foliage || 0) : Math.min(100, +oe.foliage || 0),
         S7 = Math.floor(64 ** 2 * (S1 / 100)),
         T7 = [],
         T1 = [],
@@ -34010,9 +35093,10 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 let f = t.data.textureid[c];
                 for (let u = 0; u < 4; ++u) f[u] === 27 && (a[c] = u)
             }
+            for (let pass = 0; pass * 100 < r; ++pass)
             for (let c = 0; c < 64; ++c)
                 for (let f = 0; f < 64; ++f) {
-                    if (Ta() % 100 > r) continue;
+                    if (Ta() % 100 > r - pass * 100) continue;
                     let u = c + t.origin[0],
                         p = f + t.origin[2],
                         g = T.getNormal(u, p);
@@ -34040,8 +35124,8 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                         if (i[W] >= S7 || W < 0) continue;
                         let U = s[W].attributes.inst.data,
                             $ = i[W] * 7,
-                            G = Math.max(0, Math.min(64, c - .25 + um() * .5)),
-                            de = Math.max(0, Math.min(64, f - .25 + um() * .5)),
+                            G = Math.max(0, Math.min(64, c - (pass ? .5 : .25) + um() * (pass ? 1 : .5))),
+                            de = Math.max(0, Math.min(64, f - (pass ? .5 : .25) + um() * (pass ? 1 : .5))),
                             be = ii(t, G, de);
                         U[$] = G + t.origin[0], U[$ + 1] = be, U[$ + 2] = de + t.origin[2], U[$ + 3] = q[2] ? .5 + Math.min(1.4, D * 1.5) : .5 + um(), U[$ + 4] = g[0] + .001, U[$ + 5] = g[1], U[$ + 6] = g[2], i[W]++
                     }
@@ -39522,7 +40606,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         wW = t => {
             let e = [];
             return T.entities.array.forEach((n, o) => {
-                !n.visual || !n.visual.transform.visible || n.stats && !n.stats.alive || n.id !== fo && n.visual.cDist && n.visual.cDist > 60 || n.type === 3 && (n.id !== Sn || t > 0 && jy(n, t)) || (ut(n.hudPos, n.visualPosition || n.pos), n.type !== 3 && (n.hudPos[1] += n.visual.getTopAbsolute(), n.mount !== void 0 && (n.hudPos[1] += 1)), la(n.hudPos, n.hudPos) && (n.id === T.playerId && (n.hudPos[0] = Math.round(.5 * Ln.width / hudK()), n.hudPos[1] = Math.round(.5 * Ln.height / hudK())), e.push(n)))
+                !n.visual || !n.visual.transform.visible || n.stats && !n.stats.alive || n.id !== fo && n.visual.cDist && !oe.uncapNameplates && n.visual.cDist > 60 || n.type === 3 && (n.id !== Sn || t > 0 && jy(n, t)) || (ut(n.hudPos, n.visualPosition || n.pos), n.type !== 3 && (n.hudPos[1] += n.visual.getTopAbsolute(), n.mount !== void 0 && (n.hudPos[1] += 1)), la(n.hudPos, n.hudPos) && (n.id === T.playerId && (n.hudPos[0] = Math.round(.5 * Ln.width / hudK()), n.hudPos[1] = Math.round(.5 * Ln.height / hudK())), e.push(n)))
             }), e.sort((n, o) => o.hudPos[2] - n.hudPos[2])
         },
         xW = (t, e, n) => e ? 4 : n === 0 ? oe.classColorBars && t.type === 0 ? 8 + t.class : 1 : T.player.canCombatInteract(t) ? n === 2 ? oe.classColorBars ? 8 + t.class : 5 : t.type === 1 && t.aggroMode === 0 ? 2 : 3 : 6,
@@ -39545,7 +40629,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     _ = t.skills.timedSkill !== void 0;
                 !l && r && Qr(_ ? U9 : O9, t.hudPos, 1, t.namePlateScale, 1, _ ? 2 : 1, 0, _ ? 4 : 0);
                 let b = r || o === 0 && oe.nameplateShowFriendlyPlayers || o === 1 && oe.nameplateShowMonsters || o === 2 && oe.nameplateShowEnemyPlayers || c,
-                    cc = b && !l && oe.CCIndicatorOnNameplates && nn.has(t.name) ? ccColorOf(t.id) : null;
+                    cc = b && !l && oe.CCIndicatorOnNameplates ? ccColorOf(t.id) : null;
                 cc && Qr(ccPlate(ccDraw(cc, 6, .3), po[0].width + us * 2, (_ ? U9 : O9).height), t.hudPos, v, t.namePlateScale, 1, _ ? 2 : 1, 0, _ ? 4 : 0);
                 if (_ && b) {
                     let y = po[0].height - us,
@@ -41859,6 +42943,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             super.setMedals(e), Vp(e, n, o, "$m"), sc.set(e)
         }
         setItem(e, n, o) {
+            classicBossBeforeSet(e);
             let s = super.setItem(e, n);
             s.reason = o, this.dirty = !0
         }
@@ -42448,7 +43533,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         let e = T.entity(t[0]);
         e !== void 0 && (e.party = 1)
     }).set(55, t => {
-        window.open("/leaderboards?mode=1&kill=" + t[0], "_blank")
+        classicBossKillReply(t[0]) || window.open("/leaderboards?mode=1&kill=" + t[0], "_blank")
     }).set(56, t => {
         Ih()
     }).set(58, t => {
@@ -42503,6 +43588,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             a = e[6],
             c = e[7];
         i !== void 0 && oe.dpsmeterMode === 0 && Ah(i, o, s);
+        l > 0 && classicBossHit(t, i, o);
         let f = t === T.player,
             u = i === T.player;
         if (f ? oe.showIncomingDamage && $y([-.3, -.3, .5], o, l, a, !0, 0) : u && $y(t.visualPosition, o, l, a, !1, 2), l > 0 && (t.stats.changeResource(6, -o), i === T.player && Bn(4, t)), c > 0 && (t.stats.refreshCombatTimer(T.time, c), i && i.stats.refreshCombatTimer(T.time, c)), !n && l > 0 && t.visual && !t.visual.inFog) {
@@ -42522,7 +43608,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             s = t === T.player;
         s && oe.showIncomingHeal && q9([.35, -.2, .5], e[1], e[4], !0, 0), !n && o && o.visual && t.visual && !t.visual.inFog && !o.visual.inFog && o3(e[2], o.visual.transform, t.visual.transform, t.radius, s ? 1 : 0)
     }).set(10, (t, e, n) => {
-        e[1] == 0 ? t.stats.alive && (t.stats.die(), Bn(4, t, !0), t == T.player && Fc(P.ui.death.death, P.ui.death.deathmsg, [{
+        e[1] == 0 ? t.stats.alive && (classicBossDeath(t), t.stats.die(), Bn(4, t, !0), t == T.player && Fc(P.ui.death.death, P.ui.death.deathmsg, [{
             text: P.ui.death.respawn,
             blockedTime: Math.max(0, Math.ceil(e[2] - T.time) + 1),
             fun: () => {
