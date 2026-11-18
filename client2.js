@@ -1810,6 +1810,7 @@ precision highp float;precision highp int;uniform Screen{vec2 resolution;};unifo
         bloomRow = null,
         fogRow = null,
         timeSlider = ee(0),
+        timeToIngame = ee(!0),
         markOwnRevs = ee(!1),
         CCIndicator = ee(!1),
         flashCCIndicator = ee(!1),
@@ -1974,9 +1975,31 @@ precision highp float;precision highp int;uniform Screen{vec2 resolution;};unifo
             target.insertBefore(row, anchor || null);
             return () => (off(), row.remove());
         },
+        deviceDayTime = () => {
+            let now = new Date(),
+                g = now.getHours() + now.getMinutes() / 60 + now.getSeconds() / 3600,
+                nightStart = .8735,
+                nightEnd = .9139,
+                dayOfYear = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 864e5),
+                season = (Math.cos(2 * Math.PI * (dayOfYear - 172) / 365.25) + 1) / 2,
+                realNightStart = 17 + 4 * season,
+                realNightEnd = 7 - 3 * season;
+            if (g >= realNightStart || g < realNightEnd) {
+                let len = 24 - realNightStart + realNightEnd,
+                    t = g >= realNightStart ? (g - realNightStart) / len : (g + 24 - realNightStart) / len;
+                return nightStart + (nightEnd - nightStart) * t;
+            }
+            return (nightEnd + (1 + nightStart - nightEnd) * ((g - realNightEnd) / (realNightStart - realNightEnd))) % 1;
+        },
         dayTime = e => {
             let o = classicPlain ? (e / 3600 + .9) % 1 : (Date.now() / 6e5 + .9) % 1;
-            return oe.timeSlider ? oe.timeSlider / 1e3 : o;
+            if (oe.timeSlider) return oe.timeSlider / 1e3;
+            if (!oe.timeToIngame) return o;
+            let d = deviceDayTime();
+            if (classicPlain) return d;
+            let inv = y => .5 - Math.sin(Math.asin(Math.max(-1, Math.min(1, 1 - 2 * y))) / 3),
+                f = d < .7 ? Vu(0, .7, d) * .4 : .4 + Vu(.7, 1, d) * .6;
+            return f < .5 ? inv(f / .5) * .85 : .85 + inv((f - .5) / .5) * .15;
         };
     var hc = `#version 300 es
 in vec2 uv;
@@ -19987,7 +20010,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 e = h("div"), e.textContent = `${P.ui.settings.resolution}`, n = h("input"), o = h("div"), o.textContent = `${P.ui.settings.viewrange}`, s = h("input"), i = h("div"), l = A(r), a = Qe(), c = h("span"), f = A(t[7]), u = h("input"), p = h("div"), v = A(g), _ = h("br"), b = h("small"), b.textContent = `${P.ui.settings.reload}`, y = h("input"), k = h("div"), E = A(C), F = h("br"), M = h("small"), M.textContent = `${P.ui.settings.reload}`, L = h("input"), V = h("div"), V.textContent = `${P.ui.settings.fxaa}`, Z(D.$$.fragment), z = h("div"), z.textContent = `${P.ui.settings.bloom}`, Z(q.$$.fragment), R = h("div"), W = A(O), U = h("br"), $ = h("small"), $.textContent = `${P.ui.settings.offscreendesc}`, Z(G.$$.fragment), de = h("div"), de.textContent = `${P.ui.settings.particles}`, Z(be.$$.fragment), le = h("div"), le.textContent = `${P.ui.settings.fogpattern}`, Z(se.$$.fragment), fe = h("div"), fe.textContent = `${P.ui.settings.shadows}`, ke = h("div"), we = h("div"), xe = A(ce), $e = h("br"), ye = h("small"), ye.textContent = `${P.ui.settings.reload}`, Z(Oe.$$.fragment), ze = h("div"), ue = A(Ne), _e = h("br"), pe = h("small"), pe.textContent = `${P.ui.settings.reload}`, he = h("input"), m(n, "type", "range"), m(n, "min", "30"), m(n, "step", "10"), m(s, "type", "range"), m(s, "min", "30"), m(c, "class", "textgrey"), m(u, "type", "range"), m(u, "min", "50"), m(u, "max", "100"), m(b, "class", "textgrey"), m(y, "type", "range"), m(y, "min", "0"), m(y, "max", "4"), m(M, "class", "textgrey"), m(L, "type", "range"), m(L, "min", "0"), m(L, "max", worldOverrideOff ? "300" : "100"), m($, "class", "textgrey"), m(fe, "class", "textprimary"), m(ye, "class", "textgrey"), m(pe, "class", "textgrey"), m(he, "type", "range"), m(he, "min", "0"), m(he, "max", "3")
             },
             m(te, H) {
-                x(te, e, H), x(te, n, H), Ge(n, t[5]), x(te, o, H), x(te, s, H), Ge(s, t[6]), x(te, i, H), d(i, l), d(i, a), d(i, c), d(c, f), x(te, u, H), Ge(u, t[7]), x(te, p, H), d(p, v), d(p, _), d(p, b), x(te, y, H), Ge(y, t[8]), x(te, k, H), d(k, E), d(k, F), d(k, M), x(te, L, H), Ge(L, t[9]), grassValueLabel(L, k), x(te, V, H), X(D, te, H), x(te, z, H), X(q, te, H), z.style.display = "none", z.nextElementSibling && (z.nextElementSibling.style.display = "none"), x(te, R, H), timeRows = [sliderRow("Time", timeSlider, te, R, 0, 1e3, !0), checkRow("Override effect alpha", fxAlphaOverride, te, R), textRow("Effect alpha skill IDs", fxAlphaSkills, te, R), sliderRow("Missile effect alpha", fxAlphaSprite, te, R, 0, 100), sliderRow("Ribbon effect alpha", fxAlphaRibbon, te, R, 0, 100), sliderRow("Mesh effect alpha", fxAlphaModel, te, R, 0, 100)], d(R, W), d(R, U), d(R, $), X(G, te, H), x(te, de, H), X(be, te, H), x(te, le, H), X(se, te, H), x(te, fe, H), x(te, ke, H), x(te, we, H), d(we, xe), d(we, $e), d(we, ye), X(Oe, te, H), x(te, ze, H), d(ze, ue), d(ze, _e), d(ze, pe), x(te, he, H), Ge(he, t[10]), ie = !0, Ie || (We = [Y(n, "change", t[38]), Y(n, "input", t[38]), Y(s, "change", t[39]), Y(s, "input", t[39]), Y(u, "change", t[40]), Y(u, "input", t[40]), Y(y, "change", t[41]), Y(y, "input", t[41]), Y(y, "change", t[35]), Y(L, "change", t[42]), Y(L, "input", t[42]), Y(L, "change", t[35]), Y(he, "change", t[43]), Y(he, "input", t[43]), Y(he, "change", t[35])], Ie = !0)
+                x(te, e, H), x(te, n, H), Ge(n, t[5]), x(te, o, H), x(te, s, H), Ge(s, t[6]), x(te, i, H), d(i, l), d(i, a), d(i, c), d(c, f), x(te, u, H), Ge(u, t[7]), x(te, p, H), d(p, v), d(p, _), d(p, b), x(te, y, H), Ge(y, t[8]), x(te, k, H), d(k, E), d(k, F), d(k, M), x(te, L, H), Ge(L, t[9]), grassValueLabel(L, k), x(te, V, H), X(D, te, H), x(te, z, H), X(q, te, H), z.style.display = "none", z.nextElementSibling && (z.nextElementSibling.style.display = "none"), x(te, R, H), timeRows = [sliderRow("Time", timeSlider, te, R, 0, 1e3, !0), checkRow("Use device time", timeToIngame, te, R), checkRow("Override effect alpha", fxAlphaOverride, te, R), textRow("Effect alpha skill IDs", fxAlphaSkills, te, R), sliderRow("Missile effect alpha", fxAlphaSprite, te, R, 0, 100), sliderRow("Ribbon effect alpha", fxAlphaRibbon, te, R, 0, 100), sliderRow("Mesh effect alpha", fxAlphaModel, te, R, 0, 100)], d(R, W), d(R, U), d(R, $), X(G, te, H), x(te, de, H), X(be, te, H), x(te, le, H), X(se, te, H), x(te, fe, H), x(te, ke, H), x(te, we, H), d(we, xe), d(we, $e), d(we, ye), X(Oe, te, H), x(te, ze, H), d(ze, ue), d(ze, _e), d(ze, pe), x(te, he, H), Ge(he, t[10]), ie = !0, Ie || (We = [Y(n, "change", t[38]), Y(n, "input", t[38]), Y(s, "change", t[39]), Y(s, "input", t[39]), Y(u, "change", t[40]), Y(u, "input", t[40]), Y(y, "change", t[41]), Y(y, "input", t[41]), Y(y, "change", t[35]), Y(L, "change", t[42]), Y(L, "input", t[42]), Y(L, "change", t[35]), Y(he, "change", t[43]), Y(he, "input", t[43]), Y(he, "change", t[35])], Ie = !0)
             },
             p(te, H) {
                 H[0] & 32 && Ge(n, te[5]), H[0] & 64 && Ge(s, te[6]), (!ie || H[0] & 128) && j(f, te[7]), H[0] & 128 && Ge(u, te[7]), H[0] & 256 && Ge(y, te[8]), H[0] & 512 && Ge(L, te[9]), H[0] & 1024 && Ge(he, te[10])
@@ -30830,7 +30853,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             localStorage.getItem(from) !== null && localStorage.getItem(to) === null && localStorage.setItem(to, localStorage.getItem(from)), localStorage.removeItem(from);
         } catch (e) {}
     });
-    fw("mapEnabled", mapEnabled), fw("ssao", ssao), ssao.set(!1), wd.set(!0), fw("timeSlider", timeSlider), fw("markOwnRevs", markOwnRevs), [["CCIndicator", CCIndicator], ["flashCCIndicator", flashCCIndicator], ["CCIndicatorOnNameplates", CCIndicatorOnNameplates], ["hideBuffs", hideBuffs], ["hideClassBuffs", hideClassBuffs], ["stackSameBuffs", stackSameBuffs], ["partyHeight", partyHeight], ["sortParty", sortParty], ["classColorParty", classColorParty], ["disablePartyNameplates", disablePartyNameplates], ["uncapNameplates", uncapNameplates], ["revUnfriendly", revUnfriendly], ["nextFriendlyIgnoreBots", nextFriendlyIgnoreBots], ["losTarget", losTarget], ["fxAlphaOverride", fxAlphaOverride], ["fxAlphaSprite", fxAlphaSprite], ["fxAlphaRibbon", fxAlphaRibbon], ["fxAlphaModel", fxAlphaModel], ["fxAlphaSkills", fxAlphaSkills], ["mouseOverTarget", mouseOverTarget]].forEach(([k, st]) => fw(k, st)), (() => {
+    fw("mapEnabled", mapEnabled), fw("ssao", ssao), ssao.set(!1), wd.set(!0), fw("timeSlider", timeSlider), fw("timeToIngame", timeToIngame), fw("markOwnRevs", markOwnRevs), [["CCIndicator", CCIndicator], ["flashCCIndicator", flashCCIndicator], ["CCIndicatorOnNameplates", CCIndicatorOnNameplates], ["hideBuffs", hideBuffs], ["hideClassBuffs", hideClassBuffs], ["stackSameBuffs", stackSameBuffs], ["partyHeight", partyHeight], ["sortParty", sortParty], ["classColorParty", classColorParty], ["disablePartyNameplates", disablePartyNameplates], ["uncapNameplates", uncapNameplates], ["revUnfriendly", revUnfriendly], ["nextFriendlyIgnoreBots", nextFriendlyIgnoreBots], ["losTarget", losTarget], ["fxAlphaOverride", fxAlphaOverride], ["fxAlphaSprite", fxAlphaSprite], ["fxAlphaRibbon", fxAlphaRibbon], ["fxAlphaModel", fxAlphaModel], ["fxAlphaSkills", fxAlphaSkills], ["mouseOverTarget", mouseOverTarget]].forEach(([k, st]) => fw(k, st)), (() => {
         let was;
         sortParty.subscribe(v => (was !== void 0 && v && !was && partyOrderSave({}), was = v));
     })(), fw("blockSpecialSelling", blockSpecialSelling), fw("bloomBlur", bloomBlur), bloomBlur.set(!0), bloomBlur.subscribe(v => bloomBlurOn = v), fw("fogEnabled", fogSetting), fogSetting.set(!0), fogSetting.subscribe(v => fogOn = v), fw("fogDistance", fogDistance), fogDistance.set(100), fogDistance.subscribe(v => fogDistMul = (+v || 100) / 100), fw("skillbarCols", skillbarCols), fw("skillbarRows", skillbarRows), skillbarCols.subscribe(() => setTimeout(skillbarLayout)), skillbarRows.subscribe(() => setTimeout(skillbarLayout)), fw("disableWorldOverride", disableWorldOverride), disableWorldOverride.subscribe(v => !!v !== worldOverrideOff && typeof location != "undefined" && location.reload());
@@ -33786,12 +33809,40 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 },
                 purp = [.56, .42, .78];
             if (!pal) return c;
+            let tune = {
+                    guardstone: {
+                        fogNight: 1.35,
+                        skyPurple: .25,
+                        skybotSat: 1.25
+                    },
+                    faivel: {
+                        fogNight: .8,
+                        skyPurple: .25,
+                        skybotSat: 1.25
+                    }
+                } [cfg[0]],
+                lum = col => col[0] * .299 + col[1] * .587 + col[2] * .114,
+                sat = (col, f) => {
+                    let l = lum(col);
+                    return col.map(v => classicClamp01(l + (v - l) * f));
+                },
+                night = [.5, .32, .86];
+            tune && delete map.skybot;
             for (let k in map) c[k] && (c[k] = c[k].map((col, p) => {
                 let o = classicHex(pal[p][map[k]]),
                     w = (p === 2 ? cfg[2] : cfg[1]) * (k === "ambient" ? 4 / 7 : 1),
                     r = col.map((v, i) => v + (o[i] - v) * w);
                 return cfg[3] && p < 2 && k !== "direct" ? r.map((v, i) => v + (purp[i] - v) * cfg[3]) : r;
             }));
+            if (tune) {
+                c.skybot && (c.skybot = c.skybot.map(col => sat(col, tune.skybotSat)));
+                c.fog && c.fog[2] && (c.fog = c.fog.map((col, p) => p === 2 ? col.map(v => classicClamp01(v * tune.fogNight)) : col));
+                for (let k of ["skytop", "skymid", "skybot"]) c[k] && c[k][2] && (c[k] = c[k].map((col, p) => {
+                    if (p !== 2) return col;
+                    let t = night.map(v => v * lum(col) / lum(night));
+                    return col.map((v, i) => classicClamp01(v + (t[i] - v) * tune.skyPurple));
+                }));
+            }
             return c;
         },
         env05 = (id, env) => {
