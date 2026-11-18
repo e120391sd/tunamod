@@ -23773,7 +23773,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 ]));
                 box.appendChild(row);
             });
-            return chars.length || box.appendChild(el("div", "textgrey bl-empty", "No kills logged yet.")), box;
+            return box;
         };
         const statBox = (label, value, cls) => {
             const b = el("div", "bl-stat");
@@ -24026,7 +24026,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         const middle = chars => {
             const box = el("div", "bl-mid panel-black"),
                 c = chars.find(x => x.name === st.char);
-            if (!c) return box.appendChild(el("div", "textgrey bl-empty", chars.length ? "Select a character on the left." : "Kill Gloomfury to start logging.")), box;
+            if (!c) return chars.length && box.appendChild(el("div", "textgrey bl-empty", "Select a character on the left.")), box;
             const P = prep(c),
                 body = el("div", "bl-midbody"),
                 nav = el("div", "bl-nav");
@@ -24296,7 +24296,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 cog = el("img", "btn black svgicon"),
                 close = el("img", "btn black svgicon"),
                 body = el("div", "bl-body");
-            cog.src = env.ui("icons/cog.svg"), cog.onclick = e => (e.stopPropagation(), openMenu(e, settingsMenu())), close.src = env.ui("icons/cross.svg"), close.onclick = () => api.close(), title.append(el("div", "textprimary title", "Boss Log"), cog, close), win.append(title, body), root.appendChild(win), parts = {
+            cog.src = env.ui("icons/cog.svg"), cog.onclick = e => (e.stopPropagation(), openMenu(e, settingsMenu())), close.src = env.ui("icons/cross.svg"), close.onclick = () => api.close(), title.append(el("div", "textprimary title", "Boss Logs"), cog, close), win.append(title, body), root.appendChild(win), parts = {
                 body
             }, (parent || document.body).appendChild(root), drag(title, root), render();
             return root;
@@ -33681,7 +33681,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         },
         envAt = id => {
             let env = Ic.get(id);
-            env && worldOverrideOff && (env = softEnv05(id, env));
+            env && worldOverrideOff && !classicIsEditor() && (env = softEnv05(id, env));
             let tint = env && worldAmbientTint[classicWorldFor(id)];
             if (!env || !oe.classicLighting && !oe.classicWaterColors && !tint) return env;
             let ck = id + ":" + classicWorldFor(id),
