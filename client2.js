@@ -1810,7 +1810,7 @@ precision highp float;precision highp int;uniform Screen{vec2 resolution;};unifo
         bloomRow = null,
         fogRow = null,
         timeSlider = ee(0),
-        timeToIngame = ee(!0),
+        timeToIngame = ee(!1),
         markOwnRevs = ee(!1),
         CCIndicator = ee(!1),
         flashCCIndicator = ee(!1),
