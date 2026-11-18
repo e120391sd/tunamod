@@ -23680,8 +23680,10 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             const subs = it.stats.filter(s => s.type === "bonus");
             if (subs.some(s => cfg.neg.includes(s.id))) return !1;
             if (!cfg.pos.length) return !0;
-            const want = new Map(cfg.pos.map(p => [p.id, p.minQ]));
-            return subs.every(s => want.has(s.id)) && subs.some(s => (s.rollPercent || 0) >= want.get(s.id));
+            const want = new Map(cfg.pos.map(p => [p.id, p.minQ])),
+                ok = p => subs.some(s => s.id === p.id && (s.rollPercent || 0) >= p.minQ);
+            if (cfg.pos.some(p => p.req && !ok(p))) return !1;
+            return subs.some(s => want.has(s.id) && (s.rollPercent || 0) >= want.get(s.id));
         };
         const characters = kills => {
             const m = new Map;
@@ -24146,11 +24148,11 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     const r = el("div", "bl-srow"),
                         s = el("input"),
                         v = el("span", "textwhite bl-val", p.minQ + "%");
-                    s.type = "range", s.min = 0, s.max = 110, s.value = p.minQ, s.oninput = () => (v.textContent = s.value + "%", p.minQ = +s.value, saveLive()), r.append(el("span", "textgreen bl-sname", "+ " + env.statName(p.id)), s, v, button("x", "black bl-x", () => (cfg.pos = cfg.pos.filter(x => x !== p), save()))), blk.appendChild(r);
+                    s.type = "range", s.min = 0, s.max = 110, s.value = p.minQ, s.oninput = () => (v.textContent = s.value + "%", p.minQ = +s.value, saveLive()), r.append(el("span", "textgreen bl-sname", "+ " + env.statName(p.id)), s, v, (b => (b.title = "Required", b.onclick = () => (p.req = !p.req, save()), b))(el("div", "btn checkbox bl-req" + (p.req ? " active" : "")))), blk.appendChild(r);
                 });
                 cfg.neg.forEach(id => {
                     const r = el("div", "bl-srow");
-                    r.append(el("span", "textred bl-sname", "- " + env.statName(id)), button("x", "black bl-x", () => (cfg.neg = cfg.neg.filter(x => x !== id), save()))), blk.appendChild(r);
+                    r.append(el("span", "textred bl-sname", "- " + env.statName(id))), blk.appendChild(r);
                 }), detail.appendChild(blk);
             });
             return box.append(head, ctrl, frame, detail), box;
@@ -24274,7 +24276,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
 .bl-val{width:34px;text-align:right}
 .bl-sname{flex:1;font-weight:700}
 .bl-none{font-size:12px}
-.bl-x{padding:0 5px;font-size:11px}
+.bl-srow .bl-req{width:16px;height:16px;padding:0;flex:0 0 16px;box-sizing:border-box;cursor:pointer}
 .bl-empty{padding:8px;font-size:12px}
 .bl-menu{position:fixed;z-index:1000}
 .bl-tip{position:fixed;z-index:1000;pointer-events:none;background-color:#10131d;padding:6px 8px;font-size:14px;max-width:260px}
