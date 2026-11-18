@@ -33811,14 +33811,16 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             if (!pal) return c;
             let tune = {
                     guardstone: {
-                        fogNight: 1.35,
+                        fogNight: 1,
                         skyPurple: .25,
                         skybotSat: 1.25
                     },
                     faivel: {
                         fogNight: .8,
                         skyPurple: .25,
-                        skybotSat: 1.25
+                        skybotSat: 1.25,
+                        botNight: .75,
+                        midToBot: .35
                     }
                 } [cfg[0]],
                 lum = col => col[0] * .299 + col[1] * .587 + col[2] * .114,
@@ -33842,6 +33844,10 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     let t = night.map(v => v * lum(col) / lum(night));
                     return col.map((v, i) => classicClamp01(v + (t[i] - v) * tune.skyPurple));
                 }));
+                if (tune.botNight && c.skybot && c.skybot[2]) {
+                    c.skybot = c.skybot.map((col, p) => p === 2 ? col.map(v => classicClamp01(v * tune.botNight)) : col);
+                    c.skymid && c.skymid[2] && (c.skymid = c.skymid.map((col, p) => p === 2 ? col.map((v, i) => classicClamp01(v + (c.skybot[2][i] - v) * tune.midToBot)) : col));
+                }
             }
             return c;
         },
