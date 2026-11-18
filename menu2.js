@@ -9,9 +9,10 @@
         const cur = document.currentScript && document.currentScript.src,
             q = new URLSearchParams(cur ? new URL(cur).search : ""),
             url = (q.set("mod-original", "1"), "https://hordes.io/menu/script.js?" + q),
+            kick = () => document.readyState === "complete" && typeof window.onload == "function" && window.onload(),
             plain = () => {
                 const sc = document.createElement("script");
-                sc.async = !0, sc.src = url, (document.body || document.head).appendChild(sc);
+                sc.async = !0, sc.onload = kick, sc.src = url, (document.body || document.head).appendChild(sc);
             };
         window.__deviceDayTime = () => {
             const now = new Date(),
@@ -36,7 +37,7 @@
             if (from < 0 || at - from > 8) return plain();
             const code = src.slice(0, from) + "=window.__deviceDayTime()" + src.slice(at + key.length),
                 sc = document.createElement("script");
-            sc.onerror = plain, sc.src = URL.createObjectURL(new Blob([code], {
+            sc.onerror = plain, sc.onload = kick, sc.src = URL.createObjectURL(new Blob([code], {
                 type: "text/javascript"
             })), (document.body || document.head).appendChild(sc);
         }).catch(plain);
