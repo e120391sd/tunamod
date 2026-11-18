@@ -24070,7 +24070,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 save = () => (saveFilters(c.name, f), render()),
                 head = el("div", "bl-fhead");
             const fclose = el("img", "btn black svgicon bl-close");
-            fclose.src = env.ui("icons/cross.svg"), ffclose.onclick = () => (st.filtersOpen = !1, render()), head.append(el("div", "textprimary", "Stat filters · " + c.name), el("div", "bl-grow"), fclose);
+            fclose.src = env.ui("icons/cross.svg"), fclose.onclick = () => (st.filtersOpen = !1, render()), head.append(el("div", "textprimary", "Stat filters · " + c.name), el("div", "bl-grow"), fclose);
             const ctrl = el("div", "bl-ctrl"),
                 pick = el("select", "bl-select");
             STAT_IDS.forEach(id => {
@@ -24185,7 +24185,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
 .bl-kill{background:#10131dcc;border-radius:3px;padding:3px 5px;border:2px solid transparent;flex-shrink:0}
 .bl-kill.purum{border-color:#0681ea}
 .bl-kill.usable{border-color:#f5c247}
-.bl-kill.flash{box-shadow:0 0 0 2px #f90;background:rgba(255,153,0,.12)}
+.bl-kill.flash{border-color:#f90;background:rgba(255,153,0,.12)}
 .bl-kid{flex-shrink:0;font-size:11px;padding:2px 5px}
 .bl-khead{display:flex;gap:8px;font-size:12px;align-items:baseline}
 .bl-grow{flex:1}
