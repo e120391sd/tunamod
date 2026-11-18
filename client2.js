@@ -6858,9 +6858,7 @@ void main() {
             };
             Ii.set(e.id, n), e.giver !== 0 && (Ai.has(e.giver) || Ai.set(e.giver, []), Ai.get(e.giver).push(n)), e.returner !== e.giver && (Ai.has(e.returner) || Ai.set(e.returner, []), Ai.get(e.returner).push(n))
         });
-        classicNewGame || (old2023Look.skins.forEach(([id, patch]) => $v.has(id) && $v.set(id, Object.assign({}, $v.get(id), patch))), old2023Look.animationsWithoutEffects.forEach(id => Hu.has(id) && Hu.set(id, Object.assign({}, Hu.get(id), {
-            effects: []
-        }))));
+        classicNewGame || old2023Look.skins.forEach(([id, patch]) => $v.has(id) && $v.set(id, Object.assign({}, $v.get(id), patch)));
         let guardstone = Ic.get(2);
         let faivel = Ic.get(13);
 
@@ -23678,9 +23676,12 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             const cfg = f[TYPE_SLOT[it.type]];
             if (!cfg || !cfg.pos.length && !cfg.neg.length) return !1;
             if (it.quality < cfg.minQ) return !1;
-            const stats = new Map((it.stats || []).map(s => [s.id, s]));
-            if (cfg.neg.some(id => stats.has(id))) return !1;
-            return !cfg.pos.length || cfg.pos.some(p => stats.has(p.id) && (stats.get(p.id).rollPercent || 0) >= p.minQ);
+            if (!it.stats || !it.stats.length) return !1;
+            const subs = it.stats.filter(s => s.type === "bonus");
+            if (subs.some(s => cfg.neg.includes(s.id))) return !1;
+            if (!cfg.pos.length) return !0;
+            const want = new Map(cfg.pos.map(p => [p.id, p.minQ]));
+            return subs.every(s => want.has(s.id)) && subs.some(s => (s.rollPercent || 0) >= want.get(s.id));
         };
         const characters = kills => {
             const m = new Map;
@@ -23826,7 +23827,8 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         const statGrid = (kills, withLast) => {
             const dps = kills.map(k => k._v),
                 mps = kills.map(k => k._mps).filter(v => v != null),
-                avg = dps.length ? dps.reduce((a, b) => a + b, 0) / dps.length : 0,
+                times = kills.map(k => new Date(k.date).getTime()),
+                days = times.length ? Math.max(1, (Math.max(...times) - Math.min(...times)) / 864e5) : 1,
                 top = kills.map(k => k._items.filter(i => isGear(i) && i.quality >= 99).length),
                 usableCount = kills.reduce((a, k) => a + k._items.filter(i => i._usable).length, 0),
                 purumKills = kills.filter(k => k._purum).length,
@@ -23838,7 +23840,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 const cell = el("div", "bl-cell usable");
                 cell.appendChild(itemSlot(it)), strip.appendChild(cell);
             }), last.append(el("div", "textgrey", "Last Usable Items"), recent.length ? strip : el("div", "textwhite", "-"));
-            return grid.append(statBox("Total kills", num(kills.length), "textprimary"), statBox("Usable items", num(usableCount), "textprimary"), statBox("Average " + metric, num(avg), "textgreen"), statBox("Highest " + metric, num(Math.max(0, ...dps)), "textgreen"), ...mps.length ? [statBox("Average MPS", num(mps.reduce((a, b) => a + b, 0) / mps.length), "textgreen"), statBox("Highest MPS", num(Math.max(...mps)), "textgreen")] : [], statBox("Items per kill (99%+)", String(median(top)), "textpurp"), statBox("Purum chance", purumKills + " / " + kills.length + (kills.length ? "  (" + (purumKills / kills.length * 100).toFixed(1) + "%)" : ""), "textblue"), ...withLast ? [last] : []), grid;
+            return grid.append(statBox("Total kills", num(kills.length), "textprimary"), statBox("Kills per day", kills.length ? (kills.length / days).toFixed(1) : "0", "textprimary"), statBox("Median " + metric, num(median(dps)), "textgreen"), statBox("Highest " + metric, num(Math.max(0, ...dps)), "textgreen"), ...mps.length ? [statBox("Median MPS", num(median(mps)), "textgreen"), statBox("Highest MPS", num(Math.max(...mps)), "textgreen")] : [], statBox("Items per kill (99%+)", String(median(top)), "textpurp"), statBox("Usable items", num(usableCount), "textpurp"), ...withLast ? [last] : [], statBox("Purum chance", purumKills + " / " + kills.length + (kills.length ? "  (" + (purumKills / kills.length * 100).toFixed(1) + "%)" : ""), "textblue")), grid;
         };
         const RANGES = [["1d", 864e5], ["7d", 6048e5], ["30d", 2592e6], ["1yr", 31536e6], ["All time", 0]];
         const overview = (c, P) => {
@@ -23852,8 +23854,8 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             RANGES.forEach(([n]) => rb.appendChild(button(n, (st.range === n ? "blue" : "grey") + " bl-rbtn", () => st.range !== n && (st.range = n, render()))));
             head.append(button("Normalize", (st.normalize ? "blue" : "grey") + " bl-rbtn", () => (st.normalize = !st.normalize, render())), el("div", "textgrey bl-sub", num(kills.length) + " kills"), rb);
             const ts = kills.map(k => new Date(k.date).getTime()),
-                tB = Date.now(),
-                tA = span ? tB - span : ts.length ? Math.min(ts[0], tB - 36e5) : tB - 864e5,
+                tA = ts.length > 1 && ts[ts.length - 1] > ts[0] ? ts[0] : ts.length ? ts[0] - 432e5 : Date.now() - 864e5,
+                tB = ts.length > 1 && ts[ts.length - 1] > ts[0] ? ts[ts.length - 1] : ts.length ? ts[0] + 432e5 : Date.now(),
                 redraw = hover => drawDps(cv, kills, hover, ts, tA, tB);
             cv.onmousemove = e => {
                 if (!ts.length) return;
@@ -23951,7 +23953,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             const k = kills[hover],
                 x = X(hover),
                 y = Y(vals[hover]);
-            g.strokeStyle = "rgba(245,194,71,.6)", g.lineWidth = 2, g.setLineDash([6, 6]), g.beginPath(), g.moveTo(x, 12), g.lineTo(x, H - 22), g.stroke(), g.setLineDash([]), g.fillStyle = "#f5c247", g.beginPath(), g.arc(x, y, 8, 0, 6.283), g.fill();
+            g.strokeStyle = "rgba(245,194,71,.6)", g.lineWidth = 2, g.setLineDash([6, 6]), g.beginPath(), g.moveTo(x, 12), g.lineTo(x, H - 22), g.stroke(), g.setLineDash([]), g.fillStyle = "#f5c247", g.beginPath(), g.arc(x, y, 5.6, 0, 6.283), g.fill();
             const l1 = num(vals[hover]) + " " + metric + (k._mps != null ? "  ·  " + num(k._mps) + " MPS" : ""),
                 l2 = fmtDate(k.date) + "  ·  kill #" + (hover + 1) + (k._items && k._items.length ? "  ·  " + k._items.length + " items" : ""),
                 tw = Math.max(g.measureText(l2).width, (g.font = "bold 24px hordes, sans-serif", g.measureText(l1).width)) + 20,
@@ -23969,7 +23971,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             const box = el("div", "bl-range"),
                 s = el("input"),
                 v = el("span", "textwhite bl-rval", fmt(value));
-            return s.type = "range", s.min = min, s.max = max, s.step = step, s.value = value, s.oninput = () => v.textContent = fmt(+s.value), s.onchange = () => (set(+s.value), render()), box.append(iconEl, s, v), box;
+            return s.type = "range", s.min = min, s.max = max, s.step = step, s.value = value, s.oninput = () => (v.textContent = fmt(+s.value), set(+s.value), liveRefresh()), box.append(iconEl, s, v), box;
         };
         const topBar = (c, P, onlyItems) => {
             const bar = el("div", "bl-bar panel-black"),
@@ -23995,21 +23997,28 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             const row = el("div", "bl-sortrow");
             return row.appendChild(el("span", "textgrey", "Sort by")), SORTS.forEach(([k, n]) => row.appendChild(button(k === "dps" ? metric : n, (st.sort === k ? "blue" : "grey") + " bl-rbtn", () => (st.sort = st.sort === k ? null : k, render())))), row.append(el("span", "bl-grow"), button(st.reverse ? "Z - A" : "A - Z", "grey bl-rbtn", () => (st.reverse = !st.reverse, render()))), row;
         };
+        let liveFill = null,
+            liveQueued = !1;
+        const liveRefresh = () => {
+            liveQueued || (liveQueued = !0, requestAnimationFrame(() => (liveQueued = !1, liveFill && liveFill())));
+        };
         const killsList = (c, P, mode) => {
             const wrap = el("div", "bl-listwrap"),
                 onlyItems = mode !== "kills",
-                ks = filterKills(P, onlyItems),
                 onlyUsable = mode === "usable",
                 pick = i => !i._purum && (!onlyUsable || i._usable),
-                items = [];
-            ks.forEach(k => k._items.forEach(i => pick(i) && (!onlyItems || (i.quality || 0) >= st.minQual) && items.push(i)));
-            const counts = el("div", "bl-counts");
-            onlyItems ? counts.append(el("span", null, num(items.length) + " / " + num(P.kills.reduce((a, k) => a + k._items.filter(pick).length, 0)) + (onlyUsable ? " Usable Items" : " Items")), el("span", null, num(ks.length) + " Kills")) : counts.append(el("span", null, num(ks.length) + " / " + num(P.kills.length) + " Kills"), el("span", null, num(items.length) + " Items"));
-            const list = el("div", "bl-list scrollbar"),
-                rows = [];
-            if (onlyItems) {
-                items.length || list.appendChild(el("div", "textgrey bl-empty", "Nothing found."));
-                items.forEach(it => rows.push(() => {
+                counts = el("div", "bl-counts"),
+                list = el("div", "bl-list scrollbar"),
+                drawer = el("div", "bl-drawer");
+            if (!onlyItems && st.jump && !filterKills(P, onlyItems).some(k => k.killId === st.jump)) st.date = "", st.minItems = 0, st.minDps = 0, st.bisOnly = !1;
+            const fill = () => {
+                const ks = filterKills(P, onlyItems),
+                    items = [],
+                    rows = [];
+                ks.forEach(k => k._items.forEach(i => pick(i) && (!onlyItems || (i.quality || 0) >= st.minQual) && items.push(i)));
+                onlyItems ? counts.replaceChildren(el("span", null, num(items.length) + " / " + num(P.kills.reduce((a, k) => a + k._items.filter(pick).length, 0)) + (onlyUsable ? " Usable Items" : " Items")), el("span", null, num(ks.length) + " Kills")) : counts.replaceChildren(el("span", null, num(ks.length) + " / " + num(P.kills.length) + " Kills"), el("span", null, num(items.length) + " Items"));
+                list.replaceChildren();
+                if (onlyItems) items.forEach(it => rows.push(() => {
                     const row = el("div", "bl-irow" + (it._usable ? " usable" : it._purum ? " purum" : "")),
                         info = el("div", "bl-iinfo");
                     info.append(el("div", "text" + (isGear(it) ? QCOL[qb(it.quality)] : "white") + " bl-iname", (it.name || env.itemName(it.type, it.tier) || it.type) + (it.upgrade ? " +" + it.upgrade : "") + (isGear(it) ? "  " + it.quality + "%" : it.gained != null ? "  +" + it.gained : "")), el("div", "textgrey bl-imeta", fmtDate(it._kill.date) + "  ·  " + c.name + "  ·  " + num(it._kill._v) + " " + metric));
@@ -24017,54 +24026,48 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     row.append(itemSlot(it), info, el("span", "bl-grow"), kid);
                     return row;
                 }));
-            } else {
-                if (st.jump && !ks.some(k => k.killId === st.jump) && (st.date || st.minItems || st.minDps || st.bisOnly)) return st.date = "", st.minItems = 0, st.minDps = 0, st.bisOnly = !1, killsList(c, P, mode);
-                ks.length || list.appendChild(el("div", "textgrey bl-empty", "No kills match."));
-                const best = Math.max(1, ...P.kills.map(k => k._v));
-                ks.forEach(k => rows.push(() => {
-                    const row = el("div", "bl-kill" + (k._usable ? " usable" : k._purum ? " purum" : ""));
-                    row.dataset.kill = k.killId;
-                    const
-                        head = el("div", "bl-khead"),
-                        hp = el("div", "bl-pbar"),
-                        fill = el("div", "progressBar bgc" + (k.playerClass != null ? k.playerClass : c.cls));
-                    head.append(el("span", "textwhite", fmtDate(k.date)), el("span", "textgrey", fmtDur(k.fightSeconds || 0)), el("span", "bl-grow"), ...k._mps != null ? [el("span", "textblue", num(k._mps) + " MPS")] : [], el("span", "textgrey", metric === "HPS" ? num(offv(k, "hpstotal") || k.myHealing || 0) + " heal" : num(offv(k, "dpstotal") || k.myDamage) + " dmg")), fill.style.width = Math.max(1, (k._v) / best * 100) + "%", fill.append(el("span", "bl-pl", k.player || c.name), el("span", "bl-pr", num(k.myDps))), hp.appendChild(fill), row.append(head, hp);
-                    if (k._items.length) {
-                        const strip = el("div", "bl-strip");
-                        k._items.filter(i => !i._purum).concat(k._items.filter(i => i._purum)).forEach(it => {
-                            const cell = el("div", "bl-cell" + (it._usable ? " usable" : it._purum ? " purum" : ""));
-                            cell.appendChild(itemSlot(it)), strip.appendChild(cell);
-                        }), row.appendChild(strip);
-                    }
-                    return row;
-                }));
-            }
-            const token = ++batchToken,
-                pump = (from, n) => {
-                    if (token !== batchToken || !list.isConnected && from) return;
-                    const frag = document.createDocumentFragment(),
-                        end = Math.min(rows.length, from + n);
-                    for (let i = from; i < end; ++i) frag.appendChild(rows[i]());
-                    list.appendChild(frag), end < rows.length && setTimeout(() => pump(end, 80), 0);
-                };
-            const jump = !onlyItems && st.jump,
-                at = jump ? ks.findIndex(k => k.killId === jump) : -1;
-            st.jump = null, pump(0, Math.max(25, at + 6)), at >= 0 && requestAnimationFrame(() => {
-                const r = [...list.children].find(x => x.dataset && x.dataset.kill === jump);
-                r && (r.scrollIntoView({
-                    block: "center"
-                }), r.classList.add("flash"), setTimeout(() => r.classList.remove("flash"), 1600));
-            });
+                else {
+                    const best = Math.max(1, ...P.kills.map(k => k._v));
+                    ks.forEach(k => rows.push(() => {
+                        const row = el("div", "bl-kill" + (k._usable ? " usable" : k._purum ? " purum" : ""));
+                        row.dataset.kill = k.killId;
+                        const head = el("div", "bl-khead"),
+                            hp = el("div", "bl-pbar"),
+                            bar = el("div", "progressBar bgc" + (k.playerClass != null ? k.playerClass : c.cls));
+                        head.append(el("span", "textwhite", fmtDate(k.date)), el("span", "textgrey", fmtDur(k.fightSeconds || 0)), el("span", "bl-grow"), ...k._mps != null ? [el("span", "textblue", num(k._mps) + " MPS")] : [], el("span", "textgrey", metric === "HPS" ? num(offv(k, "hpstotal") || k.myHealing || 0) + " heal" : num(offv(k, "dpstotal") || k.myDamage) + " dmg")), bar.style.width = Math.max(1, k._v / best * 100) + "%", bar.append(el("span", "bl-pl", k.player || c.name), el("span", "bl-pr", num(k._v))), hp.appendChild(bar), row.append(head, hp);
+                        if (k._items.length) {
+                            const strip = el("div", "bl-strip");
+                            k._items.filter(i => !i._purum).concat(k._items.filter(i => i._purum)).forEach(it => {
+                                const cell = el("div", "bl-cell" + (it._usable ? " usable" : it._purum ? " purum" : ""));
+                                cell.appendChild(itemSlot(it)), strip.appendChild(cell);
+                            }), row.appendChild(strip);
+                        }
+                        return row;
+                    }));
+                }
+                const token = ++batchToken,
+                    pump = (from, n) => {
+                        if (token !== batchToken || !list.isConnected && from) return;
+                        const frag = document.createDocumentFragment(),
+                            end = Math.min(rows.length, from + n);
+                        for (let i = from; i < end; ++i) frag.appendChild(rows[i]());
+                        list.appendChild(frag), end < rows.length && setTimeout(() => pump(end, 80), 0);
+                    };
+                const jump = !onlyItems && st.jump,
+                    at = jump ? ks.findIndex(k => k.killId === jump) : -1;
+                st.jump = null, pump(0, Math.max(25, at + 6)), at >= 0 && requestAnimationFrame(() => {
+                    const r = [...list.children].find(x => x.dataset && x.dataset.kill === jump);
+                    r && (r.scrollIntoView({
+                        block: "center"
+                    }), r.classList.add("flash"), setTimeout(() => r.classList.remove("flash"), 1600));
+                });
+                !onlyItems && st.statsOpen && drawer.replaceChildren(statGrid(ks));
+            };
+            liveFill = fill, fill();
             wrap.append(topBar(c, P, onlyItems), sortRow(), counts, list);
             const foot = el("div", "bl-foot");
             if (onlyItems) foot.appendChild(button("Stat filters", st.filtersOpen ? "blue" : "grey", () => (st.filtersOpen = !st.filtersOpen, render())));
-            else {
-                foot.appendChild(button("Stats", st.statsOpen ? "blue" : "grey", () => (st.statsOpen = !st.statsOpen, render())));
-                if (st.statsOpen) {
-                    const drawer = el("div", "bl-drawer");
-                    drawer.appendChild(statGrid(ks)), wrap.appendChild(drawer);
-                }
-            }
+            else foot.appendChild(button("Stats", st.statsOpen ? "blue" : "grey", () => (st.statsOpen = !st.statsOpen, render()))), st.statsOpen && wrap.appendChild(drawer);
             return wrap.appendChild(foot), wrap;
         };
         const middle = chars => {
@@ -24074,7 +24077,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             const P = prep(c),
                 body = el("div", "bl-midbody"),
                 nav = el("div", "bl-nav");
-            body.appendChild(st.view === "overview" ? overview(c, P) : killsList(c, P, st.view));
+            liveFill = null, body.appendChild(st.view === "overview" ? overview(c, P) : killsList(c, P, st.view));
             return [
                 ["kills", "Kills"],
                 ["items", "Items"],
@@ -24091,6 +24094,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             const box = el("div", "bl-right panel-black"),
                 f = filtersOf(c.name),
                 save = () => (saveFilters(c.name, f), render()),
+                saveLive = () => (saveFilters(c.name, f), renderMiddle()),
                 head = el("div", "bl-fhead");
             const fclose = el("img", "btn black svgicon bl-close");
             fclose.src = env.ui("icons/cross.svg"), fclose.onclick = () => (st.filtersOpen = !1, render()), head.append(el("div", "textprimary", "Stat filters · " + c.name), el("div", "bl-grow"), fclose);
@@ -24137,12 +24141,12 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     title = el("div", "bl-blkhead"),
                     mq = el("input"),
                     mqv = el("span", "textwhite bl-val", cfg.minQ + "%");
-                title.append(el("span", "textprimary bl-sname", SLOT_NAMES[slot]), el("span", "textgrey", "Min quality")), mq.type = "range", mq.min = 0, mq.max = 110, mq.value = cfg.minQ, mq.oninput = () => mqv.textContent = mq.value + "%", mq.onchange = () => (cfg.minQ = +mq.value, save()), title.append(mq, mqv), blk.appendChild(title);
+                title.append(el("span", "textprimary bl-sname", SLOT_NAMES[slot]), el("span", "textgrey", "Min quality")), mq.type = "range", mq.min = 0, mq.max = 110, mq.value = cfg.minQ, mq.oninput = () => (mqv.textContent = mq.value + "%", cfg.minQ = +mq.value, saveLive()), title.append(mq, mqv), blk.appendChild(title);
                 cfg.pos.forEach(p => {
                     const r = el("div", "bl-srow"),
                         s = el("input"),
                         v = el("span", "textwhite bl-val", p.minQ + "%");
-                    s.type = "range", s.min = 0, s.max = 110, s.value = p.minQ, s.oninput = () => v.textContent = s.value + "%", s.onchange = () => (p.minQ = +s.value, save()), r.append(el("span", "textgreen bl-sname", "+ " + env.statName(p.id)), s, v, button("x", "black bl-x", () => (cfg.pos = cfg.pos.filter(x => x !== p), save()))), blk.appendChild(r);
+                    s.type = "range", s.min = 0, s.max = 110, s.value = p.minQ, s.oninput = () => (v.textContent = s.value + "%", p.minQ = +s.value, saveLive()), r.append(el("span", "textgreen bl-sname", "+ " + env.statName(p.id)), s, v, button("x", "black bl-x", () => (cfg.pos = cfg.pos.filter(x => x !== p), save()))), blk.appendChild(r);
                 });
                 cfg.neg.forEach(id => {
                     const r = el("div", "bl-srow");
@@ -24150,6 +24154,19 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 }), detail.appendChild(blk);
             });
             return box.append(head, ctrl, frame, detail), box;
+        };
+        let midQueued = !1;
+        const renderMiddle = () => {
+            midQueued || (midQueued = !0, requestAnimationFrame(() => {
+                if (midQueued = !1, !root) return;
+                const old = parts.body.querySelector(".bl-mid"),
+                    scroll = old && old.querySelector(".bl-list"),
+                    top = scroll ? scroll.scrollTop : 0,
+                    fresh = middle(characters(env.load() || []));
+                old && old.replaceWith(fresh);
+                const ns = fresh.querySelector(".bl-list");
+                ns && (ns.scrollTop = top);
+            }));
         };
         const render = () => {
             if (!root) return;
@@ -24183,7 +24200,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
 .bl-statgrid{display:grid;grid-template-columns:1fr 1fr;gap:4px}
 .bl-stat{background:#10131dcc;border-radius:3px;padding:5px 7px;font-size:12px}
 .bl-stat>div:last-child{font-size:16px;font-weight:700;margin-top:1px}
-.bl-statgrid .bl-lastuse{grid-column:1/3}
+.bl-statgrid .bl-lastuse{grid-column:auto}
 .bl-lastuse .bl-strip{margin-top:3px}
 .bl-sub{font-size:12px}
 .bl-chead{display:flex;align-items:center;gap:6px}
@@ -24317,6 +24334,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             ["Configure Stat Filters", () => st.char && (st.filtersOpen = !0, render())],
             ["Import Data", importData],
             ["Export Data", exportData],
+            ["Reset Data", () => env.save && confirm("Are you sure you want to reset all Boss Log data?") && (env.save([]), st.char = null, st.view = "overview", st.filtersOpen = !1, render())],
             ["UI Quickbutton" + (env.quickGet() ? " (on)" : " (off)"), () => env.quickSet && env.quickSet(!env.quickGet())]
         ];
         const open = (opts, parent) => {
@@ -24331,6 +24349,10 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     quickGet: () => !1,
                     quickSet: null
                 }, opts || {}), root) return render(), root;
+            window.__blSelClear || (window.__blSelClear = !0, addEventListener("mousedown", e => {
+                const sel = window.getSelection && window.getSelection();
+                sel && !sel.isCollapsed && !(e.target && e.target.closest && e.target.closest("input,select,textarea")) && sel.removeAllRanges();
+            }, !0));
             document.getElementById("bossLogCss") || document.head.appendChild(Object.assign(document.createElement("style"), {
                 id: "bossLogCss",
                 textContent: css
@@ -24607,8 +24629,9 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 rollPercent: Math.round(v.qual * 100) / 100
             })), out;
         },
+        classicBossDropTypes = new Set(["sword", "bow", "staff", "hammer", "armlet", "armor", "bag", "boot", "glove", "ring", "amulet", "shield", "orb", "quiver", "totem", "rune"]),
         classicBossDrop = (type, tier, quality, src, eid, full) => {
-            if (!classicBossOpen || Date.now() > classicBossOpen.until || !type || type === "gold") return;
+            if (!classicBossOpen || Date.now() > classicBossOpen.until || !classicBossDropTypes.has(type)) return;
             let list = classicBossLoad(),
                 rec = list.find(r => r.killId === classicBossOpen.killId);
             if (!rec) return;
@@ -24665,7 +24688,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             });
             String(text).replace(/<[^>]*>/g, "").split(String.fromCharCode(10)).forEach(line => {
                 let m = line.match(/^\s*\d+\.\s*T(\d+)\s+([a-z]+)\s+(\d+(?:\.\d+)?)%/i);
-                m && classicBossDrop(m[2].toLowerCase(), +m[1] - 1, +m[3], "chat");
+                m && classicBossDrop(m[2].toLowerCase(), +m[1], +m[3], "chat");
             });
         },
         classicBossGround = e => {
@@ -33813,14 +33836,14 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     guardstone: {
                         fogNight: 1,
                         skyPurple: .25,
-                        skybotSat: 1.25
+                        skybotSat: 1.25,
+                        hlNight: !0
                     },
                     faivel: {
                         fogNight: .8,
                         skyPurple: .25,
                         skybotSat: 1.25,
-                        botNight: .75,
-                        midToBot: .35
+                        hlNight: !0
                     }
                 } [cfg[0]],
                 lum = col => col[0] * .299 + col[1] * .587 + col[2] * .114,
@@ -33834,7 +33857,11 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 let o = classicHex(pal[p][map[k]]),
                     w = (p === 2 ? cfg[2] : cfg[1]) * (k === "ambient" ? 4 / 7 : 1),
                     r = col.map((v, i) => v + (o[i] - v) * w);
-                return cfg[3] && p < 2 && k !== "direct" ? r.map((v, i) => v + (purp[i] - v) * cfg[3]) : r;
+                if (!cfg[3] || p > 1 || k === "direct") return r;
+                let h = r.map((v, i) => v * [1 + .6 * cfg[3], 1 - .35 * cfg[3], 1 + .45 * cfg[3]][i]),
+                    l0 = r[0] * .299 + r[1] * .587 + r[2] * .114,
+                    l1 = h[0] * .299 + h[1] * .587 + h[2] * .114 || 1;
+                return h.map(v => classicClamp01(v * l0 / l1));
             }));
             if (tune) {
                 c.skybot && (c.skybot = c.skybot.map(col => sat(col, tune.skybotSat)));
@@ -33844,9 +33871,11 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     let t = night.map(v => v * lum(col) / lum(night));
                     return col.map((v, i) => classicClamp01(v + (t[i] - v) * tune.skyPurple));
                 }));
-                if (tune.botNight && c.skybot && c.skybot[2]) {
-                    c.skybot = c.skybot.map((col, p) => p === 2 ? col.map(v => classicClamp01(v * tune.botNight)) : col);
-                    c.skymid && c.skymid[2] && (c.skymid = c.skymid.map((col, p) => p === 2 ? col.map((v, i) => classicClamp01(v + (c.skybot[2][i] - v) * tune.midToBot)) : col));
+                if (tune.hlNight && c.skymid && c.skymid[2]) {
+                    let mid = c.skymid[2],
+                        bot = mid.map((v, i) => classicClamp01(v * [1.03, 1.11, 1][i])),
+                        set = (k, col) => c[k] && (c[k] = c[k].map((x, p) => p === 2 ? col : x));
+                    set("skybot", bot), set("horizon", bot.map((v, i) => classicClamp01(v * [.81, .97, 1.14][i]))), set("fog", bot.map((v, i) => classicClamp01(v * [.69, .74, 1.07][i] * tune.fogNight)));
                 }
             }
             return c;
@@ -33926,7 +33955,13 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         },
         DN = () => {
             let t = on.environment.data.watercolors;
-            for (let e = 0; e < 9; ++e) t[e] = bn.water[Math.floor(e / 3)][e % 3]
+            for (let e = 0; e < 9; ++e) t[e] = bn.water[Math.floor(e / 3)][e % 3];
+            if (classicPlain) {
+                let w = on.environment.data.worldlight,
+                    hz = on.sky.data.skycolors,
+                    light = Math.max(.25, Math.min(1.15, ((w[0] + w[3]) * .299 + (w[1] + w[4]) * .587 + (w[2] + w[5]) * .114) / .95));
+                for (let e = 0; e < 9; ++e) t[e] = Math.max(0, Math.min(1, t[e] * light * .75 + hz[9 + e % 3] * .25));
+            }
         },
         VN = (t, e) => {
             let n = on.environment.data.worldlight,
@@ -34039,7 +34074,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         let r = on.sky.data;
         Bi(r.skycolors, 0, bn.skytop[s], bn.skytop[i], o), Bi(r.skycolors, 3, bn.skymid[s], bn.skymid[i], o), Bi(r.skycolors, 6, bn.skybot[s], bn.skybot[i], o), Bi(r.skycolors, 9, bn.horizon[s], bn.horizon[i], o), Bi(r.skycolors, 12, bn.clouds[s], bn.clouds[i], o), Bi(r.suncolor, 0, bn.sun[s], bn.sun[i], o), ut(vf, gf), vf[1] = Math.abs(Math.sin(t * 6.282)), go(vf, vf);
         let l = on.environment.data;
-        Bi(l.worldlight, 0, bn.direct[s], bn.direct[i], o), Bi(l.worldlight, 3, bn.ambient[s], bn.ambient[i], o), l.worldlight[6] = gf[0], l.worldlight[7] = gf[1], l.worldlight[8] = gf[2], Bi(l.fog, 0, bn.fog[s], bn.fog[i], o), l.fog[3] = n > 0 ? -100 : fy, l.fog[4] = n > 0 ? uy : classicPlain ? Ts : classicFogFar, fogOn ? n > 0 || (l.fog[3] *= fogDistMul, l.fog[4] *= fogDistMul) : (l.fog[3] = 1e5, l.fog[4] = 2e5), l.daycycle[0] = t, l.time[0] = e % 3600, ht[31].uniforms.amount.value = qu(o, bn.bloom[s], bn.bloom[i])
+        Bi(l.worldlight, 0, bn.direct[s], bn.direct[i], o), Bi(l.worldlight, 3, bn.ambient[s], bn.ambient[i], o), l.worldlight[6] = gf[0], l.worldlight[7] = gf[1], l.worldlight[8] = gf[2], Bi(l.fog, 0, bn.fog[s], bn.fog[i], o), l.fog[3] = n > 0 ? -100 : fy, l.fog[4] = n > 0 ? uy : classicFogFar, fogOn ? n > 0 || (l.fog[3] *= fogDistMul, l.fog[4] *= fogDistMul) : (l.fog[3] = 1e5, l.fog[4] = 2e5), l.daycycle[0] = t, l.time[0] = e % 3600, ht[31].uniforms.amount.value = qu(o, bn.bloom[s], bn.bloom[i])
     };
     var RN = [],
         zN = [],
@@ -40698,7 +40733,31 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         };
     var Wy = oe.itemTypeFilter.toLowerCase().replace(/\s/g, "").split(","),
         Pf = new Set,
-        jy = (t, e) => t.visual.transform.visible && !(t.quality < (t.droptype === "material" ? oe.materialQualityFilter : oe.itemQualityFilter)) && !Wy.includes(t.droptype) && (e === 1 / 0 || T.player.squaredDistance(t.pos) <= e),
+        classicMyPurum = d => d.droptype === "rune" && d.tier === 5 && T && T.player && (d.party === 0 || d.party === T.player.id || T.player.party && d.party === T.player.party),
+        classicPurumSeen = new Map,
+        classicPurumNext = 0,
+        classicPurumTick = () => {
+            if (!T || !T.player || !T.entities || !T.entities.type[3]) return;
+            let me = T.player,
+                now = T.time;
+            for (let d of T.entities.type[3]) {
+                if (!d.hasInfo || !classicMyPurum(d)) continue;
+                classicPurumSeen.has(d.id) || classicPurumSeen.set(d.id, now);
+                if (now - classicPurumSeen.get(d.id) < 10 || now < classicPurumNext || !d.canBePickedUpBy(me)) continue;
+                let inv = me.inventory && me.inventory.slots,
+                    n = me.stats.getStat(19) || 0,
+                    free = !inv;
+                for (let i = 0; i < n && !free; ++i) {
+                    let it = inv.get(i);
+                    free = !it || !it.type || it.type === "rune" && it.tier === 5;
+                }
+                if (!free) continue;
+                classicPurumNext = now + 2, Jr(d.id);
+                break;
+            }
+            classicPurumSeen.size > 64 && classicPurumSeen.clear();
+        },
+        jy = (t, e) => t.visual.transform.visible && (classicMyPurum(t) || !(t.quality < (t.droptype === "material" ? oe.materialQualityFilter : oe.itemQualityFilter)) && !Wy.includes(t.droptype)) && (e === 1 / 0 || T.player.squaredDistance(t.pos) <= e),
         yW = (t, e, n) => {
             for (let o = n.length - 1; o >= 0; o--) {
                 let s = n[o];
@@ -40848,7 +40907,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             Oo.setTransform(1, 0, 0, 1, 0, 0), Oo.clearRect(0, 0, Ln.width, Ln.height), Oo.setTransform(hudK(), 0, 0, hudK(), 0, 0)
         },
         SW = t => {
-            classicHudTick(), it.shift.down ? Gy(t, 1 / 0) : (W9(t, oe.itemLabelRange ** 2), oe.itemLabelRange > 0 ? Gy(t, oe.itemLabelRange) : Pf.clear()), D9(t)
+            classicHudTick(), classicPurumTick(), it.shift.down ? Gy(t, 1 / 0) : (W9(t, oe.itemLabelRange ** 2), oe.itemLabelRange > 0 ? Gy(t, oe.itemLabelRange) : Pf.clear()), D9(t)
         };
     var Yy = {};
     so(Yy, {
