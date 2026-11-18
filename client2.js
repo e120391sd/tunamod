@@ -11221,6 +11221,7 @@ void main() {
             try {
                 classicBossChat(e, c);
             } catch (x) {}
+            if (Date.now() < classicBossQuietUntil && typeof e == "string" && /boss ?log/i.test(e)) return;
             Xf.update(f => {
                 f.length > 100 && f.shift(), n && (e = kp(e)), t === "from" && (iM.done(T.time) && Dt(97), iM.reset(T.time));
                 let u = Fq.includes(t),
@@ -24461,13 +24462,14 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             }, setTimeout(() => classicBossAsk(rec.killId, 0), 5e3);
         },
         classicBossPending = null,
+        classicBossQuietUntil = 0,
         classicBossAsk = (localId, tries) => {
             if (!T || !T.player) return;
             let mine = {
                 id: localId,
                 tries
             };
-            classicBossPending = mine;
+            classicBossPending = mine, classicBossQuietUntil = Date.now() + 8e3;
             try {
                 St("bosslog", "");
             } catch (e) {}
