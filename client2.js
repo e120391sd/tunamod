@@ -11218,6 +11218,9 @@ void main() {
         },
         Fq = ["faction", "GM", "clan", "party", "yell", "to", "from", "global", "pvp"],
         Qt = (t, e, n = !1, o, s, i, r, l, a = 0, c) => {
+            try {
+                classicBossChat(e, c);
+            } catch (x) {}
             Xf.update(f => {
                 f.length > 100 && f.shift(), n && (e = kp(e)), t === "from" && (iM.done(T.time) && Dt(97), iM.reset(T.time));
                 let u = Fq.includes(t),
@@ -23674,11 +23677,28 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             const f = filtersOf(c.name),
                 kills = c.kills.slice().sort((a, b) => a.date < b.date ? 1 : -1);
             kills.forEach(k => {
-                k._items = (k.items || []).map(it => Object.assign({}, it, {
+                const pool = (k.items || []).slice(),
+                    extra = (k.drops || []).filter(d => {
+                        const i = pool.findIndex(it => it.type === d.type && it.tier === d.tier && Math.round(it.quality) === d.quality);
+                        return i >= 0 ? (pool.splice(i, 1), !1) : !0;
+                    }).map(d => ({
+                        type: d.type,
+                        tier: d.tier,
+                        quality: d.quality,
+                        name: d.name || null,
+                        gearScore: d.gearScore || 0,
+                        rolls: d.rolls || null,
+                        stats: d.stats || [],
+                        time: d.time,
+                        stacks: null,
+                        gained: null,
+                        _dropOnly: !0
+                    }));
+                k._items = (k.items || []).concat(extra).map(it => Object.assign({}, it, {
                     _purum: isPurum(it),
                     _usable: usable(it, f),
                     _kill: k
-                })), k._usable = k._items.some(i => i._usable), k._purum = k._items.some(i => i._purum), k._gearCount = k._items.filter(i => !i._purum).length, k._v = metric === "HPS" ? offv(k, "hps") || k.myHps || 0 : offv(k, "dps") || k._v, k._mps = c.cls === 0 ? offv(k, "mps") : null;
+                })), k._usable = k._items.some(i => i._usable), k._purum = k._items.some(i => i._purum), k._gearCount = k._items.filter(i => !i._purum).length, k._v = metric === "HPS" ? offv(k, "hps") || k.myHps || 0 : offv(k, "dps") || k.myDps || 0, k._mps = c.cls === 0 ? offv(k, "mps") : null;
             });
             return {
                 f,
@@ -23696,7 +23716,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             return img.src = env.iconUrl(it.type, it.tier, isGear(it) ? qb(it.quality) : 0), size && (img.style.width = img.style.height = size + "px"), img.onerror = () => img.style.visibility = "hidden", img;
         };
         const itemSlot = it => {
-            const s = el("div", "bl-slot border " + (isGear(it) ? QCOL[qb(it.quality)] : "white"));
+            const s = el("div", "bl-slot border " + (isGear(it) ? QCOL[qb(it.quality)] : "white") + (it._dropOnly ? " drop" : ""));
             s.appendChild(icon(it)), it.stacks != null && it.gained != null && s.appendChild(el("span", "bl-stack", String(it.gained)));
             return s.onmouseenter = e => showTip(it, e), s.onmousemove = moveTip, s.onmouseleave = hideTip, s;
         };
@@ -23725,7 +23745,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     d.appendChild(el("small", "textgrey", " " + (s.rollPercent == null ? "" : s.rollPercent.toFixed(1) + "%"))), p.appendChild(d);
                 }), c.appendChild(p);
             }
-            const foot = el("div", "pack textgrey bl-tipfoot", fmtDate(it.time || it._kill.date) + (it._usable ? "  ·  usable" : ""));
+            const foot = el("div", "pack textgrey bl-tipfoot", fmtDate(it.time || it._kill.date) + (it._usable ? "  ·  usable" : "") + (it._dropOnly ? "  ·  not picked up" + (it.stats && it.stats.length ? "" : ", stats unknown") : ""));
             return c.appendChild(foot), box.appendChild(c), box;
         };
         const showTip = (it, e) => {
@@ -23987,7 +24007,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     head.append(el("span", "textwhite", fmtDate(k.date)), el("span", "textgrey", fmtDur(k.fightSeconds || 0)), el("span", "bl-grow"), ...k._mps != null ? [el("span", "textblue", num(k._mps) + " MPS")] : [], el("span", "textgrey", metric === "HPS" ? num(offv(k, "hpstotal") || k.myHealing || 0) + " heal" : num(offv(k, "dpstotal") || k.myDamage) + " dmg")), fill.style.width = Math.max(1, (k._v) / best * 100) + "%", fill.append(el("span", "bl-pl", k.player || c.name), el("span", "bl-pr", num(k.myDps))), hp.appendChild(fill), row.append(head, hp);
                     if (k._items.length) {
                         const strip = el("div", "bl-strip");
-                        k._items.filter(i => !i._purum).slice(0, 4).concat(k._items.filter(i => i._purum).slice(0, 1)).forEach(it => {
+                        k._items.filter(i => !i._purum).concat(k._items.filter(i => i._purum)).forEach(it => {
                             const cell = el("div", "bl-cell" + (it._usable ? " usable" : it._purum ? " purum" : ""));
                             cell.appendChild(itemSlot(it)), strip.appendChild(cell);
                         }), row.appendChild(strip);
@@ -24172,7 +24192,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
 .bl-pbar .progressBar{height:100%;border-radius:1.5px}
 .bl-pl{padding-left:4px;position:relative;z-index:1}
 .bl-pr{position:absolute;right:7px;z-index:1}
-.bl-strip{display:flex;gap:3px}
+.bl-strip{display:flex;flex-wrap:wrap;gap:3px}
 .bl-cell{flex:0 0 44px}
 .bl-sortrow{display:flex;gap:4px;align-items:center;font-size:12px;padding:0 2px}
 .bl-win .bl-close.btn{width:24px;height:24px;padding:4px;box-sizing:border-box;flex:0 0 24px;cursor:pointer}
@@ -24180,6 +24200,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
 .bl-cell.purum .bl-slot{border-color:#0681ea}
 .bl-cell.usable .bl-slot{border-color:#f5c247}
 .bl-slot:hover{filter:brightness(1.25)}
+.bl-slot.drop{opacity:.7}
 .bl-slot .bl-ic{width:100%;height:100%}
 .bl-stack{position:absolute;right:2px;bottom:0;font-size:12px;font-weight:700;color:#dae8ea;text-shadow:0 0 2px #000,0 0 2px #000}
 .bl-irow{display:flex;gap:6px;align-items:center;background:#10131dcc;border-radius:3px;padding:3px;border:2px solid transparent;flex-shrink:0}
@@ -24549,6 +24570,86 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 rolls: Array.isArray(it.rolls) ? it.rolls.slice() : null,
                 stats
             }), classicBossSave(list);
+        },
+        classicBossStats = it => {
+            let names = P.ui && P.ui.stats && P.ui.stats.array || [],
+                out = [];
+            return it.stats && it.stats.forEach((v, id) => out.push({
+                id,
+                name: names[id] || String(id),
+                type: v.type,
+                value: v.value,
+                rollPercent: Math.round(v.qual * 100) / 100
+            })), out;
+        },
+        classicBossDrop = (type, tier, quality, src, eid, full) => {
+            if (!classicBossOpen || Date.now() > classicBossOpen.until || !type || type === "gold") return;
+            let list = classicBossLoad(),
+                rec = list.find(r => r.killId === classicBossOpen.killId);
+            if (!rec) return;
+            let drops = rec.drops || (rec.drops = []),
+                q = Math.round(quality);
+            if (src === "ground" && drops.some(d => d.eid === eid)) return;
+            let same = drops.find(d => d.type === type && d.tier === tier && d.quality === q && !d[src]);
+            same ? (same[src] = !0, eid != null && (same.eid = eid), full && !same.stats && Object.assign(same, full)) : drops.push({
+                type,
+                tier,
+                quality: q,
+                [src]: !0,
+                ...eid != null ? {
+                    eid
+                } : {},
+                ...full || {},
+                time: new Date().toISOString()
+            }), classicBossSave(list);
+        },
+        classicBossChat = (text, items) => {
+            if (!classicBossOpen || Date.now() > classicBossOpen.until || typeof text != "string") return;
+            if (/items\s*@/i.test(text) || /^\s*\d+\.\s*T\d+/i.test(text)) {
+                let list = classicBossLoad(),
+                    rec = list.find(r => r.killId === classicBossOpen.killId);
+                rec && ((rec.dropMsgs || (rec.dropMsgs = [])).push({
+                    text,
+                    items: Array.isArray(items) ? items.map(x => ({
+                        type: x.type,
+                        tier: x.tier,
+                        rolls: x.rolls ? [...x.rolls] : null,
+                        stacks: x.stacks,
+                        upgrade: x.upgrade,
+                        index: x.index
+                    })) : null
+                }), classicBossSave(list));
+            }
+            let full = Array.isArray(items) ? items.filter(x => x && x.type && x.rolls && x.rolls.length) : [];
+            if (full.length) return full.forEach(x => {
+                try {
+                    let it = new Kr(0);
+                    it.hydrate({
+                        type: x.type,
+                        tier: x.tier,
+                        rolls: [...x.rolls],
+                        upgrade: x.upgrade || 0,
+                        bound: x.bound || 0
+                    }), classicBossDrop(x.type, x.tier, it.quality, "chat", null, {
+                        name: Jt(x.type, x.tier),
+                        gearScore: it.gs,
+                        rolls: [...x.rolls],
+                        stats: classicBossStats(it)
+                    });
+                } catch (e) {}
+            });
+            String(text).replace(/<[^>]*>/g, "").split(String.fromCharCode(10)).forEach(line => {
+                let m = line.match(/^\s*\d+\.\s*T(\d+)\s+([a-z]+)\s+(\d+(?:\.\d+)?)%/i);
+                m && classicBossDrop(m[2].toLowerCase(), +m[1] - 1, +m[3], "chat");
+            });
+        },
+        classicBossGround = e => {
+            if (!classicBossOpen || Date.now() > classicBossOpen.until || !e || !e.droptype) return;
+            let list = classicBossLoad(),
+                rec = list.find(r => r.killId === classicBossOpen.killId),
+                p = rec && rec.pos,
+                ok = !p || !e.pos || Math.hypot(e.pos[0] - p[0], e.pos[2] - p[2]) < 40;
+            ok && classicBossDrop(e.droptype, e.tier, e.quality, "ground", e.id);
         };
     var UT = (t, e, n) => {
             if (t && t.type) switch (e) {
@@ -42533,7 +42634,10 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             let r, l;
             this.droptype == "gold" ? (this.name = this.tier + "c", this.setSize(.1), r = "gold", this.color = "gold", this.quality = 100) : (r = this.droptype + this.tier, l = Xt[r], l && (this.name = Jt(this.droptype, this.tier)), this.droptype !== "material" && this.droptype !== "misc" && this.droptype !== "rune" && this.droptype !== "book" ? (this.color = Nt(o)[1], oe.itemQualityPercent && (this.name += ` ${this.quality}%`)) : (this.color = this.droptype, this.droptype !== "material" ? this.quality = 100 : (this.color = "material" + Go(l.quality), this.quality = l.quality)));
             let a = l && l.art || r;
-            Sl(this.visual.transform.data.uvshift, fr[a]), J(this.visual.transform.scale, fr[a][0] * 20, 1, fr[a][1] * 20), this.visual.transform.data.shine[0] = Math.random() * 6.1, this.dirty = !0, this.visual.transform.visible = !0
+            Sl(this.visual.transform.data.uvshift, fr[a]), J(this.visual.transform.scale, fr[a][0] * 20, 1, fr[a][1] * 20), this.visual.transform.data.shine[0] = Math.random() * 6.1, this.dirty = !0, this.visual.transform.visible = !0;
+            try {
+                classicBossGround(this);
+            } catch (x) {}
         }
         onRemove() {
             oi(this.visual.transform.data.multi, this.visual.transform), (it.shift.down || oe.itemLabelRange > 0) && (Pf.add(this), this.uiTimeout = Math.round(T.time / 5) * 5 + 10)
