@@ -23629,7 +23629,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             let sv = imU.imSunV.value;
             sv[0] = vf[0], sv[1] = vf[1], sv[2] = vf[2], sv[3] = 0;
         },
-        imGlowFrag = "#version 300 es\nprecision highp float;uniform sampler2D inputA;uniform sampler2D imDepth;uniform vec4 imGlareU;uniform vec4 imSunCol;uniform float glAmt;in vec2 vUv;out vec4 fragColor;vec3 glW(vec3 c){float l=dot(c,vec3(0.299,0.587,0.114));return c*smoothstep(0.25,0.85,l);}void main(){vec4 src=texture(inputA,vUv);vec2 px=1.0/vec2(textureSize(inputA,0));float sc=float(textureSize(inputA,0).y)/1080.0;vec3 g=vec3(0.0);float tw=0.0;for(int r=1;r<=2;++r){float rad=(float(r*r)*4.5+1.5)*sc;float w=1.0/float(r);for(int k=0;k<6;++k){float an=float(k)*1.0472+float(r)*0.5236;g+=glW(texture(inputA,vUv+vec2(cos(an),sin(an))*rad*px).rgb)*w;tw+=w;}}g/=tw;vec3 c=src.rgb;c=1.0-(1.0-c)*(1.0-clamp(g*glAmt*1.6,0.0,1.0));if(imGlareU.z>0.0){vec2 sp=imGlareU.xy;float vis=0.0;for(int k=0;k<5;k++){vec2 o=k==1?vec2(0.01,0.0):k==2?vec2(-0.01,0.0):k==3?vec2(0.0,0.01):k==4?vec2(0.0,-0.01):vec2(0.0);vis+=step(0.99999,texture(imDepth,clamp(sp+o,0.001,0.999)).r);}vis/=5.0;vec2 d=(vUv-sp)*vec2(imGlareU.w,1.0);float r=length(d);float g=exp(-r*9.0)*0.45+exp(-r*2.8)*0.12;vec2 ax=vec2(0.5)-sp;for(int k=1;k<4;k++){vec2 gp=sp+ax*float(k)*0.55;g+=smoothstep(0.05+0.02*float(k),0.0,length((vUv-gp)*vec2(imGlareU.w,1.0)))*0.05;}c+=imSunCol.rgb*g*vis*imGlareU.z;}fragColor=vec4(c,src.a);}",
+        imGlowFrag = "#version 300 es\nprecision highp float;uniform sampler2D inputA;uniform sampler2D imDepth;uniform vec4 imGlareU;uniform vec4 imSunCol;uniform float glAmt;in vec2 vUv;out vec4 fragColor;vec3 glW(vec3 c){float l=dot(c,vec3(0.299,0.587,0.114));float k=max(l-0.62,0.0);k=k*k/(k+0.12);return c*(k/max(l,0.001));}void main(){vec4 src=texture(inputA,vUv);vec2 px=1.0/vec2(textureSize(inputA,0));float sc=float(textureSize(inputA,0).y)/1080.0;vec3 g=vec3(0.0);float tw=0.0;for(int r=1;r<=2;++r){float rad=(float(r*r)*4.5+1.5)*sc;float w=1.0/float(r);for(int k=0;k<6;++k){float an=float(k)*1.0472+float(r)*0.5236;g+=glW(texture(inputA,vUv+vec2(cos(an),sin(an))*rad*px).rgb)*w;tw+=w;}}g/=tw;vec3 c=src.rgb+g*glAmt*1.5;if(imGlareU.z>0.0){vec2 sp=imGlareU.xy;float vis=0.0;for(int k=0;k<5;k++){vec2 o=k==1?vec2(0.01,0.0):k==2?vec2(-0.01,0.0):k==3?vec2(0.0,0.01):k==4?vec2(0.0,-0.01):vec2(0.0);vis+=step(0.99999,texture(imDepth,clamp(sp+o,0.001,0.999)).r);}vis/=5.0;vec2 d=(vUv-sp)*vec2(imGlareU.w,1.0);float r=length(d);float g=exp(-r*9.0)*0.45+exp(-r*2.8)*0.12;vec2 ax=vec2(0.5)-sp;for(int k=1;k<4;k++){vec2 gp=sp+ax*float(k)*0.55;g+=smoothstep(0.05+0.02*float(k),0.0,length((vUv-gp)*vec2(imGlareU.w,1.0)))*0.05;}c+=imSunCol.rgb*g*vis*imGlareU.z;}fragColor=vec4(c,src.a);}",
         imGlowP = null,
         imGlowProg = () => imGlowP = kn({
             vertex: hc,
@@ -34036,7 +34036,15 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                         hlNight: !1,
                         nightKeep: !0,
                         nightCol: [.2, .5, .92],
-                        nightLight: [1.35, 1.25]
+                        duskPull: {
+                            ambient: .5,
+                            direct: .35,
+                            fog: .4,
+                            horizon: .4,
+                            clouds: .4,
+                            skytop: .4,
+                            skymid: .4
+                        }
                     }
                 } [cfg[0]],
                 lum = col => col[0] * .299 + col[1] * .587 + col[2] * .114,
@@ -34049,9 +34057,10 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             for (let k in map) c[k] && (c[k] = c[k].map((col, p) => {
                 if (tune && tune.nightKeep && p === 2) return col;
                 let o = classicHex(pal[p][map[k]]),
-                    w = (p === 2 ? cfg[2] : cfg[1]) * (k === "ambient" ? 4 / 7 : 1),
+                    dp = tune && tune.duskPull && p === 1,
+                    w = dp ? tune.duskPull[k] || 0 : (p === 2 ? cfg[2] : cfg[1]) * (k === "ambient" ? 4 / 7 : 1),
                     r = col.map((v, i) => v + (o[i] - v) * w);
-                if (!cfg[3] || p > 1 || k === "direct") return r;
+                if (!cfg[3] || p > 1 || dp || k === "direct") return r;
                 let h = r.map((v, i) => v * [1 + .6 * cfg[3], 1 - .35 * cfg[3], 1 + .45 * cfg[3]][i]),
                     l0 = r[0] * .299 + r[1] * .587 + r[2] * .114,
                     l1 = h[0] * .299 + h[1] * .587 + h[2] * .114 || 1;
