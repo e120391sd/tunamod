@@ -23586,7 +23586,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     f = imSwap(f, "float h=f;", "float h=f;float imWv=0.0;if(imOpt2.x>0.5){for(int k=0;k<2;++k){float off=float(k)/3.0;float tt=mod(time*0.2+off,1.0)*3.141;imWv+=texture(waterNoise,vUv.yx*0.5+vec2(off,0.2*tt+off)).r*abs(sin(tt));}}");
                     f = imSwap(f, "float j=1.0-clamp(h/0.6,0.0,1.0);", "float j=1.0-clamp(h/(0.6*(0.85+0.3*imWv)),0.0,1.0);");
                     f = imSwap(f, "float n=texture(waterLines,vUv.yx+b*0.15).r;", "float n=texture(waterLines,vUv.yx+b*0.15+(imOpt2.x>0.5?vec2(time*0.02)+imWv*0.1:vec2(0.0))).r;");
-                    f = imSwap(f, "vec4 s=vec4(r,1.0-i);", "vec4 s=vec4(r,1.0-i);if(imOpt2.x>0.5){float fd=1.0-smoothstep(60.0,90.0,a);vec3 mc=(mix(watercolors[2],p*watercolors[2],m)+n*watercolors[0]*0.05)*q;mc=mix(mc,watercolors[0]*q,j);vec3 gr=p*mix(vec3(1.0),watercolors[1]*1.5,0.22);vec3 wc=mix(mc,gr,0.45);float wl=dot(wc,vec3(0.299,0.587,0.114));wc=max(mix(vec3(wl),wc,1.0+0.7*imNightF()),0.0);s.rgb=mix(s.rgb,wc,fd);}");
+                    f = imSwap(f, "vec4 s=vec4(r,1.0-i);", "vec4 s=vec4(r,1.0-i);if(imOpt2.x>0.5){float fd=1.0-smoothstep(60.0,90.0,a);float nq=imNightF();vec3 qd=mix(q,vec3(dot(q,vec3(0.299,0.587,0.114)))*vec3(0.88,0.98,1.12),nq*0.85);vec3 mc=(mix(watercolors[2],p*watercolors[2],m)+n*watercolors[0]*0.05)*qd;mc=mix(mc,watercolors[0]*qd,j);vec3 gr=p*mix(vec3(1.0),watercolors[1]*1.5,0.22);vec3 wc=mix(mc,gr,0.45);s.rgb=mix(s.rgb,wc,fd);}");
                     f = imSwap(f, "s.rgb+=t*worldlight[0];", "s.rgb+=t*worldlight[0];if(imOpt2.y>0.5){vec3 vd=normalize(cameraPosition-vWorldPos.xyz);float b2=texture(waterNoise,vUv.xy/3.0-time*0.07).r-0.5;vec3 nn=normalize(vec3(b*0.9,1.0,b2*0.9));float nf=imNightF();vec3 ld=normalize(imSunV.xyz+vec3(0.0,0.0001,0.0));float rd=max(dot(reflect(-ld,nn),vd),0.0);float spk=step(0.55,texture(waterNoise,vUv.xy*2.0+vec2(time*0.05,-time*0.04)).r);float sp=pow(rd,14.0)*0.22+pow(rd,120.0)*2.2*spk;vec3 gc=mix(vec3(1.0,0.93,0.78),vec3(0.62,0.72,0.95)*0.75,nf);s.rgb+=gc*sp*smoothstep(0.02,0.15,ld.y);}if(imOpt2.x>0.5){float pd=length(vWorldPos.xz-imPly.xz);float ph=abs(vWorldPos.y-imPly.y);if(pd<5.0&&ph<2.5){float nz=texture(waterNoise,vWorldPos.xz*0.15+time*0.05).r;float rw=imRing(imR0,vWorldPos.xz,nz)+imRing(imR1,vWorldPos.xz,nz)+imRing(imR2,vWorldPos.xz,nz)+imRing(imR3,vWorldPos.xz,nz)+imRing(imR4,vWorldPos.xz,nz)+imRing(imR5,vWorldPos.xz,nz);float ch=(1.0-smoothstep(0.25,0.85+0.2*nz,pd))*imPly.w*smoothstep(0.35,0.75,texture(waterNoise,vWorldPos.xz*0.6+vec2(time*0.6,-time*0.45)).r);float hf=1.0-ph/2.5;s.rgb+=watercolors[0]*(max(rw,-0.3)*0.22+ch*0.35)*hf;}s.rgb*=mix(mix(0.8,1.0,l),1.0,j);}");
                     n.frag = f;
                 }
@@ -34157,7 +34157,8 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     hz = on.sky.data.skycolors,
                     light = Math.max(.25, Math.min(1.15, ((w[0] + w[3]) * .299 + (w[1] + w[4]) * .587 + (w[2] + w[5]) * .114) / .95));
                 for (let e = 0; e < 3; ++e) t[e] *= 1 - .18 * imState.night;
-                for (let e = 3; e < 9; ++e) t[e] = Math.max(0, Math.min(t[e], t[e] * light * .75 + hz[9 + e % 3] * .25));
+                let hl = hz[9] * .299 + hz[10] * .587 + hz[11] * .114, nn = imState.night * .85;
+                for (let e = 3; e < 9; ++e) t[e] = Math.max(0, Math.min(t[e], t[e] * light * .75 + (hz[9 + e % 3] + (hl * [.88, .98, 1.12][e % 3] - hz[9 + e % 3]) * nn) * .25));
             }
         },
         VN = (t, e) => {
