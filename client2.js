@@ -23537,7 +23537,35 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             },
             imSunV: {
                 value: new Float32Array(4)
+            },
+            imR0: {
+                value: new Float32Array([0, 0, 9, 0])
+            },
+            imR1: {
+                value: new Float32Array([0, 0, 9, 0])
+            },
+            imR2: {
+                value: new Float32Array([0, 0, 9, 0])
+            },
+            imR3: {
+                value: new Float32Array([0, 0, 9, 0])
+            },
+            imR4: {
+                value: new Float32Array([0, 0, 9, 0])
+            },
+            imR5: {
+                value: new Float32Array([0, 0, 9, 0])
             }
+        },
+        imWake = {
+            list: [],
+            lx: null,
+            lz: 0,
+            lt: 0,
+            ex: 0,
+            ez: 0,
+            et: 0,
+            mv: 0
         },
         imState = {
             night: 0
@@ -23546,7 +23574,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         ["imWater", imWater],
         ["imGlint", imGlint]
     ].forEach(([k, s]) => fw(k, s));
-    var imGlslW = "uniform vec4 imCam;uniform vec4 imPly;uniform vec4 imOpt2;uniform vec4 imSunV;float imNightF(){return clamp(-sin(daycycle*6.2832)*1.6,0.0,1.0);}",
+    var imGlslW = "uniform vec4 imCam;uniform vec4 imPly;uniform vec4 imOpt2;uniform vec4 imSunV;uniform vec4 imR0;uniform vec4 imR1;uniform vec4 imR2;uniform vec4 imR3;uniform vec4 imR4;uniform vec4 imR5;float imRing(vec4 r,vec2 p,float nz){if(r.z>2.2||r.w<=0.0)return 0.0;float rad=0.25+r.z*1.5+(nz-0.5)*0.18;float dd=length(p-r.xy);float k=(dd-rad)*5.0;float ring=exp(-k*k)-0.45*exp(-(k+1.6)*(k+1.6));float fade=1.0-r.z/2.2;return ring*fade*fade*r.w;}float imNightF(){return clamp(-sin(daycycle*6.2832)*1.6,0.0,1.0);}",
         imSwap = (src, a, b) => src.split(a).length === 2 ? src.replace(a, () => b) : src,
         imPatch = (name, n) => {
             if (!classicPlain || !n) return;
@@ -23559,7 +23587,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     f = imSwap(f, "float j=1.0-clamp(h/0.6,0.0,1.0);", "float j=1.0-clamp(h/(0.6*(0.85+0.3*imWv)),0.0,1.0);");
                     f = imSwap(f, "float n=texture(waterLines,vUv.yx+b*0.15).r;", "float n=texture(waterLines,vUv.yx+b*0.15+(imOpt2.x>0.5?vec2(time*0.02)+imWv*0.1:vec2(0.0))).r;");
                     f = imSwap(f, "vec4 s=vec4(r,1.0-i);", "vec4 s=vec4(r,1.0-i);if(imOpt2.x>0.5){float fd=1.0-smoothstep(60.0,90.0,a);vec3 mc=(mix(watercolors[2],p*watercolors[2],m)+n*watercolors[0]*0.05)*q;mc=mix(mc,watercolors[0]*q,j);vec3 gr=p*mix(vec3(1.0),watercolors[1]*1.5,0.22);vec3 wc=mix(mc,gr,0.45);float wl=dot(wc,vec3(0.299,0.587,0.114));wc=max(mix(vec3(wl),wc,1.0+0.7*imNightF()),0.0);s.rgb=mix(s.rgb,wc,fd);}");
-                    f = imSwap(f, "s.rgb+=t*worldlight[0];", "s.rgb+=t*worldlight[0];if(imOpt2.y>0.5){vec3 vd=normalize(cameraPosition-vWorldPos.xyz);float b2=texture(waterNoise,vUv.xy/3.0-time*0.07).r-0.5;vec3 nn=normalize(vec3(b*0.9,1.0,b2*0.9));float nf=imNightF();vec3 ld=normalize(imSunV.xyz+vec3(0.0,0.0001,0.0));float rd=max(dot(reflect(-ld,nn),vd),0.0);float spk=step(0.55,texture(waterNoise,vUv.xy*2.0+vec2(time*0.05,-time*0.04)).r);float sp=pow(rd,14.0)*0.22+pow(rd,120.0)*2.2*spk;vec3 gc=mix(vec3(1.0,0.93,0.78),vec3(0.62,0.72,0.95)*0.75,nf);s.rgb+=gc*sp*smoothstep(0.02,0.15,ld.y);}if(imOpt2.x>0.5){float pd=length(vWorldPos.xz-imPly.xz);float ph=abs(vWorldPos.y-imPly.y);if(pd<6.0&&ph<2.5){float rg=sin(pd*5.0-imCam.w*5.0)*0.5+0.5;s.rgb+=watercolors[0]*rg*0.16*(1.0-pd/6.0)*(1.0-ph/2.5);}s.rgb*=mix(mix(0.8,1.0,l),1.0,j);}");
+                    f = imSwap(f, "s.rgb+=t*worldlight[0];", "s.rgb+=t*worldlight[0];if(imOpt2.y>0.5){vec3 vd=normalize(cameraPosition-vWorldPos.xyz);float b2=texture(waterNoise,vUv.xy/3.0-time*0.07).r-0.5;vec3 nn=normalize(vec3(b*0.9,1.0,b2*0.9));float nf=imNightF();vec3 ld=normalize(imSunV.xyz+vec3(0.0,0.0001,0.0));float rd=max(dot(reflect(-ld,nn),vd),0.0);float spk=step(0.55,texture(waterNoise,vUv.xy*2.0+vec2(time*0.05,-time*0.04)).r);float sp=pow(rd,14.0)*0.22+pow(rd,120.0)*2.2*spk;vec3 gc=mix(vec3(1.0,0.93,0.78),vec3(0.62,0.72,0.95)*0.75,nf);s.rgb+=gc*sp*smoothstep(0.02,0.15,ld.y);}if(imOpt2.x>0.5){float pd=length(vWorldPos.xz-imPly.xz);float ph=abs(vWorldPos.y-imPly.y);if(pd<5.0&&ph<2.5){float nz=texture(waterNoise,vWorldPos.xz*0.15+time*0.05).r;float rw=imRing(imR0,vWorldPos.xz,nz)+imRing(imR1,vWorldPos.xz,nz)+imRing(imR2,vWorldPos.xz,nz)+imRing(imR3,vWorldPos.xz,nz)+imRing(imR4,vWorldPos.xz,nz)+imRing(imR5,vWorldPos.xz,nz);float ch=(1.0-smoothstep(0.25,0.85+0.2*nz,pd))*imPly.w*smoothstep(0.35,0.75,texture(waterNoise,vWorldPos.xz*0.6+vec2(time*0.6,-time*0.45)).r);float hf=1.0-ph/2.5;s.rgb+=watercolors[0]*(max(rw,-0.3)*0.22+ch*0.35)*hf;}s.rgb*=mix(mix(0.8,1.0,l),1.0,j);}");
                     n.frag = f;
                 }
             }
@@ -23567,6 +23595,25 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         },
         imEnvAdjust = (l, t) => {
             imState.night = Math.max(0, Math.min(1, -Math.sin(t * 6.2832) * 1.6));
+        },
+        imWakeTick = pl => {
+            let now = Date.now() / 1e3,
+                w = imWake,
+                u = [imU.imR0, imU.imR1, imU.imR2, imU.imR3, imU.imR4, imU.imR5];
+            if (pl) {
+                if (w.lx == null) w.lx = pl[0], w.lz = pl[2], w.lt = now, w.ex = pl[0], w.ez = pl[2];
+                let dt = Math.max(1e-3, now - w.lt),
+                    sp = Math.hypot(pl[0] - w.lx, pl[2] - w.lz) / dt;
+                sp > 30 && (sp = 0);
+                w.mv += (Math.min(1, sp / 6) - w.mv) * Math.min(1, dt * 6), w.lx = pl[0], w.lz = pl[2], w.lt = now;
+                let far = Math.hypot(pl[0] - w.ex, pl[2] - w.ez);
+                if (w.mv > .15 && far > .55 && now - w.et > .28) w.list.unshift([pl[0], pl[2], now, Math.min(1, .35 + w.mv)]), w.ex = pl[0], w.ez = pl[2], w.et = now, w.list.length > 6 && (w.list.length = 6);
+            }
+            for (let i = 0; i < 6; ++i) {
+                let r = w.list[i],
+                    v = u[i].value;
+                r ? (v[0] = r[0], v[1] = r[1], v[2] = now - r[2], v[3] = r[3]) : (v[2] = 9, v[3] = 0);
+            }
         },
         imFrame = () => {
             if (!classicPlain || !_t || !_t.worldPosition) return;
@@ -23576,7 +23623,8 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 q = imU.imPly.value,
                 o2 = imU.imOpt2.value;
             u[0] = cam[0], u[1] = cam[1], u[2] = cam[2], u[3] = Date.now() / 1e3 % 86400;
-            q[0] = pl ? pl[0] : cam[0], q[1] = pl ? pl[1] : cam[1] - 12, q[2] = pl ? pl[2] : cam[2], q[3] = 0;
+            q[0] = pl ? pl[0] : cam[0], q[1] = pl ? pl[1] : cam[1] - 12, q[2] = pl ? pl[2] : cam[2], q[3] = imWake.mv;
+            imWakeTick(pl);
             o2[0] = oe.imWater ? 1 : 0, o2[1] = oe.imGlint ? 1 : 0, o2[2] = imState.night, o2[3] = 0;
             let sv = imU.imSunV.value;
             sv[0] = vf[0], sv[1] = vf[1], sv[2] = vf[2], sv[3] = 0;
@@ -33956,7 +34004,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         classicOldPullCfg = {
             2: ["guardstone", 0, .7, 0],
             13: ["faivel", 0, .7, .12],
-            3: ["headless", .7, .7, 0]
+            3: ["headless", .25, .25, 0]
         },
         classicOldPull = (c, id) => {
             let cfg = classicOldPullCfg[id],
