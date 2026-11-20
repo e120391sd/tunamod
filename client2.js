@@ -11240,7 +11240,7 @@ void main() {
         Fq = ["faction", "GM", "clan", "party", "yell", "to", "from", "global", "pvp"],
         Qt = (t, e, n = !1, o, s, i, r, l, a = 0, c) => {
             try {
-                classicBossChat(e, c);
+                classicBossChat(e, c, !o);
             } catch (x) {}
             if (Date.now() < classicBossQuietUntil && typeof e == "string" && /boss ?log/i.test(e)) return;
             Xf.update(f => {
@@ -13899,9 +13899,10 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     value: [Zc.depthTexture, Kc[1].depthTexture]
                 }
             };
+            Object.assign(xn, imU);
             for (let e in kh) {
                 let n = kh[e];
-                n.vert && (n.vert = n.vert.replace("#SHADOWS", oe.shadows ? 1 : 0)), n.frag && (n.frag = n.frag.replace("#SHADOWS", oe.shadows ? 1 : 0))
+                n.vert && (n.vert = n.vert.replace("#SHADOWS", oe.shadows ? 1 : 0)), n.frag && (n.frag = n.frag.replace("#SHADOWS", oe.shadows ? 1 : 0)), imPatch(e, n)
             }
             let t = {
                 mesh: ["position", "uv", "normal", "color", "interiorlight", "alpha", "worldMatrix"],
@@ -14183,7 +14184,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 attributeLocations: t.post
             }), ht[35] = kn({
                 vertex: hc,
-                fragment: classicSsaoFrag,
+                fragment: imSsaoSoft(classicSsaoFrag),
                 depthWrite: !1,
                 depthTest: !1,
                 globalUniforms: xn,
@@ -14320,7 +14321,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     }
                 },
                 attributeLocations: ["position", "uv"]
-            }), nz(ht, xn), Ju(ht[18], N.ONE, N.ONE_MINUS_SRC_ALPHA), Ju(ht[16], N.ONE, N.ONE_MINUS_SRC_ALPHA), Ju(ht[15], N.ONE, N.ONE_MINUS_SRC_ALPHA), M2.push(3, 4, 6, 7, 10, 15, 5)
+            }), classicPlain && (ht[46] = imGlowProg()), nz(ht, xn), Ju(ht[18], N.ONE, N.ONE_MINUS_SRC_ALPHA), Ju(ht[16], N.ONE, N.ONE_MINUS_SRC_ALPHA), Ju(ht[15], N.ONE, N.ONE_MINUS_SRC_ALPHA), M2.push(3, 4, 6, 7, 10, 15, 5)
         },
         nz = (t, e) => {
             let n = t[4].program,
@@ -19855,7 +19856,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 x(ne, e, Le), d(e, o), d(e, s), d(e, i), d(e, r), x(ne, l, Le);
                 for (let oo = 0; oo < Mo.length; oo += 1) Mo[oo] && Mo[oo].m(l, null);
                 Vn(l, t[18], !0), x(ne, a, Le), x(ne, c, Le), x(ne, f, Le), x(ne, u, Le), x(ne, p, Le), x(ne, g, Le), x(ne, v, Le), x(ne, _, Le), x(ne, b, Le), X(y, ne, Le), x(ne, k, Le), x(ne, C, Le), x(ne, E, Le), x(ne, F, Le), Ge(F, t[19]), x(ne, M, Le), X(L, ne, Le), x(ne, V, Le), X(D, ne, Le), x(ne, z, Le), X(q, ne, Le), x(ne, R, Le), X(O, ne, Le), x(ne, W, Le), X(U, ne, Le), x(ne, $, Le), X(G, ne, Le), x(ne, de, Le), X(be, ne, Le), x(ne, le, Le), X(se, ne, Le), x(ne, fe, Le), X(ke, ne, Le), x(ne, we, Le), x(ne, ce, Le), x(ne, xe, Le), d(xe, ye), d(xe, Oe), d(xe, ze), d(ze, Ne), x(ne, ue, Le), Ge(ue, t[20]), x(ne, _e, Le), X(pe, ne, Le), x(ne, he, Le), d(he, Ie), d(he, We), d(he, te), d(te, H), d(te, He), x(ne, Ve, Le), Ge(Ve, t[21]), x(ne, Be, Le), d(Be, je), d(Be, st), d(Be, at), d(at, ot), d(at, Wt), x(ne, Ee, Le), Ge(Ee, t[22]), x(ne, et, Le), d(et, gt), d(et, Ke), d(et, wt), x(ne, pt, Le), Ge(pt, t[23]), x(ne, qe, Le), x(ne, Tt, Le), x(ne, Ut, Le), X(Ze, ne, Le), x(ne, tt, Le), X(nt, ne, Le), x(ne, Lt, Le), X(Xe, ne, Le), x(ne, yt, Le), X(kt, ne, Le), x(ne, Pt, Le), x(ne, mo, Le), x(ne, Lo, Le), d(Lo, Ht), d(Lo, ri), d(Lo, li), X(xo, ne, Le), x(ne, Fr, Le), X(Es, ne, Le), x(ne, ai, Le), X(Is, ne, Le), x(ne, pn, Le), d(pn, un), d(pn, Ea), d(pn, Lf), d(Lf, Fg), d(Lf, s3), x(ne, Ls, Le), Ge(Ls, t[24]), x(ne, Ia, Le), d(Ia, i3), d(Ia, r3), d(Ia, Df), d(Df, Cg), d(Df, l3), x(ne, Ds, Le), Ge(Ds, t[25]), x(ne, km, Le), x(ne, ci, Le), Ge(ci, t[26]), x(ne, wm, Le), x(ne, fi, Le), Ge(fi, t[27]), x(ne, xm, Le), X(La, ne, Le), x(ne, Vf, Le), x(ne, Sg, Le), x(ne, Mm, Le), X(Da, ne, Le), x(ne, Fm, Le), X(Va, ne, Le), x(ne, Cm, Le), X(qa, ne, Le), x(ne, Sm, Le), x(ne, ui, Le), Ge(ui, t[28]), x(ne, qf, Le), x(ne, Tg, Le), x(ne, Tm, Le), X(Ra, ne, Le), x(ne, Pm, Le), X(za, ne, Le), x(ne, Rf, Le), x(ne, Pg, Le), x(ne, Ba, Le), d(Ba, a3), d(Ba, c3), d(Ba, zf), d(zf, Ag), d(zf, f3), x(ne, pi, Le), Ge(pi, t[29]), x(ne, Oa, Le), d(Oa, u3), d(Oa, p3), d(Oa, Am), d(Am, Eg), x(ne, mi, Le), Ge(mi, t[30]), x(ne, Bf, Le), x(ne, Ig, Le), x(ne, Ua, Le), d(Ua, m3), d(Ua, d3), d(Ua, Em), d(Em, Lg), x(ne, di, Le), Ge(di, t[31]), x(ne, $a, Le), d($a, h3), d($a, g3), d($a, Im), d(Im, Dg), x(ne, hi, Le), Ge(hi, t[32]), x(ne, Of, Le), x(ne, Vg, Le), x(ne, Lm, Le), X(Na, ne, Le), Qo = !0, qg || (v3 = [Y(l, "change", t[53]), Y(l, "change", t[35]), Y(u, "click", z_), Y(g, "click", B_), Y(F, "change", t[54]), Y(F, "input", t[54]), Y(ue, "change", t[55]), Y(ue, "input", t[55]), Y(Ve, "change", t[56]), Y(Ve, "input", t[56]), Y(Ve, "change", t[35]), Y(Ee, "change", t[57]), Y(Ee, "input", t[57]), Y(Ee, "change", t[35]), Y(pt, "input", t[58]), Y(pt, "change", t[35]), Y(Ls, "change", t[59]), Y(Ls, "input", t[59]), Y(Ds, "change", t[60]), Y(Ds, "input", t[60]), Y(ci, "input", t[61]), Y(fi, "input", t[62]), Y(ui, "change", t[63]), Y(ui, "input", t[63]), Y(pi, "change", t[64]), Y(pi, "input", t[64]), Y(mi, "change", t[65]), Y(mi, "input", t[65]), Y(di, "change", t[66]), Y(di, "input", t[66]), Y(hi, "change", t[67]), Y(hi, "input", t[67])], qg = !0)
-                storageMount(ne, Le), mapMount(ne, k), sellRow && sellRow(), sellRow = checkRow("Block selling charms & upgraded items", blockSpecialSelling, ne, null), overrideRow && overrideRow(), overrideRow = checkRow("Disable world override", disableWorldOverride, ne, null), modRowsUi && modRowsUi.forEach(f => f()), modRowsUi = [sliderRow("Party frame height", partyHeight, ne, qf, 0, 100), checkRow("Sort party by class", sortParty, ne, qf), checkRow("Class-color party HP bars", classColorParty, ne, qf), checkRow("Disable blue partied nameplates", disablePartyNameplates, ne, qf), checkRow("Uncap nameplate draw distance", uncapNameplates, ne, qf), headerRow("Buffs", ne, null), checkRow("Hide irrelevant buffs", hideBuffs, ne, null), checkRow("Hide class buffs", hideClassBuffs, ne, null), checkRow("Make all buffs stackable", stackSameBuffs, ne, null), headerRow("CC indicators", ne, null), checkRow("Enable CC indicators", CCIndicator, ne, null), checkRow("Flash CC indicator color", flashCCIndicator, ne, null), checkRow("Show on nameplates", CCIndicatorOnNameplates, ne, null)], skillbarRowsUi && skillbarRowsUi.forEach(f => f()), skillbarRowsUi = [headerRow("Skillbar", ne, null), sliderRow("Columns", skillbarCols, ne, null, 0, 24), sliderRow("Rows", skillbarRows, ne, null, 0, 6)];
+                storageMount(ne, Le), mapMount(ne, k), sellRow && sellRow(), sellRow = checkRow("Block selling charms & upgraded items", blockSpecialSelling, ne, null), overrideRow && overrideRow(), overrideRow = checkRow("Disable world override", disableWorldOverride, ne, null), modRowsUi && modRowsUi.forEach(f => f()), modRowsUi = [sliderRow("Party frame height", partyHeight, ne, qf, 0, 100), checkRow("Sort party by class", sortParty, ne, qf), checkRow("Class-color party HP bars", classColorParty, ne, qf), checkRow("Disable blue partied nameplates", disablePartyNameplates, ne, qf), checkRow("Uncap nameplate draw distance", uncapNameplates, ne, qf), headerRow("Buffs", ne, null), checkRow("Hide irrelevant buffs", hideBuffs, ne, null), checkRow("Hide class buffs", hideClassBuffs, ne, null), checkRow("Make all buffs stackable", stackSameBuffs, ne, null), headerRow("CC indicators", ne, null), checkRow("Enable CC indicators", CCIndicator, ne, null), checkRow("Flash CC indicator color", flashCCIndicator, ne, null), checkRow("Show on nameplates", CCIndicatorOnNameplates, ne, null)], skillbarRowsUi && skillbarRowsUi.forEach(f => f()), skillbarRowsUi = [headerRow("Skillbar", ne, null), sliderRow("Columns", skillbarCols, ne, null, 0, 24), sliderRow("Rows", skillbarRows, ne, null, 0, 6)], imRowsUi && imRowsUi.forEach(f => f()), imRowsUi = imRows(ne, null);
             },
             p(ne, Le) {
                 if (Le[1] & 8) {
@@ -19877,7 +19878,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 I(y.$$.fragment, ne), I(L.$$.fragment, ne), I(D.$$.fragment, ne), I(q.$$.fragment, ne), I(O.$$.fragment, ne), I(U.$$.fragment, ne), I(G.$$.fragment, ne), I(be.$$.fragment, ne), I(se.$$.fragment, ne), I(ke.$$.fragment, ne), I(pe.$$.fragment, ne), I(Ze.$$.fragment, ne), I(nt.$$.fragment, ne), I(Xe.$$.fragment, ne), I(kt.$$.fragment, ne), I(xo.$$.fragment, ne), I(Es.$$.fragment, ne), I(Is.$$.fragment, ne), I(La.$$.fragment, ne), I(Da.$$.fragment, ne), I(Va.$$.fragment, ne), I(qa.$$.fragment, ne), I(Ra.$$.fragment, ne), I(za.$$.fragment, ne), I(Na.$$.fragment, ne), Qo = !1
             },
             d(ne) {
-                storageUnmount(), mapUnmount(), sellRow && (sellRow(), sellRow = null), skillbarRowsUi && (skillbarRowsUi.forEach(f => f()), skillbarRowsUi = null), modRowsUi && (modRowsUi.forEach(f => f()), modRowsUi = null), overrideRow && (overrideRow(), overrideRow = null);
+                storageUnmount(), mapUnmount(), sellRow && (sellRow(), sellRow = null), skillbarRowsUi && (skillbarRowsUi.forEach(f => f()), skillbarRowsUi = null), imRowsUi && (imRowsUi.forEach(f => f()), imRowsUi = null), modRowsUi && (modRowsUi.forEach(f => f()), modRowsUi = null), overrideRow && (overrideRow(), overrideRow = null);
                 ne && (w(e), w(l), w(a), w(c), w(f), w(u), w(p), w(g), w(v), w(_), w(b), w(k), w(C), w(E), w(F), w(M), w(V), w(z), w(R), w(W), w($), w(de), w(le), w(fe), w(we), w(ce), w(xe), w(ue), w(_e), w(he), w(Ve), w(Be), w(Ee), w(et), w(pt), w(qe), w(Tt), w(Ut), w(tt), w(Lt), w(yt), w(Pt), w(mo), w(Lo), w(Fr), w(ai), w(pn), w(Ls), w(Ia), w(Ds), w(km), w(ci), w(wm), w(fi), w(xm), w(Vf), w(Sg), w(Mm), w(Fm), w(Cm), w(Sm), w(ui), w(qf), w(Tg), w(Tm), w(Pm), w(Rf), w(Pg), w(Ba), w(pi), w(Oa), w(mi), w(Bf), w(Ig), w(Ua), w(di), w($a), w(hi), w(Of), w(Vg), w(Lm)), rt(Mo, ne), K(y, ne), K(L, ne), K(D, ne), K(q, ne), K(O, ne), K(U, ne), K(G, ne), K(be, ne), K(se, ne), K(ke, ne), K(pe, ne), K(Ze, ne), K(nt, ne), K(Xe, ne), K(kt, ne), K(xo, ne), K(Es, ne), K(Is, ne), K(La, ne), K(Da, ne), K(Va, ne), K(qa, ne), K(Ra, ne), K(za, ne), K(Na, ne), qg = !1, ct(v3)
             }
         }
@@ -23520,6 +23521,121 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         qh = t => {
             ti.set("gold", (ti.get("gold") || 0) + t)
         };
+    var imWater = ee(!0),
+        imSsao = ee(!0),
+        imGlint = ee(!0),
+        imRowsUi = null,
+        imU = {
+            imCam: {
+                value: new Float32Array(4)
+            },
+            imPly: {
+                value: new Float32Array(4)
+            },
+            imOpt2: {
+                value: new Float32Array(4)
+            },
+            imSunV: {
+                value: new Float32Array(4)
+            }
+        },
+        imState = {
+            night: 0
+        };
+    [
+        ["imWater", imWater],
+        ["imSsao", imSsao],
+        ["imGlint", imGlint]
+    ].forEach(([k, s]) => fw(k, s));
+    var imGlslW = "uniform vec4 imCam;uniform vec4 imPly;uniform vec4 imOpt2;uniform vec4 imSunV;float imNightF(){return clamp(-sin(daycycle*6.2832)*1.6,0.0,1.0);}",
+        imSwap = (src, a, b) => src.split(a).length === 2 ? src.replace(a, () => b) : src,
+        imPatch = (name, n) => {
+            if (!classicPlain || !n) return;
+            if (name === "water" && n.frag && n.frag.indexOf("imOpt2") < 0) {
+                let f = n.frag,
+                    i = f.indexOf("void main(");
+                if (i >= 0) {
+                    f = f.slice(0, i) + imGlslW + f.slice(i);
+                    f = imSwap(f, "float h=f;", "float h=f;float imWv=0.0;if(imOpt2.x>0.5){for(int k=0;k<2;++k){float off=float(k)/3.0;float tt=mod(time*0.2+off,1.0)*3.141;imWv+=texture(waterNoise,vUv.yx*0.5+vec2(off,0.2*tt+off)).r*abs(sin(tt));}}");
+                    f = imSwap(f, "float j=1.0-clamp(h/0.6,0.0,1.0);", "float j=1.0-clamp(h/(0.6*(0.85+0.3*imWv)),0.0,1.0);");
+                    f = imSwap(f, "float n=texture(waterLines,vUv.yx+b*0.15).r;", "float n=texture(waterLines,vUv.yx+b*0.15+(imOpt2.x>0.5?vec2(time*0.02)+imWv*0.1:vec2(0.0))).r;");
+                    f = imSwap(f, "vec4 s=vec4(r,1.0-i);", "vec4 s=vec4(r,1.0-i);if(imOpt2.x>0.5){float fd=1.0-smoothstep(60.0,90.0,a);vec3 mc=(mix(watercolors[2],p*watercolors[2],m)+n*watercolors[0]*0.05)*q;mc=mix(mc,watercolors[0]*q,j);vec3 gr=p*mix(vec3(1.0),watercolors[1]*1.5,0.22);vec3 wc=mix(mc,gr,0.45);float wl=dot(wc,vec3(0.299,0.587,0.114));wc=max(mix(vec3(wl),wc,1.0+0.7*imNightF()),0.0);s.rgb=mix(s.rgb,wc,fd);}");
+                    f = imSwap(f, "s.rgb+=t*worldlight[0];", "s.rgb+=t*worldlight[0];if(imOpt2.y>0.5){vec3 vd=normalize(cameraPosition-vWorldPos.xyz);float b2=texture(waterNoise,vUv.xy/3.0-time*0.07).r-0.5;vec3 nn=normalize(vec3(b*0.9,1.0,b2*0.9));float nf=imNightF();vec3 ld=normalize(imSunV.xyz+vec3(0.0,0.0001,0.0));float rd=max(dot(reflect(-ld,nn),vd),0.0);float spk=step(0.55,texture(waterNoise,vUv.xy*2.0+vec2(time*0.05,-time*0.04)).r);float sp=pow(rd,14.0)*0.22+pow(rd,120.0)*2.2*spk;vec3 gc=mix(vec3(1.0,0.93,0.78),vec3(0.62,0.72,0.95)*0.75,nf);s.rgb+=gc*sp*smoothstep(0.02,0.15,ld.y);}if(imOpt2.x>0.5){float pd=length(vWorldPos.xz-imPly.xz);float ph=abs(vWorldPos.y-imPly.y);if(pd<6.0&&ph<2.5){float rg=sin(pd*5.0-imCam.w*5.0)*0.5+0.5;s.rgb+=watercolors[0]*rg*0.16*(1.0-pd/6.0)*(1.0-ph/2.5);}s.rgb*=mix(mix(0.8,1.0,l),1.0,j);}");
+                    n.frag = f;
+                }
+            }
+            name === "foliagePlant" && n.vert && (n.vert = imSwap(n.vert, "float e=sin(time+instPos.x+f.x)*0.1*f.y;", "float e=sin(time+instPos.x+f.x)*0.2*f.y;"));
+        },
+        imEnvAdjust = (l, t) => {
+            imState.night = Math.max(0, Math.min(1, -Math.sin(t * 6.2832) * 1.6));
+        },
+        imFrame = () => {
+            if (!classicPlain || !_t || !_t.worldPosition) return;
+            let cam = _t.worldPosition,
+                pl = T && T.player ? T.player.visualPosition || T.player.pos : null,
+                u = imU.imCam.value,
+                q = imU.imPly.value,
+                o2 = imU.imOpt2.value;
+            u[0] = cam[0], u[1] = cam[1], u[2] = cam[2], u[3] = Date.now() / 1e3 % 86400;
+            q[0] = pl ? pl[0] : cam[0], q[1] = pl ? pl[1] : cam[1] - 12, q[2] = pl ? pl[2] : cam[2], q[3] = 0;
+            o2[0] = oe.imWater ? 1 : 0, o2[1] = oe.imGlint ? 1 : 0, o2[2] = imState.night, o2[3] = 0;
+            let sv = imU.imSunV.value;
+            sv[0] = vf[0], sv[1] = vf[1], sv[2] = vf[2], sv[3] = 0;
+        },
+        imSsaoSoft = src => classicPlain ? imSwap(imSwap(src, "occ*=1.0-smoothstep(120.0,180.0,-P.z);", "occ*=1.0-smoothstep(50.0,120.0,-P.z);"), "fragColor=vec4(mix(worldlight[1]*0.2,vec3(1.0),QE),1.0);", "QE=1.0-smoothstep(0.0,1.0,1.0-QE)*0.55;fragColor=vec4(mix(worldlight[1]*0.5,vec3(1.0),QE),1.0);") : src,
+        imGlowFrag = "#version 300 es\nprecision highp float;uniform sampler2D inputA;uniform sampler2D imDepth;uniform vec4 imGlareU;uniform vec4 imSunCol;uniform float glAmt;in vec2 vUv;out vec4 fragColor;vec3 glW(vec3 c){float l=dot(c,vec3(0.299,0.587,0.114));return c*smoothstep(0.25,0.85,l);}void main(){vec4 src=texture(inputA,vUv);vec2 px=1.0/vec2(textureSize(inputA,0));float sc=float(textureSize(inputA,0).y)/1080.0;vec3 g=vec3(0.0);float tw=0.0;for(int r=1;r<=3;++r){float rad=float(r*r)*5.0*sc;float w=1.0/float(r);for(int k=0;k<10;++k){float an=float(k)*0.6283+float(r)*0.9;g+=glW(texture(inputA,vUv+vec2(cos(an),sin(an))*rad*px).rgb)*w;tw+=w;}}g/=tw;vec3 c=src.rgb;c=1.0-(1.0-c)*(1.0-clamp(g*glAmt*1.6,0.0,1.0));if(imGlareU.z>0.0){vec2 sp=imGlareU.xy;float vis=0.0;for(int k=0;k<5;k++){vec2 o=k==1?vec2(0.01,0.0):k==2?vec2(-0.01,0.0):k==3?vec2(0.0,0.01):k==4?vec2(0.0,-0.01):vec2(0.0);vis+=step(0.99999,texture(imDepth,clamp(sp+o,0.001,0.999)).r);}vis/=5.0;vec2 d=(vUv-sp)*vec2(imGlareU.w,1.0);float r=length(d);float g=exp(-r*9.0)*0.45+exp(-r*2.8)*0.12;vec2 ax=vec2(0.5)-sp;for(int k=1;k<4;k++){vec2 gp=sp+ax*float(k)*0.55;g+=smoothstep(0.05+0.02*float(k),0.0,length((vUv-gp)*vec2(imGlareU.w,1.0)))*0.05;}c+=imSunCol.rgb*g*vis*imGlareU.z;}fragColor=vec4(c,src.a);}",
+        imGlowP = null,
+        imGlowProg = () => imGlowP = kn({
+            vertex: hc,
+            fragment: imGlowFrag,
+            depthWrite: !1,
+            depthTest: !1,
+            globalUniforms: xn,
+            uniforms: {
+                inputA: {
+                    value: null
+                },
+                glAmt: {
+                    value: .4
+                },
+                imGlareU: {
+                    value: new Float32Array([0, 0, 0, 1])
+                },
+                imSunCol: {
+                    value: new Float32Array([1, 1, 1, 0])
+                }
+            },
+            attributeLocations: ["position", "uv"]
+        }),
+        imGlowRun = () => {
+            if (!classicPlain || !imGlowP) return;
+            let p = imGlowP,
+                gl = p.uniforms.imGlareU.value,
+                sc = p.uniforms.imSunCol.value;
+            gl[2] = 0;
+            if (typeof fs != "undefined" && fs && fs.transform.visible && fs.geometry) {
+                let m = fs.transform.worldMatrix,
+                    v = on.camera.data.projectionViewMatrix,
+                    x = m[12],
+                    y = m[13],
+                    z = m[14],
+                    cx = v[0] * x + v[4] * y + v[8] * z + v[12],
+                    cy = v[1] * x + v[5] * y + v[9] * z + v[13],
+                    cw = v[3] * x + v[7] * y + v[11] * z + v[15];
+                if (cw > 0) {
+                    let ux = cx / cw * .5 + .5,
+                        uy = cy / cw * .5 + .5,
+                        edge = Math.max(0, 1 - Math.max(0, Math.abs(ux - .5) - .5, Math.abs(uy - .5) - .5) * 6),
+                        n = imState.night,
+                        su = on.sky.data.suncolor;
+                    gl[0] = ux, gl[1] = uy, gl[3] = lt.width / Math.max(1, lt.height), gl[2] = edge * Math.min(1, Math.max(0, vf[1] * 3)) * (.9 - .45 * n);
+                    sc[0] = su[0] + (.62 - su[0]) * n, sc[1] = su[1] + (.72 - su[1]) * n, sc[2] = su[2] + (.95 - su[2]) * n;
+                }
+            }
+            Gn("imDepth", ei.depthTexture, 0, p), Gn("inputA", ei.colorTexture, 0, p), hm(gr), ks(np, p), V1(gr, ei, N.COLOR_BUFFER_BIT);
+        },
+        imRows = (target, anchor) => classicPlain ? [headerRow("Graphics (world override off)", target, anchor), checkRow("Water details", imWater, target, anchor), checkRow("Water reflections", imGlint, target, anchor), checkRow("SSAO", imSsao, target, anchor)] : [headerRow("Graphics", target, anchor), checkRow("SSAO", imSsao, target, anchor)];
+
     var bossLogUi = (() => {
         const SLOTS = [
                 ["weapon", {
@@ -23610,6 +23726,24 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     hour: "2-digit",
                     minute: "2-digit"
                 });
+            },
+            STAT_MUL = {
+                8: .1,
+                9: .1,
+                13: .1,
+                14: .1,
+                16: .1
+            },
+            STAT_SUF = {
+                13: "%",
+                14: "%",
+                16: "%",
+                18: "%"
+            },
+            fmtStat = (id, v) => {
+                let x = v;
+                STAT_MUL[id] && (x = v * STAT_MUL[id], x = x.toFixed(x >= .1 ? 1 : 2));
+                return x + (STAT_SUF[id] || "");
             },
             fmtDur = sec => {
                 const t = Math.round(sec);
@@ -23705,7 +23839,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 kills = c.kills.slice().sort((a, b) => a.date < b.date ? 1 : -1);
             kills.forEach(k => {
                 const pool = (k.items || []).slice(),
-                    extra = (k.drops || []).filter(d => {
+                    extra = (k.drops || []).filter(d => d.type === "rune" || d.picked || !(d.rolls && d.rolls.length || d.stats && d.stats.length)).filter(d => {
                         const i = pool.findIndex(it => it.type === d.type && it.tier === d.tier && Math.round(it.quality) === d.quality);
                         return i >= 0 ? (pool.splice(i, 1), !1) : !0;
                     }).map(d => ({
@@ -23768,7 +23902,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     d.append(el("span", "text" + QCOL[qb(mn.rollPercent)], String(mn.value)), document.createTextNode(" - "), el("span", "text" + QCOL[qb(mx.rollPercent)], String(mx.value)), document.createTextNode(" "), el("span", "text" + QCOL[qb(Math.min(mn.rollPercent, mx.rollPercent))], "Damage")), p.appendChild(d);
                 }
                 stats.filter(s => !(mn && mx && (s.id === 10 || s.id === 11))).forEach(s => {
-                    const d = el("div", "text" + QCOL[qb(s.rollPercent || 0)], (s.type === "bonus" ? "+ " : "") + s.value + " " + (s.name || env.statName(s.id)));
+                    const d = el("div", "text" + QCOL[qb(s.rollPercent || 0)], (s.type === "bonus" ? "+ " : "") + fmtStat(s.id, s.value) + " " + (s.name || env.statName(s.id)));
                     d.appendChild(el("small", "textgrey", " " + (s.rollPercent == null ? "" : s.rollPercent.toFixed(1) + "%"))), p.appendChild(d);
                 }), c.appendChild(p);
             }
@@ -24440,7 +24574,13 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         classicBossLoad = () => {
             try {
                 let v = JSON.parse(localStorage.getItem(classicBossKey) || "[]");
-                return Array.isArray(v) ? v : [];
+                if (!Array.isArray(v)) return [];
+                let cut = 0;
+                return v.forEach(r => {
+                    if (!r || !Array.isArray(r.drops) || classicBossOpen && classicBossOpen.killId === r.killId) return;
+                    let n = r.drops.length;
+                    r.drops = r.drops.filter(d => d && (d.type === "rune" || d.picked || !(d.rolls && d.rolls.length || d.stats && d.stats.length))), cut += n - r.drops.length;
+                }), cut && localStorage.setItem(classicBossKey, JSON.stringify(v)), v;
             } catch (e) {
                 return [];
             }
@@ -24596,6 +24736,9 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             let list = classicBossLoad(),
                 rec = list.find(r => r.killId === classicBossOpen.killId);
             if (!rec) return;
+            let match = (rec.drops || []).find(d => !d.picked && d.type === it.type && d.tier === it.tier && (it.stacks != null || d.quality == null || Math.abs(d.quality - it.quality) <= 1));
+            if (!match) return;
+            match.picked = !0;
             rec.items.push({
                 time: new Date().toISOString(),
                 reason,
@@ -24640,7 +24783,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             let drops = rec.drops || (rec.drops = []),
                 q = Math.round(quality);
             if (src === "ground" && drops.some(d => d.eid === eid)) return;
-            let same = drops.find(d => d.type === type && d.tier === tier && d.quality === q && !d[src]);
+            let same = src === "ground" ? null : drops.find(d => d.type === type && d.tier === tier && d.quality === q && !d[src]);
             same ? (same[src] = !0, eid != null && (same.eid = eid), full && !same.stats && Object.assign(same, full)) : drops.push({
                 type,
                 tier,
@@ -24653,8 +24796,11 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 time: new Date().toISOString()
             }), classicBossSave(list);
         },
-        classicBossChat = (text, items) => {
-            if (!classicBossOpen || Date.now() > classicBossOpen.until || typeof text != "string") return;
+        classicBossHdrAt = 0,
+        classicBossChat = (text, items, system) => {
+            if (!system || !classicBossOpen || Date.now() > classicBossOpen.until || typeof text != "string") return;
+            /items\s*@/i.test(text) && (classicBossHdrAt = Date.now());
+            if (Date.now() - classicBossHdrAt > 8e3) return;
             if (/items\s*@/i.test(text) || /^\s*\d+\.\s*T\d+/i.test(text)) {
                 let list = classicBossLoad(),
                     rec = list.find(r => r.killId === classicBossOpen.killId);
@@ -24699,7 +24845,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 rec = list.find(r => r.killId === classicBossOpen.killId),
                 p = rec && rec.pos,
                 ok = !p || !e.pos || Math.hypot(e.pos[0] - p[0], e.pos[2] - p[2]) < 40;
-            ok && classicBossDrop(e.droptype, e.tier, e.quality, "ground", e.id);
+            ok && e.droptype === "rune" && e.tier === 5 && T && T.player && e.party === T.player.id && classicBossDrop(e.droptype, e.tier, e.quality, "ground", e.id);
         };
     var UT = (t, e, n) => {
             if (t && t.type) switch (e) {
@@ -33834,13 +33980,15 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                         fogNight: 1,
                         skyPurple: .25,
                         skybotSat: 1.25,
-                        hlNight: !0
+                        hlNight: !0,
+                        nightLight: [1.35, 1.25]
                     },
                     faivel: {
                         fogNight: .8,
                         skyPurple: .25,
                         skybotSat: 1.25,
-                        hlNight: !0
+                        hlNight: !0,
+                        nightLight: [1.35, 1.25]
                     }
                 } [cfg[0]],
                 lum = col => col[0] * .299 + col[1] * .587 + col[2] * .114,
@@ -33861,6 +34009,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 return h.map(v => classicClamp01(v * l0 / l1));
             }));
             if (tune) {
+                tune.nightLight && ["ambient", "direct"].forEach((k, n) => c[k] && c[k][2] && (c[k] = c[k].map((col, p) => p === 2 ? col.map(v => classicClamp01(v * tune.nightLight[n])) : col)));
                 c.skybot && (c.skybot = c.skybot.map(col => sat(col, tune.skybotSat)));
                 c.fog && c.fog[2] && (c.fog = c.fog.map((col, p) => p === 2 ? col.map(v => classicClamp01(v * tune.fogNight)) : col));
                 for (let k of ["skytop", "skymid", "skybot"]) c[k] && c[k][2] && (c[k] = c[k].map((col, p) => {
@@ -33957,7 +34106,8 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 let w = on.environment.data.worldlight,
                     hz = on.sky.data.skycolors,
                     light = Math.max(.25, Math.min(1.15, ((w[0] + w[3]) * .299 + (w[1] + w[4]) * .587 + (w[2] + w[5]) * .114) / .95));
-                for (let e = 0; e < 9; ++e) t[e] = Math.max(0, Math.min(1, t[e] * light * .75 + hz[9 + e % 3] * .25));
+                for (let e = 0; e < 3; ++e) t[e] *= 1 - .18 * imState.night;
+                for (let e = 3; e < 9; ++e) t[e] = Math.max(0, Math.min(t[e], t[e] * light * .75 + hz[9 + e % 3] * .25));
             }
         },
         VN = (t, e) => {
@@ -34071,7 +34221,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         let r = on.sky.data;
         Bi(r.skycolors, 0, bn.skytop[s], bn.skytop[i], o), Bi(r.skycolors, 3, bn.skymid[s], bn.skymid[i], o), Bi(r.skycolors, 6, bn.skybot[s], bn.skybot[i], o), Bi(r.skycolors, 9, bn.horizon[s], bn.horizon[i], o), Bi(r.skycolors, 12, bn.clouds[s], bn.clouds[i], o), Bi(r.suncolor, 0, bn.sun[s], bn.sun[i], o), ut(vf, gf), vf[1] = Math.abs(Math.sin(t * 6.282)), go(vf, vf);
         let l = on.environment.data;
-        Bi(l.worldlight, 0, bn.direct[s], bn.direct[i], o), Bi(l.worldlight, 3, bn.ambient[s], bn.ambient[i], o), l.worldlight[6] = gf[0], l.worldlight[7] = gf[1], l.worldlight[8] = gf[2], Bi(l.fog, 0, bn.fog[s], bn.fog[i], o), l.fog[3] = n > 0 ? -100 : fy, l.fog[4] = n > 0 ? uy : classicFogFar, fogOn ? n > 0 || (l.fog[3] *= fogDistMul, l.fog[4] *= fogDistMul) : (l.fog[3] = 1e5, l.fog[4] = 2e5), l.daycycle[0] = t, l.time[0] = e % 3600, ht[31].uniforms.amount.value = qu(o, bn.bloom[s], bn.bloom[i])
+        Bi(l.worldlight, 0, bn.direct[s], bn.direct[i], o), Bi(l.worldlight, 3, bn.ambient[s], bn.ambient[i], o), l.worldlight[6] = gf[0], l.worldlight[7] = gf[1], l.worldlight[8] = gf[2], Bi(l.fog, 0, bn.fog[s], bn.fog[i], o), l.fog[3] = n > 0 ? -100 : fy, l.fog[4] = n > 0 ? uy : classicFogFar, fogOn ? n > 0 || (l.fog[3] *= fogDistMul, l.fog[4] *= fogDistMul) : (l.fog[3] = 1e5, l.fog[4] = 2e5), l.daycycle[0] = t, l.time[0] = e % 3600, ht[31].uniforms.amount.value = qu(o, bn.bloom[s], bn.bloom[i]), classicPlain && imEnvAdjust(l, t)
     };
     var RN = [],
         zN = [],
@@ -34115,7 +34265,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         _1 = t => v1 = t,
         c7 = (t, e, n) => {
             let o = dayTime(e);
-            classicPlain ? o < .7 ? o = Vu(0, .7, o) * .4 : o = .4 + Vu(.7, 1, o) * .6 : o = o < .85 ? Vu(0, .85, o) * .5 : .5 + Vu(.85, 1, o) * .5, o7(o, v1, e, n), l7(o, v1, e, n), r7(o, v1)
+            classicPlain ? o < .7 ? o = Vu(0, .7, o) * .4 : o = .4 + Vu(.7, 1, o) * .6 : o = o < .85 ? Vu(0, .85, o) * .5 : .5 + Vu(.85, 1, o) * .5, o7(o, v1, e, n), l7(o, v1, e, n), r7(o, v1), imFrame()
         };
     var rm = () => [-0, -0, -0, -0, -0, -0],
         Oi = rm();
@@ -40558,7 +40708,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         M9 = t => {
             pW();
             let e = w9(Cf, _t, !1);
-            mW(e), dW(e), hW(t)
+            mW(e), dW(e), imGlowRun(), hW(t)
         };
     var Tf = oe.resolution / 100,
         C9 = !1,
@@ -40608,7 +40758,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
     var E9 = (t, e) => {
             gd(_t), (C9 || classicMapScan) && classicMapTick(performance.now(), e);
             let n = new Set;
-            oe.ssao && n.add(35), oe.fxaa && n.add(32), oe.bloom && n.add(30), C9 && (a9(t, e.smoothtime, n), M9(n))
+            (oe.ssao || oe.imSsao) && n.add(35), oe.fxaa && n.add(32), oe.bloom && n.add(30), C9 && (a9(t, e.smoothtime, n), M9(n))
         },
         I9 = (t, e) => {
             c9(t, e)
