@@ -6708,9 +6708,9 @@ void main() {
         grassMainTextures = [1227, 1235],
         meshOverrides = new Map,
         oldTiledMeshes = [
-            [1550, 40],
-            [1551, 20],
-            [1552, 30]
+            [1550, 40 * 4 / 3],
+            [1551, 20 * 4 / 3],
+            [1552, 30 * 4 / 3]
         ],
         meshGroundSink = new Map,
         meshHideChance = new Map,
