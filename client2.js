@@ -9708,7 +9708,7 @@ void main() {
         a_ = (t, e) => {
             let n = Mt(t, -100, 100),
                 o = Mt(e, -100, 100);
-            Hn[1] = Mt(Hn[1] + o * .0028 * (oe.invertMouseY ? -oe.mouseSensitivity : oe.mouseSensitivity), -Math.PI / 2, Math.PI / 2), Hn[0] = pr(Hn[0] - n * .005 * (oe.invertMouseX ? -oe.mouseSensitivity : oe.mouseSensitivity)), sp += Math.abs(o) + Math.abs(n)
+            Hn[1] = classicPlain ? Mt(Hn[1] + o * .0028 * (oe.invertMouseY ? -oe.mouseSensitivity : oe.mouseSensitivity), -Math.PI / 2, Math.PI / 2) : Mt(Hn[1] + o * .004 * (oe.invertMouseY ? -oe.mouseSensitivity : oe.mouseSensitivity), -1.5 / .7, 1.5 / .7), Hn[0] = pr(Hn[0] - n * .005 * (oe.invertMouseX ? -oe.mouseSensitivity : oe.mouseSensitivity)), sp += Math.abs(o) + Math.abs(n)
         },
         rp = () => {
             sp = 0
@@ -24050,19 +24050,15 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             const ts = kills.map(k => new Date(k.date).getTime()),
                 tA = ts.length > 1 && ts[ts.length - 1] > ts[0] ? ts[0] : ts.length ? ts[0] - 432e5 : Date.now() - 864e5,
                 tB = ts.length > 1 && ts[ts.length - 1] > ts[0] ? ts[ts.length - 1] : ts.length ? ts[0] + 432e5 : Date.now(),
-                redraw = hover => drawDps(cv, kills, hover, ts, tA, tB);
+                lay = cycleLayout(ts),
+                redraw = hover => drawDps(cv, kills, hover, lay);
             cv.onmousemove = e => {
                 if (!ts.length) return;
                 const r = cv.getBoundingClientRect(),
-                    x = (e.clientX - r.left) / r.width * cv.width,
-                    t = tA + (x - 70) / (cv.width - 110) * ((cv._tB || tB) - tA);
-                let a = 0,
-                    b = ts.length - 1;
-                for (; b - a > 1;) {
-                    const m = a + b >> 1;
-                    ts[m] < t ? a = m : b = m;
-                }
-                redraw(Math.abs(ts[a] - t) <= Math.abs(ts[b] - t) ? a : b);
+                    f = ((e.clientX - r.left) / r.width * cv.width - 70) / (cv.width - 110);
+                let best = 0;
+                for (let i = 1; i < lay.pos.length; ++i) Math.abs(lay.pos[i] - f) < Math.abs(lay.pos[best] - f) && (best = i);
+                redraw(best);
             }, cv.onmouseleave = () => redraw(-1);
             if (typeof ResizeObserver != "undefined") {
                 const ro = new ResizeObserver(() => cv.isConnected ? redraw(-1) : ro.disconnect());
@@ -24101,16 +24097,43 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             const res = out.filter(t => t <= tB).map(t => [t, fmt(t)]);
             return res.end = tB, res;
         };
-        const drawDps = (cv, kills, hover, ts, tA, tB) => {
+        const cycleLayout = ts => {
+            const groups = [];
+            ts.forEach((t, i) => {
+                const g = groups[groups.length - 1];
+                g && t - g.end <= 54e5 ? (g.idx.push(i), g.end = t) : groups.push({ start: t, end: t, idx: [i] });
+            });
+            const pos = new Array(ts.length),
+                cols = [],
+                seps = [];
+            let u = 0;
+            groups.forEach((g, gi) => {
+                if (gi) {
+                    const miss = g.start - groups[gi - 1].end > 162e5;
+                    u += miss ? .9 : .3, miss && seps.push(u - .45);
+                }
+                const n = g.idx.length;
+                g.idx.forEach((i, j) => pos[i] = u + (n > 1 ? .15 + .7 * j / (n - 1) : .5)), cols.push({ c: u + .5, g }), u += 1;
+            });
+            const two = v => String(v).padStart(2, "0"),
+                total = Math.max(u, 1);
+            let lastDay = "";
+            const labels = cols.map(({ c, g }) => {
+                const d = new Date(g.start),
+                    day = two(d.getDate()) + "/" + two(d.getMonth() + 1),
+                    lbl = (day !== lastDay ? day + " " : "") + two(d.getHours()) + ":" + two(d.getMinutes());
+                return lastDay = day, [c / total, lbl, g.idx];
+            });
+            return { pos: pos.map(v => v / total), labels, seps: seps.map(v => v / total) };
+        };
+        const drawDps = (cv, kills, hover, lay) => {
             const cw = Math.max(100, Math.round(cv.clientWidth * 2)),
                 ch = Math.max(80, Math.round(cv.clientHeight * 2));
             (cv.width !== cw || cv.height !== ch) && (cv.width = cw, cv.height = ch);
             const g = cv.getContext("2d"),
                 W = cv.width,
                 H = cv.height,
-                vals = kills.map(k => k._v),
-                tk = axisTicks(tA, tB, Math.max(2, Math.floor((W - 110) / 120)), st.range === "1yr" ? ["m", 1] : null);
-            tB = cv._tB = tk.end;
+                vals = kills.map(k => k._v);
             if (g.clearRect(0, 0, W, H), g.font = "20px hordes, sans-serif", !vals.length) return g.fillStyle = "#5b858e", void (g.textAlign = "center", g.fillText(st.range === "All time" ? "No kills yet" : "No kills in this range", W / 2, H / 2), g.textAlign = "start");
             const norm = st.normalize,
                 sorted = vals.slice().sort((a, b) => a - b),
@@ -24129,23 +24152,27 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     for (let j = Math.max(0, i - win); j <= Math.min(vals.length - 1, i + win); ++j) a += vals[j], ++n;
                     return a / n;
                 }),
-                X = i => 70 + (W - 110) * Math.max(0, Math.min(1, (ts[i] - tA) / Math.max(1, tB - tA))),
+                X = i => 70 + (W - 110) * lay.pos[i],
+                XF = f => 70 + (W - 110) * f,
                 Y = v => 12 + (H - 34) * (1 - Math.max(0, Math.min(1, (v - lo) / (hi - lo))));
             g.strokeStyle = "rgba(91,133,142,.35)", g.fillStyle = "#5b858e", g.lineWidth = 1;
             for (let i = 0; i <= 4; ++i) {
                 const y = 12 + (H - 34) * i / 4;
                 g.beginPath(), g.moveTo(70, y), g.lineTo(W - 40, y), g.stroke(), g.fillText(num(hi - (hi - lo) * i / 4), 0, y + 6);
             }
+            g.strokeStyle = "rgba(91,133,142,.45)", g.lineWidth = 1, g.setLineDash([4, 6]), lay.seps.forEach(f => (g.beginPath(), g.moveTo(XF(f), 12), g.lineTo(XF(f), H - 22), g.stroke())), g.setLineDash([]);
             let lastEnd = -1e9;
-            tk.forEach(([t, lbl]) => {
-                const x = 70 + (W - 110) * (t - tA) / Math.max(1, tB - tA),
+            const cyc = lay.labels.map(([f, lbl, idx]) => {
+                const x = XF(f),
                     w = g.measureText(lbl).width,
                     lx = Math.max(70, Math.min(W - 2 - w, x - w / 2));
-                g.strokeStyle = "rgba(91,133,142,.18)", g.lineWidth = 1, g.beginPath(), g.moveTo(x, 12), g.lineTo(x, H - 22), g.stroke(), lx > lastEnd + 8 && (g.fillStyle = "#5b858e", g.fillText(lbl, lx, H - 2), lastEnd = lx + w);
+                return g.strokeStyle = "rgba(91,133,142,.12)", g.lineWidth = 1, g.beginPath(), g.moveTo(x, 12), g.lineTo(x, H - 22), g.stroke(), lx > lastEnd + 10 && (g.fillStyle = "#5b858e", g.fillText(lbl, lx, H - 2), lastEnd = lx + w), [x, idx.reduce((a, i) => a + vals[i], 0) / idx.length];
             });
-            g.strokeStyle = norm ? "rgba(52,203,73,.28)" : "#34cb49", g.lineWidth = norm ? 1.5 : 2, g.beginPath(), vals.forEach((v, i) => i ? g.lineTo(X(i), Y(v)) : g.moveTo(X(i), Y(v))), g.stroke();
-            vals.length <= 60 && (g.fillStyle = "#34cb49", vals.forEach((v, i) => (g.beginPath(), g.arc(X(i), Y(v), 4, 0, 6.283), g.fill())));
-            norm && (g.strokeStyle = "#34cb49", g.lineWidth = 3, g.beginPath(), avg.forEach((v, i) => i ? g.lineTo(X(i), Y(v)) : g.moveTo(X(i), Y(v))), g.stroke());
+            const dots = vals.length <= 400,
+                r = Math.max(2.5, Math.min(5, (W - 110) / Math.max(1, vals.length) / 3));
+            g.fillStyle = norm ? "rgba(52,203,73,.35)" : "rgba(52,203,73,.6)", dots && vals.forEach((v, i) => (g.beginPath(), g.arc(X(i), Y(v), r, 0, 6.283), g.fill()));
+            g.strokeStyle = "#34cb49", g.lineWidth = 3, g.lineJoin = "round", g.beginPath(), cyc.forEach(([x, v], i) => i ? g.lineTo(x, Y(v)) : g.moveTo(x, Y(v))), g.stroke();
+            g.fillStyle = "#34cb49", cyc.length <= 120 && cyc.forEach(([x, v]) => (g.beginPath(), g.arc(x, Y(v), 3, 0, 6.283), g.fill()));
             if (hover < 0 || hover >= vals.length) return;
             const k = kills[hover],
                 x = X(hover),
@@ -31947,7 +31974,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             return e.liveShape = null, c ? (e.liveShape = {
                 data: live,
                 normals: new Float32Array(3456)
-            }, b7(e.liveShape), classicCloneChunk(c)) : (aw && aw.header && aw.header.freshBase && (live.ctw = classicFreshCt(live, e.id)), classicBasePatch(e.id, live));
+            }, b7(e.liveShape), classicCloneChunk(c)) : (aw && aw.header && aw.header.freshBase && (live.ctw = classicFreshCt(live, e.id)), aw && live.props && (live.props = live.props.filter(p => p.id !== 1550 && p.id !== 1551)), classicBasePatch(e.id, live));
         },
         classicLiveColliders = t => {
             let L = t.liveShape;
@@ -42726,8 +42753,16 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 this.__ocDone || this.type !== 1 || oldCreatureCheck(this);
                 e > 0 && (hn(this.pos, this.pos, this.conciliator, -e * 10), Pn(this.conciliator, this.conciliator, 1 - e * 10));
                 let mag = this.__mag = classicMagnetFor(this),
-                    src = mag ? [mag.x, isFinite(mag.y) ? mag.y : this.pos[1], mag.z] : this.pos,
-                    i = _o(src, this.visualPosition);
+                    src = mag ? [mag.x, isFinite(mag.y) ? mag.y : this.pos[1], mag.z] : this.pos;
+                if (!mag && !classicPlain && this.type !== 0 && this !== T.player && o && o.getHeight) {
+                    let x = this.pos[0],
+                        z = this.pos[2],
+                        y = this.pos[1],
+                        g = o.getHeight(x, z),
+                        w = o.getWaterHeight ? o.getWaterHeight(x, z) : -1;
+                    (y < g || Math.abs(y - g) < 12) && (y = w > g + this.radius * 1.2 ? w - this.radius * 1.2 : g), this.inWater = Math.max(0, w - y), src = [x, y, z];
+                }
+                let i = _o(src, this.visualPosition);
                 (s || i > 1e-5) && (ut(this.visualPosition, src), this.visualPosition[1] += this.radius, this.mount === void 0 ? ut(this.visual.transform.position, this.visualPosition) : (ut(this.mount.transform.position, this.visualPosition), this.mount.transform.position[1] += this.mount.skin.size * .5 - this.radius)), this.interiorlightTimer.done(n) && (this.interiorlightTimer.reset(n), o.getInteriorLight(this.interiorlightTarget, this.aabb));
                 let r = Math.min(1, e),
                     l = this.interiorlightTarget,
@@ -43512,6 +43547,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             }
         }
         handleCamera(e) {
+            if (!classicPlain) return this.handleCamera2023(e);
             if (ut(tn.position, this.mount ? this.mount.transform.position : this.visual.transform.position), tn.position[1] += 1.25, tn.rotation[0] = Hn[1], !it.lmb.down && !it.rmb.down && !ns.enabled && (this.steer[0] !== 0 || this.steer[1] !== 0)) {
                 let u = Jl(this.rot, Hn[0]) * Math.min(1, e * 2);
                 u !== 0 && (Math.abs(u) > .03 * e ? (u = u > 0 ? Math.max(u, Math.min(1, .6 * e)) : Math.min(u, Math.max(1, -.6 * e)), Hn[0] -= u) : Hn[0] = this.rot)
@@ -43549,6 +43585,28 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 u > l[1] && (tn.position[1] += u - l[1])
             }
             Gt(tn, !1), mc(_t, !1), Qi(_t, l, [0, -1]);
+            let f = T.getWaterHeight(l[0], l[2]);
+            if (f > l[1]) {
+                let u = f - l[1];
+                _1(u);
+                let p = l[1] - f;
+                if (Qi(_t, l, [0, 1]), f < l[1]) {
+                    let g = l[1] - f;
+                    Math.abs(g) > Math.abs(p) ? (tn.position[1] -= p, _1(0)) : tn.position[1] -= g, Gt(tn, !1), mc(_t, !1)
+                }
+            } else _1(0)
+        }
+        handleCamera2023(e) {
+            if (ut(tn.position, this.mount ? this.mount.transform.position : this.visual.transform.position), tn.rotation[0] = Math.max(-1.5, Math.min(1.5, Hn[1] * .7)), !it.lmb.down && !it.rmb.down && !ns.enabled && (this.steer[0] !== 0 || this.steer[1] !== 0)) {
+                let u = Jl(this.rot, Hn[0]) * Math.min(1, e * 2);
+                u !== 0 && (Math.abs(u) > .03 * e ? (u = u > 0 ? Math.max(u, Math.min(1, .6 * e)) : Math.min(u, Math.max(1, -.6 * e)), Hn[0] -= u) : Hn[0] = this.rot)
+            }
+            tn.rotation[1] = Hn[0], Gt(tn, !1), this.smoothZoom = oe.cameraZoom, J(_t.transform.position, 0, 1, -oe.cameraZoom), mc(_t, !1);
+            let m = _t.transform.worldMatrix,
+                cl = v => Math.max(0, Math.min(T.bounds, v));
+            tn.position[1] += Math.max(0, T.getHeight(cl(m[12]), cl(m[14])) - m[13]) + 2 * Math.tan(_t.fov * Math.PI / 360) * (_t.near || .1), Gt(tn, !1), mc(_t, !1);
+            let l = [0, 0, 0];
+            Qi(_t, l, [0, -1]);
             let f = T.getWaterHeight(l[0], l[2]);
             if (f > l[1]) {
                 let u = f - l[1];
