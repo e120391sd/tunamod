@@ -34142,7 +34142,26 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             for (let k in ref || {}) c[k] = JSON.parse(JSON.stringify(ref[k]));
             return classicEnvCache.set(key, classicOldPull(c, id)), c;
         },
+        classicOldWorldSky = {"guardstone":[[0.475,0.933,0.984],[0.878,0.537,0.757],[0.125,0.161,0.624]],"faivel":[[0.506,0.839,0.894],[0.478,0.506,0.729],[0.184,0.224,0.502]],"headless":[[0.369,0.906,1],[0.824,0.549,0.302],[0.384,0.255,0.773]]},
+        classicOldWorldCols = {"guardstone":{"ambient":[[0.627,0.878,0.992],[0.4,0.529,0.769],[0.129,0.318,0.596]],"direct":[[0.4,0.459,0.427],[0.263,0.49,0.506],[0.094,0.094,0.773]],"fog":[[0.42,0.745,0.933],[0.341,0.616,0.89],[0.173,0.2,0.447]]},"faivel":{"ambient":[[0.647,0.788,0.929],[0.58,0.741,0.804],[0.275,0.345,0.525]],"direct":[[0.569,0.58,0.286],[0.255,0.263,0.596],[0.118,0.192,0.459]],"fog":[[0.671,0.82,0.906],[0.314,0.788,0.886],[0.306,0.357,0.855]]},"headless":{"ambient":[[0.463,0.871,0.918],[0.098,0.322,0.843],[0.188,0.227,0.671]],"direct":[[0.569,0.529,0.412],[0.216,0.153,0.267],[0.078,0.176,0.4]],"fog":[[0.427,0.863,0.863],[0.082,0.275,0.416],[0.271,0.22,0.886]]}},
         envAt = id => {
+            let base = envAtBase(id),
+                ow = classicEnvWorlds[id] || classicLearnedWorlds.get(id) || envNameWorld(id),
+                old = base && !classicPlain && classicOldWorldCols[ow];
+            if (!old) return base;
+            let key = "ow:" + id + ":" + ow,
+                c = classicEnvCache.get(key);
+            if (c && c.__src === base) return c;
+            c = Object.assign({}, base, {
+                __src: base
+            });
+            for (let k in old) c[k] = old[k].map(v => v.slice());
+            let sk = classicOldWorldSky[ow],
+                mix = (p, f) => sk[p].map((v, q) => v + (old.fog[p][q] - v) * f);
+            sk && (c.skytop = sk.map(v => v.slice()), c.skymid = [0, 1, 2].map(p => mix(p, .15)), c.skybot = [0, 1, 2].map(p => mix(p, .5)), c.horizon = old.fog.map(v => v.slice()));
+            return classicEnvCache.set(key, c), c;
+        },
+        envAtBase = id => {
             let env = Ic.get(id);
             env && worldOverrideOff && !classicIsEditor() && (env = env05(id, env));
             let tint = env && worldAmbientTint[classicWorldFor(id)];
