@@ -32214,7 +32214,12 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     !n || T.smoothtime % 1 < .5 ? Nn.globalAlpha = n ? .6 : .8 : Nn.globalAlpha = 1;
                     let s = o.width,
                         i = o.height;
-                    (e === 1265 || e === 1266) && (Nn.save(), Nn.fillStyle = "#10131d", Nn.beginPath(), Nn.arc(t[0], t[1], Math.max(s, i) / 2 + 1, 0, Math.PI * 2), Nn.fill(), Nn.restore());
+                    if (e === 1265 || e === 1266) {
+                        let q = Math.max(s, i) + 2,
+                            x = Math.round(t[0] - q / 2),
+                            y = Math.round(t[1] - q / 2);
+                        Nn.save(), Nn.fillStyle = "#10131d", Nn.beginPath(), Nn.roundRect ? Nn.roundRect(x, y, q, q, 1) : Nn.rect(x, y, q, q), Nn.fill(), Nn.restore();
+                    }
                     Nn.drawImage(o, t[0] - s / 2, t[1] - i / 2, ~~s, ~~i)
                 }
             } else {
