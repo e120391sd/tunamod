@@ -1681,6 +1681,19 @@
             preserveDrawingBuffer: !1,
             desynchronized: typeof process != "undefined" && !!process.argv && process.argv.includes("--classic-desync")
         }),
+        glTrack = (g => {
+            let st = {
+                    fb: null,
+                    vp: [0, 0, g.drawingBufferWidth, g.drawingBufferHeight],
+                    vao: null,
+                    mask: [!0, !0, !0, !0]
+                },
+                bf = g.bindFramebuffer.bind(g),
+                vp = g.viewport.bind(g),
+                va = g.bindVertexArray.bind(g),
+                cm = g.colorMask.bind(g);
+            return g.bindFramebuffer = (t, f) => ((t === g.FRAMEBUFFER || t === g.DRAW_FRAMEBUFFER) && (st.fb = f), bf(t, f)), g.viewport = (x, y, w, h) => (st.vp = [x, y, w, h], vp(x, y, w, h)), g.bindVertexArray = v => (st.vao = v, va(v)), g.colorMask = (r, gg, b, a) => (st.mask = [r, gg, b, a], cm(r, gg, b, a)), st;
+        })(N),
         Ln = document.createElement("canvas"),
         Oo = Ln.getContext("2d", {
             alpha: !0
@@ -1772,6 +1785,7 @@
         classicAoB = null,
         ssao = ee(!1),
         fixSkybox = ee(!1),
+        fullDistantTerrain = ee(!1),
         classicSsaoFrag = `#version 300 es
 precision highp float;precision highp int;uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};uniform sampler2D aoDepth;uniform float aoSeed;in vec2 vUv;out vec4 fragColor;const int zr=16;const vec3 Rs[zr]=vec3[](vec3(0.5381,0.1856,-0.4319),vec3(0.1379,0.2486,0.4430),vec3(0.3371,0.5679,-0.0057),vec3(-0.6999,-0.0451,-0.0019),vec3(0.0689,-0.1598,-0.8547),vec3(0.0560,0.0069,-0.1843),vec3(-0.0146,0.1402,0.0762),vec3(0.0100,-0.1924,-0.0344),vec3(-0.3577,-0.5301,-0.4358),vec3(-0.3169,0.1063,0.0158),vec3(0.0103,-0.5869,0.0046),vec3(-0.0897,-0.4940,0.3287),vec3(0.7119,-0.0154,-0.0918),vec3(-0.0533,0.0596,-0.5411),vec3(0.0352,-0.0631,0.5460),vec3(-0.4776,0.2847,-0.0271));const float R=1.6;float lz(vec2 uv){float d=texture(aoDepth,uv).r;float n=projectionMatrix[3][2]/(projectionMatrix[2][2]-1.0);float f=projectionMatrix[3][2]/(projectionMatrix[2][2]+1.0);return 2.0*n*f/(f+n-(2.0*d-1.0)*(f-n));}vec3 vp(vec2 uv){float z=lz(uv);return vec3((uv*2.0-1.0)*vec2(z/projectionMatrix[0][0],z/projectionMatrix[1][1]),-z);}void main(){float dRaw=texture(aoDepth,vUv).r;if(dRaw>=0.99999){fragColor=vec4(1.0);return;}vec2 px=1.0/vec2(textureSize(aoDepth,0));vec3 P=vp(vUv);vec3 pr=vp(vUv+vec2(px.x,0.0)),pl=vp(vUv-vec2(px.x,0.0)),pu=vp(vUv+vec2(0.0,px.y)),pd=vp(vUv-vec2(0.0,px.y));vec3 dx=abs(pr.z-P.z)<abs(P.z-pl.z)?pr-P:P-pl;vec3 dy=abs(pu.z-P.z)<abs(P.z-pd.z)?pu-P:P-pd;vec3 Nm=normalize(cross(dx,dy));if(dot(Nm,P)>0.0)Nm=-Nm;float ign=fract(52.9829189*fract(dot(gl_FragCoord.xy+aoSeed*5.588238,vec2(0.06711056,0.00583715))));float ang=ign*6.2831853;vec3 uH=normalize(vec3(cos(ang),sin(ang),ign*2.0-1.0));float occ=0.0;for(int i=0;i<zr;i++){vec3 k=reflect(Rs[i],uH);k*=sign(dot(k,Nm));vec3 S=P+(Nm*0.15+k)*R;vec4 c=projectionMatrix*vec4(S,1.0);vec2 suv=c.xy/c.w*0.5+0.5;if(suv.x<0.0||suv.y<0.0||suv.x>1.0||suv.y>1.0)continue;float sz=-lz(suv);float rc=smoothstep(0.0,1.0,R/max(abs(P.z-sz),1e-3));occ+=(sz>=S.z+0.05?1.0:0.0)*rc;}occ/=float(zr);occ*=1.0-smoothstep(120.0,180.0,-P.z);float o=occ*1.7;float QE=1.0-0.55*o/(1.0+o);fragColor=vec4(mix(worldlight[1]*0.2,vec3(1.0),QE),1.0);}`,
         classicAoTemporalFrag = `#version 300 es
@@ -1809,6 +1823,7 @@ precision highp float;precision highp int;uniform Screen{vec2 resolution;};unifo
         },
         ssaoRow = null,
         skyFixRow = null,
+        farTerrainRow = null,
         bloomRow = null,
         fogRow = null,
         timeSlider = ee(0),
@@ -20012,7 +20027,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 e = h("div"), e.textContent = `${P.ui.settings.resolution}`, n = h("input"), o = h("div"), o.textContent = `${P.ui.settings.viewrange}`, s = h("input"), i = h("div"), l = A(r), a = Qe(), c = h("span"), f = A(t[7]), u = h("input"), p = h("div"), v = A(g), _ = h("br"), b = h("small"), b.textContent = `${P.ui.settings.reload}`, y = h("input"), k = h("div"), E = A(C), F = h("br"), M = h("small"), M.textContent = `${P.ui.settings.reload}`, L = h("input"), V = h("div"), V.textContent = `${P.ui.settings.fxaa}`, Z(D.$$.fragment), z = h("div"), z.textContent = `${P.ui.settings.bloom}`, Z(q.$$.fragment), R = h("div"), W = A(O), U = h("br"), $ = h("small"), $.textContent = `${P.ui.settings.offscreendesc}`, Z(G.$$.fragment), de = h("div"), de.textContent = `${P.ui.settings.particles}`, Z(be.$$.fragment), le = h("div"), le.textContent = `${P.ui.settings.fogpattern}`, Z(se.$$.fragment), fe = h("div"), fe.textContent = `${P.ui.settings.shadows}`, ke = h("div"), we = h("div"), xe = A(ce), $e = h("br"), ye = h("small"), ye.textContent = `${P.ui.settings.reload}`, Z(Oe.$$.fragment), ze = h("div"), ue = A(Ne), _e = h("br"), pe = h("small"), pe.textContent = `${P.ui.settings.reload}`, he = h("input"), m(n, "type", "range"), m(n, "min", "30"), m(n, "step", "10"), m(s, "type", "range"), m(s, "min", "30"), m(c, "class", "textgrey"), m(u, "type", "range"), m(u, "min", "50"), m(u, "max", "100"), m(b, "class", "textgrey"), m(y, "type", "range"), m(y, "min", "0"), m(y, "max", "4"), m(M, "class", "textgrey"), m(L, "type", "range"), m(L, "min", "0"), m(L, "max", worldOverrideOff ? "300" : "100"), m($, "class", "textgrey"), m(fe, "class", "textprimary"), m(ye, "class", "textgrey"), m(pe, "class", "textgrey"), m(he, "type", "range"), m(he, "min", "0"), m(he, "max", "3")
             },
             m(te, H) {
-                x(te, e, H), x(te, n, H), Ge(n, t[5]), x(te, o, H), x(te, s, H), Ge(s, t[6]), x(te, i, H), d(i, l), d(i, a), d(i, c), d(c, f), x(te, u, H), Ge(u, t[7]), x(te, p, H), d(p, v), d(p, _), d(p, b), x(te, y, H), Ge(y, t[8]), x(te, k, H), d(k, E), d(k, F), d(k, M), x(te, L, H), Ge(L, t[9]), grassValueLabel(L, k), x(te, V, H), X(D, te, H), x(te, z, H), X(q, te, H), z.style.display = "none", z.nextElementSibling && (z.nextElementSibling.style.display = "none"), x(te, R, H), timeRows = [sliderRow("Time", timeSlider, te, R, 0, 1e3, !0), checkRow("Use device time", timeToIngame, te, R)], d(R, W), d(R, U), d(R, $), X(G, te, H), x(te, de, H), X(be, te, H), x(te, le, H), X(se, te, H), x(te, fe, H), x(te, ke, H), x(te, we, H), d(we, xe), d(we, $e), d(we, ye), X(Oe, te, H), x(te, ze, H), d(ze, ue), d(ze, _e), d(ze, pe), x(te, he, H), Ge(he, t[10]), imRowsUi && imRowsUi.forEach(f => f()), imRowsUi = imRows(te, fe), ssaoRow && ssaoRow(), ssaoRow = checkRow("Ambient occlusion (SSAO)", ssao, te, fe), skyFixRow && skyFixRow(), skyFixRow = classicPlain ? null : checkRow("Fix skybox positioning", fixSkybox, te, fe), fxRowsUi && fxRowsUi.forEach(f => f()), fxRowsUi = [headerRow("Effect alpha", te, null), checkRow("Override effect alpha", fxAlphaOverride, te, null), textRow("Effect alpha skill IDs", fxAlphaSkills, te, null), sliderRow("Missile effect alpha", fxAlphaSprite, te, null, 0, 100), sliderRow("Ribbon effect alpha", fxAlphaRibbon, te, null, 0, 100), sliderRow("Mesh effect alpha", fxAlphaModel, te, null, 0, 100)], ie = !0, Ie || (We = [Y(n, "change", t[38]), Y(n, "input", t[38]), Y(s, "change", t[39]), Y(s, "input", t[39]), Y(u, "change", t[40]), Y(u, "input", t[40]), Y(y, "change", t[41]), Y(y, "input", t[41]), Y(y, "change", t[35]), Y(L, "change", t[42]), Y(L, "input", t[42]), Y(L, "change", t[35]), Y(he, "change", t[43]), Y(he, "input", t[43]), Y(he, "change", t[35])], Ie = !0)
+                x(te, e, H), x(te, n, H), Ge(n, t[5]), x(te, o, H), x(te, s, H), Ge(s, t[6]), x(te, i, H), d(i, l), d(i, a), d(i, c), d(c, f), x(te, u, H), Ge(u, t[7]), x(te, p, H), d(p, v), d(p, _), d(p, b), x(te, y, H), Ge(y, t[8]), x(te, k, H), d(k, E), d(k, F), d(k, M), x(te, L, H), Ge(L, t[9]), grassValueLabel(L, k), x(te, V, H), X(D, te, H), x(te, z, H), X(q, te, H), z.style.display = "none", z.nextElementSibling && (z.nextElementSibling.style.display = "none"), x(te, R, H), timeRows = [sliderRow("Time", timeSlider, te, R, 0, 1e3, !0), checkRow("Use device time", timeToIngame, te, R)], d(R, W), d(R, U), d(R, $), X(G, te, H), x(te, de, H), X(be, te, H), x(te, le, H), X(se, te, H), x(te, fe, H), x(te, ke, H), x(te, we, H), d(we, xe), d(we, $e), d(we, ye), X(Oe, te, H), x(te, ze, H), d(ze, ue), d(ze, _e), d(ze, pe), x(te, he, H), Ge(he, t[10]), imRowsUi && imRowsUi.forEach(f => f()), imRowsUi = imRows(te, fe), ssaoRow && ssaoRow(), ssaoRow = checkRow("Ambient occlusion (SSAO)", ssao, te, fe), skyFixRow && skyFixRow(), skyFixRow = classicPlain ? null : checkRow("Fix skybox positioning", fixSkybox, te, fe), farTerrainRow && farTerrainRow(), farTerrainRow = classicPlain ? null : checkRow("Full detail distant terrain", fullDistantTerrain, te, fe), fxRowsUi && fxRowsUi.forEach(f => f()), fxRowsUi = [headerRow("Effect alpha", te, null), checkRow("Override effect alpha", fxAlphaOverride, te, null), textRow("Effect alpha skill IDs", fxAlphaSkills, te, null), sliderRow("Missile effect alpha", fxAlphaSprite, te, null, 0, 100), sliderRow("Ribbon effect alpha", fxAlphaRibbon, te, null, 0, 100), sliderRow("Mesh effect alpha", fxAlphaModel, te, null, 0, 100)], ie = !0, Ie || (We = [Y(n, "change", t[38]), Y(n, "input", t[38]), Y(s, "change", t[39]), Y(s, "input", t[39]), Y(u, "change", t[40]), Y(u, "input", t[40]), Y(y, "change", t[41]), Y(y, "input", t[41]), Y(y, "change", t[35]), Y(L, "change", t[42]), Y(L, "input", t[42]), Y(L, "change", t[35]), Y(he, "change", t[43]), Y(he, "input", t[43]), Y(he, "change", t[35])], Ie = !0)
             },
             p(te, H) {
                 H[0] & 32 && Ge(n, te[5]), H[0] & 64 && Ge(s, te[6]), (!ie || H[0] & 128) && j(f, te[7]), H[0] & 128 && Ge(u, te[7]), H[0] & 256 && Ge(y, te[8]), H[0] & 512 && Ge(L, te[9]), H[0] & 1024 && Ge(he, te[10])
@@ -20024,7 +20039,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 I(D.$$.fragment, te), I(q.$$.fragment, te), I(G.$$.fragment, te), I(be.$$.fragment, te), I(se.$$.fragment, te), I(Oe.$$.fragment, te), ie = !1
             },
             d(te) {
-                ssaoRow && (ssaoRow(), ssaoRow = null), skyFixRow && (skyFixRow(), skyFixRow = null), bloomRow && (bloomRow(), bloomRow = null), fogRow && (fogRow(), fogRow = null), fogDistRow && (fogDistRow(), fogDistRow = null), timeRows && (timeRows.forEach(f => f()), timeRows = null), imRowsUi && (imRowsUi.forEach(f => f()), imRowsUi = null), fxRowsUi && (fxRowsUi.forEach(f => f()), fxRowsUi = null);
+                ssaoRow && (ssaoRow(), ssaoRow = null), skyFixRow && (skyFixRow(), skyFixRow = null), farTerrainRow && (farTerrainRow(), farTerrainRow = null), bloomRow && (bloomRow(), bloomRow = null), fogRow && (fogRow(), fogRow = null), fogDistRow && (fogDistRow(), fogDistRow = null), timeRows && (timeRows.forEach(f => f()), timeRows = null), imRowsUi && (imRowsUi.forEach(f => f()), imRowsUi = null), fxRowsUi && (fxRowsUi.forEach(f => f()), fxRowsUi = null);
                 te && (w(e), w(n), w(o), w(s), w(i), w(u), w(p), w(y), w(k), w(L), w(V), w(z), w(R), w(de), w(le), w(fe), w(ke), w(we), w(ze), w(he)), K(D, te), K(q, te), K(G, te), K(be, te), K(se, te), K(Oe, te), Ie = !1, ct(We)
             }
         }
@@ -31125,7 +31140,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             localStorage.getItem(from) !== null && localStorage.getItem(to) === null && localStorage.setItem(to, localStorage.getItem(from)), localStorage.removeItem(from);
         } catch (e) {}
     });
-    fw("mapEnabled", mapEnabled), fw("ssao", ssao), fw("fixSkybox", fixSkybox), wd.set(!0), fw("timeSlider", timeSlider), fw("timeToIngame", timeToIngame), fw("markOwnRevs", markOwnRevs), [["CCIndicator", CCIndicator], ["flashCCIndicator", flashCCIndicator], ["CCIndicatorOnNameplates", CCIndicatorOnNameplates], ["hideBuffs", hideBuffs], ["hideClassBuffs", hideClassBuffs], ["stackSameBuffs", stackSameBuffs], ["partyHeight", partyHeight], ["sortParty", sortParty], ["classColorParty", classColorParty], ["disablePartyNameplates", disablePartyNameplates], ["uncapNameplates", uncapNameplates], ["revUnfriendly", revUnfriendly], ["nextFriendlyIgnoreBots", nextFriendlyIgnoreBots], ["losTarget", losTarget], ["fxAlphaOverride", fxAlphaOverride], ["fxAlphaSprite", fxAlphaSprite], ["fxAlphaRibbon", fxAlphaRibbon], ["fxAlphaModel", fxAlphaModel], ["fxAlphaSkills", fxAlphaSkills], ["mouseOverTarget", mouseOverTarget]].forEach(([k, st]) => fw(k, st)), (() => {
+    fw("mapEnabled", mapEnabled), fw("ssao", ssao), fw("fixSkybox", fixSkybox), fw("fullDistantTerrain", fullDistantTerrain), wd.set(!0), fw("timeSlider", timeSlider), fw("timeToIngame", timeToIngame), fw("markOwnRevs", markOwnRevs), [["CCIndicator", CCIndicator], ["flashCCIndicator", flashCCIndicator], ["CCIndicatorOnNameplates", CCIndicatorOnNameplates], ["hideBuffs", hideBuffs], ["hideClassBuffs", hideClassBuffs], ["stackSameBuffs", stackSameBuffs], ["partyHeight", partyHeight], ["sortParty", sortParty], ["classColorParty", classColorParty], ["disablePartyNameplates", disablePartyNameplates], ["uncapNameplates", uncapNameplates], ["revUnfriendly", revUnfriendly], ["nextFriendlyIgnoreBots", nextFriendlyIgnoreBots], ["losTarget", losTarget], ["fxAlphaOverride", fxAlphaOverride], ["fxAlphaSprite", fxAlphaSprite], ["fxAlphaRibbon", fxAlphaRibbon], ["fxAlphaModel", fxAlphaModel], ["fxAlphaSkills", fxAlphaSkills], ["mouseOverTarget", mouseOverTarget]].forEach(([k, st]) => fw(k, st)), (() => {
         let was;
         sortParty.subscribe(v => (was !== void 0 && v && !was && partyOrderSave({}), was = v));
     })(), fw("blockSpecialSelling", blockSpecialSelling), fw("bloomBlur", bloomBlur), bloomBlur.set(!0), bloomBlur.subscribe(v => bloomBlurOn = v), fw("fogEnabled", fogSetting), fogSetting.set(!0), fogSetting.subscribe(v => fogOn = v), fw("fogDistance", fogDistance), fogDistance.set(100), fogDistance.subscribe(v => fogDistMul = (+v || 100) / 100), fw("skillbarCols", skillbarCols), fw("skillbarRows", skillbarRows), skillbarCols.subscribe(() => setTimeout(skillbarLayout)), skillbarRows.subscribe(() => setTimeout(skillbarLayout)), fw("disableWorldOverride", disableWorldOverride), disableWorldOverride.subscribe(v => !!v !== worldOverrideOff && typeof location != "undefined" && location.reload());
@@ -34954,6 +34969,9 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 }
             }
         }).catch(() => {}),
+        lakeKeyFile = null,
+        lakeKeys = [],
+        lakeKeyOf = i => (lakeKeyFile !== T.file && (lakeKeyFile = T.file, lakeKeys = []), lakeKeys[i] || (lakeKeys[i] = T.file + ":" + i)),
         lakeCellAt = (wx, wz) => {
             let amount = T.chunkAmount,
                 gx = Math.floor(wx / lakeCell),
@@ -34967,7 +34985,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                         cx = Math.floor(x / lakeGrid),
                         cz = Math.floor(z / lakeGrid);
                     if (cx < 0 || cz < 0 || cx >= amount || cz >= amount) continue;
-                    let key = T.file + ":" + (cx + cz * amount);
+                    let key = lakeKeyOf(cx + cz * amount);
                     if (!lakeWet.has(key)) {
                         let ch = T.getChunk(cx, cz);
                         ch && ch.state >= 3 && ch.state !== 8 && ch.data && lakeWet.set(key, lakeWetFromData(ch.data));
@@ -35547,7 +35565,31 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             });
             return !0;
         };
-    var A7 = (t, e) => {
+    var folRange = 230,
+        folPos = () => typeof tn != "undefined" && tn.position,
+        folFar = (t, r = folRange) => {
+            let p = folPos();
+            return !!p && !classicMapCapturing && Math.hypot(t.origin[0] + 32 - p[0], t.origin[2] + 32 - p[2]) > r;
+        },
+        folStream = list => {
+            if (!S1) return;
+            let built = 0,
+                up = 0;
+            for (let k = 0; k < list.length; ++k) {
+                let t = list[k];
+                if (!t || t.state < 4 || t.state === 8) continue;
+                t.ctFar && t.state >= 5 && up < 1 && !ctFarChunk(t) && (++up, t.ctFar = !1, ctBuild(t));
+                if (t.folPending) built < 2 && !folFar(t) && (++built, A7(t, !0));
+                else t.geometry.foliage && folFar(t, folRange + 100) && (E7(t), t.folPending = !0);
+            }
+        },
+        A7 = (t, e) => {
+            if (S1 === 0 || !e) return;
+            if (folFar(t)) return void(t.folPending = !0);
+            t.folPending = !1;
+            return A7now(t, e);
+        };
+    var A7now = (t, e) => {
             if (S1 === 0 || !e) return;
             if (classicNewGame && ngFolGenerate(t)) return;
             if (classicPaintedFoliage(t)) return;
@@ -35664,6 +35706,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 let a = t[r];
                 if (wE(a.x * 2, a.z * 2) < hy) {
                     let c = a.geometry.foliage;
+                    if (!c) continue;
                     for (let f = 0; f < c.folIds.length; ++f) {
                         let u = c.folIds[f],
                             p = o.indexOf(u);
@@ -36175,14 +36218,14 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             };
         },
         ctGlSave = () => ({
-            fb: N.getParameter(N.FRAMEBUFFER_BINDING),
-            vp: N.getParameter(N.VIEWPORT),
-            vao: N.getParameter(N.VERTEX_ARRAY_BINDING),
+            fb: glTrack.fb,
+            vp: glTrack.vp.slice(),
+            vao: glTrack.vao,
             blend: N.isEnabled(N.BLEND),
             cull: N.isEnabled(N.CULL_FACE),
             depth: N.isEnabled(N.DEPTH_TEST),
             scissor: N.isEnabled(N.SCISSOR_TEST),
-            mask: N.getParameter(N.COLOR_WRITEMASK)
+            mask: glTrack.mask.slice()
         }),
         ctGlRestore = prev => {
             N.bindFramebuffer(N.FRAMEBUFFER, prev.fb), N.viewport(prev.vp[0], prev.vp[1], prev.vp[2], prev.vp[3]), N.bindVertexArray(prev.vao);
@@ -36365,7 +36408,8 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 },
                 holes = d.holes.length > 0,
                 ox = t.origin[0],
-                oz = t.origin[2];
+                oz = t.origin[2],
+                xs = [0, 0, 0, 0];
             for (let q = 0; q < 4; ++q) {
                 let qx = q & 1,
                     qz = q >> 1,
@@ -36405,13 +36449,13 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                             x0 = mm[g] / 255,
                             x1 = mm[g + 1] / 255,
                             x2 = mm[g + 2] / 255,
-                            xs = [x0, x1, x2, Math.max(0, 1 - x0 - x1 - x2)],
                             steep = t.steepMask ? t.steepMask[off + p] / 255 : 0,
                             hy = !gs && t.hlStone ? t.hlStone[off + p] / 255 : 0,
                             hx = t.hlSteep ? t.hlSteep[off + p] / 255 : t.treeDirt ? t.treeDirt[off + p] / 255 : 0,
                             gA = 0,
                             grassW = 0,
                             tgm = tgBare ? t.topGrass.mask[off + p] / 255 : 0;
+                        xs[0] = x0, xs[1] = x1, xs[2] = x2, xs[3] = Math.max(0, 1 - x0 - x1 - x2);
                         if (tgm > 0) {
                             let ot = 0;
                             for (let k = 0; k < 4; ++k) tgB.stone >> k & 1 || (ot += xs[k]);
@@ -36765,11 +36809,19 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             ctJobKeys.add(key), terrainJobs.push(run);
         },
         ctDeps = t => [t.fvPath, t.stoneStrip, t.stoneUnder, t.softUnder, t.topGrass, t.steepMask, t.hlStone, t.hlSteep, t.treeDirt],
+        ctFarRange = 384,
+        ctFarChunk = t => {
+            if (classicPlain || oe.fullDistantTerrain || classicMapCapturing || classicMapScan) return !1;
+            let p = typeof tn != "undefined" && tn.position;
+            return !!p && Math.hypot(t.origin[0] + 32 - p[0], t.origin[2] + 32 - p[2]) > ctFarRange;
+        },
         ctBuild = t => {
             ctPaletteInit();
             let key = T.file + ":" + t.id,
                 ct = ctFromData(t);
-            if (!ct) {
+            if (!ct && ctFarChunk(t)) t.ctFar = !0, t.fvPath = null, ct = t.ct && t.ctKey === key ? t.ct : ctQuick(t);
+            else if (!ct) {
+                t.ctFar = !1;
                 ctPrepare(t);
                 let deps = ctDeps(t),
                     c = ctCache.get(key);
@@ -37093,7 +37145,8 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 ch && ch.state >= 3 && ch.state !== 8 || (terrainPassCache.delete(k), n--);
             }
         },
-        terrainCacheSet = (t, kind, v) => (terrainPassCache.size >= terrainCacheMax && terrainCacheTrim(), terrainPassCache.set(terrainCacheKey(t, kind), v), v),
+        terrainCacheNext = 0,
+        terrainCacheSet = (t, kind, v) => (terrainPassCache.size >= Math.max(terrainCacheMax, terrainCacheNext) && (terrainCacheTrim(), terrainCacheNext = terrainPassCache.size + 256), terrainPassCache.set(terrainCacheKey(t, kind), v), v),
         buildStoneStrips = t => {
             t.stoneStrip = null;
             let res = terrainDeferred(t, "strip", t => terrainCacheSet(t, "strip", buildStoneStripsNow(t)));
@@ -37331,7 +37384,27 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             return d.__topBits = out;
         },
         terrainJobs = [],
-        terrainJobKeys = new Set,
+        terrainJobTails = new Map,
+        terrainJobKeys = (() => {
+            let set = new Set,
+                tail = k => k.startsWith("rebuild~") ? null : k.slice(k.indexOf(":")),
+                add = set.add.bind(set),
+                del = set.delete.bind(set);
+            return set.add = k => {
+                if (!set.has(k)) {
+                    let tl = tail(k);
+                    tl && terrainJobTails.set(tl, (terrainJobTails.get(tl) || 0) + 1);
+                }
+                return add(k);
+            }, set.delete = k => {
+                if (set.has(k)) {
+                    let tl = tail(k),
+                        n = tl && (terrainJobTails.get(tl) || 0) - 1;
+                    tl && (n > 0 ? terrainJobTails.set(tl, n) : terrainJobTails.delete(tl));
+                }
+                return del(k);
+            }, set;
+        })(),
         terrainHoldStart = 0,
         terrainHoldChunks = 10,
         terrainHoldMax = 2e4,
@@ -37353,12 +37426,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         terrainFrame = 0,
         chunkBuiltFrame = -1,
         chunkPrewarmMax = 1500,
-        terrainPassPending = t => {
-            let tail = ":" + T.file + ":" + t.id;
-            for (let key of terrainJobKeys)
-                if (key.endsWith(tail) && !key.startsWith("rebuild~")) return !0;
-            return !1;
-        },
+        terrainPassPending = t => terrainJobTails.has(":" + T.file + ":" + t.id),
         terrainPrewarm = t => {
             if (!oe.faivelRetexture && !dirtPatchEnabled && !shoreShaderEnabled) return !0;
             let now = performance.now();
@@ -37379,7 +37447,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         },
         chunkBuildReady = t => {
             if (!T || T.state !== 4) return !0;
-            if (!terrainPrewarm(t) || chunkBuiltFrame === terrainFrame) return !1;
+            if (!(ctFarChunk(t) || terrainPrewarm(t)) || chunkBuiltFrame === terrainFrame) return !1;
             return chunkBuiltFrame = terrainFrame, !0;
         },
         terrainJobErrors = new Set,
@@ -44366,7 +44434,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             this.chunkCache.push(e)
         }
         manageChunks(e) {
-            ME(e, this.chunkAmount);
+            ME(e, this.chunkAmount), folStream(this.chunksArray);
             let n = 0,
                 o = !1,
                 s = 5,
