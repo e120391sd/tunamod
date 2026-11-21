@@ -15070,9 +15070,9 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             type: 1
         })
     });
-    var enrageFxColor = Object.assign([.14, .08, .06, .45], {
+    var enrageFxColor = classicPlain ? Object.assign([.14, .08, .06, .45], {
         eyes: [1, .5, .08, 1]
-    });
+    }) : [.9, .3, .1, .7];
     var fF = new ve({
         id: 72,
         icon: "ui/skills/17",
