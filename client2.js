@@ -7854,7 +7854,7 @@ void main() {
             meshOverrides.set(1637, {
                 model: 1554,
                 texture: 1222,
-                scale: [2.29, 2.29],
+                scale: [1.95, 2.29],
                 groundSink: !0,
                 offset: {
                     y: -2
@@ -7864,7 +7864,7 @@ void main() {
             meshOverrides.set(1638, {
                 model: 1554,
                 texture: 1222,
-                scale: [2.1, 2.1],
+                scale: [1.79, 2.1],
                 groundSink: !0,
                 offset: {
                     y: -2
@@ -7874,7 +7874,7 @@ void main() {
             meshOverrides.set(1639, {
                 model: 1554,
                 texture: 1222,
-                scale: [8, 8],
+                scale: [6.8, 8],
                 groundSink: !0,
                 offset: {
                     y: -2
@@ -7884,14 +7884,14 @@ void main() {
             meshOverrides.set(1640, {
                 model: 1553,
                 texture: 1221,
-                scale: [1.3, 1.3],
+                scale: [1.1, 1.3],
                 groundSink: !0,
                 ground: true
             })
             meshOverrides.set(1641, {
                 model: 1554,
                 texture: 1222,
-                scale: [2.1, 2.1],
+                scale: [1.79, 2.1],
                 groundSink: !0,
                 offset: {
                     y: -2
