@@ -1724,7 +1724,7 @@
             currentProgram: -1
         },
         ik = (t, e) => {
-            lt.width = t, lt.height = e, an.width = t, an.height = e, Ln.width = Math.round(window.innerWidth * hudK()), Ln.height = Math.round(window.innerHeight * hudK())
+            lt.width = t, lt.height = e, an.width = t, an.height = e, Ln.width = t, Ln.height = e
         },
         ru = (t, e) => {
             lt.viewport.width === t && lt.viewport.height === e || (lt.viewport.width = t, lt.viewport.height = e, N.viewport(0, 0, t, e))
@@ -9703,7 +9703,7 @@ void main() {
         },
         sp = 0,
         ip = (t, e) => {
-            To(z0, 2 * (t * oe.resolutionScale / an.width) - 1, 2 * (1 - e * oe.resolutionScale / an.height) - 1), To(Nc, ~~(t * oe.resolutionScale), ~~(e * oe.resolutionScale))
+            To(z0, 2 * (t * oe.resolutionScale * hudK() / an.width) - 1, 2 * (1 - e * oe.resolutionScale * hudK() / an.height) - 1), To(Nc, ~~(t * oe.resolutionScale), ~~(e * oe.resolutionScale))
         },
         a_ = (t, e) => {
             let n = Mt(t, -100, 100),
@@ -31002,6 +31002,17 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             twitch.onclick = () => vc.update(v => !v);
             bar.append(link("instagram", "https://www.instagram.com/hordesio.official"), link("reddit", "https://www.reddit.com/r/Hordesio"), link("discord", "https://discord.gg/hordes"), link("twitter", "https://twitter.com/hordesio"), twitch);
             target.appendChild(bar);
+            let fit = () => {
+                    let m = target.querySelector("#minimapcontainer"),
+                        w = m && m.offsetParent ? m.offsetWidth : 0;
+                    w > 0 ? (bar.style.display = "flex", bar.style.width = w + "px", bar.style.boxSizing = "border-box", bar.style.justifyContent = "space-between", bar.style.gap = "2px", [...bar.children].forEach(b => (b.style.flex = "1 1 0", b.style.display = "flex", b.style.justifyContent = "center", b.style.margin = "0"))) : (bar.style.display = "", bar.style.width = "", [...bar.children].forEach(b => (b.style.flex = "", b.style.display = "", b.style.justifyContent = "", b.style.margin = "")));
+                },
+                seen = null,
+                ro = typeof ResizeObserver != "undefined" ? new ResizeObserver(fit) : null;
+            setInterval(() => {
+                let m = target.querySelector("#minimapcontainer");
+                m !== seen && (ro && (seen && ro.unobserve(seen), m && ro.observe(m)), seen = m), fit();
+            }, 1e3), fit();
         };
     var storageRow = null,
         storageMount = (target, anchor) => {
@@ -40805,13 +40816,13 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 hudKv = hk;
                 for (let a = 1; a < $9.length; ++a) $9[a] = sh(kW[a], B9[a], hk);
             }
-            let t = Math.round(window.innerWidth * Tf),
-                e = Math.round(window.innerHeight * Tf);
+            let t = Math.round(window.innerWidth * Tf * hudK()),
+                e = Math.round(window.innerHeight * Tf * hudK());
             ik(t, e)
         },
         P9 = () => {
-            let t = Math.round(window.innerWidth * Tf),
-                e = Math.round(window.innerHeight * Tf);
+            let t = Math.round(window.innerWidth * Tf * hudK()),
+                e = Math.round(window.innerHeight * Tf * hudK());
             T9(), WM(t, e), A9(t, e)
         },
         A9 = (t, e) => {
