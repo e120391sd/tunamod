@@ -23681,6 +23681,18 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             Gn("imDepth", ei.depthTexture, 0, p), Gn("inputA", ei.colorTexture, 0, p), hm(gr), ks(np, p), V1(gr, ei, N.COLOR_BUFFER_BIT);
         },
         imRows = (target, anchor) => classicPlain ? [checkRow("Translucent water", imWater, target, anchor), checkRow("Water reflections", imGlint, target, anchor)] : [];
+    var imUiHidden = !1;
+    typeof document != "undefined" && document.addEventListener("keydown", e => {
+        if (e.key !== "F8" || e.repeat) return;
+        let a = document.activeElement;
+        if (a && (a.tagName === "INPUT" || a.tagName === "TEXTAREA" || a.isContentEditable)) return;
+        e.preventDefault();
+        if (!document.getElementById("imNoUiCss")) {
+            let st = document.createElement("style");
+            st.id = "imNoUiCss", st.textContent = "html.imNoUi body *{visibility:hidden!important}html.imNoUi body canvas.imMain{visibility:visible!important}", document.head.append(st);
+        }
+        an && an.classList && an.classList.add("imMain"), imUiHidden = !imUiHidden, document.documentElement.classList.toggle("imNoUi", imUiHidden);
+    }, !0);
 
     var bossLogUi = (() => {
         const SLOTS = [
@@ -42301,7 +42313,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             this.hasDied || !this.skeleton.helmet || (e === !1 ? this.body[13] !== void 0 && this.removeMesh(13) : (this.body[13] === void 0 && (this.mesh(13, 0, !1, 10, .8), this.body[13].position[1] = .8), this.changeMeshBaseColor(this.body[13], e)))
         }
         watersplash(e) {
-            if (classicPlain) return;
+            if (classicPlain && oe.imWater) return;
             let n = gn();
             ut(n.position, this.entity.pos), n.position[1] = this.entity.pos[1] + this.entity.inWater + .05 + (oe.classicWater ? classicWaveAt(n.position[0], n.position[2]) : 0), Gt(n), si(e, n, this.soundPrio, !0);
         }
