@@ -31974,7 +31974,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             return e.liveShape = null, c ? (e.liveShape = {
                 data: live,
                 normals: new Float32Array(3456)
-            }, b7(e.liveShape), classicCloneChunk(c)) : (aw && aw.header && aw.header.freshBase && (live.ctw = classicFreshCt(live, e.id)), aw && live.props && (live.props = live.props.filter(p => p.id !== 1550 && p.id !== 1551)), classicBasePatch(e.id, live));
+            }, b7(e.liveShape), classicCloneChunk(c)) : (aw && aw.header && aw.header.freshBase && (live.ctw = classicFreshCt(live, e.id)), classicBasePatch(e.id, live));
         },
         classicLiveColliders = t => {
             let L = t.liveShape;
