@@ -24118,8 +24118,11 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 lo0 = pct(.02),
                 hi0 = pct(.98),
                 pad = Math.max(10, (hi0 - lo0) * .08),
-                lo = norm ? Math.max(0, lo0 - pad) : 0,
-                hi = norm ? hi0 + pad : Math.max(10, sorted[sorted.length - 1]) * 1.1,
+                mn = sorted[0],
+                mx = sorted[sorted.length - 1],
+                padA = Math.max(10, (mx - mn) * .1),
+                lo = norm ? Math.max(0, lo0 - pad) : Math.max(0, mn - padA),
+                hi = norm ? hi0 + pad : mx + padA,
                 win = Math.max(1, Math.round(vals.length / 40)),
                 avg = vals.map((v, i) => {
                     let a = 0, n = 0;
