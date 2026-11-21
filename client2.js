@@ -31094,7 +31094,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             storageRow && storageRow.remove(), storageRow = null;
         };
     typeof document != "undefined" && document.head && document.head.appendChild(Object.assign(document.createElement("style"), {
-        textContent: "html:not(.classic-map) .minimapcontainer{display:none!important}html:not(.classic-map) .bar.svelte-nijy6x{clear:right;margin-right:0}.l-corner-ul .btnbar .btn.border.grey{border-color:#364c56}"
+        textContent: "html:not(.classic-map) .minimapcontainer{display:none!important}.minimapcontainer .warIcon{background:#10131d!important;z-index:3}html:not(.classic-map) .bar.svelte-nijy6x{clear:right;margin-right:0}.l-corner-ul .btnbar .btn.border.grey{border-color:#364c56}"
     }));
     var mapEnabled = ee(true),
         mapRow = null,
