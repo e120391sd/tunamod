@@ -42836,7 +42836,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 e > 0 && (hn(this.pos, this.pos, this.conciliator, -e * 10), Pn(this.conciliator, this.conciliator, 1 - e * 10));
                 let mag = this.__mag = classicMagnetFor(this),
                     src = mag ? [mag.x, isFinite(mag.y) ? mag.y : this.pos[1], mag.z] : this.pos;
-                if (!mag && !classicPlain && this.type !== 0 && this !== T.player && o && o.getHeight) {
+                if (!mag && !classicPlain && this.type !== 0 && this.level < 99 && this !== T.player && o && o.getHeight) {
                     let x = this.pos[0],
                         z = this.pos[2],
                         y = this.pos[1],
