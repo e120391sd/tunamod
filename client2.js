@@ -8204,30 +8204,44 @@ void main() {
             }
             classicCustomList = Array.isArray(list) ? list : [];
             for (let d of classicCustomList) {
-                let b = d && oldCreatureById.get(d.base);
-                if (!b || !d.name || !(d.id > 0)) continue;
-                let c = {
-                    ...b,
-                    id: d.id,
-                    oldId: b.oldId,
-                    name: String(d.name),
-                    level: d.level > 0 ? d.level : b.level,
-                    colPrim: Array.isArray(d.colPrim) ? d.colPrim : b.colPrim,
-                    colSec: Array.isArray(d.colSec) ? d.colSec : b.colSec,
-                    size: d.size > 0 ? d.size : b.size,
-                    custom: !0,
-                    base: b.id
-                };
-                let sk = $v.get(b.skin);
-                if (Array.isArray(d.eyes) && sk && sk.body && sk.body.some(p => p.bid === 1)) {
+                let b = d && oldCreatureById.get(d.base),
+                    own = d && d.skin > 0,
+                    skinId = own ? d.skin : b && b.skin;
+                if (!skinId || !d.name || !(d.id > 0)) continue;
+                let sk = $v.get(skinId),
+                    c = {
+                        ...(b || {
+                            type: 1,
+                            faction: 2,
+                            oldId: 0
+                        }),
+                        id: d.id,
+                        oldId: b ? b.oldId : 0,
+                        name: String(d.name),
+                        level: d.level > 0 ? d.level : b ? b.level : 1,
+                        colPrim: Array.isArray(d.colPrim) ? d.colPrim : !own && b ? b.colPrim : sk && sk.colPrim || null,
+                        colSec: Array.isArray(d.colSec) ? d.colSec : !own && b ? b.colSec : sk && sk.colSec || null,
+                        size: d.size > 0 ? d.size : !own && b ? b.size : sk && sk.size || 1,
+                        skin: skinId,
+                        custom: !0,
+                        base: b ? b.id : 0
+                    },
+                    bids = sk && sk.body ? sk.body.map(p => p.bid) : [],
+                    fx = Array.isArray(d.effects) ? d.effects.filter(f => Array.isArray(f) && ju.has(+f[0])).map(f => ({
+                        id: +f[0],
+                        bid: bids.includes(+f[1]) ? +f[1] : bids[0]
+                    })) : [],
+                    eyes = Array.isArray(d.eyes) && bids.includes(1);
+                if (sk && (eyes || fx.length)) {
                     let nid = classicCustomSkin(c.id);
                     $v.set(nid, {
                         ...sk,
                         id: nid,
-                        body: sk.body.map(p => p.bid === 1 ? {
+                        body: eyes ? sk.body.map(p => p.bid === 1 ? {
                             ...p,
                             col: [d.eyes[0], d.eyes[1], d.eyes[2], p.col[3]]
-                        } : p)
+                        } : p) : sk.body,
+                        effects: (sk.effects || []).concat(fx)
                     }), c.skin = nid;
                 }
                 oldCreatureImports.push(c), oldCreatureById.set(c.id, c), classicCustomIds.add(c.id);
@@ -8352,6 +8366,16 @@ void main() {
             23: "moonhowler",
             24: "silkrunner",
             25: "shimmerbranch"
+        },
+        rareMountRideSize = {
+            nightmare: 1.8,
+            curseweaver: 1.9,
+            "nopus majorus": 2,
+            "sound of silence": 1.5,
+            "violet death": 1.5,
+            babel: 2,
+            1349: 4,
+            felicia: 1.5
         },
         rareMountCreature = (buff, ent) => {
             if (!oe.faivelRetexture || !ent || !ent.pos || !buff.data) return null;
@@ -42511,7 +42535,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         }
         changeEntityMount(e, buff) {
             let oc = e && buff && rareMountCreature(buff, this.entity);
-            this.entity.mount && (this.entity.mount.onRemove(), this.entity.mount = void 0, this.entity.updateVisualPosition(0, T.time, T, !0)), e && (this.entity.mount = new If(this.entity), oc ? (this.entity.mount.setSkin(oc.skin, oc.colPrim, oc.colSec), this.entity.mount.ocSize = oc.size, rareMountSeat(this.entity.mount, e)) : this.entity.mount.setSkin(e), this.entity.updateTransformScale(), this.entity.updateVisualPosition(0, T.time, T, !0), this.entity.updateTransformRotation(.016), this.entity.updateMountRotation(.016))
+            this.entity.mount && (this.entity.mount.onRemove(), this.entity.mount = void 0, this.entity.updateVisualPosition(0, T.time, T, !0)), e && (this.entity.mount = new If(this.entity), oc ? (this.entity.mount.setSkin(oc.skin, oc.colPrim, oc.colSec), this.entity.mount.ocSize = rareMountRideSize[oc.id] || rareMountRideSize[oc.name.toLowerCase()] || oc.size, rareMountSeat(this.entity.mount, e)) : this.entity.mount.setSkin(e), this.entity.updateTransformScale(), this.entity.updateVisualPosition(0, T.time, T, !0), this.entity.updateTransformRotation(.016), this.entity.updateMountRotation(.016))
         }
     };
     var N1 = class {
