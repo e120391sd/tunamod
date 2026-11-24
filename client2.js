@@ -2641,7 +2641,8 @@ void main() {
         classicLighting: !1,
         guardstoneTextureFix: !0
     });
-    var stoneShaderEnabled = !worldOverrideOff && !classicNewGame,
+    var classicNoPasses = !0,
+        stoneShaderEnabled = !worldOverrideOff && !classicNewGame,
         dirtPatchEnabled = !1,
         gloomEnabled = !worldOverrideOff && !classicNewGame,
         shoreShaderEnabled = !worldOverrideOff && !classicNewGame;
@@ -6855,7 +6856,6 @@ void main() {
                 M2.length && M2[next.shader] === void 0 && console.log("mesh override " + V0 + ": shader " + next.shader + " has no material");
                 next.geometry !== base.geometry && (next.collisionGeometry = base.collisionGeometry == null ? base.geometry : base.collisionGeometry);
                 o.groundSink != null && meshGroundSink.set(V0, o.groundSink);
-                o.hideChance != null && meshHideChance.set(V0, o.hideChance);
                 Ys.set(V0, next);
             });
         };
@@ -8430,6 +8430,7 @@ void main() {
             nightmare: 1.7,
             curseweaver: 1.6,
             "lunar spirit": 1,
+            "crypt scarab": 1,
             "nopus majorus": 2,
             "sound of silence": 1.2,
             "violet death": 1.5,
@@ -36473,7 +36474,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         ctPrepare = t => {
             let world = chunkWorldOf(t),
                 gs = world === "guardstone";
-            if (classicPlain) return t.fvPath = t.stoneUnder = t.softUnder = t.topGrass = t.steepMask = t.hlStone = t.hlSteep = t.treeDirt = t.ctStone = null, {
+            if (classicPlain || classicNoPasses) return t.fvPath = t.stoneUnder = t.softUnder = t.topGrass = t.steepMask = t.hlStone = t.hlSteep = t.treeDirt = null, t.ctStone = !classicPlain && stoneShaderEnabled ? buildStoneData(t) : null, {
                 world,
                 gs
             };
@@ -37556,7 +37557,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         chunkPrewarmMax = 1500,
         terrainPassPending = t => terrainJobTails.has(":" + T.file + ":" + t.id),
         terrainPrewarm = t => {
-            if (!oe.faivelRetexture && !dirtPatchEnabled && !shoreShaderEnabled) return !0;
+            if (classicNoPasses || !oe.faivelRetexture && !dirtPatchEnabled && !shoreShaderEnabled) return !0;
             let now = performance.now();
             t.prewarmId !== t.id && (t.prewarmId = t.id, t.prewarmStart = now);
             if (now - t.prewarmStart > chunkPrewarmMax) return !0;
