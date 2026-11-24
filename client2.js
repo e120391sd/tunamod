@@ -8184,6 +8184,48 @@ void main() {
         let k = c.name.toLowerCase();
         oldCreatureByName.has(k) || oldCreatureByName.set(k, []), oldCreatureByName.get(k).push(c);
     });
+    var classicFxTint = new Map,
+        classicFxNext = 9e5,
+        classicTintCol = (c, t) => {
+            if (!Array.isArray(c)) return c;
+            let m = Math.max(c[0], c[1], c[2]);
+            return [t[0] * m, t[1] * m, t[2] * m].concat(c.slice(3));
+        },
+        classicTintEffect = (id, t) => {
+            let src = ju.get(id);
+            if (!src || !Array.isArray(t)) return id;
+            let key = id + ":" + t.slice(0, 3).map(v => (+v).toFixed(3)).join(",");
+            if (classicFxTint.has(key)) return classicFxTint.get(key);
+            let e = JSON.parse(JSON.stringify(src)),
+                nid = classicFxNext++;
+            for (let p of e.periods || []) {
+                let a = p.params;
+                if (!a) continue;
+                if (p.id === 0) {
+                    let r = classicTintCol([a[0], a[1], a[2]], t);
+                    a[0] = r[0], a[1] = r[1], a[2] = r[2];
+                } else if (p.id === 1 && k0.has(a[0])) {
+                    let q = k0.get(a[0]),
+                        pid = classicFxNext++;
+                    k0.set(pid, {
+                        ...q,
+                        id: pid,
+                        colStart: classicTintCol(q.colStart, t),
+                        colEnd: classicTintCol(q.colEnd, t)
+                    }), a[0] = pid;
+                } else if (p.id === 5 && Uv.has(a[0])) {
+                    let q = Uv.get(a[0]),
+                        rid = classicFxNext++;
+                    Uv.set(rid, {
+                        ...q,
+                        id: rid,
+                        colStart: classicTintCol(q.colStart, t),
+                        colEnd: classicTintCol(q.colEnd, t)
+                    }), a[0] = rid;
+                }
+            }
+            return e.id = nid, ju.set(nid, e), classicFxTint.set(key, nid), nid;
+        };
     var classicCustomSkin = id => id + 1e5,
         classicSkinEyes = skin => {
             let s = $v.get(skin),
@@ -8228,11 +8270,19 @@ void main() {
                     },
                     bids = sk && sk.body ? sk.body.map(p => p.bid) : [],
                     fx = Array.isArray(d.effects) ? d.effects.filter(f => Array.isArray(f) && ju.has(+f[0])).map(f => ({
-                        id: +f[0],
+                        id: Array.isArray(f[2]) ? classicTintEffect(+f[0], f[2]) : +f[0],
                         bid: bids.includes(+f[1]) ? +f[1] : bids[0]
                     })) : [],
+                    sfx = d.skinFx && typeof d.skinFx == "object" ? d.skinFx : null,
+                    baseFx = (sk && sk.effects || []).map((f, i) => {
+                        let o = sfx && sfx[i];
+                        return o && o.off ? null : o && Array.isArray(o.col) ? {
+                            ...f,
+                            id: classicTintEffect(f.id, o.col)
+                        } : f;
+                    }).filter(Boolean),
                     eyes = Array.isArray(d.eyes) && bids.includes(1);
-                if (sk && (eyes || fx.length)) {
+                if (sk && (eyes || fx.length || sfx && Object.keys(sfx).length)) {
                     let nid = classicCustomSkin(c.id);
                     $v.set(nid, {
                         ...sk,
@@ -8241,7 +8291,7 @@ void main() {
                             ...p,
                             col: [d.eyes[0], d.eyes[1], d.eyes[2], p.col[3]]
                         } : p) : sk.body,
-                        effects: (sk.effects || []).concat(fx)
+                        effects: baseFx.concat(fx)
                     }), c.skin = nid;
                 }
                 oldCreatureImports.push(c), oldCreatureById.set(c.id, c), classicCustomIds.add(c.id);
