@@ -8456,7 +8456,7 @@ void main() {
             for (let t = 0; t < 15; ++t) {
                 let it = Xt["mount" + t],
                     bs = it && $v.get(it.skin);
-                if (bs && bs.skeleton === cs.skeleton && bs.mountPos && bs.mountPos.length === 3 && m.body[bs.mountPart]) return m.mountPosOv = cs.skeleton === 2 ? [bs.mountPos[0], bs.mountPos[1], bs.mountPos[2] + .6 * (m.ocSize || cs.size || 1) / (bs.size || 1)] : bs.mountPos, m.mountPartOv = bs.mountPart;
+                if (bs && bs.skeleton === cs.skeleton && bs.mountPos && bs.mountPos.length === 3 && m.body[bs.mountPart]) return m.mountPosOv = cs.skeleton === 2 ? [bs.mountPos[0], bs.mountPos[1], bs.mountPos[2] + .6 * Math.max(0, (m.ocSize || cs.size || 1) / (bs.size || 1) - 1)] : bs.mountPos, m.mountPartOv = bs.mountPart;
             }
             m.mountPosOv = off && !(off[0] === 0 && off[1] === 1 && off[2] === 0) ? [off[0], off[1], Math.max(-.3, Math.min(.3, off[2]))] : [0, .55, -.2], m.mountPartOv = 0;
         },
