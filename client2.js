@@ -8361,6 +8361,16 @@ void main() {
             let opts = ocOptions(name, ent.pos[0], ent.pos[2], !0);
             return opts ? ocPick(opts, ent.id, 13, null) : null;
         },
+        rareMountSeat = (m, mountSkinId) => {
+            let cs = m.skin,
+                p = cs && cs.mountPos;
+            if (!cs || !p || p[0] !== 0 || p[1] !== 1 || p[2] !== 0) return;
+            let ms = $v.get(mountSkinId),
+                sk = Nv.get(cs.skeleton),
+                off = sk && sk.mountOffset;
+            if (ms && ms.skeleton === cs.skeleton && ms.mountPos && m.body[ms.mountPart]) m.mountPosOv = ms.mountPos, m.mountPartOv = ms.mountPart;
+            else m.mountPosOv = off && !(off[0] === 0 && off[1] === 1 && off[2] === 0) ? [off[0], off[1], Math.max(-.3, Math.min(.3, off[2]))] : [0, .55, -.2], m.mountPartOv = 0;
+        },
         oldCreatureFor = e => {
             let src = (e.originalName || e.name || "").toLowerCase(),
                 opts = ocOptions(src, e.pos[0], e.pos[2], !!(T && T.player && T.player !== e && T.player.hostility(e) === 0));
@@ -42355,7 +42365,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             })
         }
         mountPosition(e) {
-            Bo(e, this.skin.mountPos, this.body[this.skin.mountPart].worldMatrix)
+            Bo(e, this.mountPosOv || this.skin.mountPos, this.body[this.mountPosOv ? this.mountPartOv : this.skin.mountPart].worldMatrix)
         }
         getAudioPitch() {
             return Math.max(.6, Math.min(1, .5 / this.entity.radius))
@@ -42501,7 +42511,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         }
         changeEntityMount(e, buff) {
             let oc = e && buff && rareMountCreature(buff, this.entity);
-            this.entity.mount && (this.entity.mount.onRemove(), this.entity.mount = void 0, this.entity.updateVisualPosition(0, T.time, T, !0)), e && (this.entity.mount = new If(this.entity), oc ? (this.entity.mount.setSkin(oc.skin, oc.colPrim, oc.colSec), this.entity.mount.ocSize = oc.size) : this.entity.mount.setSkin(e), this.entity.updateTransformScale(), this.entity.updateVisualPosition(0, T.time, T, !0), this.entity.updateTransformRotation(.016), this.entity.updateMountRotation(.016))
+            this.entity.mount && (this.entity.mount.onRemove(), this.entity.mount = void 0, this.entity.updateVisualPosition(0, T.time, T, !0)), e && (this.entity.mount = new If(this.entity), oc ? (this.entity.mount.setSkin(oc.skin, oc.colPrim, oc.colSec), this.entity.mount.ocSize = oc.size, rareMountSeat(this.entity.mount, e)) : this.entity.mount.setSkin(e), this.entity.updateTransformScale(), this.entity.updateVisualPosition(0, T.time, T, !0), this.entity.updateTransformRotation(.016), this.entity.updateMountRotation(.016))
         }
     };
     var N1 = class {
