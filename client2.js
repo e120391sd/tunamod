@@ -42600,7 +42600,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         }
         changeEntityMount(e, buff) {
             let oc = e && buff && rareMountCreature(buff, this.entity);
-            this.entity.mount && (this.entity.mount.onRemove(), this.entity.mount = void 0, this.entity.updateVisualPosition(0, T.time, T, !0)), e && (this.entity.mount = new If(this.entity), oc ? (this.entity.mount.setSkin(oc.skin, oc.colPrim, oc.colSec), this.entity.mount.ocSize = rareMountRideSize[oc.id] || rareMountRideSize[oc.name.toLowerCase()] || oc.size, rareMountSeat(this.entity.mount, e)) : this.entity.mount.setSkin(e), this.entity.updateTransformScale(), this.entity.updateVisualPosition(0, T.time, T, !0), this.entity.updateTransformRotation(.016), this.entity.updateMountRotation(.016))
+            this.entity.mount && (this.entity.mount.onRemove(), this.entity.mount = void 0, this.entity.updateVisualPosition(0, T.time, T, !0)), e && (this.entity.mount = new If(this.entity), oc ? (this.entity.mount.setSkin(oc.skin, oc.colPrim, oc.colSec), this.entity.mount.ocSize = this.entity.mount.skin && this.entity.mount.skin.skeleton === 2 ? 1 : rareMountRideSize[oc.id] || rareMountRideSize[oc.name.toLowerCase()] || oc.size, rareMountSeat(this.entity.mount, e)) : this.entity.mount.setSkin(e), this.entity.updateTransformScale(), this.entity.updateVisualPosition(0, T.time, T, !0), this.entity.updateTransformRotation(.016), this.entity.updateMountRotation(.016))
         }
     };
     var N1 = class {
