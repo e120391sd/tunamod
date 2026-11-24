@@ -8427,10 +8427,11 @@ void main() {
             25: "shimmerbranch"
         },
         rareMountRideSize = {
-            nightmare: 1.7,
+            nightmare: 1.1,
             curseweaver: 1.6,
             "lunar spirit": 1,
             "crypt scarab": 1,
+            "giant pickleling": 1,
             "nopus majorus": 2,
             "sound of silence": 1.2,
             "violet death": 1.5,
