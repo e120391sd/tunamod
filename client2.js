@@ -6856,6 +6856,7 @@ void main() {
                 M2.length && M2[next.shader] === void 0 && console.log("mesh override " + V0 + ": shader " + next.shader + " has no material");
                 next.geometry !== base.geometry && (next.collisionGeometry = base.collisionGeometry == null ? base.geometry : base.collisionGeometry);
                 o.groundSink != null && meshGroundSink.set(V0, o.groundSink);
+                o.hideChance != null && meshHideChance.set(V0, o.hideChance);
                 Ys.set(V0, next);
             });
         };
