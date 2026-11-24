@@ -8213,6 +8213,15 @@ void main() {
                         colStart: classicTintCol(q.colStart, t),
                         colEnd: classicTintCol(q.colEnd, t)
                     }), a[0] = pid;
+                } else if (p.id === 4) {
+                    for (let m of p.modifiers || []) {
+                        let q = m.params;
+                        if (!q || q[0] !== 0) continue;
+                        for (let o of m.id === 1 ? [1] : m.id === 2 ? [1, 5] : []) {
+                            let r = classicTintCol([q[o], q[o + 1], q[o + 2]], t);
+                            q[o] = r[0], q[o + 1] = r[1], q[o + 2] = r[2];
+                        }
+                    }
                 } else if (p.id === 5 && Uv.has(a[0])) {
                     let q = Uv.get(a[0]),
                         rid = classicFxNext++;
@@ -8442,8 +8451,13 @@ void main() {
             let ms = $v.get(mountSkinId),
                 sk = Nv.get(cs.skeleton),
                 off = sk && sk.mountOffset;
-            if (ms && ms.skeleton === cs.skeleton && ms.mountPos && m.body[ms.mountPart]) m.mountPosOv = ms.mountPos, m.mountPartOv = ms.mountPart;
-            else m.mountPosOv = off && !(off[0] === 0 && off[1] === 1 && off[2] === 0) ? [off[0], off[1], Math.max(-.3, Math.min(.3, off[2]))] : [0, .55, -.2], m.mountPartOv = 0;
+            if (ms && ms.skeleton === cs.skeleton && ms.mountPos && m.body[ms.mountPart]) return m.mountPosOv = ms.mountPos, m.mountPartOv = ms.mountPart;
+            for (let t = 0; t < 15; ++t) {
+                let it = Xt["mount" + t],
+                    bs = it && $v.get(it.skin);
+                if (bs && bs.skeleton === cs.skeleton && bs.mountPos && bs.mountPos.length === 3 && m.body[bs.mountPart]) return m.mountPosOv = bs.mountPos, m.mountPartOv = bs.mountPart;
+            }
+            m.mountPosOv = off && !(off[0] === 0 && off[1] === 1 && off[2] === 0) ? [off[0], off[1], Math.max(-.3, Math.min(.3, off[2]))] : [0, .55, -.2], m.mountPartOv = 0;
         },
         oldCreatureFor = e => {
             let src = (e.originalName || e.name || "").toLowerCase(),
