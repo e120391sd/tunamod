@@ -8012,14 +8012,14 @@ void main() {
                 offset: {
                     y: -0.1
                 },
-                scale: [2, 2]
+                scale: [2.5, 2.5]
             })
             meshOverrides.set(1651, {
                 model: 1479,
                 texture: 1220,
                 ground: true,
                 groundSink: !0,
-                scale: [1.5, 1.5],
+                scale: [2.25, 2.25],
                 offset: {
                 },
             })
@@ -8339,6 +8339,27 @@ void main() {
                 if (a.stop) break;
             }
             return pick(ocData.rules);
+        },
+        rareMountNames = {
+            15: "ghost",
+            16: "keiler",
+            17: "mireshell",
+            18: "desert scarab",
+            19: "glimworm",
+            20: "mudlasher",
+            21: "sandpaw",
+            22: "oakmane",
+            23: "moonhowler",
+            24: "silkrunner",
+            25: "shimmerbranch"
+        },
+        rareMountCreature = (buff, ent) => {
+            if (!oe.faivelRetexture || !ent || !ent.pos || !buff.data) return null;
+            let item = $r[buff.data[0]],
+                name = item && item.type === "mount" && rareMountNames[item.tier];
+            if (!name) return null;
+            let opts = ocOptions(name, ent.pos[0], ent.pos[2], !0);
+            return opts ? ocPick(opts, ent.id, 13, null) : null;
         },
         oldCreatureFor = e => {
             let src = (e.originalName || e.name || "").toLowerCase(),
@@ -42450,7 +42471,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 let s = as(n.logic.fx.stick, this.entity.visual.transform, this.entity.id === T.playerId || n.caster === T.playerId ? 1 : 0, !1);
                 this.stickEffects.set(e, s)
             }
-            if (!this.effects.has(e)) n.logic.fx.visual && this.entity.visual.skin.id !== n.logic.fx.visual && this.changeEntityVisual(n.logic.fx.visual), n.logic.fx.mount && this.changeEntityMount(n.logic.fx.mount(n)), n.logic.fx.color && this.entity.visual.addColor(n.logic.fx.color), n.logic.fx.alpha && this.entity.visual.addAlpha(n.logic.fx.alpha), n.logic.fx.anim && (this.entity.visual.clearAnims(), this.entity.visual.anim(n.logic.fx.anim, !0, 0)), this.visualFreeze += n.visualFreeze, this.visualIncapacitate += n.visualIncapacitate, this.effects.add(e);
+            if (!this.effects.has(e)) n.logic.fx.visual && this.entity.visual.skin.id !== n.logic.fx.visual && this.changeEntityVisual(n.logic.fx.visual), n.logic.fx.mount && this.changeEntityMount(n.logic.fx.mount(n), n), n.logic.fx.color && this.entity.visual.addColor(n.logic.fx.color), n.logic.fx.alpha && this.entity.visual.addAlpha(n.logic.fx.alpha), n.logic.fx.anim && (this.entity.visual.clearAnims(), this.entity.visual.anim(n.logic.fx.anim, !0, 0)), this.visualFreeze += n.visualFreeze, this.visualIncapacitate += n.visualIncapacitate, this.effects.add(e);
             else if (o && this.stickEffects.has(e)) {
                 let s = this.stickEffects.get(e);
                 s.loops = 0, s.fractionNow = 0
@@ -42478,8 +42499,9 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 s.loops = 1, n.done = !0, this.stickEffects.set(o, s)
             })
         }
-        changeEntityMount(e) {
-            this.entity.mount && (this.entity.mount.onRemove(), this.entity.mount = void 0, this.entity.updateVisualPosition(0, T.time, T, !0)), e && (this.entity.mount = new If(this.entity), this.entity.mount.setSkin(e), this.entity.updateTransformScale(), this.entity.updateVisualPosition(0, T.time, T, !0), this.entity.updateTransformRotation(.016), this.entity.updateMountRotation(.016))
+        changeEntityMount(e, buff) {
+            let oc = e && buff && rareMountCreature(buff, this.entity);
+            this.entity.mount && (this.entity.mount.onRemove(), this.entity.mount = void 0, this.entity.updateVisualPosition(0, T.time, T, !0)), e && (this.entity.mount = new If(this.entity), oc ? (this.entity.mount.setSkin(oc.skin, oc.colPrim, oc.colSec), this.entity.mount.ocSize = oc.size) : this.entity.mount.setSkin(e), this.entity.updateTransformScale(), this.entity.updateVisualPosition(0, T.time, T, !0), this.entity.updateTransformRotation(.016), this.entity.updateMountRotation(.016))
         }
     };
     var N1 = class {
@@ -42845,14 +42867,14 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     (y < g || Math.abs(y - g) < 12) && (y = w > g + this.radius * 1.2 ? w - this.radius * 1.2 : g), this.inWater = Math.max(0, w - y), src = [x, y, z];
                 }
                 let i = _o(src, this.visualPosition);
-                (s || i > 1e-5) && (ut(this.visualPosition, src), this.visualPosition[1] += this.radius, this.mount === void 0 ? ut(this.visual.transform.position, this.visualPosition) : (ut(this.mount.transform.position, this.visualPosition), this.mount.transform.position[1] += this.mount.skin.size * .5 - this.radius)), this.interiorlightTimer.done(n) && (this.interiorlightTimer.reset(n), o.getInteriorLight(this.interiorlightTarget, this.aabb));
+                (s || i > 1e-5) && (ut(this.visualPosition, src), this.visualPosition[1] += this.radius, this.mount === void 0 ? ut(this.visual.transform.position, this.visualPosition) : (ut(this.mount.transform.position, this.visualPosition), this.mount.transform.position[1] += (this.mount.ocSize || this.mount.skin.size) * .5 - this.radius)), this.interiorlightTimer.done(n) && (this.interiorlightTimer.reset(n), o.getInteriorLight(this.interiorlightTarget, this.aabb));
                 let r = Math.min(1, e),
                     l = this.interiorlightTarget,
                     a = this.visual.interiorlight;
                 a[0] += Math.sign(l[0] - a[0]) * r, a[1] += Math.sign(l[1] - a[1]) * r, a[2] += Math.sign(l[2] - a[2]) * r, a[3] += Math.sign(l[3] - a[3]) * r
             }
             updateTransformScale() {
-                Co(this.visual.transform.scale, this.size * .7), this.mount !== void 0 && Co(this.mount.transform.scale, this.mount.skin.size * .7)
+                Co(this.visual.transform.scale, this.size * .7), this.mount !== void 0 && Co(this.mount.transform.scale, (this.mount.ocSize || this.mount.skin.size) * .7)
             }
             updateTransformRotation(e) {
                 if (this.stats.alive && this.buffs.visualFreeze === 0) {
