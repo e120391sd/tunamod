@@ -8431,7 +8431,7 @@ void main() {
             curseweaver: 1.6,
             "lunar spirit": 1,
             "nopus majorus": 2,
-            "sound of silence": 1.8,
+            "sound of silence": 1.5,
             "violet death": 1.5,
             babel: 2,
             1349: 4,
