@@ -8435,8 +8435,7 @@ void main() {
             "nopus majorus": 2,
             "sound of silence": 1.2,
             "violet death": 1.5,
-            babel: 2,
-            1349: 4,
+            1349: 2,
             felicia: 1.5
         },
         rareMountCreature = (buff, ent) => {
@@ -31581,8 +31580,11 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 bufs.push(new Uint8Array(await res.arrayBuffer()));
             }
             let out = new Uint8Array(bufs.reduce((a, b) => a + b.length, 0)),
-                o = 0;
+                o = 0,
+                need = 12 + len;
             for (let b of bufs) out.set(b, o), o += b.length;
+            for (let [, off, n] of header.chunks || []) need = Math.max(need, 12 + len + off + n);
+            if (out.length !== need) throw new Error("classic world: parts do not match (" + out.length + " of " + need + " bytes)");
             return out;
         },
         classicWorldLoad = async () => {
@@ -31596,16 +31598,28 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     len != null && (head = new TextDecoder().decode(await classicWorldRange(12, 11 + len)));
                 } catch (e) {}
                 if (cached && cached.bytes && (head == null || head === cached.head)) return void await classicWorldUse(new Uint8Array(cached.bytes));
-                let res = await fetch(classicWorldUrl + "?t=" + Date.now(), {
-                    cache: "no-store"
-                });
-                if (!res.ok) return void(cached && cached.bytes && await classicWorldUse(new Uint8Array(cached.bytes)));
-                let u8 = await classicWorldParts(new Uint8Array(await res.arrayBuffer())),
-                    text = await classicWorldUse(u8);
-                text && classicWorldCache(!0, {
-                    head: text,
-                    bytes: u8.buffer
-                });
+                let last = null;
+                for (let attempt = 0; attempt < 3; ++attempt) {
+                    try {
+                        attempt && await new Promise(r => setTimeout(r, 3e3 * attempt));
+                        let res = await fetch(classicWorldUrl + "?t=" + Date.now(), {
+                            cache: "no-store"
+                        });
+                        if (!res.ok) throw new Error("classic world: http " + res.status);
+                        let u8 = await classicWorldParts(new Uint8Array(await res.arrayBuffer())),
+                            w = await classicWorldParse(u8);
+                        if (!w) throw new Error("classic world: not a .hworld file");
+                        classicWorld = w, classicWorldApply();
+                        return void classicWorldCache(!0, {
+                            head: w.text,
+                            bytes: u8.buffer
+                        });
+                    } catch (e) {
+                        last = e, console.warn("classic world: attempt " + (attempt + 1) + " failed", e);
+                    }
+                }
+                if (cached && cached.bytes) return console.warn("classic world: using the cached copy"), void await classicWorldUse(new Uint8Array(cached.bytes));
+                throw last;
             } catch (e) {
                 console.warn("classic world: could not load", e);
             } finally {
@@ -32169,58 +32183,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 pal: pal2
             };
         },
-        classicPaintedFoliage = t => {
-            let g0 = t.data && t.data.foliageGrid;
-            return !1;
-            let fixed = t.data.__folFixed || (t.data.__folFixed = classicFolRepair(t, g0, t.data.foliageSize, classicFolPal));
-            if (!fixed) return !1;
-            let g = fixed.g,
-                pal = fixed.pal,
-                at = v => v ? pal[(v >> 4) - 1] : null,
-                sizes = fixed.sizes,
-                ids = [];
-            for (let k = 0; k < 4096 && ids.length < 32; ++k) {
-                let fid = at(g[k]);
-                fid == null || !(g[k] & 15) || !Ec.has(fid) || ids.includes(fid) || ids.push(fid);
-            }
-            E7(t);
-            let geo = t.geometry.foliage = {
-                instances: [],
-                folIds: ids
-            };
-            ids.forEach((fid, o) => {
-                geo.instances.push(HN(o));
-                let i = Ec.get(fid);
-                P1.has(i.id) || P1.set(i.id, F7(i)), C7.has(i.texture) || (C7.add(i.texture), Ao(i.texture, r => {
-                    A0(r, 16), ws(r), Ly.set(i.texture, r)
-                }));
-            });
-            let cnt = ids.map(() => 0),
-                holes = t.data.holes.length > 0,
-                ox = t.origin[0],
-                oz = t.origin[2];
-            for (let f = 0; f < 64; ++f)
-                for (let c = 0; c < 64; ++c) {
-                    let v = g[c + f * 64],
-                        dens = v & 15,
-                        W = dens ? ids.indexOf(at(v)) : -1,
-                        gx = ox + c,
-                        gz = oz + f;
-                    if (W < 0 || dirtHash(gx, gz, 700) * 100 >= S1 || holes && am(t, c, f) || cm(t, c, f) > ii(t, c, f) - .1) continue;
-                    let count = Math.min(Math.round(dens / 8), 2),
-                        sizeK = sizes ? sizes[c + f * 64] / 64 : 1,
-                        U = geo.instances[W].attributes.inst.data;
-                    for (let k = 0; k < count && cnt[W] < S7; ++k) {
-                        let x = c - .7 + 1.4 * dirtHash(gx, gz, 710 + k * 3),
-                            z = f - .7 + 1.4 * dirtHash(gx, gz, 711 + k * 3);
-                        if (x < 0 || x >= 64 || z < 0 || z >= 64) continue;
-                        let nrm = T.getNormal(x + ox, z + oz),
-                            $ = cnt[W]++ * 7;
-                        U[$] = x + ox, U[$ + 1] = ii(t, x, z), U[$ + 2] = z + oz, U[$ + 3] = sizeK * (.4 + (1.5 * dirtHash(gx, gz, 712 + k * 3) + .2) * dens / 15) / 1.35, U[$ + 4] = nrm[0] + .001, U[$ + 5] = nrm[1], U[$ + 6] = nrm[2];
-                    }
-                }
-            return geo.instances.forEach((x, o) => (T0(x, cnt[o]), Po(x, x.attributes.inst), x.bounds = t.geometry.terrain.bounds)), !0;
-        };
+        classicPaintedFoliage = t => !1;
     worldOverrideOff ? classicWorldLoading = !1 : classicWorldLoad();
     var Qh = t => {
             Qp(!0), Hp = t[0], Yp = t[2]
@@ -42602,7 +42565,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         }
         changeEntityMount(e, buff) {
             let oc = e && buff && rareMountCreature(buff, this.entity);
-            this.entity.mount && (this.entity.mount.onRemove(), this.entity.mount = void 0, this.entity.updateVisualPosition(0, T.time, T, !0)), e && (this.entity.mount = new If(this.entity), oc ? (this.entity.mount.setSkin(oc.skin, oc.colPrim, oc.colSec), this.entity.mount.ocSize = this.entity.mount.skin && this.entity.mount.skin.skeleton === 2 ? 1 : rareMountRideSize[oc.id] || rareMountRideSize[oc.name.toLowerCase()] || oc.size, rareMountSeat(this.entity.mount, e)) : this.entity.mount.setSkin(e), this.entity.updateTransformScale(), this.entity.updateVisualPosition(0, T.time, T, !0), this.entity.updateTransformRotation(.016), this.entity.updateMountRotation(.016))
+            this.entity.mount && (this.entity.mount.onRemove(), this.entity.mount = void 0, this.entity.updateVisualPosition(0, T.time, T, !0)), e && (this.entity.mount = new If(this.entity), oc ? (this.entity.mount.setSkin(oc.skin, oc.colPrim, oc.colSec), this.entity.mount.ocSize = rareMountRideSize[oc.id] || rareMountRideSize[oc.name.toLowerCase()] || (this.entity.mount.skin && this.entity.mount.skin.skeleton === 2 ? 1 : oc.size), rareMountSeat(this.entity.mount, e)) : this.entity.mount.setSkin(e), this.entity.updateTransformScale(), this.entity.updateVisualPosition(0, T.time, T, !0), this.entity.updateTransformRotation(.016), this.entity.updateMountRotation(.016))
         }
     };
     var N1 = class {
