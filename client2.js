@@ -1786,6 +1786,17 @@
         ssao = ee(!1),
         fixSkybox = ee(!1),
         shaders2021 = ee(!1),
+        colors2021 = ee(!1),
+        fixShadowAcne = ee(!1),
+        acneRow = null,
+        classicAcneFix = (() => {
+            try {
+                return localStorage.getItem("fixShadowAcne") === "true"
+            } catch (e) {
+                return !1
+            }
+        })(),
+        colors21Row = null,
         classic21 = (() => {
             try {
                 return localStorage.getItem("shaders2021") === "true"
@@ -1796,7 +1807,7 @@
         mountReskins = ee(!0),
         fullDistantTerrain = ee(!1),
         classicSsaoFrag = `#version 300 es
-precision highp float;uniform sampler2D inputA;uniform sampler2D inputB;uniform sampler2D aoDepth;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform Screen{vec2 resolution;};in vec2 vUv;out vec4 fragColor;const int zr=16;const float Ul=float(zr);const vec3 Rs[zr]=vec3[](vec3(0.5381,0.1856,-0.4319),vec3(0.1379,0.2486,0.4430),vec3(0.3371,0.5679,-0.0057),vec3(-0.6999,-0.0451,-0.0019),vec3(0.0689,-0.1598,-0.8547),vec3(0.0560,0.0069,-0.1843),vec3(-0.0146,0.1402,0.0762),vec3(0.0100,-0.1924,-0.0344),vec3(-0.3577,-0.5301,-0.4358),vec3(-0.3169,0.1063,0.0158),vec3(0.0103,-0.5869,0.0046),vec3(-0.0897,-0.4940,0.3287),vec3(0.7119,-0.0154,-0.0918),vec3(-0.0533,0.0596,-0.5411),vec3(0.0352,-0.0631,0.5460),vec3(-0.4776,0.2847,-0.0271));float zn;float rand(vec2 co){return fract(sin(dot(co.xy,vec2(12.9898,78.233)))*43758.5453);}const float Fc=0.03;const float Lc=0.0000005;const float radius=0.004;const vec2 dq=vec2(0.0,0.001);const vec2 ql=vec2(0.001,0.0);vec3 normal_from_depth(float BS,vec2 texcoords){float oN=texture(aoDepth,texcoords+dq).r;float NH=texture(aoDepth,texcoords+ql).r;vec3 p1=vec3(dq,oN-BS);vec3 p2=vec3(ql,NH-BS);vec3 Ip=cross(p1,p2);Ip.z=-Ip.z;return normalize(Ip);}void main(){zn=132.5;float BS=texture(aoDepth,vUv).r;vec3 tj=vec3(vUv.xy,BS);vec3 Ip=normal_from_depth(BS,vUv);float SB=zn;float qh=(2.0*0.1*SB)/(SB+0.1-BS*(SB-0.1))/SB;float XZ=radius/qh;float NJ=0.0;vec2 pc=mod(floor(gl_FragCoord.xy),4.0)/4.0;vec3 uH=normalize(vec3(rand(pc.xy),rand(pc.yx),rand(pc.xy*1.5))*2.0-1.0);for(int i=0;i<zr;i++){vec3 Jm=XZ*reflect(Rs[i],uH);float d=dot(Jm,Ip);vec3 HZ=tj+(abs(d)<0.001?Jm:sign(d)*Jm);float Uu=texture(aoDepth,clamp(HZ.xy,0.0,1.0)).r;float difference=BS-Uu;NJ+=step(Lc,difference)*(1.0-smoothstep(Lc,Fc,difference));}NJ*=(1.0-smoothstep(0.6,1.0,qh));NJ*=(1.0/Ul);NJ=pow(NJ,1.7);float QE=clamp(0.1+1.0-NJ,0.0,1.0);fragColor=vec4(mix(worldlight[1]*0.2,vec3(1.0),QE),1.0);}`,
+precision highp float;uniform sampler2D inputA;uniform sampler2D inputB;uniform sampler2D aoDepth;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform Screen{vec2 resolution;};in vec2 vUv;out vec4 fragColor;const int zr=16;const float Ul=float(zr);const vec3 Rs[zr]=vec3[](vec3(0.5381,0.1856,-0.4319),vec3(0.1379,0.2486,0.4430),vec3(0.3371,0.5679,-0.0057),vec3(-0.6999,-0.0451,-0.0019),vec3(0.0689,-0.1598,-0.8547),vec3(0.0560,0.0069,-0.1843),vec3(-0.0146,0.1402,0.0762),vec3(0.0100,-0.1924,-0.0344),vec3(-0.3577,-0.5301,-0.4358),vec3(-0.3169,0.1063,0.0158),vec3(0.0103,-0.5869,0.0046),vec3(-0.0897,-0.4940,0.3287),vec3(0.7119,-0.0154,-0.0918),vec3(-0.0533,0.0596,-0.5411),vec3(0.0352,-0.0631,0.5460),vec3(-0.4776,0.2847,-0.0271));float zn;float K21;float ic;float lzc(vec2 uv){float d=texture(aoDepth,uv).r;float n=projectionMatrix[3][2]/(projectionMatrix[2][2]-1.0);float f=projectionMatrix[3][2]/(projectionMatrix[2][2]+1.0);return 2.0*n*f/(f+n-(2.0*d-1.0)*(f-n));}float rand(vec2 co){return fract(sin(dot(co.xy,vec2(12.9898,78.233)))*43758.5453);}const float Fc=0.03;const float Lc=0.0000005;const float radius=0.004;const vec2 dq=vec2(0.0,0.001);const vec2 ql=vec2(0.001,0.0);vec3 normal_from_depth(float BS,vec2 texcoords){vec3 p1=vec3(dq,K21*(ic-1.0/lzc(texcoords+dq)));vec3 p2=vec3(ql,K21*(ic-1.0/lzc(texcoords+ql)));vec3 Ip=cross(p1,p2);Ip.z=-Ip.z;return normalize(Ip);}void main(){zn=fog[1][1];K21=zn*0.1/(zn-0.1);float zc=lzc(vUv);ic=1.0/zc;float BS=clamp(((zn+0.1)/(zn-0.1)-2.0*zn*0.1/((zn-0.1)*zc))*0.5+0.5,0.0,1.0);vec3 tj=vec3(vUv.xy,BS);vec3 Ip=normal_from_depth(BS,vUv);float SB=zn;float qh=(2.0*0.1*SB)/(SB+0.1-BS*(SB-0.1))/SB;float XZ=radius/qh;float NJ=0.0;vec3 uH=normalize(vec3(rand(vUv.xy),rand(vUv.yx),rand(vUv.xy*1.5)));for(int i=0;i<zr;i++){vec3 Jm=XZ*reflect(Rs[i],uH);vec3 HZ=tj+sign(dot(Jm,Ip))*Jm;float difference=K21*(1.0/lzc(clamp(HZ.xy,0.0,1.0))-ic);NJ+=step(Lc,difference)*(1.0-smoothstep(Lc,Fc,difference));}NJ*=(1.0-smoothstep(0.6,1.0,qh));NJ*=(1.0/Ul);NJ=pow(NJ,1.7);float QE=clamp(0.1+1.0-NJ,0.0,1.0);fragColor=vec4(mix(worldlight[1]*0.2,vec3(1.0),QE),1.0);}`,
 classicSsaoBlurFrag = `#version 300 es
 precision highp float;uniform sampler2D inputA;uniform sampler2D inputB;uniform Screen{vec2 resolution;};in vec2 vUv;uniform int step;float weight[5]=float[5](0.227027,0.1945946,0.1216216,0.054054,0.016216);out vec4 fragColor;void main(){vec2 KQ=2.0/resolution;vec3 result=vec3(1.0);if(step==0){result=texture(inputA,vUv).rgb*weight[0];for(int i=1;i<5;++i){result+=texture(inputA,clamp(vUv+vec2(KQ.x*float(i),0.0),0.0,1.0)).rgb*weight[i];result+=texture(inputA,clamp(vUv-vec2(KQ.x*float(i),0.0),0.0,1.0)).rgb*weight[i];}}else{result=texture(inputA,vUv).rgb*weight[0];for(int i=1;i<5;++i){result+=texture(inputA,clamp(vUv+vec2(0.0,KQ.y*float(i)),0.0,1.0)).rgb*weight[i];result+=texture(inputA,clamp(vUv-vec2(0.0,KQ.y*float(i)),0.0,1.0)).rgb*weight[i];}}if(step==1){result=result*texture(inputB,vUv).rgb;}fragColor=vec4(result,1.0);}`,
 checkRow = (label, store, target, anchor) => {
@@ -13932,8 +13943,13 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             faivel: [[0xa5c9ed, 0x919449, 0xabd1e7, 0x81d6e4], [0x94bdcd, 0x414398, 0x50c9e2, 0x7a81ba], [0x465886, 0x1e3175, 0x4e5bda, 0x2f3980]],
             headless: [[0x3db9c7, 0xc7bd9e, 0x6ddcdc, 0x5ee7ff], [0x0a3caf, 0x5b4071, 0x15466a, 0xd28c4d], [0x141a61, 0x2957c0, 0x4538e2, 0x6241c5]]
         },
-        classic21Env = (env, world) => {
-            let cols = classic21Cols[world] || classic21Cols.guardstone,
+        classic23Cols = {
+            guardstone: [[0xa0e0fd, 0x66756d, 0x6bbeee, 0x79eefb], [0x6687c4, 0x437d81, 0x579de3, 0xe089c1], [0x215198, 0x1818c5, 0x2c3372, 0x20299f]],
+            faivel: [[0xa5c9ed, 0x919449, 0xabd1e7, 0x81d6e4], [0x94bdcd, 0x414398, 0x50c9e2, 0x7a81ba], [0x465886, 0x1e3175, 0x4e5bda, 0x2f3980]],
+            headless: [[0x76deea, 0x918769, 0x6ddcdc, 0x5ee7ff], [0x1952d7, 0x372744, 0x15466a, 0xd28c4d], [0x303aab, 0x142d66, 0x4538e2, 0x6241c5]]
+        },
+        classic21Env = (env, world, table = classic21Cols) => {
+            let cols = table[world] || table.guardstone,
                 ph = k => cols.map(p => classic21Hex(p[k])),
                 mix = (a, b, f) => a.map((v, i) => v + (b[i] - v) * f),
                 amb = ph(0),
@@ -13948,16 +13964,6 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             c.horizon = fog.map(f => f.slice());
             c.sun = fog.map(f => mix([1, 1, 1], f, .5));
             return c;
-        },
-        classic21Base = (env, world) => {
-            let cols = classic21Cols[world] || classic21Cols.guardstone,
-                ph = k => cols.map(p => classic21Hex(p[k]));
-            return Object.assign({}, env, {
-                ambient: ph(0),
-                direct: ph(1),
-                fog: ph(2),
-                skytop: ph(3)
-            })
         },
         classic21Swaps = [
             ["vec3 b(vec3 c,vec3 d,vec3 e,vec3 f,float g,vec3 h,float i){f=normalize(f);float j=clamp(dot(f,worldlight[2]),0.0,g);vec3 k=c*mix(0.7,1.1,0.5+(0.5*j));vec3 l=normalize(worldlight[2]+vViewDir);vec3 m=d*pow(max(0.0,dot(l,f)),20.0)*i*max(g*0.7+0.2,0.2)*20.0;vec3 n=k+d*j+h;return n*e+m;}", "vec3 b(vec3 c,vec3 d,vec3 e,vec3 f,float g,vec3 h,float i){f=normalize(f);float j=max(dot(f,worldlight[2]),0.0)*g;return (h+d*j+c)*e;}"],
@@ -13975,6 +13981,20 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             return s
         };
 
+    if (!classicAcneFix) {
+        let acneSw = (src, pairs) => {
+            for (let [a, b] of pairs) {
+                if (src.indexOf(a) < 0) throw new Error("acne patch: " + a);
+                src = src.split(a).join(b)
+            }
+            return src
+        };
+        e6 = acneSw(e6, [0, 1].map(k => ["texture(shadowMaps[" + k + "],r)", "texture(shadowMaps[" + k + "],r+vec3(0.0,0.0,-0.001*(float(gl_FrontFacing)*2.0-1.0)))"]));
+        a6 = acneSw(a6, [0, 1].map(k => ["texture(shadowMaps[" + k + "],s)", "texture(shadowMaps[" + k + "],s+vec3(0.0,0.0,-0.001))"]));
+        s6 = acneSw(s6, [0, 1].map(k => ["shadowPVMatrix[" + k + "]*(vWorldPos)", "shadowPVMatrix[" + k + "]*(vWorldPos+vec4(normalize(vNormal)*0.2,0.0))"]));
+        r6 = acneSw(r6, [0, 1].map(k => ["shadowPVMatrix[" + k + "]*(vWorldPos)", "shadowPVMatrix[" + k + "]*(vWorldPos+vec4(normalize(vNormal)*0.2,0.0))"]));
+        k6 = acneSw(k6, [["texture(diffuse,vUv).a<0.7", "texture(diffuse,vUv).a<0.5"]])
+    }
     if (oe.faivelRetexture) {
         let folSprite = src => src.replace(/g\[1\]=instNorm\.xyz;[\s\S]*?g\[0\]=normalize\(cross\(g\[1\],g\[2\]\)\);/, "g[0]=vec3(viewMatrix[0][0],viewMatrix[1][0],viewMatrix[2][0]);g[1]=vec3(viewMatrix[0][1],viewMatrix[1][1],viewMatrix[2][1]);g[2]=vec3(viewMatrix[0][2],viewMatrix[1][2],viewMatrix[2][2]);f.x*=fract((instPos.x+instPos.z*1.618)*3.7)<0.5?-1.0:1.0;");
         QM.indexOf("g[1]=instNorm.xyz;") < 0 || KM.indexOf("g[1]=instNorm.xyz;") < 0 ? console.warn("pre 0.5 foliage: foliage shader has changed, keeping the new orientation") : (QM = folSprite(QM), KM = folSprite(KM));
@@ -20044,7 +20064,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 x(ne, e, Le), d(e, o), d(e, s), d(e, i), d(e, r), x(ne, l, Le);
                 for (let oo = 0; oo < Mo.length; oo += 1) Mo[oo] && Mo[oo].m(l, null);
                 Vn(l, t[18], !0), x(ne, a, Le), x(ne, c, Le), x(ne, f, Le), x(ne, u, Le), x(ne, p, Le), x(ne, g, Le), x(ne, v, Le), x(ne, _, Le), x(ne, b, Le), X(y, ne, Le), x(ne, k, Le), x(ne, C, Le), x(ne, E, Le), x(ne, F, Le), Ge(F, t[19]), x(ne, M, Le), X(L, ne, Le), x(ne, V, Le), X(D, ne, Le), x(ne, z, Le), X(q, ne, Le), x(ne, R, Le), X(O, ne, Le), x(ne, W, Le), X(U, ne, Le), x(ne, $, Le), X(G, ne, Le), x(ne, de, Le), X(be, ne, Le), x(ne, le, Le), X(se, ne, Le), x(ne, fe, Le), X(ke, ne, Le), x(ne, we, Le), x(ne, ce, Le), x(ne, xe, Le), d(xe, ye), d(xe, Oe), d(xe, ze), d(ze, Ne), x(ne, ue, Le), Ge(ue, t[20]), x(ne, _e, Le), X(pe, ne, Le), x(ne, he, Le), d(he, Ie), d(he, We), d(he, te), d(te, H), d(te, He), x(ne, Ve, Le), Ge(Ve, t[21]), x(ne, Be, Le), d(Be, je), d(Be, st), d(Be, at), d(at, ot), d(at, Wt), x(ne, Ee, Le), Ge(Ee, t[22]), x(ne, et, Le), d(et, gt), d(et, Ke), d(et, wt), x(ne, pt, Le), Ge(pt, t[23]), x(ne, qe, Le), x(ne, Tt, Le), x(ne, Ut, Le), X(Ze, ne, Le), x(ne, tt, Le), X(nt, ne, Le), x(ne, Lt, Le), X(Xe, ne, Le), x(ne, yt, Le), X(kt, ne, Le), x(ne, Pt, Le), x(ne, mo, Le), x(ne, Lo, Le), d(Lo, Ht), d(Lo, ri), d(Lo, li), X(xo, ne, Le), x(ne, Fr, Le), X(Es, ne, Le), x(ne, ai, Le), X(Is, ne, Le), x(ne, pn, Le), d(pn, un), d(pn, Ea), d(pn, Lf), d(Lf, Fg), d(Lf, s3), x(ne, Ls, Le), Ge(Ls, t[24]), x(ne, Ia, Le), d(Ia, i3), d(Ia, r3), d(Ia, Df), d(Df, Cg), d(Df, l3), x(ne, Ds, Le), Ge(Ds, t[25]), x(ne, km, Le), x(ne, ci, Le), Ge(ci, t[26]), x(ne, wm, Le), x(ne, fi, Le), Ge(fi, t[27]), x(ne, xm, Le), X(La, ne, Le), x(ne, Vf, Le), x(ne, Sg, Le), x(ne, Mm, Le), X(Da, ne, Le), x(ne, Fm, Le), X(Va, ne, Le), x(ne, Cm, Le), X(qa, ne, Le), x(ne, Sm, Le), x(ne, ui, Le), Ge(ui, t[28]), x(ne, qf, Le), x(ne, Tg, Le), x(ne, Tm, Le), X(Ra, ne, Le), x(ne, Pm, Le), X(za, ne, Le), x(ne, Rf, Le), x(ne, Pg, Le), x(ne, Ba, Le), d(Ba, a3), d(Ba, c3), d(Ba, zf), d(zf, Ag), d(zf, f3), x(ne, pi, Le), Ge(pi, t[29]), x(ne, Oa, Le), d(Oa, u3), d(Oa, p3), d(Oa, Am), d(Am, Eg), x(ne, mi, Le), Ge(mi, t[30]), x(ne, Bf, Le), x(ne, Ig, Le), x(ne, Ua, Le), d(Ua, m3), d(Ua, d3), d(Ua, Em), d(Em, Lg), x(ne, di, Le), Ge(di, t[31]), x(ne, $a, Le), d($a, h3), d($a, g3), d($a, Im), d(Im, Dg), x(ne, hi, Le), Ge(hi, t[32]), x(ne, Of, Le), x(ne, Vg, Le), x(ne, Lm, Le), X(Na, ne, Le), Qo = !0, qg || (v3 = [Y(l, "change", t[53]), Y(l, "change", t[35]), Y(u, "click", z_), Y(g, "click", B_), Y(F, "change", t[54]), Y(F, "input", t[54]), Y(ue, "change", t[55]), Y(ue, "input", t[55]), Y(Ve, "change", t[56]), Y(Ve, "input", t[56]), Y(Ve, "change", t[35]), Y(Ee, "change", t[57]), Y(Ee, "input", t[57]), Y(Ee, "change", t[35]), Y(pt, "input", t[58]), Y(pt, "change", t[35]), Y(Ls, "change", t[59]), Y(Ls, "input", t[59]), Y(Ds, "change", t[60]), Y(Ds, "input", t[60]), Y(ci, "input", t[61]), Y(fi, "input", t[62]), Y(ui, "change", t[63]), Y(ui, "input", t[63]), Y(pi, "change", t[64]), Y(pi, "input", t[64]), Y(mi, "change", t[65]), Y(mi, "input", t[65]), Y(di, "change", t[66]), Y(di, "input", t[66]), Y(hi, "change", t[67]), Y(hi, "input", t[67])], qg = !0)
-                storageMount(ne, Le), mapMount(ne, k), sellRow && sellRow(), sellRow = checkRow("Block selling charms & upgraded items", blockSpecialSelling, ne, null), overrideRow && overrideRow(), overrideRow = checkRow("Disable world override", disableWorldOverride, ne, null), modRowsUi && modRowsUi.forEach(f => f()), modRowsUi = [sliderRow("Party frame height", partyHeight, ne, qf, 0, 100), checkRow("Sort party by class", sortParty, ne, qf), checkRow("Class-color party HP bars", classColorParty, ne, qf), checkRow("Disable blue partied nameplates", disablePartyNameplates, ne, qf), checkRow("Uncap nameplate draw distance", uncapNameplates, ne, qf), checkRow("Mount reskins", mountReskins, ne, qf), headerRow("Buffs", ne, null), checkRow("Hide irrelevant buffs", hideBuffs, ne, null), checkRow("Hide class buffs", hideClassBuffs, ne, null), checkRow("Make all buffs stackable", stackSameBuffs, ne, null), headerRow("CC indicators", ne, null), checkRow("Enable CC indicators", CCIndicator, ne, null), checkRow("Flash CC indicator color", flashCCIndicator, ne, null), checkRow("Show on nameplates", CCIndicatorOnNameplates, ne, null)], skillbarRowsUi && skillbarRowsUi.forEach(f => f()), skillbarRowsUi = [headerRow("Skillbar", ne, null), sliderRow("Columns", skillbarCols, ne, null, 0, 24), sliderRow("Rows", skillbarRows, ne, null, 0, 6)], shaders21Row && shaders21Row(), shaders21Row = classicPlain ? null : checkRow("2021 version", shaders2021, ne, null);
+                storageMount(ne, Le), mapMount(ne, k), sellRow && sellRow(), sellRow = checkRow("Block selling charms & upgraded items", blockSpecialSelling, ne, null), overrideRow && overrideRow(), overrideRow = checkRow("Disable world override", disableWorldOverride, ne, null), modRowsUi && modRowsUi.forEach(f => f()), modRowsUi = [sliderRow("Party frame height", partyHeight, ne, qf, 0, 100), checkRow("Sort party by class", sortParty, ne, qf), checkRow("Class-color party HP bars", classColorParty, ne, qf), checkRow("Disable blue partied nameplates", disablePartyNameplates, ne, qf), checkRow("Uncap nameplate draw distance", uncapNameplates, ne, qf), checkRow("Mount reskins", mountReskins, ne, qf), headerRow("Buffs", ne, null), checkRow("Hide irrelevant buffs", hideBuffs, ne, null), checkRow("Hide class buffs", hideClassBuffs, ne, null), checkRow("Make all buffs stackable", stackSameBuffs, ne, null), headerRow("CC indicators", ne, null), checkRow("Enable CC indicators", CCIndicator, ne, null), checkRow("Flash CC indicator color", flashCCIndicator, ne, null), checkRow("Show on nameplates", CCIndicatorOnNameplates, ne, null)], skillbarRowsUi && skillbarRowsUi.forEach(f => f()), skillbarRowsUi = [headerRow("Skillbar", ne, null), sliderRow("Columns", skillbarCols, ne, null, 0, 24), sliderRow("Rows", skillbarRows, ne, null, 0, 6)], shaders21Row && shaders21Row(), shaders21Row = classicPlain ? null : checkRow("2021 version", shaders2021, ne, null), colors21Row && colors21Row(), colors21Row = classicPlain ? null : checkRow("2021 lighting colors", colors2021, ne, null), acneRow && acneRow(), acneRow = checkRow("Fix shadow acne (reload)", fixShadowAcne, ne, null);
             },
             p(ne, Le) {
                 if (Le[1] & 8) {
@@ -20066,7 +20086,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 I(y.$$.fragment, ne), I(L.$$.fragment, ne), I(D.$$.fragment, ne), I(q.$$.fragment, ne), I(O.$$.fragment, ne), I(U.$$.fragment, ne), I(G.$$.fragment, ne), I(be.$$.fragment, ne), I(se.$$.fragment, ne), I(ke.$$.fragment, ne), I(pe.$$.fragment, ne), I(Ze.$$.fragment, ne), I(nt.$$.fragment, ne), I(Xe.$$.fragment, ne), I(kt.$$.fragment, ne), I(xo.$$.fragment, ne), I(Es.$$.fragment, ne), I(Is.$$.fragment, ne), I(La.$$.fragment, ne), I(Da.$$.fragment, ne), I(Va.$$.fragment, ne), I(qa.$$.fragment, ne), I(Ra.$$.fragment, ne), I(za.$$.fragment, ne), I(Na.$$.fragment, ne), Qo = !1
             },
             d(ne) {
-                storageUnmount(), mapUnmount(), sellRow && (sellRow(), sellRow = null), shaders21Row && (shaders21Row(), shaders21Row = null), skillbarRowsUi && (skillbarRowsUi.forEach(f => f()), skillbarRowsUi = null), modRowsUi && (modRowsUi.forEach(f => f()), modRowsUi = null), overrideRow && (overrideRow(), overrideRow = null);
+                storageUnmount(), mapUnmount(), sellRow && (sellRow(), sellRow = null), shaders21Row && (shaders21Row(), shaders21Row = null), colors21Row && (colors21Row(), colors21Row = null), acneRow && (acneRow(), acneRow = null), skillbarRowsUi && (skillbarRowsUi.forEach(f => f()), skillbarRowsUi = null), modRowsUi && (modRowsUi.forEach(f => f()), modRowsUi = null), overrideRow && (overrideRow(), overrideRow = null);
                 ne && (w(e), w(l), w(a), w(c), w(f), w(u), w(p), w(g), w(v), w(_), w(b), w(k), w(C), w(E), w(F), w(M), w(V), w(z), w(R), w(W), w($), w(de), w(le), w(fe), w(we), w(ce), w(xe), w(ue), w(_e), w(he), w(Ve), w(Be), w(Ee), w(et), w(pt), w(qe), w(Tt), w(Ut), w(tt), w(Lt), w(yt), w(Pt), w(mo), w(Lo), w(Fr), w(ai), w(pn), w(Ls), w(Ia), w(Ds), w(km), w(ci), w(wm), w(fi), w(xm), w(Vf), w(Sg), w(Mm), w(Fm), w(Cm), w(Sm), w(ui), w(qf), w(Tg), w(Tm), w(Pm), w(Rf), w(Pg), w(Ba), w(pi), w(Oa), w(mi), w(Bf), w(Ig), w(Ua), w(di), w($a), w(hi), w(Of), w(Vg), w(Lm)), rt(Mo, ne), K(y, ne), K(L, ne), K(D, ne), K(q, ne), K(O, ne), K(U, ne), K(G, ne), K(be, ne), K(se, ne), K(ke, ne), K(pe, ne), K(Ze, ne), K(nt, ne), K(Xe, ne), K(kt, ne), K(xo, ne), K(Es, ne), K(Is, ne), K(La, ne), K(Da, ne), K(Va, ne), K(qa, ne), K(Ra, ne), K(za, ne), K(Na, ne), qg = !1, ct(v3)
             }
         }
@@ -31310,7 +31330,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             localStorage.getItem(from) !== null && localStorage.getItem(to) === null && localStorage.setItem(to, localStorage.getItem(from)), localStorage.removeItem(from);
         } catch (e) {}
     });
-    fw("mapEnabled", mapEnabled), fw("ssao", ssao), fw("fixSkybox", fixSkybox), fw("shaders2021", shaders2021), fw("mountReskins", mountReskins), fw("fullDistantTerrain", fullDistantTerrain), fw("timeSlider", timeSlider), fw("timeToIngame", timeToIngame), fw("markOwnRevs", markOwnRevs), [["CCIndicator", CCIndicator], ["flashCCIndicator", flashCCIndicator], ["CCIndicatorOnNameplates", CCIndicatorOnNameplates], ["hideBuffs", hideBuffs], ["hideClassBuffs", hideClassBuffs], ["stackSameBuffs", stackSameBuffs], ["partyHeight", partyHeight], ["sortParty", sortParty], ["classColorParty", classColorParty], ["disablePartyNameplates", disablePartyNameplates], ["uncapNameplates", uncapNameplates], ["revUnfriendly", revUnfriendly], ["nextFriendlyIgnoreBots", nextFriendlyIgnoreBots], ["losTarget", losTarget], ["fxAlphaOverride", fxAlphaOverride], ["fxAlphaSprite", fxAlphaSprite], ["fxAlphaRibbon", fxAlphaRibbon], ["fxAlphaModel", fxAlphaModel], ["fxAlphaSkills", fxAlphaSkills], ["mouseOverTarget", mouseOverTarget]].forEach(([k, st]) => fw(k, st)), (() => {
+    fw("mapEnabled", mapEnabled), fw("ssao", ssao), fw("fixSkybox", fixSkybox), fw("shaders2021", shaders2021), fw("colors2021", colors2021), fw("fixShadowAcne", fixShadowAcne), fw("mountReskins", mountReskins), fw("fullDistantTerrain", fullDistantTerrain), fw("timeSlider", timeSlider), fw("timeToIngame", timeToIngame), fw("markOwnRevs", markOwnRevs), [["CCIndicator", CCIndicator], ["flashCCIndicator", flashCCIndicator], ["CCIndicatorOnNameplates", CCIndicatorOnNameplates], ["hideBuffs", hideBuffs], ["hideClassBuffs", hideClassBuffs], ["stackSameBuffs", stackSameBuffs], ["partyHeight", partyHeight], ["sortParty", sortParty], ["classColorParty", classColorParty], ["disablePartyNameplates", disablePartyNameplates], ["uncapNameplates", uncapNameplates], ["revUnfriendly", revUnfriendly], ["nextFriendlyIgnoreBots", nextFriendlyIgnoreBots], ["losTarget", losTarget], ["fxAlphaOverride", fxAlphaOverride], ["fxAlphaSprite", fxAlphaSprite], ["fxAlphaRibbon", fxAlphaRibbon], ["fxAlphaModel", fxAlphaModel], ["fxAlphaSkills", fxAlphaSkills], ["mouseOverTarget", mouseOverTarget]].forEach(([k, st]) => fw(k, st)), (() => {
         let was;
         sortParty.subscribe(v => (was !== void 0 && v && !was && partyOrderSave({}), was = v));
     })(), fw("blockSpecialSelling", blockSpecialSelling), fw("bloomBlur", bloomBlur), bloomBlur.set(!0), bloomBlur.subscribe(v => bloomBlurOn = v), fw("fogEnabled", fogSetting), fogSetting.set(!0), fogSetting.subscribe(v => fogOn = v), fw("fogDistance", fogDistance), fogDistance.set(100), fogDistance.subscribe(v => fogDistMul = (+v || 100) / 100), fw("skillbarCols", skillbarCols), fw("skillbarRows", skillbarRows), skillbarCols.subscribe(() => setTimeout(skillbarLayout)), skillbarRows.subscribe(() => setTimeout(skillbarLayout)), fw("disableWorldOverride", disableWorldOverride), disableWorldOverride.subscribe(v => !!v !== worldOverrideOff && typeof location != "undefined" && location.reload());
@@ -34301,18 +34321,17 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         },
         envAt = id => {
             let env = Ic.get(id);
-            if (env && classic21) {
+            if (env && (classic21 || oe.colors2021)) {
                 let w21 = classicWorldFor(id) || "guardstone",
                     k21 = "21:" + id + ":" + w21,
                     c21 = classicEnvCache.get(k21);
                 return c21 || (c21 = classic21Env(env, w21), classicEnvCache.set(k21, c21), c21)
             }
-            env && worldOverrideOff && !classicIsEditor() && (env = env05(id, env));
-            if (env) {
-                let wb = classicWorldFor(id) || "guardstone",
-                    kb = "21b:" + id + ":" + wb,
-                    cb = classicEnvCache.get(kb);
-                cb && cb.__src === env || (cb = classic21Base(env, wb), cb.__src = env, classicEnvCache.set(kb, cb)), env = cb
+            if (env && !classicIsEditor()) {
+                let w23 = classicWorldFor(id) || "guardstone",
+                    k23 = "23b:" + id + ":" + w23,
+                    c23 = classicEnvCache.get(k23);
+                c23 && c23.__src === env || (c23 = classic21Env(env, w23, classic23Cols), c23.__src = env, classicEnvCache.set(k23, c23)), env = c23
             }
             let tint = env && worldAmbientTint[classicWorldFor(id)];
             if (!env || !oe.classicLighting && !oe.classicWaterColors && !tint) return env;
@@ -40939,7 +40958,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         },
         pW = () => {
             let t = Cf;
-            if (N.enable(N.POLYGON_OFFSET_FILL), N.polygonOffset(1.3, 3), hf) {
+            if (classicAcneFix ? (N.enable(N.POLYGON_OFFSET_FILL), N.polygonOffset(1.3, 3)) : N.disable(N.POLYGON_OFFSET_FILL), hf) {
                 for (let e = 1; e >= 0; --e) {
                     let n = Kc[e],
                         o = Fa[e];
