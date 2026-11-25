@@ -33663,13 +33663,15 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         YE = t => {
             if (!classicPlain) {
                 let size = Math.max(20, classicFogFar),
-                    yaw = Math.atan2(gf[0], gf[1]),
+                    now = performance.now() / 1e3,
                     prev = Fa[0].__anchor,
-                    a = prev && prev[3] === size && Math.hypot(tn.position[0] - prev[0], tn.position[1] - prev[1], tn.position[2] - prev[2]) <= 15 ? prev.slice(0, 3) : [...tn.position];
-                Fa[0].__anchor = [...a, size];
+                    keep = prev && prev[3] === size && now - prev[4] <= 10 && Math.hypot(tn.position[0] - prev[0], tn.position[1] - prev[1], tn.position[2] - prev[2]) <= 15,
+                    a = keep ? prev.slice(0, 3) : [...tn.position],
+                    dl = Math.hypot(gf[0], gf[1], gf[2]) || 1;
+                keep || (Fa[0].__anchor = [...a, size, now]);
                 for (let s = 0; s < Fa.length; ++s) {
                     let i = Fa[s];
-                    (!H3(i.transform.position, a) || i.__size !== size) && (ut(i.transform.position, a), J(i.transform.rotation, -Math.PI / 2, yaw, 0), i.far = size * 2, i.near = -size * 2, Z3(i, -size, size, -size, size), mc(i, !0), gd(i), i.__size = size, hf = !0);
+                    !keep && (J(i.transform.position, gf[0] / dl * size, gf[1] / dl * size, gf[2] / dl * size), Tl(i.transform, [0, 0, 0], !0, [0, 1, 0]), i.transform.position[0] += a[0], i.transform.position[1] += a[1], i.transform.position[2] += a[2], i.far = size * 2, i.near = .1, Z3(i, -size, size, -size, size), mc(i, !0), gd(i), i.__size = size, hf = !0);
                 }
                 let sd = on.shadows.data,
                     fe = on.environment.data;
