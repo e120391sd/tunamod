@@ -1796,7 +1796,7 @@
         mountReskins = ee(!0),
         fullDistantTerrain = ee(!1),
         classicSsaoFrag = `#version 300 es
-precision highp float;uniform sampler2D aoDepth;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};in vec2 vUv;out vec4 fragColor;const int zr=16;const float Ul=float(zr);const vec3 Rs[zr]=vec3[](vec3(0.5381,0.1856,-0.4319),vec3(0.1379,0.2486,0.4430),vec3(0.3371,0.5679,-0.0057),vec3(-0.6999,-0.0451,-0.0019),vec3(0.0689,-0.1598,-0.8547),vec3(0.0560,0.0069,-0.1843),vec3(-0.0146,0.1402,0.0762),vec3(0.0100,-0.1924,-0.0344),vec3(-0.3577,-0.5301,-0.4358),vec3(-0.3169,0.1063,0.0158),vec3(0.0103,-0.5869,0.0046),vec3(-0.0897,-0.4940,0.3287),vec3(0.7119,-0.0154,-0.0918),vec3(-0.0533,0.0596,-0.5411),vec3(0.0352,-0.0631,0.5460),vec3(-0.4776,0.2847,-0.0271));float rand(vec2 co){return fract(sin(dot(co.xy,vec2(12.9898,78.233)))*43758.5453);}float lz(vec2 uv){float d=texture(aoDepth,uv).r;float n=projectionMatrix[3][2]/(projectionMatrix[2][2]-1.0);float f=projectionMatrix[3][2]/(projectionMatrix[2][2]+1.0);return 2.0*n*f/(f+n-(2.0*d-1.0)*(f-n));}vec3 vp(vec2 uv){float z=lz(uv);return vec3((uv*2.0-1.0)*vec2(z/projectionMatrix[0][0],z/projectionMatrix[1][1]),-z);}void main(){if(texture(aoDepth,vUv).r>=0.99999){fragColor=vec4(1.0);return;}vec2 px=1.0/vec2(textureSize(aoDepth,0));vec3 P=vp(vUv);vec3 pr=vp(vUv+vec2(px.x,0.0)),pl=vp(vUv-vec2(px.x,0.0)),pu=vp(vUv+vec2(0.0,px.y)),pd=vp(vUv-vec2(0.0,px.y));vec3 dx=abs(pr.z-P.z)<abs(P.z-pl.z)?pr-P:P-pl;vec3 dy=abs(pu.z-P.z)<abs(P.z-pd.z)?pu-P:P-pd;vec3 Ip=normalize(cross(dx,dy));if(dot(Ip,P)>0.0)Ip=-Ip;float SB=clamp(fog[1][1],40.0,300.0);float XZ=0.008*SB/projectionMatrix[1][1];float Lc=XZ*0.03;float Fc=XZ*2.0;float NJ=0.0;vec3 uH=normalize(vec3(rand(vUv.xy),rand(vUv.yx),rand(vUv.xy*1.5)));for(int i=0;i<zr;i++){vec3 Jm=XZ*reflect(Rs[i],uH);vec3 HZ=P+sign(dot(Jm,Ip))*Jm;vec4 c=projectionMatrix*vec4(HZ,1.0);vec2 suv=clamp(c.xy/c.w*0.5+0.5,0.0,1.0);float difference=-lz(suv)-HZ.z;NJ+=step(Lc,difference)*(1.0-smoothstep(Lc,Fc,difference));}NJ*=(1.0-smoothstep(0.6,1.0,-P.z/SB));NJ*=(1.0/Ul);NJ=pow(NJ,1.7);float QE=clamp(0.1+1.0-NJ,0.0,1.0);fragColor=vec4(mix(worldlight[1]*0.2,vec3(1.0),QE),1.0);}`,
+precision highp float;uniform sampler2D inputA;uniform sampler2D inputB;uniform sampler2D aoDepth;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform Screen{vec2 resolution;};in vec2 vUv;out vec4 fragColor;const int zr=16;const float Ul=float(zr);const vec3 Rs[zr]=vec3[](vec3(0.5381,0.1856,-0.4319),vec3(0.1379,0.2486,0.4430),vec3(0.3371,0.5679,-0.0057),vec3(-0.6999,-0.0451,-0.0019),vec3(0.0689,-0.1598,-0.8547),vec3(0.0560,0.0069,-0.1843),vec3(-0.0146,0.1402,0.0762),vec3(0.0100,-0.1924,-0.0344),vec3(-0.3577,-0.5301,-0.4358),vec3(-0.3169,0.1063,0.0158),vec3(0.0103,-0.5869,0.0046),vec3(-0.0897,-0.4940,0.3287),vec3(0.7119,-0.0154,-0.0918),vec3(-0.0533,0.0596,-0.5411),vec3(0.0352,-0.0631,0.5460),vec3(-0.4776,0.2847,-0.0271));float zn;float d21(vec2 uv){float d=texture(aoDepth,uv).r;float n=projectionMatrix[3][2]/(projectionMatrix[2][2]-1.0);float f=projectionMatrix[3][2]/(projectionMatrix[2][2]+1.0);float z=2.0*n*f/(f+n-(2.0*d-1.0)*(f-n));float N=0.1;float F=zn;return clamp(((F+N)/(F-N)-2.0*F*N/((F-N)*z))*0.5+0.5,0.0,1.0);}float rand(vec2 co){return fract(sin(dot(co.xy,vec2(12.9898,78.233)))*43758.5453);}const float Fc=0.03;const float Lc=0.0000005;const float radius=0.004;const vec2 dq=vec2(0.0,0.001);const vec2 ql=vec2(0.001,0.0);vec3 normal_from_depth(float BS,vec2 texcoords){float oN=d21(texcoords+dq);float NH=d21(texcoords+ql);vec3 p1=vec3(dq,oN-BS);vec3 p2=vec3(ql,NH-BS);vec3 Ip=cross(p1,p2);Ip.z=-Ip.z;return normalize(Ip);}void main(){zn=min(fog[1][1],2000.0);float BS=d21(vUv);vec3 tj=vec3(vUv.xy,BS);vec3 Ip=normal_from_depth(BS,vUv);float SB=zn;float qh=(2.0*0.1*SB)/(SB+0.1-BS*(SB-0.1))/SB;float XZ=radius/qh;float NJ=0.0;vec3 uH=normalize(vec3(rand(vUv.xy),rand(vUv.yx),rand(vUv.xy*1.5)));for(int i=0;i<zr;i++){vec3 Jm=XZ*reflect(Rs[i],uH);vec3 HZ=tj+sign(dot(Jm,Ip))*Jm;float Uu=d21(clamp(HZ.xy,0.0,1.0));float difference=BS-Uu;NJ+=step(Lc,difference)*(1.0-smoothstep(Lc,Fc,difference));}NJ*=(1.0-smoothstep(0.6,1.0,qh));NJ*=(1.0/Ul);NJ=pow(NJ,1.7);float QE=clamp(0.1+1.0-NJ,0.0,1.0);fragColor=vec4(mix(worldlight[1]*0.2,vec3(1.0),QE),1.0);}`,
         classicSsaoBlurFrag = `#version 300 es
 precision highp float;uniform sampler2D inputA;uniform sampler2D inputB;uniform Screen{vec2 resolution;};in vec2 vUv;uniform int step;float weight[5]=float[5](0.227027,0.1945946,0.1216216,0.054054,0.016216);out vec4 fragColor;void main(){vec2 KQ=2.0/resolution;vec3 result=vec3(1.0);if(step==0){result=texture(inputA,vUv).rgb*weight[0];for(int i=1;i<5;++i){result+=texture(inputA,vUv+vec2(KQ.x*float(i),0.0)).rgb*weight[i];result+=texture(inputA,vUv-vec2(KQ.x*float(i),0.0)).rgb*weight[i];}}else{result=texture(inputA,vUv).rgb*weight[0];for(int i=1;i<5;++i){result+=texture(inputA,vUv+vec2(0.0,KQ.y*float(i))).rgb*weight[i];result+=texture(inputA,vUv-vec2(0.0,KQ.y*float(i))).rgb*weight[i];}}if(step==1){result=result*texture(inputB,vUv).rgb;}fragColor=vec4(result,1.0);}`,
         checkRow = (label, store, target, anchor) => {
@@ -13949,12 +13949,15 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             c.sun = fog.map(f => mix([1, 1, 1], f, .5));
             return c;
         },
-        classic21DayRemap = t => {
-            let sm = (a, b, x) => {
-                let i = Math.max(0, Math.min(1, (x - a) / (b - a)));
-                return i * i * (3 - 2 * i)
-            };
-            return t < .85 ? .5 * sm(0, .85, t) : .5 + .5 * sm(.85, 1, t)
+        classic21Base = (env, world) => {
+            let cols = classic21Cols[world] || classic21Cols.guardstone,
+                ph = k => cols.map(p => classic21Hex(p[k]));
+            return Object.assign({}, env, {
+                ambient: ph(0),
+                direct: ph(1),
+                fog: ph(2),
+                skytop: ph(3)
+            })
         },
         classic21Swaps = [
             ["vec3 b(vec3 c,vec3 d,vec3 e,vec3 f,float g,vec3 h,float i){f=normalize(f);float j=clamp(dot(f,worldlight[2]),0.0,g);vec3 k=c*mix(0.7,1.1,0.5+(0.5*j));vec3 l=normalize(worldlight[2]+vViewDir);vec3 m=d*pow(max(0.0,dot(l,f)),20.0)*i*max(g*0.7+0.2,0.2)*20.0;vec3 n=k+d*j+h;return n*e+m;}", "vec3 b(vec3 c,vec3 d,vec3 e,vec3 f,float g,vec3 h,float i){f=normalize(f);float j=max(dot(f,worldlight[2]),0.0)*g;return (h+d*j+c)*e;}"],
@@ -34049,7 +34052,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             Ho.length = 0, Ca.length = 0, Sa.length = 0, im.length = 0
         };
     JE(si);
-    var gf = classicPlain && !classic21 ? [0, 2, 2.3] : [1.5, 2.5, 0],
+    var gf = classicPlain ? [0, 2, 2.3] : [1.5, 2.5, 0],
         vf = [0, 0, 0];
     go(gf, gf);
     var bn = {},
@@ -34305,6 +34308,12 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 return c21 || (c21 = classic21Env(env, w21), classicEnvCache.set(k21, c21), c21)
             }
             env && worldOverrideOff && !classicIsEditor() && (env = env05(id, env));
+            if (env) {
+                let wb = classicWorldFor(id) || "guardstone",
+                    kb = "21b:" + id + ":" + wb,
+                    cb = classicEnvCache.get(kb);
+                cb && cb.__src === env || (cb = classic21Base(env, wb), cb.__src = env, classicEnvCache.set(kb, cb)), env = cb
+            }
             let tint = env && worldAmbientTint[classicWorldFor(id)];
             if (!env || !oe.classicLighting && !oe.classicWaterColors && !tint) return env;
             let ck = id + ":" + classicWorldFor(id),
@@ -34475,12 +34484,11 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         let o = .5,
             s = 0,
             i = 0,
-            stages = classicPlain && !classic21 ? g1 : oldDayStages,
-            st = classic21 ? classic21DayRemap(t) : t;
+            stages = classicPlain ? g1 : oldDayStages;
         for (let a = 0; a < stages.length; ++a) {
             let c = stages[a];
-            if (c.end >= st) {
-                o = Vu(c.start, c.end, st), s = c.from, i = c.to;
+            if (c.end >= t) {
+                o = Vu(c.start, c.end, t), s = c.from, i = c.to;
                 break
             }
         }
