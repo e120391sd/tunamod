@@ -1781,382 +1781,24 @@
         iv = t => {
             (!t || !t.depth) && (lu(N.DEPTH_TEST), sv(!0)), N.clear(N.COLOR_BUFFER_BIT | N.DEPTH_BUFFER_BIT)
         };
-    var ssao21Cfg = {
-        ign: !0,
-        blur: !0,
-        radius: .09,
-        bias: .9,
-        fade: 300
-    };
-    var ssao21Samples = (() => {
-        const N = 32;
-        const phi = Math.PI * (3 - Math.sqrt(5));
-        let out = [];
-        for (let i = 0; i < N; i++) {
-            let z = (i + 0.5) / N;
-            let r = Math.sqrt(1 - z * z);
-            let a = phi * i;
-            let x = Math.cos(a) * r;
-            let y = Math.sin(a) * r;
-            let t = i / (N - 1);
-            let scale = 0.1 + 0.9 * t * t;
-            out.push(`vec3(${(x * scale).toFixed(4)},${(y * scale).toFixed(4)},${(z * scale).toFixed(4)})`);
-        }
-        return out.join(",\n");
-    })();
-    var ssao21Frag = `#version 300 es
-precision highp float;precision highp int;
-
-uniform Camera{
-    mat4 projectionMatrix;
-    mat4 viewMatrix;
-    mat4 projectionViewMatrix;
-    vec3 cameraPosition;
-};
-
-uniform Screen{vec2 resolution;};
-
-uniform sampler2D depthTex;
-uniform sampler2D inputA;
-
-in vec2 vUv;
-out vec4 fragColor;
-
-bool isFoliage(vec2 uv){
-    return texture(inputA, uv).a < 0.02;
-}
-
-const int zr=32;
-
-const vec3 Rs[32]=vec3[32](
-${ssao21Samples}
-);
-
-float rand(vec2 co){
-    return fract(sin(dot(co.xy,vec2(12.9898,78.233)))*43758.5453);
-}
-
-vec3 getViewPos(vec2 uv,float depth){
-    float z = -projectionMatrix[3][2] /
-              (projectionMatrix[2][2] + depth*2.0 - 1.0);
-
-    return vec3(
-        (uv*2.0-1.0)*(-z) /
-        vec2(projectionMatrix[0][0],projectionMatrix[1][1]),
-        z
-    );
-}
-
-vec3 getNormal(vec2 uv,float depth){
-    vec2 texel = 1.0 / resolution;
-    float dR = texture(depthTex, uv + vec2(texel.x,0)).r;
-    float dL = texture(depthTex, uv - vec2(texel.x,0)).r;
-    float dU = texture(depthTex, uv + vec2(0,texel.y)).r;
-    float dD = texture(depthTex, uv - vec2(0,texel.y)).r;
-
-    float skyPen = 1e6;
-    float ddR = (dR >= 0.9999) ? skyPen : abs(dR - depth);
-    float ddL = (dL >= 0.9999) ? skyPen : abs(dL - depth);
-    float ddU = (dU >= 0.9999) ? skyPen : abs(dU - depth);
-    float ddD = (dD >= 0.9999) ? skyPen : abs(dD - depth);
-
-    vec3 p = getViewPos(uv, depth);
-    vec3 dPdx = (ddR < ddL)
-        ? (getViewPos(uv + vec2(texel.x,0), dR) - p)
-        : (p - getViewPos(uv - vec2(texel.x,0), dL));
-    vec3 dPdy = (ddU < ddD)
-        ? (getViewPos(uv + vec2(0,texel.y), dU) - p)
-        : (p - getViewPos(uv - vec2(0,texel.y), dD));
-
-    return normalize(cross(dPdx, dPdy));
-}
-
-void main(){
-
-    float depth = texture(depthTex,vUv).r;
-
-    if(depth >= 0.9999){
-        fragColor = vec4(1.0);
-        return;
-    }
-
-    vec3 pos = getViewPos(vUv, depth);
-    vec3 normal = getNormal(vUv, depth);
-
-    ${ssao21Cfg.ign ? `
-    float ign = fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715))));
-    float ang = ign * 6.2831853;
-
-    vec3 up = abs(normal.y) < 0.999 ? vec3(0.0, 1.0, 0.0) : vec3(1.0, 0.0, 0.0);
-    vec3 t0 = normalize(cross(up, normal));
-    vec3 b0 = cross(normal, t0);
-    float c = cos(ang), s = sin(ang);
-    vec3 tangent   = t0 * c + b0 * s;
-    vec3 bitangent = cross(normal, tangent);
-    mat3 TBN = mat3(tangent, bitangent, normal);
-    ` : `
-    mat3 invViewRot = transpose(mat3(viewMatrix));
-    vec3 wPos = invViewRot * pos + cameraPosition;
-    vec2 noiseSeed = floor(wPos.xz * 4.0);
-    vec3 randVec = normalize(vec3(
-        rand(noiseSeed),
-        rand(noiseSeed + 17.0),
-        rand(noiseSeed.yx + 3.0)
-    ));
-
-    vec3 tangent = normalize(randVec - normal * dot(randVec, normal));
-    vec3 bitangent = cross(normal, tangent);
-    mat3 TBN = mat3(tangent, bitangent, normal);
-    `}
-
-    float radius = clamp(-pos.z * ${ssao21Cfg.radius}, 0.25, 5.0);
-
-    {
-        float onSurface = 0.0;
-        vec3 cardinals[4];
-        cardinals[0] = vec3( radius, 0.0, 0.0);
-        cardinals[1] = vec3(-radius, 0.0, 0.0);
-        cardinals[2] = vec3(0.0,  radius, 0.0);
-        cardinals[3] = vec3(0.0, -radius, 0.0);
-        for (int ei = 0; ei < 4; ei++) {
-            vec4 cp = projectionMatrix * vec4(pos + cardinals[ei], 1.0);
-            cp.xyz /= cp.w;
-            vec2 cuv = cp.xy * 0.5 + 0.5;
-            if (cuv.x < 0.0 || cuv.x > 1.0 || cuv.y < 0.0 || cuv.y > 1.0) continue;
-            float cd = texture(depthTex, cuv).r;
-            if (cd >= 0.9999) continue;
-            vec3 cvp = getViewPos(cuv, cd);
-            if (abs(cvp.z - pos.z) < radius * 0.5) onSurface += 1.0;
-        }
-        radius *= mix(1.0, 1.0, onSurface / 4.0);
-    }
-
-    float bias = radius * 0.15;
-
-    float occlusion = 0.0;
-    float totalWeight = 0.0;
-
-    for(int i=0;i<zr;i++){
-
-        vec3 sampleVec = TBN * Rs[i];
-        vec3 samplePos = pos + sampleVec * radius;
-
-        float cosW = dot(normal, normalize(sampleVec));
-        totalWeight += cosW;
-
-        vec4 offset = projectionMatrix * vec4(samplePos,1.0);
-        offset.xyz /= offset.w;
-
-        vec2 sampleUV = offset.xy * 0.5 + 0.5;
-
-        if(sampleUV.x < 0.0 || sampleUV.x > 1.0 || sampleUV.y < 0.0 || sampleUV.y > 1.0) continue;
-
-        float sampleDepth = texture(depthTex, sampleUV).r;
-        if(sampleDepth >= 0.9999) continue;
-        if(isFoliage(sampleUV)) continue;
-
-        vec3 sampleViewPos = getViewPos(sampleUV, sampleDepth);
-
-        float rangeCheck = smoothstep(0.0, 1.0, radius / abs(pos.z - sampleViewPos.z));
-
-        float occ = (sampleViewPos.z >= samplePos.z + bias) ? cosW : 0.0;
-
-        occlusion += occ * rangeCheck;
-    }
-
-    occlusion = (totalWeight > 0.001) ? occlusion / totalWeight : 0.0;
-
-    occlusion = 1.0 - occlusion;
-
-
-    float distFade = 1.0 - smoothstep(20.0, float(${ssao21Cfg.fade}), -pos.z);
-    occlusion = mix(1.0, occlusion, distFade);
-
-    fragColor = vec4(vec3(occlusion), 1.0);
-}`;
-
-    var ssao21BlurRadius = ssao21Cfg.blur ? 3 : 0;
-    var ssao21BlurWeights = (() => {
-        let sigma = Math.max(1, ssao21BlurRadius) * 0.5;
-        let w = [];
-        for (let i = 0; i <= ssao21BlurRadius; i++) w.push(Math.exp(-(i * i) / (2 * sigma * sigma)));
-        return w.map(x => x.toFixed(6));
-    })();
-
-    var ssao21BlurFrag = `#version 300 es
-precision highp float;precision highp int;
-
-uniform Camera{
-    mat4 projectionMatrix;
-    mat4 viewMatrix;
-    mat4 projectionViewMatrix;
-    vec3 cameraPosition;
-};
-uniform Screen{vec2 resolution;};
-
-uniform sampler2D inputA;
-uniform sampler2D depthTex;
-uniform int blurStep;
-
-in vec2 vUv;
-out vec4 fragColor;
-
-const float weight[${ssao21BlurRadius + 1}] = float[${ssao21BlurRadius + 1}](${ssao21BlurWeights.join(', ')});
-
-float linearZ(float depth){
-    return -projectionMatrix[3][2] / (projectionMatrix[2][2] + depth * 2.0 - 1.0);
-}
-
-void main(){
-    vec2 texel = 1.0 / resolution;
-    float centerDepth = texture(depthTex, vUv).r;
-
-    if(centerDepth >= 0.9999){
-        fragColor = vec4(texture(inputA, vUv).rgb, 1.0);
-        return;
-    }
-
-    float zCenter = linearZ(centerDepth);
-    float sigmaZ = max(0.05, abs(zCenter) * 0.03);
-    float invTwoSigmaZSq = 1.0 / (2.0 * sigmaZ * sigmaZ);
-
-    vec3 result = texture(inputA, vUv).rgb * weight[0];
-    float wSum = weight[0];
-
-    vec2 step = (blurStep == 0) ? vec2(texel.x, 0.0) : vec2(0.0, texel.y);
-
-    int rEff = int(floor(mix(1.0, float(${ssao21BlurRadius}), smoothstep(5.0, 60.0, abs(zCenter))) + 0.5));
-
-    for(int i = 1; i < ${ssao21BlurRadius + 1}; i++){
-        if(i > rEff) break;
-        vec2 offset = step * float(i);
-
-        vec2 uvP = vUv + offset;
-        float dP = texture(depthTex, uvP).r;
-        if(dP < 0.9999){
-            float dz = linearZ(dP) - zCenter;
-            float w = weight[i] * exp(-dz * dz * invTwoSigmaZSq);
-            result += texture(inputA, uvP).rgb * w;
-            wSum += w;
-        }
-
-        vec2 uvN = vUv - offset;
-        float dN = texture(depthTex, uvN).r;
-        if(dN < 0.9999){
-            float dz = linearZ(dN) - zCenter;
-            float w = weight[i] * exp(-dz * dz * invTwoSigmaZSq);
-            result += texture(inputA, uvN).rgb * w;
-            wSum += w;
-        }
-    }
-
-    result /= wSum;
-
-    fragColor = vec4(result, 1.0);
-}`;
-    var ssao21TemporalFrag = `#version 300 es
-precision highp float;precision highp int;
-
-uniform Camera{
-    mat4 projectionMatrix;
-    mat4 viewMatrix;
-    mat4 projectionViewMatrix;
-    vec3 cameraPosition;
-};
-
-uniform sampler2D inputA;
-uniform sampler2D inputB;
-uniform sampler2D depthTex;
-uniform mat4 prevProjectionViewMatrix;
-uniform float blendAlpha;
-
-in vec2 vUv;
-out vec4 fragColor;
-
-vec3 viewPos(vec2 uv, float depth){
-    float z = -projectionMatrix[3][2] /
-              (projectionMatrix[2][2] + depth * 2.0 - 1.0);
-    return vec3(
-        (uv * 2.0 - 1.0) * (-z) /
-        vec2(projectionMatrix[0][0], projectionMatrix[1][1]),
-        z
-    );
-}
-
-void main(){
-    float curr = texture(inputA, vUv).r;
-    float depth = texture(depthTex, vUv).r;
-
-    if(depth >= 0.9999){
-        fragColor = vec4(curr, curr, curr, 1.0);
-        return;
-    }
-
-    vec3 vp = viewPos(vUv, depth);
-    mat3 invViewRot = transpose(mat3(viewMatrix));
-    vec3 wp = invViewRot * vp + cameraPosition;
-
-    vec4 prevClip = prevProjectionViewMatrix * vec4(wp, 1.0);
-    vec3 prevNDC = prevClip.xyz / prevClip.w;
-    vec2 prevUV = prevNDC.xy * 0.5 + 0.5;
-
-    float result = curr;
-    if(prevUV.x >= 0.0 && prevUV.x <= 1.0 && prevUV.y >= 0.0 && prevUV.y <= 1.0 && prevClip.w > 0.0){
-        float hist = texture(inputB, prevUV).r;
-        result = mix(hist, curr, blendAlpha);
-    }
-
-    fragColor = vec4(result, result, result, 1.0);
-}`;
-    var ssao21CompositeFrag = `#version 300 es
-precision highp float;precision highp int;
-
-uniform sampler2D inputA;
-uniform sampler2D inputB;
-
-in vec2 vUv;
-out vec4 fragColor;
-
-void main(){
-    fragColor = vec4(texture(inputA, vUv).rgb * texture(inputB, vUv).rgb, 1.0);
-}`;
     var classicAoA = null,
-        ssao21 = null,
-        ssao21Hi = 0,
-        ssao21First = !0,
-        ssao21Prev = new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]),
-        ssao21Defers = () => !!oe.ssao,
         classicAoB = null,
         ssao = ee(!1),
         fixSkybox = ee(!1),
         shaders2021 = ee(!1),
+        classic21 = (() => {
+            try {
+                return localStorage.getItem("shaders2021") === "true"
+            } catch (e) {
+                return !1
+            }
+        })(),
         mountReskins = ee(!0),
         fullDistantTerrain = ee(!1),
         classicSsaoFrag = `#version 300 es
-precision highp float;precision highp int;uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};uniform sampler2D aoDepth;uniform float aoSeed;in vec2 vUv;out vec4 fragColor;const int zr=16;const vec3 Rs[zr]=vec3[](vec3(0.5381,0.1856,-0.4319),vec3(0.1379,0.2486,0.4430),vec3(0.3371,0.5679,-0.0057),vec3(-0.6999,-0.0451,-0.0019),vec3(0.0689,-0.1598,-0.8547),vec3(0.0560,0.0069,-0.1843),vec3(-0.0146,0.1402,0.0762),vec3(0.0100,-0.1924,-0.0344),vec3(-0.3577,-0.5301,-0.4358),vec3(-0.3169,0.1063,0.0158),vec3(0.0103,-0.5869,0.0046),vec3(-0.0897,-0.4940,0.3287),vec3(0.7119,-0.0154,-0.0918),vec3(-0.0533,0.0596,-0.5411),vec3(0.0352,-0.0631,0.5460),vec3(-0.4776,0.2847,-0.0271));const float R=1.6;float lz(vec2 uv){float d=texture(aoDepth,uv).r;float n=projectionMatrix[3][2]/(projectionMatrix[2][2]-1.0);float f=projectionMatrix[3][2]/(projectionMatrix[2][2]+1.0);return 2.0*n*f/(f+n-(2.0*d-1.0)*(f-n));}vec3 vp(vec2 uv){float z=lz(uv);return vec3((uv*2.0-1.0)*vec2(z/projectionMatrix[0][0],z/projectionMatrix[1][1]),-z);}void main(){float dRaw=texture(aoDepth,vUv).r;if(dRaw>=0.99999){fragColor=vec4(1.0);return;}vec2 px=1.0/vec2(textureSize(aoDepth,0));vec3 P=vp(vUv);vec3 pr=vp(vUv+vec2(px.x,0.0)),pl=vp(vUv-vec2(px.x,0.0)),pu=vp(vUv+vec2(0.0,px.y)),pd=vp(vUv-vec2(0.0,px.y));vec3 dx=abs(pr.z-P.z)<abs(P.z-pl.z)?pr-P:P-pl;vec3 dy=abs(pu.z-P.z)<abs(P.z-pd.z)?pu-P:P-pd;vec3 Nm=normalize(cross(dx,dy));if(dot(Nm,P)>0.0)Nm=-Nm;float ign=fract(52.9829189*fract(dot(gl_FragCoord.xy+aoSeed*5.588238,vec2(0.06711056,0.00583715))));float ang=ign*6.2831853;vec3 uH=normalize(vec3(cos(ang),sin(ang),ign*2.0-1.0));float occ=0.0;for(int i=0;i<zr;i++){vec3 k=reflect(Rs[i],uH);k*=sign(dot(k,Nm));vec3 S=P+(Nm*0.15+k)*R;vec4 c=projectionMatrix*vec4(S,1.0);vec2 suv=c.xy/c.w*0.5+0.5;if(suv.x<0.0||suv.y<0.0||suv.x>1.0||suv.y>1.0)continue;float sz=-lz(suv);float rc=smoothstep(0.0,1.0,R/max(abs(P.z-sz),1e-3));occ+=(sz>=S.z+0.05?1.0:0.0)*rc;}occ/=float(zr);occ*=1.0-smoothstep(120.0,180.0,-P.z);float o=occ*1.7;float QE=1.0-0.55*o/(1.0+o);fragColor=vec4(mix(worldlight[1]*0.2,vec3(1.0),QE),1.0);}`,
-        classicAoTemporalFrag = `#version 300 es
-precision highp float;precision highp int;uniform Screen{vec2 resolution;};uniform sampler2D inputA;uniform sampler2D inputB;uniform sampler2D aoDepth;uniform mat4 invPV;uniform mat4 prevPV;uniform float aoKeep;in vec2 vUv;out vec4 fragColor;void main(){vec3 cur=texture(inputA,vUv).rgb;vec2 px=1.0/resolution;vec3 mn=cur,mx=cur;for(int y=-1;y<=1;++y)for(int x=-1;x<=1;++x){vec3 c=texture(inputA,vUv+vec2(x,y)*px).rgb;mn=min(mn,c);mx=max(mx,c);}float d=texture(aoDepth,vUv).r;vec4 w=invPV*vec4(vUv*2.0-1.0,d*2.0-1.0,1.0);w/=w.w;vec4 p=prevPV*w;vec2 puv=p.xy/p.w*0.5+0.5;float k=aoKeep;if(p.w<=0.0||puv.x<0.0||puv.y<0.0||puv.x>1.0||puv.y>1.0)k=0.0;vec3 h=clamp(texture(inputB,puv).rgb,mn,mx);fragColor=vec4(mix(cur,h,k),1.0);}`,
-        classicAoHist = null,
-        classicAoHi = 0,
-        classicAoSeed = 0,
-        classicAoLast = 0,
-        classicAoPrev = new Float32Array(16),
-        classicAoInv = new Float32Array(16),
-        classicAoInvert = (m, o) => {
-            let a = m[0], b = m[1], c = m[2], d = m[3], e = m[4], f = m[5], g = m[6], h = m[7], i = m[8], j = m[9], k = m[10], l = m[11], n = m[12], p = m[13], q = m[14], r = m[15],
-                A = a * f - b * e, B = a * g - c * e, C = a * h - d * e, D = b * g - c * f, E = b * h - d * f, F = c * h - d * g,
-                G = i * p - j * n, H = i * q - k * n, I = i * r - l * n, J = j * q - k * p, K = j * r - l * p, L = k * r - l * q,
-                det = A * L - B * K + C * J + D * I - E * H + F * G;
-            if (!det) return !1;
-            det = 1 / det;
-            o[0] = (f * L - g * K + h * J) * det, o[1] = (c * K - b * L - d * J) * det, o[2] = (p * F - q * E + r * D) * det, o[3] = (k * E - j * F - l * D) * det;
-            o[4] = (g * I - e * L - h * H) * det, o[5] = (a * L - c * I + d * H) * det, o[6] = (q * C - n * F - r * B) * det, o[7] = (i * F - k * C + l * B) * det;
-            o[8] = (e * K - f * I + h * G) * det, o[9] = (b * I - a * K - d * G) * det, o[10] = (n * E - p * C + r * A) * det, o[11] = (j * C - i * E - l * A) * det;
-            o[12] = (f * H - e * J - g * G) * det, o[13] = (a * J - b * H + c * G) * det, o[14] = (p * B - n * D - q * A) * det, o[15] = (i * D - j * B + k * A) * det;
-            return !0;
-        },
+precision highp float;uniform sampler2D inputA;uniform sampler2D inputB;uniform sampler2D aoDepth;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};uniform Screen{vec2 resolution;};in vec2 vUv;out vec4 fragColor;const int zr=16;const float Ul=float(zr);const vec3 Rs[zr]=vec3[](vec3(0.5381,0.1856,-0.4319),vec3(0.1379,0.2486,0.4430),vec3(0.3371,0.5679,-0.0057),vec3(-0.6999,-0.0451,-0.0019),vec3(0.0689,-0.1598,-0.8547),vec3(0.0560,0.0069,-0.1843),vec3(-0.0146,0.1402,0.0762),vec3(0.0100,-0.1924,-0.0344),vec3(-0.3577,-0.5301,-0.4358),vec3(-0.3169,0.1063,0.0158),vec3(0.0103,-0.5869,0.0046),vec3(-0.0897,-0.4940,0.3287),vec3(0.7119,-0.0154,-0.0918),vec3(-0.0533,0.0596,-0.5411),vec3(0.0352,-0.0631,0.5460),vec3(-0.4776,0.2847,-0.0271));float rand(vec2 co){return fract(sin(dot(co.xy,vec2(12.9898,78.233)))*43758.5453);}const float Fc=0.03;const float Lc=0.0000005;const float radius=0.004;const vec2 dq=vec2(0.0,0.001);const vec2 ql=vec2(0.001,0.0);vec3 normal_from_depth(float BS,vec2 texcoords){float oN=texture(aoDepth,texcoords+dq).r;float NH=texture(aoDepth,texcoords+ql).r;vec3 p1=vec3(dq,oN-BS);vec3 p2=vec3(ql,NH-BS);vec3 Ip=cross(p1,p2);Ip.z=-Ip.z;return normalize(Ip);}void main(){float BS=texture(aoDepth,vUv).r;vec3 tj=vec3(vUv.xy,BS);vec3 Ip=normal_from_depth(BS,vUv);float SB=fog[1][1];float qh=(2.0*0.1*SB)/(SB+0.1-BS*(SB-0.1))/SB;float XZ=radius/qh;float NJ=0.0;vec3 uH=normalize(vec3(rand(vUv.xy),rand(vUv.yx),rand(vUv.xy*1.5)));for(int i=0;i<zr;i++){vec3 Jm=XZ*reflect(Rs[i],uH);vec3 HZ=tj+sign(dot(Jm,Ip))*Jm;float Uu=texture(aoDepth,clamp(HZ.xy,0.0,1.0)).r;float difference=BS-Uu;NJ+=step(Lc,difference)*(1.0-smoothstep(Lc,Fc,difference));}NJ*=(1.0-smoothstep(0.6,1.0,qh));NJ*=(1.0/Ul);NJ=pow(NJ,1.7);float QE=clamp(0.1+1.0-NJ,0.0,1.0);fragColor=vec4(mix(worldlight[1]*0.2,vec3(1.0),QE),1.0);}`,
         classicSsaoBlurFrag = `#version 300 es
-precision highp float;precision highp int;uniform Screen{vec2 resolution;};uniform sampler2D inputA;uniform sampler2D inputB;uniform int step;in vec2 vUv;out vec4 fragColor;const float weight[5]=float[5](0.227027,0.1945946,0.1216216,0.054054,0.016216);void main(){vec2 k=2.0/resolution;vec3 r=texture(inputA,vUv).rgb*weight[0];vec2 dir=step==0?vec2(k.x,0.0):vec2(0.0,k.y);for(int i=1;i<5;++i){r+=texture(inputA,vUv+dir*float(i)).rgb*weight[i];r+=texture(inputA,vUv-dir*float(i)).rgb*weight[i];}if(step==1)r*=texture(inputB,vUv).rgb;fragColor=vec4(r,1.0);}`,
+precision highp float;uniform sampler2D inputA;uniform sampler2D inputB;uniform Screen{vec2 resolution;};in vec2 vUv;uniform int step;float weight[5]=float[5](0.227027,0.1945946,0.1216216,0.054054,0.016216);out vec4 fragColor;void main(){vec2 KQ=2.0/resolution;vec3 result=vec3(1.0);if(step==0){result=texture(inputA,vUv).rgb*weight[0];for(int i=1;i<5;++i){result+=texture(inputA,vUv+vec2(KQ.x*float(i),0.0)).rgb*weight[i];result+=texture(inputA,vUv-vec2(KQ.x*float(i),0.0)).rgb*weight[i];}}else{result=texture(inputA,vUv).rgb*weight[0];for(int i=1;i<5;++i){result+=texture(inputA,vUv+vec2(0.0,KQ.y*float(i))).rgb*weight[i];result+=texture(inputA,vUv-vec2(0.0,KQ.y*float(i))).rgb*weight[i];}}if(step==1){result=result*texture(inputB,vUv).rgb;}fragColor=vec4(result,1.0);}`,
         checkRow = (label, store, target, anchor) => {
             let row = document.createElement("div"),
                 name = document.createElement("div"),
@@ -9072,6 +8714,7 @@ void main() {
             globalUniforms: u = {},
             attributeLocations: p
         }) => {
+            classic21 && classic21Patch && (t = classic21Patch(t), e = classic21Patch(e));
             let g = {
                 id: ND++,
                 program: N.createProgram(),
@@ -13522,10 +13165,10 @@ void main() {
             let e = lt.width,
                 n = lt.height;
             for (let o = 0; o < 2; ++o) Kc.push(cr(t, t, 0, !0, N.COMPARE_REF_TO_TEXTURE));
-            Zc = cr(t, t, 0, !0, N.COMPARE_REF_TO_TEXTURE), ei = cr(e, n, 1, !0), gr = cr(e, n, 1, !0), fa = cr(Math.ceil(e / 4), Math.ceil(n / 4)), ua = cr(Math.ceil(e / 4), Math.ceil(n / 4)), classicAoA = cr(e, n), classicAoB = cr(e, n), classicAoHist = [cr(e, n), cr(e, n)], ssao21 = [cr(e, n, 1, !1), cr(e, n, 1, !1), cr(e, n, 1, !1), cr(e, n, 1, !1)]
+            Zc = cr(t, t, 0, !0, N.COMPARE_REF_TO_TEXTURE), ei = cr(e, n, 1, !0), gr = cr(e, n, 1, !0), fa = cr(Math.ceil(e / 4), Math.ceil(n / 4)), ua = cr(Math.ceil(e / 4), Math.ceil(n / 4)), classicAoA = cr(e, n), classicAoB = cr(e, n)
         },
         WM = (t, e) => {
-            ep(ei, t, e), ep(gr, t, e), ep(fa, Math.ceil(t / 4), Math.ceil(e / 4)), ep(ua, Math.ceil(t / 4), Math.ceil(e / 4)), classicAoA && (ep(classicAoA, t, e), ep(classicAoB, t, e), classicAoHist.forEach(b => ep(b, t, e)), classicAoLast = 0), ssao21 && (ssao21.forEach(b => ep(b, t, e)), ssao21First = !0)
+            ep(ei, t, e), ep(gr, t, e), ep(fa, Math.ceil(t / 4), Math.ceil(e / 4)), ep(ua, Math.ceil(t / 4), Math.ceil(e / 4)), classicAoA && (ep(classicAoA, t, e), ep(classicAoB, t, e))
         };
     var kh = {};
     so(kh, {
@@ -14283,46 +13926,51 @@ precision highp float;precision highp int;uniform Environment{vec3 worldlight[3]
 precision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};out float vCameraDistance;out vec4 vWorldPos;uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform Water{vec3 verts[4];};in vec3 position;in vec3 color;in vec3 colorFoam;in vec3 colorShallow;out vec2 vUv;void main(){vWorldPos.xyz=verts[gl_VertexID];vWorldPos.w=1.0;vUv=vWorldPos.xz/2.0;gl_Position=projectionViewMatrix*vWorldPos;}`;
     var $6 = `#version 300 es
 precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;void main(){fragColor.rgba=vec4(1.0,mod(vWorldPos.y+0.001,1.0),0.0,0.5);}`;
-    var classic2021Shaders = {
-        GM: "#version 300 es\nprecision highp float;precision highp int;out vec4 fragColor;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};in float vCameraDistance;in vec4 vWorldPos;uniform sampler2D diffuse;in vec2 vUv;in float vShine;void main(){if(vCameraDistance>fog[1][1]){fragColor=vec4(fog[0],1.0);return;}vec4 a=texture(diffuse,vUv);if(a.a<0.5)discard;a.rgb=mix(a.rgb*worldlight[1],a.rgb*1.1,smoothstep(-0.7,0.7,sin(time*6.0+vShine)));float b=clamp((fog[1][1]-vCameraDistance)/(fog[1][1]-fog[1][0]),0.0,1.0);a.rgb=mix(fog[0],a.rgb,b);fragColor=a;}",
-        YM: "#version 300 es\nprecision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};in float vCameraDistance;in vec4 vWorldPos;precision highp sampler2DShadow;uniform Shadows{uniform mat4 shadowPVMatrix[2];uniform vec3 shadowRange;};const int a=\n#SHADOWS;uniform sampler2DShadow shadowMaps[2];uniform sampler2D foliageDiffuse;in vec3 vLight;in vec3 vLightAmb;in vec3 vLightDir;in vec2 vUv;out vec4 fragColor;void main(){vec4 b=texture(foliageDiffuse,vUv);float c=0.1;b.a=b.a*smoothstep(1.0,0.0,(vCameraDistance-110.0)/20.0);if(b.a<c){discard;};float d=1.0;if(a==1&&vCameraDistance<shadowRange[2]){float e=smoothstep(shadowRange[1],shadowRange[2],vCameraDistance);if(vCameraDistance>shadowRange[0]){vec4 f=shadowPVMatrix[1]*(vWorldPos);vec3 g=(f.xyz/f.w)*0.5+0.5;d=texture(shadowMaps[1],g);}else{vec4 f=shadowPVMatrix[0]*(vWorldPos);vec3 g=(f.xyz/f.w)*0.5+0.5;d=texture(shadowMaps[0],g);}d=d;d=max(d,e);}b.rgb=b.rgb*(vLight+vLightAmb+vLightDir*d);float h=clamp((fog[1][1]-vCameraDistance)/(fog[1][1]-fog[1][0]),0.0,1.0);b.rgb=mix(fog[0],b.rgb,h);fragColor=b;}",
-        XM: "#version 300 es\nprecision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};in float vCameraDistance;in vec4 vWorldPos;precision highp sampler2DShadow;uniform Shadows{uniform mat4 shadowPVMatrix[2];uniform vec3 shadowRange;};const int a=\n#SHADOWS;uniform sampler2DShadow shadowMaps[2];uniform sampler2D foliageDiffuse;in vec3 vLightAmb;in vec3 vLightDir;in vec3 vLight;in vec2 vUv;out vec4 fragColor;void main(){vec4 b=texture(foliageDiffuse,vUv);b.a=b.a*smoothstep(1.0,0.0,(vCameraDistance-110.0)/20.0);if(b.a<0.5){discard;};float c=1.0;if(a==1&&vCameraDistance<shadowRange[2]){float d=smoothstep(shadowRange[1],shadowRange[2],vCameraDistance);if(vCameraDistance>shadowRange[0]){vec4 e=shadowPVMatrix[1]*(vWorldPos);vec3 f=(e.xyz/e.w)*0.5+0.5;c=texture(shadowMaps[1],f);}else{vec4 e=shadowPVMatrix[0]*(vWorldPos);vec3 f=(e.xyz/e.w)*0.5+0.5;c=texture(shadowMaps[0],f);}c=c;c=max(c,d);}b.rgb=b.rgb*(vLight+vLightAmb+vLightDir*c);float g=clamp((fog[1][1]-vCameraDistance)/(fog[1][1]-fog[1][0]),0.0,1.0);b.rgb=mix(fog[0],b.rgb,g);fragColor=b;}",
-        ZM: "#version 300 es\nprecision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};in float vCameraDistance;in vec4 vWorldPos;uniform sampler2D diffuse;in vec3 vNormal;in vec2 vUv;in vec4 vCol;in vec2 vYcutoff;in vec4 vUvshift;out vec4 fragColor;void main(){if(vCameraDistance>fog[1][1]){fragColor=vec4(fog[0],1.0);return;}vec2 a=vec2((vUv.x+vUvshift.x)*vUvshift.z,(vUv.y+vUvshift.y)*vUvshift.w);vec4 b=vec4(1.0,1.0,1.0,texture(diffuse,a).r)*vCol;b.a*=min(1.0,max(0.0,vUv.y/vYcutoff[0]));b.a*=min(1.0,max(0.0,(vYcutoff[1]-vUv.y)/(1.0-vYcutoff[1])));if(b.a<0.01){discard;}float c=clamp((fog[1][1]-vCameraDistance)/(fog[1][1]-fog[1][0]),0.0,1.0);b.rgb=mix(fog[0],b.rgb,c);fragColor=b;fragColor.rgb*=fragColor.a;}",
-        e6: "#version 300 es\nprecision highp float;precision highp int;precision highp sampler2DShadow;uniform Shadows{uniform mat4 shadowPVMatrix[2];uniform vec3 shadowRange;};const int a=\n#SHADOWS;uniform sampler2DShadow shadowMaps[2];uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};in float vCameraDistance;in vec4 vWorldPos;uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};in vec3 vLight;in vec4 vColor;in vec3 vNormal;in vec4 vInteriorlight;in float vAlpha;in vec3 vViewDir;vec3 b(vec3 c,vec3 d,vec3 e,vec3 f,float g,vec3 h,float i){f=normalize(f);float j=clamp(dot(f,worldlight[2]),0.0,g);vec3 k=c*mix(0.7,1.1,0.5+(0.5*j));vec3 l=normalize(worldlight[2]+vViewDir);vec3 m=d*pow(max(0.0,dot(l,f)),20.0)*i*max(g*0.7+0.2,0.2)*20.0;vec3 n=k+d*j+h;return n*e+m;}out vec4 fragColor;void main(){if(vCameraDistance>fog[1][1]){fragColor=vec4(fog[0],1.0);return;}float o=1.0;if(a==1&&vCameraDistance<shadowRange[2]){float p=smoothstep(shadowRange[1],shadowRange[2],vCameraDistance);if(vCameraDistance>shadowRange[0]){vec4 q=shadowPVMatrix[1]*(vWorldPos);vec3 r=(q.xyz/q.w)*0.5+0.5;o=texture(shadowMaps[1],r);}else{vec4 q=shadowPVMatrix[0]*(vWorldPos);vec3 r=(q.xyz/q.w)*0.5+0.5;o=texture(shadowMaps[0],r);}o=o;o=max(o,p);}vec3 s=worldlight[1];vec3 t=worldlight[0];s=mix(s,vInteriorlight.rgb*0.5,vInteriorlight.a);t=mix(t,vInteriorlight.rgb,vInteriorlight.a);float u=max(0.0,min(1.0,vColor[3]*0.2));vec4 v=vec4(b(s,t,vColor.rgb,vNormal,o,vLight,u),vAlpha);float w=max(0.0,min(1.0,-vColor[3]));v.rgb=mix(v.rgb,vColor.rgb,w);float x=clamp((fog[1][1]-vCameraDistance)/(fog[1][1]-fog[1][0]),0.0,1.0);v.rgb=mix(fog[0],v.rgb,x);fragColor=v;}",
-        t6: "#version 300 es\nprecision highp float;precision highp int;uniform Pointlights{vec4 lightCols[16];vec3 lightPos[16];int lightCount;};out vec3 vLight;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};out float vCameraDistance;out vec4 vWorldPos;uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};in vec3 position;in vec3 normal;in vec4 color;in vec4 interiorlight;in float alpha;in mat4 worldMatrix;out vec4 vColor;out vec3 vNormal;out vec4 vInteriorlight;out float vAlpha;out vec3 vViewDir;void main(){vNormal=normalize(mat3(worldMatrix)*normal);vWorldPos=worldMatrix*vec4(position,1.0);vColor=color;vAlpha=alpha;vInteriorlight=interiorlight;vCameraDistance=length(cameraPosition-vWorldPos.xyz);vec3 a=vec3(0.0);for(int b=0;b<lightCount;++b){vec3 c=lightPos[b]-vWorldPos.xyz;float d=lightCols[b].w-dot(c,c);if(d>0.0){d/=(lightCols[b].w);d=d*d;a+=max(0.0,dot(normalize(c),vNormal))*lightCols[b].rgb*d;}}vLight=a;vViewDir=-normalize(vWorldPos.xyz-cameraPosition);gl_Position=projectionViewMatrix*vWorldPos;}",
-        s6: "#version 300 es\nprecision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};in float vCameraDistance;in vec4 vWorldPos;precision highp sampler2DShadow;uniform Shadows{uniform mat4 shadowPVMatrix[2];uniform vec3 shadowRange;};const int a=\n#SHADOWS;uniform sampler2DShadow shadowMaps[2];uniform Circle{vec4 circlePos;vec4 circleInfo;};in vec3 vLight;uniform sampler2D diffuse;in vec3 vNormal;in vec2 vUv;in vec4 vInteriorlight;in vec3 vViewDir;vec3 b(vec3 c,vec3 d,vec3 e,vec3 f,float g,vec3 h,float i){f=normalize(f);float j=clamp(dot(f,worldlight[2]),0.0,g);vec3 k=c*mix(0.7,1.1,0.5+(0.5*j));vec3 l=normalize(worldlight[2]+vViewDir);vec3 m=d*pow(max(0.0,dot(l,f)),20.0)*i*max(g*0.7+0.2,0.2)*20.0;vec3 n=k+d*j+h;return n*e+m;}out vec4 fragColor;void main(){if(vCameraDistance>fog[1][1]){fragColor=vec4(fog[0],1.0);return;}vec4 o=texture(diffuse,vUv);if(o.a<0.5)discard;float p=1.0;if(a==1&&vCameraDistance<shadowRange[2]){float q=smoothstep(shadowRange[1],shadowRange[2],vCameraDistance);if(vCameraDistance>shadowRange[0]){vec4 r=shadowPVMatrix[1]*(vWorldPos);vec3 s=(r.xyz/r.w)*0.5+0.5;p=texture(shadowMaps[1],s);}else{vec4 r=shadowPVMatrix[0]*(vWorldPos);vec3 s=(r.xyz/r.w)*0.5+0.5;p=texture(shadowMaps[0],s);}p=p;p=max(p,q);}vec3 t=worldlight[1];vec3 u=worldlight[0];t=mix(t,vInteriorlight.rgb*0.5,vInteriorlight.a);u=mix(u,vInteriorlight.rgb,vInteriorlight.a);o.rgb=b(t,u,o.rgb,vNormal,p,vLight,0.0);o.rgb/=o.a;float v=clamp((fog[1][1]-vCameraDistance)/(fog[1][1]-fog[1][0]),0.0,1.0);o.rgb=mix(fog[0],o.rgb,v);float w=distance(vWorldPos.xz,circlePos.xz);float x=min(1.0,max(0.0,4.0-abs(vWorldPos.y-circlePos.y)));float cfsw=circleInfo.a;if(w<circlePos.w+0.1&&(x>0.0||(cfsw>1.0&&vWorldPos.y<=circlePos.y))){float adyw=cfsw>1.0?(vWorldPos.y>circlePos.y?x:1.0):x;float blndw=cfsw>1.0?(w<circlePos.w?cfsw-1.0:0.0):((w<circlePos.w?w/circlePos.w*0.5:0.0)+max(0.,(0.1-abs(circlePos.w-w))/0.1));o.rgb=mix(o.rgb,circleInfo.rgb,adyw*min(1.0,cfsw)*blndw);}fragColor=o;}",
-        i6: "#version 300 es\nprecision highp float;precision highp int;uniform Pointlights{vec4 lightCols[16];vec3 lightPos[16];int lightCount;};out vec3 vLight;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};out float vCameraDistance;out vec4 vWorldPos;uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};in vec2 uv;in vec3 position;in vec3 normal;in vec4 interiorlight;in mat4 worldMatrix;out vec3 vNormal;out vec2 vUv;out vec4 vInteriorlight;out vec3 vViewDir;void main(){vNormal=normalize(mat3(worldMatrix)*normal);vUv=uv;vWorldPos=worldMatrix*vec4(position,1.0);vInteriorlight=interiorlight;vCameraDistance=length(cameraPosition-vWorldPos.xyz);vec3 a=vec3(0.0);for(int b=0;b<lightCount;++b){vec3 c=lightPos[b]-vWorldPos.xyz;float d=lightCols[b].w-dot(c,c);if(d>0.0){d/=(lightCols[b].w);d=d*d;a+=max(0.0,dot(normalize(c),vNormal))*lightCols[b].rgb*d;}}vLight=a;vViewDir=-normalize(vWorldPos.xyz-cameraPosition);gl_Position=projectionViewMatrix*vWorldPos;}",
-        r6: "#version 300 es\nprecision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};in float vCameraDistance;in vec4 vWorldPos;precision highp sampler2DShadow;uniform Shadows{uniform mat4 shadowPVMatrix[2];uniform vec3 shadowRange;};const int a=\n#SHADOWS;uniform sampler2DShadow shadowMaps[2];uniform Circle{vec4 circlePos;vec4 circleInfo;};in vec3 vLight;uniform sampler2D diffuse;in vec3 vNormal;in vec2 vUv;in vec4 vCol;in vec3 vViewDir;vec3 b(vec3 c,vec3 d,vec3 e,vec3 f,float g,vec3 h,float i){f=normalize(f);float j=clamp(dot(f,worldlight[2]),0.0,g);vec3 k=c*mix(0.7,1.1,0.5+(0.5*j));vec3 l=normalize(worldlight[2]+vViewDir);vec3 m=d*pow(max(0.0,dot(l,f)),20.0)*i*max(g*0.7+0.2,0.2)*20.0;vec3 n=k+d*j+h;return n*e+m;}out vec4 fragColor;void main(){if(vCameraDistance>fog[1][1]){fragColor=vec4(fog[0],1.0);return;}vec4 o=texture(diffuse,vUv);if(o.a<0.5)discard;float p=(float(gl_FrontFacing)*2.0-1.0);float q=1.0;if(a==1&&vCameraDistance<shadowRange[2]){float r=smoothstep(shadowRange[1],shadowRange[2],vCameraDistance);if(vCameraDistance>shadowRange[0]){vec4 s=shadowPVMatrix[1]*(vWorldPos);vec3 t=(s.xyz/s.w)*0.5+0.5;q=texture(shadowMaps[1],t);}else{vec4 s=shadowPVMatrix[0]*(vWorldPos);vec3 t=(s.xyz/s.w)*0.5+0.5;q=texture(shadowMaps[0],t);}q=q;q=max(q,r);}vec3 u=mix(worldlight[1],vCol.rgb,vCol.a);vec3 v=worldlight[0]*(1.0-vCol.a);o.rgb=b(u,v,o.rgb,vNormal,q,vLight,0.0);float w=clamp((fog[1][1]-vCameraDistance)/(fog[1][1]-fog[1][0]),0.0,1.0);o.rgb=mix(fog[0],o.rgb,w);float x=distance(vWorldPos.xz,circlePos.xz);float y=min(1.0,max(0.0,4.0-abs(vWorldPos.y-circlePos.y)));float cfaw=circleInfo.a;if(x<circlePos.w+0.1&&(y>0.0||(cfaw>1.0&&vWorldPos.y<=circlePos.y))){float adyaw=cfaw>1.0?(vWorldPos.y>circlePos.y?y:1.0):y;float blndaw=cfaw>1.0?(x<circlePos.w?cfaw-1.0:0.0):((x<circlePos.w?x/circlePos.w*0.5:0.0)+max(0.,(0.1-abs(circlePos.w-x))/0.1));o.rgb=mix(o.rgb,circleInfo.rgb,adyaw*min(1.0,cfaw)*blndaw);}fragColor=o;}",
-        l6: "#version 300 es\nprecision highp float;precision highp int;uniform Pointlights{vec4 lightCols[16];vec3 lightPos[16];int lightCount;};out vec3 vLight;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};out float vCameraDistance;out vec4 vWorldPos;uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};in vec2 uv;in vec3 position;in vec3 normal;in vec4 color;in mat4 worldMatrix;out vec3 vNormal;out vec2 vUv;out vec4 vCol;out vec3 vViewDir;void main(){vNormal=normalize(mat3(worldMatrix)*normal);vUv=uv;vCol=color;vWorldPos=worldMatrix*vec4(position,1.0);vCameraDistance=length(cameraPosition-vWorldPos.xyz);vec3 a=vec3(0.0);for(int b=0;b<lightCount;++b){vec3 c=lightPos[b]-vWorldPos.xyz;float d=lightCols[b].w-dot(c,c);if(d>0.0){d/=(lightCols[b].w);d=d*d;a+=max(0.0,dot(normalize(c),vNormal))*lightCols[b].rgb*d;}}vLight=a;vViewDir=-normalize(vWorldPos.xyz-cameraPosition);gl_Position=projectionViewMatrix*vWorldPos;}",
-        a6: "#version 300 es\nprecision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};in float vCameraDistance;in vec4 vWorldPos;precision highp sampler2DShadow;uniform Shadows{uniform mat4 shadowPVMatrix[2];uniform vec3 shadowRange;};const int a=\n#SHADOWS;uniform sampler2DShadow shadowMaps[2];in vec3 vLight;uniform sampler2D diffuse;in vec3 vNormal;in vec2 vUv;in vec3 vViewDir;vec3 b(vec3 c,vec3 d,vec3 e,vec3 f,float g,vec3 h,float i){f=normalize(f);float j=clamp(dot(f,worldlight[2]),0.0,g);vec3 k=c*mix(0.7,1.1,0.5+(0.5*j));vec3 l=normalize(worldlight[2]+vViewDir);vec3 m=d*pow(max(0.0,dot(l,f)),20.0)*i*max(g*0.7+0.2,0.2)*20.0;vec3 n=k+d*j+h;return n*e+m;}out vec4 fragColor;void main(){vec4 o=texture(diffuse,vUv);if(o.a<0.7)discard;if(vCameraDistance>fog[1][1]){fragColor=vec4(fog[0],1.0);return;}float p=1.0;if(a==1&&vCameraDistance<shadowRange[2]){float q=smoothstep(shadowRange[1],shadowRange[2],vCameraDistance);if(vCameraDistance>shadowRange[0]){vec4 r=shadowPVMatrix[1]*(vWorldPos);vec3 s=(r.xyz/r.w)*0.5+0.5;p=texture(shadowMaps[1],s);}else{vec4 r=shadowPVMatrix[0]*(vWorldPos);vec3 s=(r.xyz/r.w)*0.5+0.5;p=texture(shadowMaps[0],s);}p=p;p=max(p,q);}o.rgb=b(worldlight[1],worldlight[0],o.rgb,vNormal,p,vLight,0.0);o.rgb/=o.a;float t=clamp((fog[1][1]-vCameraDistance)/(fog[1][1]-fog[1][0]),0.0,1.0);o.rgb=mix(fog[0],o.rgb,t);fragColor=o;}",
-        c6: "#version 300 es\nprecision highp float;precision highp int;uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform Screen{vec2 resolution;};in vec3 position;in vec4 info;in vec2 progress;in vec4 scaleRota;in vec4 colStart;in vec4 colEnd;out vec4 vCol;out float vRotationCos;out float vRotationSin;out vec2 vOffset;void main(){float a=min(info[3]-1.0,floor(mix(info[2],info[3],mod(info[0]*progress[0],1.0))));vOffset=vec2(fract(a*0.125),-floor(a/8.0)*0.125);vCol=mix(colStart,colEnd,progress[1]);float b=mix(scaleRota[2],scaleRota[3],progress[0]);vRotationCos=cos(b);vRotationSin=sin(b);float c=mix(scaleRota[0],scaleRota[1],progress[1])*(abs(vRotationSin)+abs(vRotationCos));vec4 d=viewMatrix*vec4(position,1.0);gl_PointSize=c*resolution[1]*projectionMatrix[1][1]/length(d.xyz);gl_Position=projectionMatrix*d;}",
-        u6: "#version 300 es\nprecision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};in float vCameraDistance;in vec4 vWorldPos;uniform sampler2D particleDiffuse;in vec4 vCol;in vec2 vOffset;in float vRotationCos;in float vRotationSin;out vec4 fragColor;const float a=1.0/(1024.0/8.0);void main(){float b=0.5;float c=abs(vRotationSin)+abs(vRotationCos);vec2 d=vec2(gl_PointCoord.x-b,gl_PointCoord.y-b)*c;vec2 e=d*vRotationCos;vec2 f=d*vRotationSin;d=vec2(e.x+f.y+b,e.y-f.x+b);if(d.x<a||d.x>1.0-a||d.y>1.0-a||d.y<a){discard;}d.x*=0.125;d.y=1.0-d.y*0.125;vec3 g=texture(particleDiffuse,d+vOffset).rgb;if((g.r+g.g+g.b)<0.1){discard;}fragColor=vec4(g.rgb,1.0);}",
-        I6: "#version 300 es\nprecision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};out float vCameraDistance;out vec4 vWorldPos;uniform Pointlights{vec4 lightCols[16];vec3 lightPos[16];int lightCount;};out vec3 vLight;uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform MeshTerrain{mat4 modelMatrix;vec4 terrainInfo[4];int quadrant;};const float a=256.0;const float b=4.0;in vec3 position;in vec3 normal;out vec3 vNormal;out vec3 vUvChannel;out vec2 vUvTexture[4];out vec3 vViewDir;void main(){vNormal=normal;vWorldPos=modelMatrix*vec4(position,1.0);vUvChannel=vec3(position[0],position[2],0.0)/32.0;int c=quadrant%2;int d=int(quadrant%4);if(c==1)vUvChannel.x-=1.0;if(d>1)vUvChannel.y-=1.0;vUvChannel.z=float(quadrant);vec2 e=vec2(-vWorldPos[0],vWorldPos[2])/4.0;vUvTexture[0]=e*terrainInfo[0][0];vUvTexture[1]=e*terrainInfo[1][0];vUvTexture[2]=e*terrainInfo[2][0];vUvTexture[3]=e*terrainInfo[3][0];for(int f=0;f<lightCount;++f){vec3 g=lightPos[f]-vWorldPos.xyz;float h=lightCols[f].w-dot(g,g);if(h>0.0){h/=(lightCols[f].w);h=h*h;vLight+=0.2*lightCols[f].rgb*h;}}vViewDir=-normalize(vWorldPos.xyz-cameraPosition);vCameraDistance=length(cameraPosition-vWorldPos.xyz);gl_Position=projectionViewMatrix*vWorldPos;}",
-        Zw_orig: "#version 300 es\nprecision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};in float vCameraDistance;in vec4 vWorldPos;uniform Sky{vec3 skycolors[5];vec3 suncolor;};uniform sampler2D skyDiffuse;uniform sampler2D cloudDiffuse;in vec2 vUv;in vec3 vPos;out vec4 fragColor;void main(){gl_FragDepth=0.999999;vec3 a=vec3(0.0);float b=vPos.y/0.5;if(b>0.4){a=mix(skycolors[1],skycolors[0],smoothstep(0.4,1.0,b));}else if(b>0.25){a=mix(skycolors[2],skycolors[1],smoothstep(0.25,0.4,b));}else if(b>0.06){a=mix(skycolors[3],skycolors[2],smoothstep(0.06,0.25,b));}else{a=mix(fog[0],skycolors[3],smoothstep(0.0,0.06,b));}float c=1.0-sin(daycycle*6.28)+0.02;float d=smoothstep(0.1,0.5,b)*smoothstep(0.9,0.6,b);a+=texture(skyDiffuse,vUv*vec2(4.0,1.0)).rgb*c*d;float e=texture(cloudDiffuse,vec2(vUv.x+time/80.0,vUv.y*0.6+time/120.0)).r*texture(cloudDiffuse,vec2(vUv.x*2.0+time/300.0,vUv.y*0.6)).r;e=e*smoothstep(0.0,0.1,b)*smoothstep(1.0,0.85,b);e=smoothstep(0.25,0.7,e);a=mix(a,skycolors[4],e);fragColor=vec4(a,1.0);}",
-        q6: "#version 300 es\nprecision highp float;precision highp int;uniform Circle{vec4 circlePos;vec4 circleInfo;};precision highp sampler2DShadow;uniform Shadows{uniform mat4 shadowPVMatrix[2];uniform vec3 shadowRange;};const int a=\n#SHADOWS;uniform sampler2DShadow shadowMaps[2];uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};in float vCameraDistance;in vec4 vWorldPos;uniform MeshTerrain{mat4 modelMatrix;vec4 terrainInfo[4];int quadrant;};const float b=256.0;const float c=4.0;precision highp sampler2DArray;uniform sampler2DArray atlas;uniform sampler2D diffuse[4];in vec3 vLight;in vec3 vNormal;in vec3 vViewDir;in vec3 vUvChannel;in vec2 vUvTexture[4];vec4 d;float e;void f(vec4 g,float h,vec4 i){float j=g.x+g.y+g.z;e+=i[3]*smoothstep(i[1],i[2],j)*h;g.a=h;g.rgb*=h;d+=g;}out vec4 fragColor;void main(){vec4 k=texture(atlas,vUvChannel);k[3]=max(0.0,min(1.0,1.0-(k.r+k.g+k.b)));if(k[0]==1.0&&k[1]==1.0&&k[2]==1.0)discard;f(texture(diffuse[0],vUvTexture[0]),k[0],terrainInfo[0]);f(texture(diffuse[1],vUvTexture[1]),k[1],terrainInfo[1]);f(texture(diffuse[2],vUvTexture[2]),k[2],terrainInfo[2]);f(texture(diffuse[3],vUvTexture[3]),k[3],terrainInfo[3]);d.rgb/=d.a;e/=d.a;d.a=1.0;if(mod(vWorldPos.y,2.0)<0.2){d.rgb=mix(d.rgb,vec3(0.8),0.5);}else{d.rgb=mix(d.rgb,vec3(0.2),0.5);}vec3 l=worldlight[2];l.y*=0.5;l=normalize(l);d.rgb*=max(0.3,min(1.0,dot(l,vNormal)*0.5+0.5));float m=distance(vWorldPos.xz,circlePos.xz);float adm=min(1.0,max(0.0,4.0-abs(vWorldPos.y-circlePos.y)));float cfb=circleInfo.a;if(m<circlePos.w+0.1&&(adm>0.0||(cfb>1.0&&vWorldPos.y<=circlePos.y))){float fadym=cfb>1.0?(vWorldPos.y>circlePos.y?adm:1.0):1.0;float blndb=cfb>1.0?(m<circlePos.w?cfb-1.0:0.0):(max(0.,(0.3-abs(circlePos.w-m))/0.3));d.rgb=mix(d.rgb,circleInfo.rgb,fadym*min(1.0,cfb)*blndb);}float n=clamp((fog[1][1]-vCameraDistance)/(fog[1][1]-fog[1][0]),0.0,1.0);d.rgb=mix(fog[0],d.rgb,n);fragColor=d;}",
-        R6: "#version 300 es\nprecision highp float;precision highp int;uniform Circle{vec4 circlePos;vec4 circleInfo;};precision highp sampler2DShadow;uniform Shadows{uniform mat4 shadowPVMatrix[2];uniform vec3 shadowRange;};const int a=\n#SHADOWS;uniform sampler2DShadow shadowMaps[2];uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};in float vCameraDistance;in vec4 vWorldPos;uniform MeshTerrain{mat4 modelMatrix;vec4 terrainInfo[4];int quadrant;};const float b=256.0;const float c=4.0;precision highp sampler2DArray;uniform sampler2DArray atlas;uniform sampler2D diffuse[4];in vec3 vLight;in vec3 vNormal;in vec3 vViewDir;in vec3 vUvChannel;in vec2 vUvTexture[4];vec4 d;float e;void f(vec4 g,float h,vec4 i){float j=g.x+g.y+g.z;e+=i[3]*smoothstep(i[1],i[2],j)*h;g.a=h;g.rgb*=h;d+=g;}out vec4 fragColor;void main(){vec4 k=texture(atlas,vUvChannel);k[3]=max(0.0,min(1.0,1.0-(k.r+k.g+k.b)));if(k[0]==1.0&&k[1]==1.0&&k[2]==1.0)discard;d.rgb=texture(diffuse[0],vUvTexture[0]).rgb;float l=64.0/12.0;float m=l/2.0;bool n=mod(vWorldPos.z,l)>m;if(mod(vWorldPos.x,l)<m){if(n){d.rgb=vec3(0.45);}else{d.rgb=vec3(0.55);}}else{if(n){d.rgb=vec3(0.55);}else{d.rgb=vec3(0.45);}}vec3 o=worldlight[2];o.y*=0.5;o=normalize(o);d.rgb*=max(0.3,min(1.0,dot(o,vNormal)*0.5+0.5));float p=distance(vWorldPos.xz,circlePos.xz);float adp=min(1.0,max(0.0,4.0-abs(vWorldPos.y-circlePos.y)));float cfc=circleInfo.a;if(p<circlePos.w+0.1&&(adp>0.0||(cfc>1.0&&vWorldPos.y<=circlePos.y))){float fadyp=cfc>1.0?(vWorldPos.y>circlePos.y?adp:1.0):1.0;float blndc=cfc>1.0?(p<circlePos.w?cfc-1.0:0.0):(max(0.,(0.3-abs(circlePos.w-p))/0.3));d.rgb=mix(d.rgb,circleInfo.rgb,fadyp*min(1.0,cfc)*blndc);}float q=clamp((fog[1][1]-vCameraDistance)/(fog[1][1]-fog[1][0]),0.0,1.0);d.rgb=mix(fog[0],d.rgb,q);fragColor=d;}",
-        B6: "#version 300 es\nprecision highp float;precision highp int;uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform MeshTerrain{mat4 modelMatrix;vec4 terrainInfo[4];int quadrant;};in vec3 position;void main(){vec4 a=modelMatrix*vec4(position,1.0);gl_Position=projectionViewMatrix*a;}"
-    };
-    if (localStorage.getItem("shaders2021") === "true") {
-        GM = classic2021Shaders.GM;
-        YM = classic2021Shaders.YM;
-        XM = classic2021Shaders.XM;
-        ZM = classic2021Shaders.ZM;
-        e6 = classic2021Shaders.e6;
-        t6 = classic2021Shaders.t6;
-        s6 = classic2021Shaders.s6;
-        i6 = classic2021Shaders.i6;
-        r6 = classic2021Shaders.r6;
-        l6 = classic2021Shaders.l6;
-        a6 = classic2021Shaders.a6;
-        c6 = classic2021Shaders.c6;
-        u6 = classic2021Shaders.u6;
-        I6 = classic2021Shaders.I6;
-        Zw_orig = classic2021Shaders.Zw_orig;
-        q6 = classic2021Shaders.q6;
-        R6 = classic2021Shaders.R6;
-        B6 = classic2021Shaders.B6;
-    }
+    var classic21Hex = h => [(h >> 16 & 255) / 255, (h >> 8 & 255) / 255, (h & 255) / 255],
+        classic21Cols = {
+            guardstone: [[0x6ac1e9, 0xb4beba, 0x6bbeee, 0x79eefb], [0x6687c4, 0x437d81, 0x579de3, 0xe089c1], [0x215198, 0x1818c5, 0x2c3372, 0x20299f]],
+            faivel: [[0xa5c9ed, 0x919449, 0xabd1e7, 0x81d6e4], [0x94bdcd, 0x414398, 0x50c9e2, 0x7a81ba], [0x465886, 0x1e3175, 0x4e5bda, 0x2f3980]],
+            headless: [[0x3db9c7, 0xc7bd9e, 0x6ddcdc, 0x5ee7ff], [0x0a3caf, 0x5b4071, 0x15466a, 0xd28c4d], [0x141a61, 0x2957c0, 0x4538e2, 0x6241c5]]
+        },
+        classic21Env = (env, world) => {
+            let cols = classic21Cols[world] || classic21Cols.guardstone,
+                ph = k => cols.map(p => classic21Hex(p[k])),
+                mix = (a, b, f) => a.map((v, i) => v + (b[i] - v) * f),
+                amb = ph(0),
+                dir = ph(1),
+                fog = ph(2),
+                sky = ph(3),
+                c = Object.assign({}, env);
+            c.ambient = amb, c.direct = dir, c.fog = fog;
+            c.skytop = sky.map(s => s.slice());
+            c.skymid = sky.map((s, i) => mix(s, fog[i], .25));
+            c.skybot = sky.map((s, i) => mix(s, fog[i], .75));
+            c.horizon = fog.map(f => f.slice());
+            c.sun = fog.map(f => mix([1, 1, 1], f, .5));
+            return c;
+        },
+        classic21DayRemap = t => {
+            let sm = (a, b, x) => {
+                let i = Math.max(0, Math.min(1, (x - a) / (b - a)));
+                return i * i * (3 - 2 * i)
+            };
+            return t < .85 ? .5 * sm(0, .85, t) : .5 + .5 * sm(.85, 1, t)
+        },
+        classic21Swaps = [
+            ["vec3 b(vec3 c,vec3 d,vec3 e,vec3 f,float g,vec3 h,float i){f=normalize(f);float j=clamp(dot(f,worldlight[2]),0.0,g);vec3 k=c*mix(0.7,1.1,0.5+(0.5*j));vec3 l=normalize(worldlight[2]+vViewDir);vec3 m=d*pow(max(0.0,dot(l,f)),20.0)*i*max(g*0.7+0.2,0.2)*20.0;vec3 n=k+d*j+h;return n*e+m;}", "vec3 b(vec3 c,vec3 d,vec3 e,vec3 f,float g,vec3 h,float i){f=normalize(f);float j=max(dot(f,worldlight[2]),0.0)*g;return (h+d*j+c)*e;}"],
+            ["vec3 f(vec3 g,vec3 h,vec3 i,vec3 j,float k,vec3 l,float m){j=normalize(j);float n=clamp(dot(j,worldlight[2]),0.0,k);vec3 o=g*mix(0.7,1.1,0.5+(0.5*n));vec3 p=normalize(worldlight[2]+vViewDir);vec3 q=h*pow(max(0.0,dot(p,j)),20.0)*m*max(k*0.7+0.2,0.2)*20.0;vec3 r=o+h*n+l;return r*i+q;}", "vec3 f(vec3 g,vec3 h,vec3 i,vec3 j,float k,vec3 l,float m){j=normalize(j);float n=clamp(dot(j,worldlight[2]),0.0,k);vec3 q=vec3(pow(max(0.0,dot(reflect(-worldlight[2],j),vViewDir)),8.5)*2.0)*m*0.15;vec3 r=g+h*n*0.65+l;return r*i+q;}"],
+            ["vec3 f(vec3 g,vec3 h,vec3 i,vec3 j,float k,vec3 l,float m){j=normalize(j);float n=clamp(dot(j,worldlight[2]),0.0,k);vec3 o=g;vec3 p=normalize(worldlight[2]+vViewDir);vec3 q=vec3(pow(max(0.0,dot(p,j)),8.5)*2.0)*m*0.15;vec3 r=o+h*n*0.75+l;return r*i+q;}", "vec3 f(vec3 g,vec3 h,vec3 i,vec3 j,float k,vec3 l,float m){j=normalize(j);float n=clamp(dot(j,worldlight[2]),0.0,k);vec3 q=vec3(pow(max(0.0,dot(reflect(-worldlight[2],j),vViewDir)),8.5)*2.0)*m*0.15;vec3 r=g+h*n*0.65+l;return r*i+q;}"],
+            ["a+=0.5*max(0.0,dot(normalize(c),vNormal))*lightCols[b].rgb*d;", "a+=max(0.0,dot(normalize(c),vNormal))*lightCols[b].rgb*d;"],
+            ["b+=0.3*lightCols[c].rgb*e;", "b+=0.65*max(0.2,normalize(d).y)*lightCols[c].rgb*e;"],
+            ["b+=0.5*lightCols[c].rgb*e;", "b+=0.65*max(0.2,normalize(d).y)*lightCols[c].rgb*e;"],
+            ["vLightDir=worldlight[0]*max(0.0,dot(instNorm.xyz,worldlight[2]));", "vLightDir=worldlight[0]*0.65*(0.9+sin(instPos.x*0.5)*0.05+cos(instPos.z*0.3)*0.05);"],
+            ["vLightDir+=worldlight[0]*max(0.0,dot(instNorm.xyz,worldlight[2]));", "vLightDir+=worldlight[0]*0.65*(0.9+sin(instPos.x*0.5)*0.05+cos(instPos.z*0.3)*0.05);"]
+        ],
+        classic21Patch = s => {
+            if (typeof s != "string") return s;
+            for (let [a, b] of classic21Swaps) s = s.split(a).join(b);
+            return s
+        };
 
     if (oe.faivelRetexture) {
         let folSprite = src => src.replace(/g\[1\]=instNorm\.xyz;[\s\S]*?g\[0\]=normalize\(cross\(g\[1\],g\[2\]\)\);/, "g[0]=vec3(viewMatrix[0][0],viewMatrix[1][0],viewMatrix[2][0]);g[1]=vec3(viewMatrix[0][1],viewMatrix[1][1],viewMatrix[2][1]);g[2]=vec3(viewMatrix[0][2],viewMatrix[1][2],viewMatrix[2][2]);f.x*=fract((instPos.x+instPos.z*1.618)*3.7)<0.5?-1.0:1.0;");
@@ -14758,107 +14406,6 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 uniforms: {
                     aoDepth: {
                         value: null
-                    },
-                    aoSeed: {
-                        value: 0
-                    }
-                },
-                attributeLocations: t.post
-            }), ht[50] = kn({
-                vertex: hc,
-                fragment: ssao21Frag,
-                depthWrite: !1,
-                depthTest: !1,
-                globalUniforms: xn,
-                uniforms: {
-                    inputA: {
-                        value: null
-                    },
-                    depthTex: {
-                        value: null
-                    }
-                },
-                attributeLocations: t.post
-            }), ht[51] = kn({
-                vertex: hc,
-                fragment: ssao21BlurFrag,
-                depthWrite: !1,
-                depthTest: !1,
-                globalUniforms: xn,
-                uniforms: {
-                    inputA: {
-                        value: null
-                    },
-                    depthTex: {
-                        value: null
-                    },
-                    blurStep: {
-                        value: 0
-                    }
-                },
-                attributeLocations: t.post
-            }), ht[52] = kn({
-                vertex: hc,
-                fragment: ssao21TemporalFrag,
-                depthWrite: !1,
-                depthTest: !1,
-                globalUniforms: xn,
-                uniforms: {
-                    inputA: {
-                        value: null
-                    },
-                    inputB: {
-                        value: null
-                    },
-                    depthTex: {
-                        value: null
-                    },
-                    prevProjectionViewMatrix: {
-                        value: new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1])
-                    },
-                    blendAlpha: {
-                        value: 1
-                    }
-                },
-                attributeLocations: t.post
-            }), ht[53] = kn({
-                vertex: hc,
-                fragment: ssao21CompositeFrag,
-                depthWrite: !1,
-                depthTest: !1,
-                uniforms: {
-                    inputA: {
-                        value: null
-                    },
-                    inputB: {
-                        value: null
-                    }
-                },
-                attributeLocations: t.post
-            }), ht[38] = kn({
-                vertex: hc,
-                fragment: classicAoTemporalFrag,
-                depthWrite: !1,
-                depthTest: !1,
-                globalUniforms: xn,
-                uniforms: {
-                    inputA: {
-                        value: null
-                    },
-                    inputB: {
-                        value: null
-                    },
-                    aoDepth: {
-                        value: null
-                    },
-                    invPV: {
-                        value: new Float32Array(16)
-                    },
-                    prevPV: {
-                        value: new Float32Array(16)
-                    },
-                    aoKeep: {
-                        value: 0
                     }
                 },
                 attributeLocations: t.post
@@ -34502,7 +34049,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             Ho.length = 0, Ca.length = 0, Sa.length = 0, im.length = 0
         };
     JE(si);
-    var gf = classicPlain ? [0, 2, 2.3] : [1.5, 2.5, 0],
+    var gf = classicPlain && !classic21 ? [0, 2, 2.3] : [1.5, 2.5, 0],
         vf = [0, 0, 0];
     go(gf, gf);
     var bn = {},
@@ -34751,6 +34298,12 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         },
         envAt = id => {
             let env = Ic.get(id);
+            if (env && classic21) {
+                let w21 = classicWorldFor(id) || "guardstone",
+                    k21 = "21:" + id + ":" + w21,
+                    c21 = classicEnvCache.get(k21);
+                return c21 || (c21 = classic21Env(env, w21), classicEnvCache.set(k21, c21), c21)
+            }
             env && worldOverrideOff && !classicIsEditor() && (env = env05(id, env));
             let tint = env && worldAmbientTint[classicWorldFor(id)];
             if (!env || !oe.classicLighting && !oe.classicWaterColors && !tint) return env;
@@ -34922,18 +34475,19 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         let o = .5,
             s = 0,
             i = 0,
-            stages = classicPlain ? g1 : oldDayStages;
+            stages = classicPlain && !classic21 ? g1 : oldDayStages,
+            st = classic21 ? classic21DayRemap(t) : t;
         for (let a = 0; a < stages.length; ++a) {
             let c = stages[a];
-            if (c.end >= t) {
-                o = Vu(c.start, c.end, t), s = c.from, i = c.to;
+            if (c.end >= st) {
+                o = Vu(c.start, c.end, st), s = c.from, i = c.to;
                 break
             }
         }
         let r = on.sky.data;
         Bi(r.skycolors, 0, bn.skytop[s], bn.skytop[i], o), Bi(r.skycolors, 3, bn.skymid[s], bn.skymid[i], o), Bi(r.skycolors, 6, bn.skybot[s], bn.skybot[i], o), Bi(r.skycolors, 9, bn.horizon[s], bn.horizon[i], o), Bi(r.skycolors, 12, bn.clouds[s], bn.clouds[i], o), Bi(r.suncolor, 0, bn.sun[s], bn.sun[i], o), ut(vf, gf), vf[1] = Math.abs(Math.sin(t * 6.282)), go(vf, vf);
         let l = on.environment.data;
-        Bi(l.worldlight, 0, bn.direct[s], bn.direct[i], o), Bi(l.worldlight, 3, bn.ambient[s], bn.ambient[i], o), l.worldlight[6] = gf[0], l.worldlight[7] = gf[1], l.worldlight[8] = gf[2], Bi(l.fog, 0, bn.fog[s], bn.fog[i], o), l.fog[3] = n > 0 ? -100 : fy, l.fog[4] = n > 0 ? uy : classicFogFar, fogOn ? n > 0 || (l.fog[3] *= fogDistMul, l.fog[4] *= fogDistMul) : (l.fog[3] = 1e5, l.fog[4] = 2e5), l.daycycle[0] = t, l.time[0] = e % 3600, ht[31].uniforms.amount.value = qu(o, bn.bloom[s], bn.bloom[i]), classicPlain && imEnvAdjust(l, t)
+        Bi(l.worldlight, 0, bn.direct[s], bn.direct[i], o), Bi(l.worldlight, 3, bn.ambient[s], bn.ambient[i], o), l.worldlight[6] = gf[0], l.worldlight[7] = gf[1], l.worldlight[8] = gf[2], Bi(l.fog, 0, bn.fog[s], bn.fog[i], o), l.fog[3] = n > 0 ? -100 : classic21 ? 5 : fy, l.fog[4] = n > 0 ? uy : classicFogFar, fogOn ? n > 0 || (l.fog[3] *= fogDistMul, l.fog[4] *= fogDistMul) : (l.fog[3] = 1e5, l.fog[4] = 2e5), l.daycycle[0] = t, l.time[0] = e % 3600, ht[31].uniforms.amount.value = qu(o, bn.bloom[s], bn.bloom[i]), classicPlain && imEnvAdjust(l, t)
     };
     var RN = [],
         zN = [],
@@ -40881,7 +40435,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             i >= 0 && Cf.splice(i, 1)
         },
         p9 = t => {
-            t9(t), classicMapCapturing || (BE(), $7(), ssao21Defers() || L7(t))
+            t9(t), classicMapCapturing || (BE(), $7(), L7(t))
         },
         m9 = t => {
             classicMapCapturing || (j7(), classicCloudsDraw())
@@ -41428,25 +40982,9 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         hW = t => {
             let e = gr,
                 n = ei;
-            if (t.has(35) && classicAoA) {
-                t.delete(35);
+            if (oe.ssao && classicAoA) {
                 let p = ht[35];
-                classicAoSeed = (classicAoSeed + 1) % 64, p.uniforms.aoSeed.value = classicAoSeed;
-                Gn("aoDepth", gr.depthTexture, 0, p), hm(classicAoA), ks(np, p);
-                let aoSrc = classicAoA,
-                    pv = on.camera.data.projectionViewMatrix,
-                    now = performance.now();
-                if (classicAoHist && classicAoInvert(pv, classicAoInv)) {
-                    let q = ht[38],
-                        out = classicAoHist[classicAoHi ^ 1];
-                    Gn("aoDepth", gr.depthTexture, 0, q), Sf(38, out, classicAoA, classicAoHist[classicAoHi], [
-                        ["invPV", classicAoInv],
-                        ["prevPV", classicAoPrev],
-                        ["aoKeep", classicAoLast && now - classicAoLast < 250 ? .55 : 0]
-                    ]), aoSrc = out, classicAoHi ^= 1;
-                }
-                classicAoPrev.set(pv), classicAoLast = now;
-                Sf(36, classicAoB, aoSrc, null, [
+                Gn("aoDepth", ei.depthTexture, 0, p), hm(classicAoA), ks(np, p), Sf(36, classicAoB, classicAoA, null, [
                     ["step", 0]
                 ]), Sf(36, e, classicAoB, n, [
                     ["step", 1]
@@ -41480,18 +41018,6 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             pW();
             let e = w9(Cf, _t, !1);
             mW(e);
-            if (oe.ssao && ssao21) {
-                let [a, b, hA, hB] = ssao21, hp = ssao21Hi ? hB : hA, hn = ssao21Hi ? hA : hB;
-                Gn("depthTex", ei.depthTexture, 0, ht[50]), Gn("inputA", ei.colorTexture, 0, ht[50]), hm(a), N.clear(N.COLOR_BUFFER_BIT), ks(np, ht[50]);
-                Gn("depthTex", ei.depthTexture, 0, ht[51]), Sf(51, b, a, null, [
-                    ["blurStep", 0]
-                ]);
-                Gn("inputA", b.colorTexture, 0, ht[51]), Gn("depthTex", ei.depthTexture, 0, ht[51]), ht[51].uniforms.blurStep.value = 1, hm(a), ks(np, ht[51]);
-                Gn("inputA", a.colorTexture, 0, ht[52]), Gn("inputB", hp.colorTexture, 0, ht[52]), Gn("depthTex", ei.depthTexture, 0, ht[52]), ht[52].uniforms.prevProjectionViewMatrix.value = ssao21Prev, ht[52].uniforms.blendAlpha.value = ssao21First ? 1 : .1, hm(hn), ks(np, ht[52]);
-                Gn("inputA", hn.colorTexture, 0, ht[53]), Gn("inputB", ei.colorTexture, 0, ht[53]), hm(gr), ks(np, ht[53]), V1(gr, ei, N.COLOR_BUFFER_BIT);
-                ssao21Prev.set(on.camera.data.projectionViewMatrix), ssao21Hi ^= 1, ssao21First = !1;
-                classicMapCapturing || (hm(ei), L7(e));
-            } else ssao21First = !0;
             dW(e), imGlowRun(), hW(t)
         };
     var Tf = oe.resolution / 100,
