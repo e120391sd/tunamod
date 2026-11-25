@@ -8430,7 +8430,7 @@ void main() {
         },
         rareMountRideSize = {
             nightmare: 1.1,
-            curseweaver: 1.6,
+            curseweaver: 1,
             "lunar spirit": 1,
             "crypt scarab": 1,
             "giant pickleling": 1,
@@ -8438,7 +8438,7 @@ void main() {
             "sound of silence": 1.2,
             "violet death": 1.5,
             1349: 2,
-            felicia: 1.5
+            felicia: 1
         },
         rareMountCreature = (buff, ent) => {
             if (!oe.faivelRetexture || oe.mountReskins === !1 || !ent || !ent.pos || !buff.data) return null;
