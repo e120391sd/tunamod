@@ -1791,8 +1791,14 @@
         stableSsao = ee(!1),
         stableSsaoRow = null,
         acneRow = null,
-        classicReloadNeeded = () => !!oe.shaders2021 !== classic21,
-        classicAcneFix = !1,
+        classicReloadNeeded = () => !!oe.shaders2021 !== classic21 || !!oe.fixShadowAcne !== classicAcneFix,
+        classicAcneFix = (() => {
+            try {
+                return localStorage.getItem("fixShadowAcne") === "true"
+            } catch (e) {
+                return !1
+            }
+        })(),
         colors21Row = null,
         classic21 = (() => {
             try {
@@ -8728,7 +8734,7 @@ void main() {
             globalUniforms: u = {},
             attributeLocations: p
         }) => {
-            classic21 && classic21Patch && (t = classic21Patch(t), e = classic21Patch(e)), !classicAcneFix && !classicPlain && (e = e.split("float j=clamp(dot(f,worldlight[2]),0.0,g);").join("float j=max(dot(f,worldlight[2]),0.0)*g;"));
+            classic21 && classic21Patch && (t = classic21Patch(t), e = classic21Patch(e));
             let g = {
                 id: ND++,
                 program: N.createProgram(),
@@ -13984,20 +13990,6 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             return s
         };
 
-    if (!classicAcneFix && !classicPlain) {
-        let acneSw = (src, pairs) => {
-            for (let [a, b] of pairs) {
-                if (src.indexOf(a) < 0) throw new Error("shadow patch: " + a);
-                src = src.split(a).join(b)
-            }
-            return src
-        };
-        e6 = acneSw(e6, [0, 1].map(k => ["shadowPVMatrix[" + k + "]*(vWorldPos)", "shadowPVMatrix[" + k + "]*(vWorldPos+vec4(normalize(vNormal)*0.1,0.0))"]));
-        a6 = acneSw(a6, [0, 1].map(k => ["texture(shadowMaps[" + k + "],s)", "texture(shadowMaps[" + k + "],s+vec3(0.0,0.0,-0.001))"]));
-        s6 = acneSw(s6, [0, 1].map(k => ["shadowPVMatrix[" + k + "]*(vWorldPos)", "shadowPVMatrix[" + k + "]*(vWorldPos+vec4(normalize(vNormal)*0.2,0.0))"]));
-        r6 = acneSw(r6, [0, 1].map(k => ["shadowPVMatrix[" + k + "]*(vWorldPos)", "shadowPVMatrix[" + k + "]*(vWorldPos+vec4(normalize(vNormal)*0.2,0.0))"]));
-        k6 = acneSw(k6, [["texture(diffuse,vUv).a<0.7", "texture(diffuse,vUv).a<0.5"]])
-    }
     if (oe.faivelRetexture) {
         let folSprite = src => src.replace(/g\[1\]=instNorm\.xyz;[\s\S]*?g\[0\]=normalize\(cross\(g\[1\],g\[2\]\)\);/, "g[0]=vec3(viewMatrix[0][0],viewMatrix[1][0],viewMatrix[2][0]);g[1]=vec3(viewMatrix[0][1],viewMatrix[1][1],viewMatrix[2][1]);g[2]=vec3(viewMatrix[0][2],viewMatrix[1][2],viewMatrix[2][2]);f.x*=fract((instPos.x+instPos.z*1.618)*3.7)<0.5?-1.0:1.0;");
         QM.indexOf("g[1]=instNorm.xyz;") < 0 || KM.indexOf("g[1]=instNorm.xyz;") < 0 ? console.warn("pre 0.5 foliage: foliage shader has changed, keeping the new orientation") : (QM = folSprite(QM), KM = folSprite(KM));
@@ -20232,7 +20224,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 e = h("div"), e.textContent = `${P.ui.settings.resolution}`, n = h("input"), o = h("div"), o.textContent = `${P.ui.settings.viewrange}`, s = h("input"), i = h("div"), l = A(r), a = Qe(), c = h("span"), f = A(t[7]), u = h("input"), p = h("div"), v = A(g), _ = h("br"), b = h("small"), b.textContent = `${P.ui.settings.reload}`, y = h("input"), k = h("div"), E = A(C), F = h("br"), M = h("small"), M.textContent = `${P.ui.settings.reload}`, L = h("input"), V = h("div"), V.textContent = `${P.ui.settings.fxaa}`, Z(D.$$.fragment), z = h("div"), z.textContent = `${P.ui.settings.bloom}`, Z(q.$$.fragment), R = h("div"), W = A(O), U = h("br"), $ = h("small"), $.textContent = `${P.ui.settings.offscreendesc}`, Z(G.$$.fragment), de = h("div"), de.textContent = `${P.ui.settings.particles}`, Z(be.$$.fragment), le = h("div"), le.textContent = `${P.ui.settings.fogpattern}`, Z(se.$$.fragment), fe = h("div"), fe.textContent = `${P.ui.settings.shadows}`, ke = h("div"), we = h("div"), xe = A(ce), $e = h("br"), ye = h("small"), ye.textContent = `${P.ui.settings.reload}`, Z(Oe.$$.fragment), ze = h("div"), ue = A(Ne), _e = h("br"), pe = h("small"), pe.textContent = `${P.ui.settings.reload}`, he = h("input"), m(n, "type", "range"), m(n, "min", "30"), m(n, "step", "10"), m(s, "type", "range"), m(s, "min", "30"), m(c, "class", "textgrey"), m(u, "type", "range"), m(u, "min", "50"), m(u, "max", "100"), m(b, "class", "textgrey"), m(y, "type", "range"), m(y, "min", "0"), m(y, "max", "4"), m(M, "class", "textgrey"), m(L, "type", "range"), m(L, "min", "0"), m(L, "max", worldOverrideOff ? "300" : "100"), m($, "class", "textgrey"), m(fe, "class", "textprimary"), m(ye, "class", "textgrey"), m(pe, "class", "textgrey"), m(he, "type", "range"), m(he, "min", "0"), m(he, "max", "3")
             },
             m(te, H) {
-                x(te, e, H), x(te, n, H), Ge(n, t[5]), x(te, o, H), x(te, s, H), Ge(s, t[6]), x(te, i, H), d(i, l), d(i, a), d(i, c), d(c, f), x(te, u, H), Ge(u, t[7]), x(te, p, H), d(p, v), d(p, _), d(p, b), x(te, y, H), Ge(y, t[8]), x(te, k, H), d(k, E), d(k, F), d(k, M), x(te, L, H), Ge(L, t[9]), grassValueLabel(L, k), x(te, V, H), X(D, te, H), x(te, z, H), X(q, te, H), z.style.display = "none", z.nextElementSibling && (z.nextElementSibling.style.display = "none"), x(te, R, H), timeRows = [sliderRow("Time", timeSlider, te, R, 0, 1e3, !0), checkRow("Use device time", timeToIngame, te, R)], d(R, W), d(R, U), d(R, $), X(G, te, H), x(te, de, H), X(be, te, H), x(te, le, H), X(se, te, H), x(te, fe, H), x(te, ke, H), x(te, we, H), d(we, xe), d(we, $e), d(we, ye), X(Oe, te, H), x(te, ze, H), d(ze, ue), d(ze, _e), d(ze, pe), x(te, he, H), Ge(he, t[10]), imRowsUi && imRowsUi.forEach(f => f()), imRowsUi = imRows(te, fe), ssaoRow && ssaoRow(), ssaoRow = checkRow("Ambient occlusion (SSAO)", ssao, te, fe), stableSsaoRow && stableSsaoRow(), stableSsaoRow = checkRow("Stable SSAO", stableSsao, te, fe), bloomToggleRow && bloomToggleRow(), bloomToggleRow = checkRow("Bloom", wd, te, fe), skyFixRow && skyFixRow(), skyFixRow = classicPlain ? null : checkRow("Fix skybox positioning", fixSkybox, te, fe), farTerrainRow && farTerrainRow(), farTerrainRow = classicPlain ? null : checkRow("Full detail distant terrain", fullDistantTerrain, te, fe), fxRowsUi && fxRowsUi.forEach(f => f()), fxRowsUi = [headerRow("Effect alpha", te, null), checkRow("Override effect alpha", fxAlphaOverride, te, null), textRow("Effect alpha skill IDs", fxAlphaSkills, te, null), sliderRow("Missile effect alpha", fxAlphaSprite, te, null, 0, 100), sliderRow("Ribbon effect alpha", fxAlphaRibbon, te, null, 0, 100), sliderRow("Mesh effect alpha", fxAlphaModel, te, null, 0, 100)], ie = !0, Ie || (We = [Y(n, "change", t[38]), Y(n, "input", t[38]), Y(s, "change", t[39]), Y(s, "input", t[39]), Y(u, "change", t[40]), Y(u, "input", t[40]), Y(y, "change", t[41]), Y(y, "input", t[41]), Y(y, "change", t[35]), Y(L, "change", t[42]), Y(L, "input", t[42]), Y(L, "change", t[35]), Y(he, "change", t[43]), Y(he, "input", t[43]), Y(he, "change", t[35])], Ie = !0)
+                x(te, e, H), x(te, n, H), Ge(n, t[5]), x(te, o, H), x(te, s, H), Ge(s, t[6]), x(te, i, H), d(i, l), d(i, a), d(i, c), d(c, f), x(te, u, H), Ge(u, t[7]), x(te, p, H), d(p, v), d(p, _), d(p, b), x(te, y, H), Ge(y, t[8]), x(te, k, H), d(k, E), d(k, F), d(k, M), x(te, L, H), Ge(L, t[9]), grassValueLabel(L, k), x(te, V, H), X(D, te, H), x(te, z, H), X(q, te, H), z.style.display = "none", z.nextElementSibling && (z.nextElementSibling.style.display = "none"), x(te, R, H), timeRows = [sliderRow("Time", timeSlider, te, R, 0, 1e3, !0), checkRow("Use device time", timeToIngame, te, R)], d(R, W), d(R, U), d(R, $), X(G, te, H), x(te, de, H), X(be, te, H), x(te, le, H), X(se, te, H), x(te, fe, H), x(te, ke, H), x(te, we, H), d(we, xe), d(we, $e), d(we, ye), X(Oe, te, H), x(te, ze, H), d(ze, ue), d(ze, _e), d(ze, pe), x(te, he, H), Ge(he, t[10]), imRowsUi && imRowsUi.forEach(f => f()), imRowsUi = imRows(te, fe), ssaoRow && ssaoRow(), ssaoRow = checkRow("Ambient occlusion (SSAO)", ssao, te, fe), stableSsaoRow && stableSsaoRow(), stableSsaoRow = checkRow("Stable SSAO", stableSsao, te, fe), acneRow && acneRow(), acneRow = checkRow("Fix shadow acne", fixShadowAcne, te, fe, !0), bloomToggleRow && bloomToggleRow(), bloomToggleRow = checkRow("Bloom", wd, te, fe), skyFixRow && skyFixRow(), skyFixRow = classicPlain ? null : checkRow("Fix skybox positioning", fixSkybox, te, fe), farTerrainRow && farTerrainRow(), farTerrainRow = classicPlain ? null : checkRow("Full detail distant terrain", fullDistantTerrain, te, fe), fxRowsUi && fxRowsUi.forEach(f => f()), fxRowsUi = [headerRow("Effect alpha", te, null), checkRow("Override effect alpha", fxAlphaOverride, te, null), textRow("Effect alpha skill IDs", fxAlphaSkills, te, null), sliderRow("Missile effect alpha", fxAlphaSprite, te, null, 0, 100), sliderRow("Ribbon effect alpha", fxAlphaRibbon, te, null, 0, 100), sliderRow("Mesh effect alpha", fxAlphaModel, te, null, 0, 100)], ie = !0, Ie || (We = [Y(n, "change", t[38]), Y(n, "input", t[38]), Y(s, "change", t[39]), Y(s, "input", t[39]), Y(u, "change", t[40]), Y(u, "input", t[40]), Y(y, "change", t[41]), Y(y, "input", t[41]), Y(y, "change", t[35]), Y(L, "change", t[42]), Y(L, "input", t[42]), Y(L, "change", t[35]), Y(he, "change", t[43]), Y(he, "input", t[43]), Y(he, "change", t[35])], Ie = !0)
             },
             p(te, H) {
                 H[0] & 32 && Ge(n, te[5]), H[0] & 64 && Ge(s, te[6]), (!ie || H[0] & 128) && j(f, te[7]), H[0] & 128 && Ge(u, te[7]), H[0] & 256 && Ge(y, te[8]), H[0] & 512 && Ge(L, te[9]), H[0] & 1024 && Ge(he, te[10])
@@ -20244,7 +20236,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 I(D.$$.fragment, te), I(q.$$.fragment, te), I(G.$$.fragment, te), I(be.$$.fragment, te), I(se.$$.fragment, te), I(Oe.$$.fragment, te), ie = !1
             },
             d(te) {
-                ssaoRow && (ssaoRow(), ssaoRow = null), stableSsaoRow && (stableSsaoRow(), stableSsaoRow = null), bloomToggleRow && (bloomToggleRow(), bloomToggleRow = null), skyFixRow && (skyFixRow(), skyFixRow = null), farTerrainRow && (farTerrainRow(), farTerrainRow = null), bloomRow && (bloomRow(), bloomRow = null), fogRow && (fogRow(), fogRow = null), fogDistRow && (fogDistRow(), fogDistRow = null), timeRows && (timeRows.forEach(f => f()), timeRows = null), imRowsUi && (imRowsUi.forEach(f => f()), imRowsUi = null), fxRowsUi && (fxRowsUi.forEach(f => f()), fxRowsUi = null);
+                ssaoRow && (ssaoRow(), ssaoRow = null), stableSsaoRow && (stableSsaoRow(), stableSsaoRow = null), acneRow && (acneRow(), acneRow = null), bloomToggleRow && (bloomToggleRow(), bloomToggleRow = null), skyFixRow && (skyFixRow(), skyFixRow = null), farTerrainRow && (farTerrainRow(), farTerrainRow = null), bloomRow && (bloomRow(), bloomRow = null), fogRow && (fogRow(), fogRow = null), fogDistRow && (fogDistRow(), fogDistRow = null), timeRows && (timeRows.forEach(f => f()), timeRows = null), imRowsUi && (imRowsUi.forEach(f => f()), imRowsUi = null), fxRowsUi && (fxRowsUi.forEach(f => f()), fxRowsUi = null);
                 te && (w(e), w(n), w(o), w(s), w(i), w(u), w(p), w(y), w(k), w(L), w(V), w(z), w(R), w(de), w(le), w(fe), w(ke), w(we), w(ze), w(he)), K(D, te), K(q, te), K(G, te), K(be, te), K(se, te), K(Oe, te), Ie = !1, ct(We)
             }
         }
@@ -31345,7 +31337,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             localStorage.getItem(from) !== null && localStorage.getItem(to) === null && localStorage.setItem(to, localStorage.getItem(from)), localStorage.removeItem(from);
         } catch (e) {}
     });
-    fw("mapEnabled", mapEnabled), fw("ssao", ssao), fw("fixSkybox", fixSkybox), fw("shaders2021", shaders2021), fw("colors2021", colors2021), fw("stableSsao", stableSsao), fw("mountReskins", mountReskins), fw("fullDistantTerrain", fullDistantTerrain), fw("timeSlider", timeSlider), fw("timeToIngame", timeToIngame), fw("markOwnRevs", markOwnRevs), [["CCIndicator", CCIndicator], ["flashCCIndicator", flashCCIndicator], ["CCIndicatorOnNameplates", CCIndicatorOnNameplates], ["hideBuffs", hideBuffs], ["hideClassBuffs", hideClassBuffs], ["stackSameBuffs", stackSameBuffs], ["partyHeight", partyHeight], ["sortParty", sortParty], ["classColorParty", classColorParty], ["disablePartyNameplates", disablePartyNameplates], ["uncapNameplates", uncapNameplates], ["revUnfriendly", revUnfriendly], ["nextFriendlyIgnoreBots", nextFriendlyIgnoreBots], ["losTarget", losTarget], ["fxAlphaOverride", fxAlphaOverride], ["fxAlphaSprite", fxAlphaSprite], ["fxAlphaRibbon", fxAlphaRibbon], ["fxAlphaModel", fxAlphaModel], ["fxAlphaSkills", fxAlphaSkills], ["mouseOverTarget", mouseOverTarget]].forEach(([k, st]) => fw(k, st)), (() => {
+    fw("mapEnabled", mapEnabled), fw("ssao", ssao), fw("fixSkybox", fixSkybox), fw("shaders2021", shaders2021), fw("colors2021", colors2021), fw("fixShadowAcne", fixShadowAcne), fw("stableSsao", stableSsao), fw("mountReskins", mountReskins), fw("fullDistantTerrain", fullDistantTerrain), fw("timeSlider", timeSlider), fw("timeToIngame", timeToIngame), fw("markOwnRevs", markOwnRevs), [["CCIndicator", CCIndicator], ["flashCCIndicator", flashCCIndicator], ["CCIndicatorOnNameplates", CCIndicatorOnNameplates], ["hideBuffs", hideBuffs], ["hideClassBuffs", hideClassBuffs], ["stackSameBuffs", stackSameBuffs], ["partyHeight", partyHeight], ["sortParty", sortParty], ["classColorParty", classColorParty], ["disablePartyNameplates", disablePartyNameplates], ["uncapNameplates", uncapNameplates], ["revUnfriendly", revUnfriendly], ["nextFriendlyIgnoreBots", nextFriendlyIgnoreBots], ["losTarget", losTarget], ["fxAlphaOverride", fxAlphaOverride], ["fxAlphaSprite", fxAlphaSprite], ["fxAlphaRibbon", fxAlphaRibbon], ["fxAlphaModel", fxAlphaModel], ["fxAlphaSkills", fxAlphaSkills], ["mouseOverTarget", mouseOverTarget]].forEach(([k, st]) => fw(k, st)), (() => {
         let was;
         sortParty.subscribe(v => (was !== void 0 && v && !was && partyOrderSave({}), was = v));
     })(), fw("blockSpecialSelling", blockSpecialSelling), fw("bloomBlur", bloomBlur), bloomBlur.set(!0), bloomBlur.subscribe(v => bloomBlurOn = v), fw("fogEnabled", fogSetting), fogSetting.set(!0), fogSetting.subscribe(v => fogOn = v), fw("fogDistance", fogDistance), fogDistance.set(100), fogDistance.subscribe(v => fogDistMul = (+v || 100) / 100), fw("skillbarCols", skillbarCols), fw("skillbarRows", skillbarRows), skillbarCols.subscribe(() => setTimeout(skillbarLayout)), skillbarRows.subscribe(() => setTimeout(skillbarLayout)), fw("disableWorldOverride", disableWorldOverride), disableWorldOverride.subscribe(v => !!v !== worldOverrideOff && typeof location != "undefined" && location.reload());
@@ -33671,15 +33663,13 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         YE = t => {
             if (!classicPlain) {
                 let size = Math.max(20, classicFogFar),
-                    now = performance.now() / 1e3,
+                    yaw = Math.atan2(gf[0], gf[1]),
                     prev = Fa[0].__anchor,
-                    keep = !hf && prev && prev[3] === size && now - prev[4] <= 10 && Math.hypot(tn.position[0] - prev[0], tn.position[1] - prev[1], tn.position[2] - prev[2]) <= 15,
-                    a = keep ? prev.slice(0, 3) : [...tn.position],
-                    dl = Math.hypot(gf[0], gf[1], gf[2]) || 1;
-                keep || (Fa[0].__anchor = [...a, size, now]);
+                    a = prev && prev[3] === size && Math.hypot(tn.position[0] - prev[0], tn.position[1] - prev[1], tn.position[2] - prev[2]) <= 15 ? prev.slice(0, 3) : [...tn.position];
+                Fa[0].__anchor = [...a, size];
                 for (let s = 0; s < Fa.length; ++s) {
                     let i = Fa[s];
-                    !keep && (J(i.transform.position, gf[0] / dl * size, gf[1] / dl * size, gf[2] / dl * size), Tl(i.transform, [0, 0, 0], !0, [0, 1, 0]), i.transform.position[0] += a[0], i.transform.position[1] += a[1], i.transform.position[2] += a[2], i.far = size * 2, i.near = .1, Z3(i, -size, size, -size, size), mc(i, !0), gd(i), i.__size = size, hf = !0);
+                    (!H3(i.transform.position, a) || i.__size !== size) && (ut(i.transform.position, a), J(i.transform.rotation, -Math.PI / 2, yaw, 0), i.far = size * 2, i.near = -size * 2, Z3(i, -size, size, -size, size), mc(i, !0), gd(i), i.__size = size, hf = !0);
                 }
                 let sd = on.shadows.data,
                     fe = on.environment.data;
