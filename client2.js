@@ -8728,7 +8728,7 @@ void main() {
             globalUniforms: u = {},
             attributeLocations: p
         }) => {
-            classic21 && classic21Patch && (t = classic21Patch(t), e = classic21Patch(e)), !classicAcneFix && !classicPlain && (t = classicWarpPatch(t), e = classicWarpPatch(e).split("float j=clamp(dot(f,worldlight[2]),0.0,g);").join("float j=max(dot(f,worldlight[2]),0.0)*g;"));
+            classic21 && classic21Patch && (t = classic21Patch(t), e = classic21Patch(e)), !classicAcneFix && !classicPlain && (e = e.split("float j=clamp(dot(f,worldlight[2]),0.0,g);").join("float j=max(dot(f,worldlight[2]),0.0)*g;"));
             let g = {
                 id: ND++,
                 program: N.createProgram(),
@@ -13978,7 +13978,6 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             ["vLightDir=worldlight[0]*max(0.0,dot(instNorm.xyz,worldlight[2]));", "vLightDir=worldlight[0]*0.65*(0.9+sin(instPos.x*0.5)*0.05+cos(instPos.z*0.3)*0.05);"],
             ["vLightDir+=worldlight[0]*max(0.0,dot(instNorm.xyz,worldlight[2]));", "vLightDir+=worldlight[0]*0.65*(0.9+sin(instPos.x*0.5)*0.05+cos(instPos.z*0.3)*0.05);"]
         ],
-        classicWarpPatch = s => typeof s != "string" ? s : s.replace(/=\((\w+)\.xyz\/\1\.w\)\*0\.5\+0\.5/g, (m, v) => "=vec3(2.0/(1.0+exp(-10.0*(" + v + ".xy/" + v + ".w)))-1.0," + v + ".z/" + v + ".w)*0.5+0.5"),
         classic21Patch = s => {
             if (typeof s != "string") return s;
             for (let [a, b] of classic21Swaps) s = s.split(a).join(b);
@@ -13997,8 +13996,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         a6 = acneSw(a6, [0, 1].map(k => ["texture(shadowMaps[" + k + "],s)", "texture(shadowMaps[" + k + "],s+vec3(0.0,0.0,-0.001))"]));
         s6 = acneSw(s6, [0, 1].map(k => ["shadowPVMatrix[" + k + "]*(vWorldPos)", "shadowPVMatrix[" + k + "]*(vWorldPos+vec4(normalize(vNormal)*0.2,0.0))"]));
         r6 = acneSw(r6, [0, 1].map(k => ["shadowPVMatrix[" + k + "]*(vWorldPos)", "shadowPVMatrix[" + k + "]*(vWorldPos+vec4(normalize(vNormal)*0.2,0.0))"]));
-        k6 = acneSw(k6, [["texture(diffuse,vUv).a<0.7", "texture(diffuse,vUv).a<0.5"]]);
-        y6 = acneSw(y6, [["gl_Position=projectionViewMatrix*worldMatrix*vec4(position,1.0);", "vec4 sp=projectionViewMatrix*worldMatrix*vec4(position,1.0);sp.xy=2.0/(1.0+exp(-10.0*sp.xy))-1.0;gl_Position=sp;"]])
+        k6 = acneSw(k6, [["texture(diffuse,vUv).a<0.7", "texture(diffuse,vUv).a<0.5"]])
     }
     if (oe.faivelRetexture) {
         let folSprite = src => src.replace(/g\[1\]=instNorm\.xyz;[\s\S]*?g\[0\]=normalize\(cross\(g\[1\],g\[2\]\)\);/, "g[0]=vec3(viewMatrix[0][0],viewMatrix[1][0],viewMatrix[2][0]);g[1]=vec3(viewMatrix[0][1],viewMatrix[1][1],viewMatrix[2][1]);g[2]=vec3(viewMatrix[0][2],viewMatrix[1][2],viewMatrix[2][2]);f.x*=fract((instPos.x+instPos.z*1.618)*3.7)<0.5?-1.0:1.0;");
