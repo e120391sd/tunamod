@@ -1788,10 +1788,23 @@
         shaders2021 = ee(!1),
         colors2021 = ee(!1),
         fixShadowAcne = ee(!1),
-        stableSsao = ee(!1),
-        stableSsaoRow = null,
         acneRow = null,
         classicReloadNeeded = () => !!oe.shaders2021 !== classic21 || !!oe.fixShadowAcne !== classicAcneFix,
+        classicShadowStats = {
+            recenter: 0,
+            redraw: 0,
+            dynamic: 0,
+            patched: [],
+            fallback: []
+        },
+        classicShadowLogOn = (() => {
+            try {
+                return localStorage.getItem("shadowLog") === "1"
+            } catch (e) {
+                return !1
+            }
+        })(),
+        classicShadowLogEv = (what, data) => console.log("[shadows] " + what, data),
         classicAcneFix = (() => {
             try {
                 return localStorage.getItem("fixShadowAcne") === "true"
@@ -1811,9 +1824,7 @@
         fullDistantTerrain = ee(!1),
         classicSsaoCamFrag = `#version 300 es
 precision highp float;uniform sampler2D inputA;uniform sampler2D inputB;uniform sampler2D aoDepth;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform Screen{vec2 resolution;};in vec2 vUv;out vec4 fragColor;const int zr=16;const float Ul=float(zr);const vec3 Rs[zr]=vec3[](vec3(0.5381,0.1856,-0.4319),vec3(0.1379,0.2486,0.4430),vec3(0.3371,0.5679,-0.0057),vec3(-0.6999,-0.0451,-0.0019),vec3(0.0689,-0.1598,-0.8547),vec3(0.0560,0.0069,-0.1843),vec3(-0.0146,0.1402,0.0762),vec3(0.0100,-0.1924,-0.0344),vec3(-0.3577,-0.5301,-0.4358),vec3(-0.3169,0.1063,0.0158),vec3(0.0103,-0.5869,0.0046),vec3(-0.0897,-0.4940,0.3287),vec3(0.7119,-0.0154,-0.0918),vec3(-0.0533,0.0596,-0.5411),vec3(0.0352,-0.0631,0.5460),vec3(-0.4776,0.2847,-0.0271));float zn;float K21;float ic;float lzc(vec2 uv){float d=texture(aoDepth,uv).r;float n=projectionMatrix[3][2]/(projectionMatrix[2][2]-1.0);float f=projectionMatrix[3][2]/(projectionMatrix[2][2]+1.0);return 2.0*n*f/(f+n-(2.0*d-1.0)*(f-n));}float rand(vec2 co){return fract(sin(dot(co.xy,vec2(12.9898,78.233)))*43758.5453);}const float Fc=0.03;const float Lc=0.0000005;const float radius=0.004;const vec2 dq=vec2(0.0,0.001);const vec2 ql=vec2(0.001,0.0);vec3 normal_from_depth(float BS,vec2 texcoords){vec3 p1=vec3(dq,K21*(ic-1.0/lzc(texcoords+dq)));vec3 p2=vec3(ql,K21*(ic-1.0/lzc(texcoords+ql)));vec3 Ip=cross(p1,p2);Ip.z=-Ip.z;return normalize(Ip);}void main(){zn=fog[1][1];K21=zn*0.1/(zn-0.1);float zc=lzc(vUv);ic=1.0/zc;float BS=clamp(((zn+0.1)/(zn-0.1)-2.0*zn*0.1/((zn-0.1)*zc))*0.5+0.5,0.0,1.0);vec3 tj=vec3(vUv.xy,BS);vec3 Ip=normal_from_depth(BS,vUv);float SB=zn;float qh=(2.0*0.1*SB)/(SB+0.1-BS*(SB-0.1))/SB;float XZ=radius/qh;float NJ=0.0;vec3 vpc=vec3((vUv*2.0-1.0)*zc/vec2(projectionMatrix[0][0],projectionMatrix[1][1]),-zc);vec3 wpc=transpose(mat3(viewMatrix))*(vpc-viewMatrix[3].xyz);float cs=exp2(ceil(log2(max(2.0*zc/(projectionMatrix[1][1]*resolution.y),1e-4))));vec3 cw=floor(wpc/cs);vec2 sd=fract(cw.xz*vec2(0.1031,0.1137)+cw.y*vec2(0.0973,0.0891)+cs*0.37);vec3 uH=normalize(vec3(rand(sd.xy),rand(sd.yx),rand(sd.xy*1.5)));for(int i=0;i<zr;i++){vec3 Jm=XZ*reflect(Rs[i],uH);vec3 HZ=tj+sign(dot(Jm,Ip))*Jm;float difference=K21*(1.0/lzc(clamp(HZ.xy,0.0,1.0))-ic);NJ+=step(Lc,difference)*(1.0-smoothstep(Lc,Fc,difference));}NJ*=(1.0-smoothstep(0.6,1.0,qh));NJ*=(1.0/Ul);NJ=pow(NJ,1.7);float QE=clamp(0.1+1.0-NJ,0.0,1.0);fragColor=vec4(mix(worldlight[1]*0.2,vec3(1.0),QE),1.0);}`,
-        classicSsaoFrag = `#version 300 es
-precision highp float;uniform sampler2D inputA;uniform sampler2D inputB;uniform sampler2D aoDepth;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform Screen{vec2 resolution;};in vec2 vUv;out vec4 fragColor;const int zr=16;const vec3 Rs[zr]=vec3[](vec3(0.5381,0.1856,-0.4319),vec3(0.1379,0.2486,0.4430),vec3(0.3371,0.5679,-0.0057),vec3(-0.6999,-0.0451,-0.0019),vec3(0.0689,-0.1598,-0.8547),vec3(0.0560,0.0069,-0.1843),vec3(-0.0146,0.1402,0.0762),vec3(0.0100,-0.1924,-0.0344),vec3(-0.3577,-0.5301,-0.4358),vec3(-0.3169,0.1063,0.0158),vec3(0.0103,-0.5869,0.0046),vec3(-0.0897,-0.4940,0.3287),vec3(0.7119,-0.0154,-0.0918),vec3(-0.0533,0.0596,-0.5411),vec3(0.0352,-0.0631,0.5460),vec3(-0.4776,0.2847,-0.0271));float rand(vec2 co){return fract(sin(dot(co.xy,vec2(12.9898,78.233)))*43758.5453);}float lzc(vec2 uv){float d=texture(aoDepth,uv).r;float n=projectionMatrix[3][2]/(projectionMatrix[2][2]-1.0);float f=projectionMatrix[3][2]/(projectionMatrix[2][2]+1.0);return 2.0*n*f/(f+n-(2.0*d-1.0)*(f-n));}vec3 vp(vec2 uv){float z=lzc(uv);return vec3((uv*2.0-1.0+vec2(projectionMatrix[2][0],projectionMatrix[2][1]))*z/vec2(projectionMatrix[0][0],projectionMatrix[1][1]),-z);}void main(){if(texture(aoDepth,vUv).r>=0.99999){fragColor=vec4(1.0);return;}vec2 px=1.0/vec2(textureSize(aoDepth,0));vec3 P=vp(vUv);float zc=-P.z;vec3 pr=vp(vUv+vec2(px.x,0.0)),pl=vp(vUv-vec2(px.x,0.0)),pu=vp(vUv+vec2(0.0,px.y)),pd=vp(vUv-vec2(0.0,px.y));vec3 dx=abs(pr.z-P.z)<abs(P.z-pl.z)?pr-P:P-pl;vec3 dy=abs(pu.z-P.z)<abs(P.z-pd.z)?pu-P:P-pd;vec3 Nm=normalize(cross(dx,dy));if(dot(Nm,P)>0.0)Nm=-Nm;vec3 wpc=transpose(mat3(viewMatrix))*(P-viewMatrix[3].xyz);float cs=exp2(ceil(log2(max(2.0*zc/(projectionMatrix[1][1]*resolution.y),1e-4))));vec3 cw=floor(wpc/cs);vec2 sd=fract(cw.xz*vec2(0.1031,0.1137)+cw.y*vec2(0.0973,0.0891)+cs*0.37);vec3 uH=normalize(vec3(rand(sd.xy),rand(sd.yx),rand(sd.xy*1.5)));const float R=5.0;float occ=0.0;for(int i=0;i<zr;i++){vec3 k=reflect(Rs[i],uH);k*=sign(dot(k,Nm));vec3 S=P+(Nm*0.02+k*(0.25+0.75*fract(float(i)*0.618+uH.x)))*R;vec4 c=projectionMatrix*vec4(S,1.0);if(c.w<=0.0)continue;vec2 su=c.xy/c.w*0.5+0.5;su=clamp(su,0.0,1.0);float sz=-lzc(su);float rc=smoothstep(0.0,1.0,3.0*R/max(abs(P.z-sz),1e-3));occ+=(sz>=S.z+0.02*R?1.0:0.0)*rc;}float zn=fog[1][1];float NJ=min(1.0,0.5+occ/float(zr)*1.5);NJ*=1.0-smoothstep(0.6*zn,zn,zc);NJ=pow(NJ,1.7);float QE=clamp(0.1+1.0-NJ,0.0,1.0);fragColor=vec4(mix(worldlight[1]*0.2,vec3(1.0),QE),1.0);}`,
-classicSsaoBlurFrag = `#version 300 es
+        classicSsaoBlurFrag = `#version 300 es
 precision highp float;uniform sampler2D inputA;uniform sampler2D inputB;uniform Screen{vec2 resolution;};in vec2 vUv;uniform int step;float weight[5]=float[5](0.227027,0.1945946,0.1216216,0.054054,0.016216);out vec4 fragColor;void main(){vec2 KQ=2.0/resolution;vec3 result=vec3(1.0);if(step==0){result=texture(inputA,vUv).rgb*weight[0];for(int i=1;i<5;++i){result+=0.5*(texture(inputA,clamp(vUv+vec2(KQ.x*float(i),0.0),0.0,1.0)).rgb+texture(inputA,clamp(vUv+vec2(KQ.x*(float(i)-0.5),0.0),0.0,1.0)).rgb)*weight[i];result+=0.5*(texture(inputA,clamp(vUv-vec2(KQ.x*float(i),0.0),0.0,1.0)).rgb+texture(inputA,clamp(vUv-vec2(KQ.x*(float(i)-0.5),0.0),0.0,1.0)).rgb)*weight[i];}}else{result=texture(inputA,vUv).rgb*weight[0];for(int i=1;i<5;++i){result+=0.5*(texture(inputA,clamp(vUv+vec2(0.0,KQ.y*float(i)),0.0,1.0)).rgb+texture(inputA,clamp(vUv+vec2(0.0,KQ.y*(float(i)-0.5)),0.0,1.0)).rgb)*weight[i];result+=0.5*(texture(inputA,clamp(vUv-vec2(0.0,KQ.y*float(i)),0.0,1.0)).rgb+texture(inputA,clamp(vUv-vec2(0.0,KQ.y*(float(i)-0.5)),0.0,1.0)).rgb)*weight[i];}}if(step==1){result=result*texture(inputB,vUv).rgb;}fragColor=vec4(result,1.0);}`,
         checkRow = (label, store, target, anchor, needsReload) => {
             let row = document.createElement("div"),
@@ -1821,7 +1832,7 @@ precision highp float;uniform sampler2D inputA;uniform sampler2D inputB;uniform 
                 box = document.createElement("div");
             if (name.textContent = label, needsReload) {
                 let note = document.createElement("small");
-                note.textContent = P.ui.settings.reload, name.append(document.createElement("br"), note)
+                note.className = "textgrey", note.textContent = P.ui.settings.reload, name.append(document.createElement("br"), note)
             }
             row.style.cssText = "display:contents", row.append(name, box);
             box.onclick = () => store.update(v => !v);
@@ -8312,6 +8323,7 @@ void main() {
                         size: d.size > 0 ? d.size : !own && b ? b.size : sk && sk.size || 1,
                         skin: skinId,
                         custom: !0,
+                        mount: !!d.mount,
                         base: b ? b.id : 0
                     },
                     bids = sk && sk.body ? sk.body.map(p => p.bid) : [],
@@ -8482,7 +8494,15 @@ void main() {
             1349: 2,
             felicia: 1
         },
+        customMountCreature = buff => {
+            let item = buff && buff.data && $r[buff.data[0]],
+                loc = item && item.type === "mount" && P.items && P.items.mount && P.items.mount[item.tier],
+                list = loc && loc.name && oldCreatureByName.get(String(loc.name).toLowerCase());
+            return list && list.find(c => c.custom && c.mount) || null
+        },
         rareMountCreature = (buff, ent) => {
+            let cm = customMountCreature(buff);
+            if (cm) return cm;
             if (!oe.faivelRetexture || oe.mountReskins === !1 || !ent || !ent.pos || !buff.data) return null;
             let item = $r[buff.data[0]],
                 name = item && item.type === "mount" && rareMountNames[item.tier];
@@ -13692,12 +13712,12 @@ void main() {
     let gsHardGlsl = `float gsHard(float m,vec2 s1,vec2 s2){if(m<=0.0)return 0.0;float hn=0.6*sandNoise(vWorldPos.xz/${(3.2*gsPatchNoiseScale).toFixed(4)}+s1)+0.4*sandNoise(vWorldPos.xz/${(1.1*gsPatchNoiseScale).toFixed(4)}+s2);return smoothstep(${gsPatchHardLo.toFixed(4)},${gsPatchHardHi.toFixed(4)},m*${(1+gsPatchNoiseAmount*.5).toFixed(4)}+(hn-0.5)*${gsPatchNoiseAmount.toFixed(4)}*min(1.0,m*3.0));}`;
     let gsHardenSetup = "if(gsHere){bandA=gsHard(bandA,vec2(31.1,12.7),vec2(2.9,24.3));spA=smoothstep(" + gsStoneEdgeLo.toFixed(4) + "," + gsStoneEdgeHi.toFixed(4) + ",spA);}";
     let dirtPatchFragCode = ``;
-    let dirtPatchSetupCode = `patchA=clamp(sandM.b*${dirtPatchStrength.toFixed(4)},0.0,1.0);patchT=patchA>0.0?texture(patchDiffuse,layerShape[2].z>0.0?vec2(-vWorldPos.x,vWorldPos.z)/4.0:vec2(-vWorldPos.x,vWorldPos.z)/4.0*${dirtPatchUvScale.toFixed(4)}):vec4(0.0);`;
-    let hlBankFragCode = `if(hlBank>0.0){vec4 bankT=texture(bankDiffuse,vec2(-vWorldPos.x,vWorldPos.z)/4.0*${hlBankUvScale.toFixed(4)});d.rgb=mix(d.rgb,bankT.rgb,hlBank);}`;
+    let dirtPatchSetupCode = `patchA=clamp(sandM.b*${dirtPatchStrength.toFixed(4)},0.0,1.0);patchT=patchA>0.0?texture(patchDiffuse,layerShape[2].z>0.0?vec2(vWorldPos.x,vWorldPos.z)/4.0:vec2(vWorldPos.x,vWorldPos.z)/4.0*${dirtPatchUvScale.toFixed(4)}):vec4(0.0);`;
+    let hlBankFragCode = `if(hlBank>0.0){vec4 bankT=texture(bankDiffuse,vec2(vWorldPos.x,vWorldPos.z)/4.0*${hlBankUvScale.toFixed(4)});d.rgb=mix(d.rgb,bankT.rgb,hlBank);}`;
     let stoneFragCode = `float stoneM=sandM.g;float stoneN=0.6*sandNoise(vWorldPos.xz/${(3.2 * stoneNoiseScale).toFixed(4)})+0.4*sandNoise(vWorldPos.xz/${(1.1 * stoneNoiseScale).toFixed(4)}+vec2(17.3,5.1));stoneM=gsHere?smoothstep(${gsShoreFade[0].toFixed(4)},${gsShoreFade[1].toFixed(4)},stoneM+(stoneN-0.5)*${(stoneNoiseAmount * gsShoreNoise).toFixed(4)}*min(1.0,stoneM*3.0)):smoothstep(0.3,0.6,stoneM*${(1 + stoneNoiseAmount * 0.5).toFixed(4)}+(stoneN-0.5)*${stoneNoiseAmount.toFixed(4)}*min(1.0,stoneM*3.0))*${stoneOverlayStrength.toFixed(4)}*terrGrassW;d.rgb=mix(d.rgb,shoreTex.rgb,stoneM);`;
     let stoneLightFragCode = `float ovCov=clamp(max(max(stoneM,steepA*terrGrassW),max(max(max(patchA,spA),bigA),bandA)*terrGrassW),0.0,1.0);if(litB>0.0&&ovCov>0.0){float sLum=d.r+d.g+d.b;e=mix(e,layerShape[3].z*smoothstep(layerShape[1].z,litB,sLum),ovCov);}e*=mix(1.0,${stoneSpecScale.toFixed(3)},ovCov);`;
     let steepFragCode = ``;
-    let steepSetupCode = `vec4 sandM=texture(sandMask,vUvChannel);vec2 stoneUv=vec2(-vWorldPos.x,vWorldPos.z)/4.0*${stoneShaderUvScale.toFixed(4)};vec2 gsRawUv=layerShape[2].z>0.0?vec2(-vWorldPos.x,vWorldPos.z)/4.0:stoneUv;vec4 stoneTex=texture(stoneDiffuse,gsRawUv);steepA=sandM.r;steepT=stoneTex;`;
+    let steepSetupCode = `vec4 sandM=texture(sandMask,vUvChannel);vec2 stoneUv=vec2(vWorldPos.x,vWorldPos.z)/4.0*${stoneShaderUvScale.toFixed(4)};vec2 gsRawUv=layerShape[2].z>0.0?vec2(vWorldPos.x,vWorldPos.z)/4.0:stoneUv;vec4 stoneTex=texture(stoneDiffuse,gsRawUv);steepA=sandM.r;steepT=stoneTex;`;
     var classicFog2023 = !0,
         classicFogCut = oe.fogpattern ? "if(vCameraDistance>fog[1][1]*0.9){if(fract(sin(gl_FragCoord.x*556.78+gl_FragCoord.y*7123.4))<smoothstep(fog[1][1]*0.9,fog[1][1],vCameraDistance))discard;}" : "if(vCameraDistance>fog[1][1])discard;";
     var GM = `#version 300 es
@@ -13815,7 +13835,7 @@ precision highp float;precision highp int;in vec2 vUv;uniform float seed;float a
 precision highp float;precision highp int;uniform Circle{vec4 circlePos;vec4 circleInfo;};precision highp sampler2DShadow;uniform Shadows{uniform mat4 shadowPVMatrix[2];uniform vec3 shadowRange;};const int a=
 #SHADOWS;uniform sampler2DShadow shadowMaps[2];uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};in float vCameraDistance;in vec4 vWorldPos;uniform MeshTerrain{mat4 modelMatrix;vec4 ctInfo[16];vec4 ctLayer[4];vec4 ctMeta;int quadrant;};const float b=256.0;const float c=4.0;precision highp sampler2DArray;uniform sampler2DArray atlas;uniform sampler2D diffuse[4];in vec3 vLight;in vec3 vNormal;in vec3 vViewDir;in vec3 vUvChannel;in vec2 vUvTexture[4];vec4 d;float e;vec3 f(vec3 g,vec3 h,vec3 i,vec3 j,float k,vec3 l,float m){j=normalize(j);float n=clamp(dot(j,worldlight[2]),0.0,k);vec3 o=g;vec3 p=normalize(worldlight[2]+vViewDir);vec3 q=vec3(pow(max(0.0,dot(p,j)),8.5)*2.0)*m*0.15;vec3 r=o+h*n*0.75+l;return r*i+q;}void s(vec4 t,float u,vec4 v){float w=t.x+t.y+t.z;e+=v[3]*smoothstep(v[1],v[2],w)*u;t.a=u;t.rgb*=u;d+=t;}out vec4 fragColor;void main(){${classicFogCut}vec4 x=texture(atlas,vUvChannel);x[3]=max(0.0,min(1.0,1.0-(x.r+x.g+x.b)));if(x[0]==1.0&&x[1]==1.0&&x[2]==1.0)discard;vec4 rw=max(x,vec4(0.0));vec4 nw;for(int bi=0;bi<4;++bi){float bw=rw[bi];float bs=layerShape[bi].y;if(bs!=1.0)bw=pow(bw,bs);bw*=layerShape[bi].x;bw*=max(0.0,1.0-dot(layerSuppress[bi],rw));nw[bi]=max(bw,0.0);}float bsum=nw[0]+nw[1]+nw[2]+nw[3];x=bsum>1e-5?nw/bsum:rw;x=mix(x,rw,layerShape[0].z);s(texture(diffuse[0],vUvTexture[0]),x[0],terrainInfo[0]);s(texture(diffuse[1],vUvTexture[1]),x[1],terrainInfo[1]);s(texture(diffuse[2],vUvTexture[2]),x[2],terrainInfo[2]);s(texture(diffuse[3],vUvTexture[3]),x[3],terrainInfo[3]);d.rgb/=d.a;e/=d.a;d.a=1.0;float y=1.0;if(a==1&&vCameraDistance<shadowRange[2]){float az=smoothstep(shadowRange[1],shadowRange[2],vCameraDistance);if(vCameraDistance>shadowRange[0]){vec4 aa=shadowPVMatrix[1]*(vWorldPos);vec3 ab=(aa.xyz/aa.w)*0.5+0.5;y=texture(shadowMaps[1],ab);}else{vec4 aa=shadowPVMatrix[0]*(vWorldPos);vec3 ab=(aa.xyz/aa.w)*0.5+0.5;y=texture(shadowMaps[0],ab);}y=y;y=max(y,az);}d.rgb=f(worldlight[1],worldlight[0],d.rgb,vNormal,y,vLight,e);float ac=distance(vWorldPos.xz,circlePos.xz);float ad=min(1.0,max(0.0,4.0-abs(vWorldPos.y-circlePos.y)));if(ac<circlePos.w+0.1&&(circleInfo.a>1.0||ad>0.0)){float cfa=circleInfo.a;float ady=cfa>1.0?1.0:ad;;float blnd=cfa>1.0?(ac<circlePos.w?cfa-1.0:0.0):((ac<circlePos.w?ac/circlePos.w*0.5:0.0)+max(0.,(0.1-abs(circlePos.w-ac))/0.1));d.rgb=mix(d.rgb,circleInfo.rgb,ady*min(1.0,cfa)*blnd);}float ae=(1.0-smoothstep(fog[1][0],fog[1][1],vCameraDistance));d.rgb=mix(fog[0],d.rgb,ae);fragColor=d;}`;
     var I6 = `#version 300 es
-precision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};out float vCameraDistance;out vec4 vWorldPos;uniform Pointlights{vec4 lightCols[16];vec3 lightPos[16];int lightCount;};out vec3 vLight;uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform MeshTerrain{mat4 modelMatrix;vec4 ctInfo[16];vec4 ctLayer[4];vec4 ctMeta;int quadrant;};const float a=256.0;const float b=4.0;in vec3 position;in vec3 normal;out vec3 vNormal;out vec3 vUvChannel;out vec2 vUvTexture[4];out vec3 vViewDir;void main(){vNormal=normal;vWorldPos=modelMatrix*vec4(position,1.0);vUvChannel=vec3(position[0],position[2],0.0)/32.0;int c=quadrant%2;int d=int(quadrant%4);if(c==1)vUvChannel.x-=1.0;if(d>1)vUvChannel.y-=1.0;vUvChannel.z=float(quadrant);vec2 e=vec2(-vWorldPos[0],vWorldPos[2])/4.0;vUvTexture[0]=e*terrainInfo[0][0];vUvTexture[1]=e*terrainInfo[1][0];vUvTexture[2]=e*terrainInfo[2][0];vUvTexture[3]=e*terrainInfo[3][0];for(int f=0;f<lightCount;++f){vec3 g=lightPos[f]-vWorldPos.xyz;float h=lightCols[f].w-dot(g,g);if(h>0.0){h/=(lightCols[f].w);h=h*h;vLight+=0.2*lightCols[f].rgb*h;}}vViewDir=-normalize(vWorldPos.xyz-cameraPosition);vCameraDistance=length(cameraPosition-vWorldPos.xyz);gl_Position=projectionViewMatrix*vWorldPos;}`;
+precision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};out float vCameraDistance;out vec4 vWorldPos;uniform Pointlights{vec4 lightCols[16];vec3 lightPos[16];int lightCount;};out vec3 vLight;uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform MeshTerrain{mat4 modelMatrix;vec4 ctInfo[16];vec4 ctLayer[4];vec4 ctMeta;int quadrant;};const float a=256.0;const float b=4.0;in vec3 position;in vec3 normal;out vec3 vNormal;out vec3 vUvChannel;out vec2 vUvTexture[4];out vec3 vViewDir;void main(){vNormal=normal;vWorldPos=modelMatrix*vec4(position,1.0);vUvChannel=vec3(position[0],position[2],0.0)/32.0;int c=quadrant%2;int d=int(quadrant%4);if(c==1)vUvChannel.x-=1.0;if(d>1)vUvChannel.y-=1.0;vUvChannel.z=float(quadrant);vec2 e=vec2(vWorldPos[0],vWorldPos[2])/4.0;vUvTexture[0]=e*terrainInfo[0][0];vUvTexture[1]=e*terrainInfo[1][0];vUvTexture[2]=e*terrainInfo[2][0];vUvTexture[3]=e*terrainInfo[3][0];for(int f=0;f<lightCount;++f){vec3 g=lightPos[f]-vWorldPos.xyz;float h=lightCols[f].w-dot(g,g);if(h>0.0){h/=(lightCols[f].w);h=h*h;vLight+=0.2*lightCols[f].rgb*h;}}vViewDir=-normalize(vWorldPos.xyz-cameraPosition);vCameraDistance=length(cameraPosition-vWorldPos.xyz);gl_Position=projectionViewMatrix*vWorldPos;}`;
     var Zw_orig = `#version 300 es
 precision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};in float vCameraDistance;in vec4 vWorldPos;uniform Sky{vec3 skycolors[5];vec3 suncolor;};uniform sampler2D skyDiffuse;uniform sampler2D cloudDiffuse;in vec2 vUv;in vec3 vPos;out vec4 fragColor;void main(){gl_FragDepth=0.999999;vec3 a=vec3(0.0);float b=vPos.y/0.5;if(b>0.4){a=mix(skycolors[1],skycolors[0],smoothstep(0.4,1.0,b));}else if(b>0.25){a=mix(skycolors[2],skycolors[1],smoothstep(0.25,0.4,b));}else if(b>0.06){a=mix(skycolors[3],skycolors[2],smoothstep(0.06,0.25,b));}else{a=mix(fog[0],skycolors[3],smoothstep(0.0,0.06,b));}float c=1.0-sin(daycycle*6.28)+0.02;float d=smoothstep(0.1,0.5,b)*smoothstep(0.9,0.6,b);a+=texture(skyDiffuse,vUv*vec2(4.0,1.0)).rgb*c*d;float e=texture(cloudDiffuse,vec2(vUv.x+time/80.0,vUv.y*0.6+time/120.0)).r*texture(cloudDiffuse,vec2(vUv.x*2.0+time/300.0,vUv.y*0.6)).r;e=e*smoothstep(0.0,0.1,b)*smoothstep(0.9,0.6,b);e=smoothstep(0.25,0.7,e);a=mix(a,skycolors[4],e);fragColor=vec4(a,1.0);}`;
     var Kw_orig = `#version 300 es
@@ -13867,14 +13887,14 @@ precision highp float;precision highp int;uniform Environment{vec3 worldlight[3]
     if (shoreShaderEnabled) {
         let tgAnchor = "float terrGrassW=clamp(dot(x,min(vec4(layerShape[0].w,layerShape[1].w,layerShape[2].w,layerShape[3].w),vec4(1.0))),0.0,1.0);";
         UM$m.split(tgAnchor).length !== 2 ? console.warn("faivel moss patches: terrain shader has changed, not applied") :
-            UM$m = UM$m.replace(tgAnchor, tgAnchor + "if(!gsHere){float mossA=texture(spMask,vUvChannel).b;vec3 mossT=texture(bandDiffuse,vec2(-vWorldPos.x,vWorldPos.z)/4.0*" + meadowMossUvScale.toFixed(4) + ").rgb;d.rgb=mix(d.rgb,mossT,mossA*terrGrassW);}");
+            UM$m = UM$m.replace(tgAnchor, tgAnchor + "if(!gsHere){float mossA=texture(spMask,vUvChannel).b;vec3 mossT=texture(bandDiffuse,vec2(vWorldPos.x,vWorldPos.z)/4.0*" + meadowMossUvScale.toFixed(4) + ").rgb;d.rgb=mix(d.rgb,mossT,mossA*terrGrassW);}");
     }
     if (shoreShaderEnabled) {
         let hsAnchor = "d.rgb=mix(d.rgb,bankT.rgb,hlBank);}";
         UM$m.indexOf(hsAnchor) < 0 ? console.warn("headless steep: terrain shader has changed, not applied") :
             UM$m = UM$m.replace("uniform sampler2D diffuse[4];", "uniform sampler2D diffuse[4];uniform sampler2D hlSteepDiffuse;")
             .replace("if(hlBank>0.0){vec4 bankT", "vec2 hsm=texture(spMask,vUvChannel).ag;if(gsHere)hsm.y=0.0;hlBank*=1.0-max(hsm.x,hsm.y);if(hlBank>0.0){vec4 bankT")
-            .replace(hsAnchor, hsAnchor + "if(hsm.x>0.0)d.rgb=mix(d.rgb,texture(hlSteepDiffuse,vec2(-vWorldPos.x,vWorldPos.z)/4.0*" + hlSteepUvScale.toFixed(4) + ").rgb,hsm.x*(1.0-hsm.y));")
+            .replace(hsAnchor, hsAnchor + "if(hsm.x>0.0)d.rgb=mix(d.rgb,texture(hlSteepDiffuse,vec2(vWorldPos.x,vWorldPos.z)/4.0*" + hlSteepUvScale.toFixed(4) + ").rgb,hsm.x*(1.0-hsm.y));")
             .replace("d.rgb=f(worldlight[1],worldlight[0],d.rgb,", "if(!gsHere&&hsm.y>0.0)d.rgb=mix(d.rgb,stoneTex.rgb,hsm.y);if(gsHere&&layerFlags.x<0.0&&spA>0.0)d.rgb=mix(d.rgb,spT.rgb,spA*(1.0-terrGrassW));d.rgb=f(worldlight[1],worldlight[0],d.rgb,");
     }
     var oldTerrainBlendGain = 1,
@@ -13900,7 +13920,7 @@ precision highp float;precision highp int;uniform Environment{vec3 worldlight[3]
         classicSteepLoc = null;
     var ctTerrainFrag = `#version 300 es
 precision highp float;precision highp int;uniform vec3 steepView;uniform Circle{vec4 circlePos;vec4 circleInfo;};precision highp sampler2DShadow;uniform Shadows{uniform mat4 shadowPVMatrix[2];uniform vec3 shadowRange;};const int a=
-#SHADOWS;uniform sampler2DShadow shadowMaps[2];uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};in float vCameraDistance;in vec4 vWorldPos;uniform MeshTerrain{mat4 modelMatrix;vec4 ctInfo[16];vec4 ctLayer[4];vec4 ctMeta;int quadrant;};precision highp sampler2DArray;uniform sampler2DArray atlas;uniform sampler2DArray ctWeights;uniform sampler2DArray ctDiffuse;uniform float ctUvMul;in vec3 vLight;in vec3 vNormal;in vec3 vViewDir;in vec3 vUvChannel;in vec2 vCt;vec4 R;float D;vec2 ut;vec2 gx;vec2 gy;void cc(vec4 c,float v,vec4 i){float b=max(max(c.r,c.g),c.b);float w=pow(smoothstep(i.y,max(i.z,i.y+0.001),b)*v,2.5);D+=i.w*w;R+=vec4(c.rgb*min(1.0,v*0.5+0.7)*w,w);}vec4 ct(float sc,float ly){return textureGrad(ctDiffuse,vec3(ut*sc,ly),gx*sc,gy*sc);}out vec4 fragColor;void main(){ut=vec2(-vWorldPos.x,vWorldPos.z)/(4.0*max(ctUvMul,1.0));gx=dFdx(ut)*${classicTerrainBlur.toFixed(2)};gy=dFdy(ut)*${classicTerrainBlur.toFixed(2)};${classicFogCut}vec4 x=textureLod(atlas,vUvChannel,0.0);if(x.r==1.0&&x.g==1.0&&x.b==1.0)discard;R=vec4(0.0);D=0.0;int n=int(ctMeta.y+0.5);float bw=-1.0;vec3 bs=vec3(1.0,0.0,0.0);vec4 w0=textureLod(ctWeights,vec3(vCt,ctMeta.x),0.0);vec4 w1=n>4?textureLod(ctWeights,vec3(vCt,ctMeta.x+1.0),0.0):vec4(0.0);vec4 w2=n>8?textureLod(ctWeights,vec3(vCt,ctMeta.x+2.0),0.0):vec4(0.0);vec4 w3=n>12?textureLod(ctWeights,vec3(vCt,ctMeta.x+3.0),0.0):vec4(0.0);${ctSlotsGlsl}if(R.a<1e-5){vec4 c=ct(bs.x,bs.y);R=vec4(c.rgb,1.0);D=bs.z;}vec3 col=R.rgb/(R.a*0.85);float det=D/R.a;float y=1.0;if(a==1&&vCameraDistance<shadowRange[2]){float az=smoothstep(shadowRange[1],shadowRange[2],vCameraDistance);if(vCameraDistance>shadowRange[0]){vec4 aa=shadowPVMatrix[1]*(vWorldPos);vec3 ab=(aa.xyz/aa.w)*0.5+0.5;y=texture(shadowMaps[1],ab);}else{vec4 aa=shadowPVMatrix[0]*(vWorldPos);vec3 ab=(aa.xyz/aa.w)*0.5+0.5;y=texture(shadowMaps[0],ab);}y=max(y,az);}vec3 nm=normalize(vNormal);float lam=max(0.0,dot(nm,worldlight[2]));float sc=0.0;if(lam>0.0){lam=min(clamp(lam,0.0,1.0),y);sc=pow(max(dot(reflect(-worldlight[2],nm),vViewDir),0.0),8.5)*2.0;}float db=length(col)*3.0*det;float lb=db-0.5;float li=lb*lb*lb*0.7+0.25;float sb=max(lb*lam,0.0);float sp=sb*sb*sb*1.2;if(db>1.2){sp*=1.3;li*=1.3;}sc*=sp*(ctUvMul>1.5?0.0:1.0);vec3 r=col*worldlight[1]+col*worldlight[0]*lam*0.65+vec3(sc)*0.15+vLight*li;float ac=distance(vWorldPos.xz,circlePos.xz);float ad=min(1.0,max(0.0,4.0-abs(vWorldPos.y-circlePos.y)));if(ac<circlePos.w+0.1&&ad>0.0){r=mix(r,circleInfo.rgb,ad*circleInfo.a*((ac<circlePos.w?ac/circlePos.w*0.5:0.0)+max(0.,(0.1-abs(circlePos.w-ac))/0.1)));}if(steepView.x>0.5){float st=length(normalize(vNormal).xz);float bw=max(steepView.z,0.02);float sb=st/bw;float q=(floor(sb)+0.5)*bw;vec3 hc=mix(vec3(0.42,0.6,0.46),vec3(0.74,0.68,0.44),smoothstep(0.0,0.35,q));hc=mix(hc,vec3(0.74,0.4,0.36),smoothstep(0.35,0.75,q));r=mix(r,hc,0.55);float fr=fract(sb),ln=1.0-smoothstep(0.0,fwidth(sb)*1.3,min(fr,1.0-fr));r=mix(r,vec3(0.42),ln*0.75);}float ae=(1.0-smoothstep(fog[1][0],fog[1][1],vCameraDistance));fragColor=vec4(mix(fog[0],r,ae),1.0);}`;
+#SHADOWS;uniform sampler2DShadow shadowMaps[2];uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};in float vCameraDistance;in vec4 vWorldPos;uniform MeshTerrain{mat4 modelMatrix;vec4 ctInfo[16];vec4 ctLayer[4];vec4 ctMeta;int quadrant;};precision highp sampler2DArray;uniform sampler2DArray atlas;uniform sampler2DArray ctWeights;uniform sampler2DArray ctDiffuse;uniform float ctUvMul;in vec3 vLight;in vec3 vNormal;in vec3 vViewDir;in vec3 vUvChannel;in vec2 vCt;vec4 R;float D;vec2 ut;vec2 gx;vec2 gy;void cc(vec4 c,float v,vec4 i){float b=max(max(c.r,c.g),c.b);float w=pow(smoothstep(i.y,max(i.z,i.y+0.001),b)*v,2.5);D+=i.w*w;R+=vec4(c.rgb*min(1.0,v*0.5+0.7)*w,w);}vec4 ct(float sc,float ly){return textureGrad(ctDiffuse,vec3(ut*sc,ly),gx*sc,gy*sc);}out vec4 fragColor;void main(){ut=vec2(vWorldPos.x,vWorldPos.z)/(4.0*max(ctUvMul,1.0));gx=dFdx(ut)*${classicTerrainBlur.toFixed(2)};gy=dFdy(ut)*${classicTerrainBlur.toFixed(2)};${classicFogCut}vec4 x=textureLod(atlas,vUvChannel,0.0);if(x.r==1.0&&x.g==1.0&&x.b==1.0)discard;R=vec4(0.0);D=0.0;int n=int(ctMeta.y+0.5);float bw=-1.0;vec3 bs=vec3(1.0,0.0,0.0);vec4 w0=textureLod(ctWeights,vec3(vCt,ctMeta.x),0.0);vec4 w1=n>4?textureLod(ctWeights,vec3(vCt,ctMeta.x+1.0),0.0):vec4(0.0);vec4 w2=n>8?textureLod(ctWeights,vec3(vCt,ctMeta.x+2.0),0.0):vec4(0.0);vec4 w3=n>12?textureLod(ctWeights,vec3(vCt,ctMeta.x+3.0),0.0):vec4(0.0);${ctSlotsGlsl}if(R.a<1e-5){vec4 c=ct(bs.x,bs.y);R=vec4(c.rgb,1.0);D=bs.z;}vec3 col=R.rgb/(R.a*0.85);float det=D/R.a;float y=1.0;if(a==1&&vCameraDistance<shadowRange[2]){float az=smoothstep(shadowRange[1],shadowRange[2],vCameraDistance);if(vCameraDistance>shadowRange[0]){vec4 aa=shadowPVMatrix[1]*(vWorldPos);vec3 ab=(aa.xyz/aa.w)*0.5+0.5;y=texture(shadowMaps[1],ab);}else{vec4 aa=shadowPVMatrix[0]*(vWorldPos);vec3 ab=(aa.xyz/aa.w)*0.5+0.5;y=texture(shadowMaps[0],ab);}y=max(y,az);}vec3 nm=normalize(vNormal);float lam=max(0.0,dot(nm,worldlight[2]));float sc=0.0;if(lam>0.0){lam=min(clamp(lam,0.0,1.0),y);sc=pow(max(dot(reflect(-worldlight[2],nm),vViewDir),0.0),8.5)*2.0;}float db=length(col)*3.0*det;float lb=db-0.5;float li=lb*lb*lb*0.7+0.25;float sb=max(lb*lam,0.0);float sp=sb*sb*sb*1.2;if(db>1.2){sp*=1.3;li*=1.3;}sc*=sp*(ctUvMul>1.5?0.0:1.0);vec3 r=col*worldlight[1]+col*worldlight[0]*lam*0.65+vec3(sc)*0.15+vLight*li;float ac=distance(vWorldPos.xz,circlePos.xz);float ad=min(1.0,max(0.0,4.0-abs(vWorldPos.y-circlePos.y)));if(ac<circlePos.w+0.1&&ad>0.0){r=mix(r,circleInfo.rgb,ad*circleInfo.a*((ac<circlePos.w?ac/circlePos.w*0.5:0.0)+max(0.,(0.1-abs(circlePos.w-ac))/0.1)));}if(steepView.x>0.5){float st=length(normalize(vNormal).xz);float bw=max(steepView.z,0.02);float sb=st/bw;float q=(floor(sb)+0.5)*bw;vec3 hc=mix(vec3(0.42,0.6,0.46),vec3(0.74,0.68,0.44),smoothstep(0.0,0.35,q));hc=mix(hc,vec3(0.74,0.4,0.36),smoothstep(0.35,0.75,q));r=mix(r,hc,0.55);float fr=fract(sb),ln=1.0-smoothstep(0.0,fwidth(sb)*1.3,min(fr,1.0-fr));r=mix(r,vec3(0.42),ln*0.75);}float ae=(1.0-smoothstep(fog[1][0],fog[1][1],vCameraDistance));fragColor=vec4(mix(fog[0],r,ae),1.0);}`;
     var ctTerrainVert = `#version 300 es
 precision highp float;precision highp int;uniform Environment{vec3 worldlight[3];vec3 fog[2];vec3 watercolors[3];float time;float daycycle;};out float vCameraDistance;out vec4 vWorldPos;uniform Pointlights{vec4 lightCols[16];vec3 lightPos[16];int lightCount;};out vec3 vLight;uniform Camera{mat4 projectionMatrix;mat4 viewMatrix;mat4 projectionViewMatrix;vec3 cameraPosition;};uniform MeshTerrain{mat4 modelMatrix;vec4 ctInfo[16];vec4 ctLayer[4];vec4 ctMeta;int quadrant;};in vec3 position;in vec3 normal;out vec3 vNormal;out vec3 vUvChannel;out vec2 vCt;out vec3 vViewDir;void main(){vNormal=normal;vWorldPos=modelMatrix*vec4(position,1.0);vUvChannel=vec3(position[0],position[2],0.0)/32.0;int c=quadrant%2;int d=int(quadrant%4);if(c==1)vUvChannel.x-=1.0;if(d>1)vUvChannel.y-=1.0;vUvChannel.z=float(quadrant);vCt=(position.xz+0.5)/65.0;vLight=vec3(0.0);for(int f=0;f<lightCount;++f){vec3 g=lightPos[f]-vWorldPos.xyz;float h=lightCols[f].w-dot(g,g);if(h>0.0){h/=(lightCols[f].w);h=h*h;vLight+=0.25*lightCols[f].rgb*h;}}vViewDir=-normalize(vWorldPos.xyz-cameraPosition);vCameraDistance=length(cameraPosition-vWorldPos.xyz);gl_Position=projectionViewMatrix*vWorldPos;}`;
     var baseTerrainFrag = `#version 300 es
@@ -13990,6 +14010,30 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             return s
         };
 
+    typeof window != "undefined" && (window.classicShadowLog = on => {
+        try {
+            localStorage.setItem("shadowLog", on ? "1" : "0")
+        } catch (e) {}
+        return classicShadowLogOn = !!on
+    }, window.classicShadowDebug = () => ({
+        stats: classicShadowStats,
+        anchor: Fa[0] && Fa[0].__anchor,
+        size: Fa[0] && Fa[0].__size,
+        shadowPV: on.shadows && Array.from(on.shadows.data.shadowPVMatrix).slice(0, 16),
+        shadowRange: on.shadows && Array.from(on.shadows.data.shadowRange),
+        polygonOffset: classicAcneFix,
+        mode2023: !classicAcneFix && !classicPlain
+    }), setInterval(() => {
+        if (!classicShadowLogOn) return;
+        let st = classicShadowStats;
+        classicShadowLogEv("per second", {
+            recenters: st.recenter,
+            staticRedraws: st.redraw,
+            movingCasters: st.dynamic,
+            patchedReceivers: st.patched.length,
+            fallbackReceivers: st.fallback.length
+        }), st.recenter = 0, st.redraw = 0
+    }, 1e3));
     if (oe.faivelRetexture) {
         let folSprite = src => src.replace(/g\[1\]=instNorm\.xyz;[\s\S]*?g\[0\]=normalize\(cross\(g\[1\],g\[2\]\)\);/, "g[0]=vec3(viewMatrix[0][0],viewMatrix[1][0],viewMatrix[2][0]);g[1]=vec3(viewMatrix[0][1],viewMatrix[1][1],viewMatrix[2][1]);g[2]=vec3(viewMatrix[0][2],viewMatrix[1][2],viewMatrix[2][2]);f.x*=fract((instPos.x+instPos.z*1.618)*3.7)<0.5?-1.0:1.0;");
         QM.indexOf("g[1]=instNorm.xyz;") < 0 || KM.indexOf("g[1]=instNorm.xyz;") < 0 ? console.warn("pre 0.5 foliage: foliage shader has changed, keeping the new orientation") : (QM = folSprite(QM), KM = folSprite(KM));
@@ -14414,18 +14458,6 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                     }
                 },
                 globalUniforms: xn,
-                attributeLocations: t.post
-            }), ht[35] = kn({
-                vertex: hc,
-                fragment: classicSsaoFrag,
-                depthWrite: !1,
-                depthTest: !1,
-                globalUniforms: xn,
-                uniforms: {
-                    aoDepth: {
-                        value: null
-                    }
-                },
                 attributeLocations: t.post
             }), ht[54] = kn({
                 vertex: hc,
@@ -20224,7 +20256,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 e = h("div"), e.textContent = `${P.ui.settings.resolution}`, n = h("input"), o = h("div"), o.textContent = `${P.ui.settings.viewrange}`, s = h("input"), i = h("div"), l = A(r), a = Qe(), c = h("span"), f = A(t[7]), u = h("input"), p = h("div"), v = A(g), _ = h("br"), b = h("small"), b.textContent = `${P.ui.settings.reload}`, y = h("input"), k = h("div"), E = A(C), F = h("br"), M = h("small"), M.textContent = `${P.ui.settings.reload}`, L = h("input"), V = h("div"), V.textContent = `${P.ui.settings.fxaa}`, Z(D.$$.fragment), z = h("div"), z.textContent = `${P.ui.settings.bloom}`, Z(q.$$.fragment), R = h("div"), W = A(O), U = h("br"), $ = h("small"), $.textContent = `${P.ui.settings.offscreendesc}`, Z(G.$$.fragment), de = h("div"), de.textContent = `${P.ui.settings.particles}`, Z(be.$$.fragment), le = h("div"), le.textContent = `${P.ui.settings.fogpattern}`, Z(se.$$.fragment), fe = h("div"), fe.textContent = `${P.ui.settings.shadows}`, ke = h("div"), we = h("div"), xe = A(ce), $e = h("br"), ye = h("small"), ye.textContent = `${P.ui.settings.reload}`, Z(Oe.$$.fragment), ze = h("div"), ue = A(Ne), _e = h("br"), pe = h("small"), pe.textContent = `${P.ui.settings.reload}`, he = h("input"), m(n, "type", "range"), m(n, "min", "30"), m(n, "step", "10"), m(s, "type", "range"), m(s, "min", "30"), m(c, "class", "textgrey"), m(u, "type", "range"), m(u, "min", "50"), m(u, "max", "100"), m(b, "class", "textgrey"), m(y, "type", "range"), m(y, "min", "0"), m(y, "max", "4"), m(M, "class", "textgrey"), m(L, "type", "range"), m(L, "min", "0"), m(L, "max", worldOverrideOff ? "300" : "100"), m($, "class", "textgrey"), m(fe, "class", "textprimary"), m(ye, "class", "textgrey"), m(pe, "class", "textgrey"), m(he, "type", "range"), m(he, "min", "0"), m(he, "max", "3")
             },
             m(te, H) {
-                x(te, e, H), x(te, n, H), Ge(n, t[5]), x(te, o, H), x(te, s, H), Ge(s, t[6]), x(te, i, H), d(i, l), d(i, a), d(i, c), d(c, f), x(te, u, H), Ge(u, t[7]), x(te, p, H), d(p, v), d(p, _), d(p, b), x(te, y, H), Ge(y, t[8]), x(te, k, H), d(k, E), d(k, F), d(k, M), x(te, L, H), Ge(L, t[9]), grassValueLabel(L, k), x(te, V, H), X(D, te, H), x(te, z, H), X(q, te, H), z.style.display = "none", z.nextElementSibling && (z.nextElementSibling.style.display = "none"), x(te, R, H), timeRows = [sliderRow("Time", timeSlider, te, R, 0, 1e3, !0), checkRow("Use device time", timeToIngame, te, R)], d(R, W), d(R, U), d(R, $), X(G, te, H), x(te, de, H), X(be, te, H), x(te, le, H), X(se, te, H), x(te, fe, H), x(te, ke, H), x(te, we, H), d(we, xe), d(we, $e), d(we, ye), X(Oe, te, H), x(te, ze, H), d(ze, ue), d(ze, _e), d(ze, pe), x(te, he, H), Ge(he, t[10]), imRowsUi && imRowsUi.forEach(f => f()), imRowsUi = imRows(te, fe), ssaoRow && ssaoRow(), ssaoRow = checkRow("Ambient occlusion (SSAO)", ssao, te, fe), stableSsaoRow && stableSsaoRow(), stableSsaoRow = checkRow("Stable SSAO", stableSsao, te, fe), acneRow && acneRow(), acneRow = checkRow("Fix shadow acne", fixShadowAcne, te, fe, !0), bloomToggleRow && bloomToggleRow(), bloomToggleRow = checkRow("Bloom", wd, te, fe), skyFixRow && skyFixRow(), skyFixRow = classicPlain ? null : checkRow("Fix skybox positioning", fixSkybox, te, fe), farTerrainRow && farTerrainRow(), farTerrainRow = classicPlain ? null : checkRow("Full detail distant terrain", fullDistantTerrain, te, fe), fxRowsUi && fxRowsUi.forEach(f => f()), fxRowsUi = [headerRow("Effect alpha", te, null), checkRow("Override effect alpha", fxAlphaOverride, te, null), textRow("Effect alpha skill IDs", fxAlphaSkills, te, null), sliderRow("Missile effect alpha", fxAlphaSprite, te, null, 0, 100), sliderRow("Ribbon effect alpha", fxAlphaRibbon, te, null, 0, 100), sliderRow("Mesh effect alpha", fxAlphaModel, te, null, 0, 100)], ie = !0, Ie || (We = [Y(n, "change", t[38]), Y(n, "input", t[38]), Y(s, "change", t[39]), Y(s, "input", t[39]), Y(u, "change", t[40]), Y(u, "input", t[40]), Y(y, "change", t[41]), Y(y, "input", t[41]), Y(y, "change", t[35]), Y(L, "change", t[42]), Y(L, "input", t[42]), Y(L, "change", t[35]), Y(he, "change", t[43]), Y(he, "input", t[43]), Y(he, "change", t[35])], Ie = !0)
+                x(te, e, H), x(te, n, H), Ge(n, t[5]), x(te, o, H), x(te, s, H), Ge(s, t[6]), x(te, i, H), d(i, l), d(i, a), d(i, c), d(c, f), x(te, u, H), Ge(u, t[7]), x(te, p, H), d(p, v), d(p, _), d(p, b), x(te, y, H), Ge(y, t[8]), x(te, k, H), d(k, E), d(k, F), d(k, M), x(te, L, H), Ge(L, t[9]), grassValueLabel(L, k), x(te, V, H), X(D, te, H), x(te, z, H), X(q, te, H), z.style.display = "none", z.nextElementSibling && (z.nextElementSibling.style.display = "none"), x(te, R, H), timeRows = [sliderRow("Time", timeSlider, te, R, 0, 1e3, !0), checkRow("Use device time", timeToIngame, te, R)], d(R, W), d(R, U), d(R, $), X(G, te, H), x(te, de, H), X(be, te, H), x(te, le, H), X(se, te, H), x(te, fe, H), x(te, ke, H), x(te, we, H), d(we, xe), d(we, $e), d(we, ye), X(Oe, te, H), x(te, ze, H), d(ze, ue), d(ze, _e), d(ze, pe), x(te, he, H), Ge(he, t[10]), imRowsUi && imRowsUi.forEach(f => f()), imRowsUi = imRows(te, fe), ssaoRow && ssaoRow(), ssaoRow = checkRow("Ambient occlusion (SSAO)", ssao, te, fe), acneRow && acneRow(), acneRow = checkRow("Fix shadow acne", fixShadowAcne, te, fe, !0), bloomToggleRow && bloomToggleRow(), bloomToggleRow = checkRow("Bloom", wd, te, de), skyFixRow && skyFixRow(), skyFixRow = classicPlain ? null : checkRow("Fix skybox positioning", fixSkybox, te, fe), farTerrainRow && farTerrainRow(), farTerrainRow = classicPlain ? null : checkRow("Full detail distant terrain", fullDistantTerrain, te, fe), fxRowsUi && fxRowsUi.forEach(f => f()), fxRowsUi = [headerRow("Effect alpha", te, null), checkRow("Override effect alpha", fxAlphaOverride, te, null), textRow("Effect alpha skill IDs", fxAlphaSkills, te, null), sliderRow("Missile effect alpha", fxAlphaSprite, te, null, 0, 100), sliderRow("Ribbon effect alpha", fxAlphaRibbon, te, null, 0, 100), sliderRow("Mesh effect alpha", fxAlphaModel, te, null, 0, 100)], ie = !0, Ie || (We = [Y(n, "change", t[38]), Y(n, "input", t[38]), Y(s, "change", t[39]), Y(s, "input", t[39]), Y(u, "change", t[40]), Y(u, "input", t[40]), Y(y, "change", t[41]), Y(y, "input", t[41]), Y(y, "change", t[35]), Y(L, "change", t[42]), Y(L, "input", t[42]), Y(L, "change", t[35]), Y(he, "change", t[43]), Y(he, "input", t[43]), Y(he, "change", t[35])], Ie = !0)
             },
             p(te, H) {
                 H[0] & 32 && Ge(n, te[5]), H[0] & 64 && Ge(s, te[6]), (!ie || H[0] & 128) && j(f, te[7]), H[0] & 128 && Ge(u, te[7]), H[0] & 256 && Ge(y, te[8]), H[0] & 512 && Ge(L, te[9]), H[0] & 1024 && Ge(he, te[10])
@@ -20236,7 +20268,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 I(D.$$.fragment, te), I(q.$$.fragment, te), I(G.$$.fragment, te), I(be.$$.fragment, te), I(se.$$.fragment, te), I(Oe.$$.fragment, te), ie = !1
             },
             d(te) {
-                ssaoRow && (ssaoRow(), ssaoRow = null), stableSsaoRow && (stableSsaoRow(), stableSsaoRow = null), acneRow && (acneRow(), acneRow = null), bloomToggleRow && (bloomToggleRow(), bloomToggleRow = null), skyFixRow && (skyFixRow(), skyFixRow = null), farTerrainRow && (farTerrainRow(), farTerrainRow = null), bloomRow && (bloomRow(), bloomRow = null), fogRow && (fogRow(), fogRow = null), fogDistRow && (fogDistRow(), fogDistRow = null), timeRows && (timeRows.forEach(f => f()), timeRows = null), imRowsUi && (imRowsUi.forEach(f => f()), imRowsUi = null), fxRowsUi && (fxRowsUi.forEach(f => f()), fxRowsUi = null);
+                ssaoRow && (ssaoRow(), ssaoRow = null), acneRow && (acneRow(), acneRow = null), bloomToggleRow && (bloomToggleRow(), bloomToggleRow = null), skyFixRow && (skyFixRow(), skyFixRow = null), farTerrainRow && (farTerrainRow(), farTerrainRow = null), bloomRow && (bloomRow(), bloomRow = null), fogRow && (fogRow(), fogRow = null), fogDistRow && (fogDistRow(), fogDistRow = null), timeRows && (timeRows.forEach(f => f()), timeRows = null), imRowsUi && (imRowsUi.forEach(f => f()), imRowsUi = null), fxRowsUi && (fxRowsUi.forEach(f => f()), fxRowsUi = null);
                 te && (w(e), w(n), w(o), w(s), w(i), w(u), w(p), w(y), w(k), w(L), w(V), w(z), w(R), w(de), w(le), w(fe), w(ke), w(we), w(ze), w(he)), K(D, te), K(q, te), K(G, te), K(be, te), K(se, te), K(Oe, te), Ie = !1, ct(We)
             }
         }
@@ -24047,7 +24079,6 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 bisOnly: !1,
                 sort: null,
                 reverse: !1,
-                normalize: !0,
                 range: "All time",
                 jump: null
             };
@@ -24260,18 +24291,18 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 head = el("div", "bl-chead"),
                 rb = el("div", "bl-ranges");
             RANGES.forEach(([n]) => rb.appendChild(button(n, (st.range === n ? "blue" : "grey") + " bl-rbtn", () => st.range !== n && (st.range = n, render()))));
-            head.append(button("Normalize", (st.normalize ? "blue" : "grey") + " bl-rbtn", () => (st.normalize = !st.normalize, render())), el("div", "textgrey bl-sub", num(kills.length) + " kills"), rb);
+            head.append(el("div", "textgrey bl-sub", num(kills.length) + " kills"), rb);
             const ts = kills.map(k => new Date(k.date).getTime()),
                 tA = ts.length > 1 && ts[ts.length - 1] > ts[0] ? ts[0] : ts.length ? ts[0] - 432e5 : Date.now() - 864e5,
                 tB = ts.length > 1 && ts[ts.length - 1] > ts[0] ? ts[ts.length - 1] : ts.length ? ts[0] + 432e5 : Date.now(),
                 lay = cycleLayout(ts),
-                redraw = hover => drawDps(cv, kills, hover, lay);
+                redraw = hover => drawKills(cv, kills, hover, lay);
             cv.onmousemove = e => {
                 if (!ts.length) return;
                 const r = cv.getBoundingClientRect(),
                     f = ((e.clientX - r.left) / r.width * cv.width - 70) / (cv.width - 110);
                 let best = 0;
-                for (let i = 1; i < lay.pos.length; ++i) Math.abs(lay.pos[i] - f) < Math.abs(lay.pos[best] - f) && (best = i);
+                for (let i = 1; i < lay.labels.length; ++i) Math.abs(lay.labels[i][0] - f) < Math.abs(lay.labels[best][0] - f) && (best = i);
                 redraw(best);
             }, cv.onmouseleave = () => redraw(-1);
             if (typeof ResizeObserver != "undefined") {
@@ -24340,60 +24371,44 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             });
             return { pos: pos.map(v => v / total), labels, seps: seps.map(v => v / total) };
         };
-        const drawDps = (cv, kills, hover, lay) => {
+        const drawKills = (cv, kills, hover, lay) => {
             const cw = Math.max(100, Math.round(cv.clientWidth * 2)),
                 ch = Math.max(80, Math.round(cv.clientHeight * 2));
             (cv.width !== cw || cv.height !== ch) && (cv.width = cw, cv.height = ch);
             const g = cv.getContext("2d"),
                 W = cv.width,
-                H = cv.height,
-                vals = kills.map(k => k._v);
-            if (g.clearRect(0, 0, W, H), g.font = "20px hordes, sans-serif", !vals.length) return g.fillStyle = "#5b858e", void (g.textAlign = "center", g.fillText(st.range === "All time" ? "No kills yet" : "No kills in this range", W / 2, H / 2), g.textAlign = "start");
-            const norm = st.normalize,
-                sorted = vals.slice().sort((a, b) => a - b),
-                pct = q => sorted[Math.min(sorted.length - 1, Math.max(0, Math.round(q * (sorted.length - 1))))],
-                lo0 = pct(.02),
-                hi0 = pct(.98),
-                pad = Math.max(10, (hi0 - lo0) * .08),
-                mn = sorted[0],
-                mx = sorted[sorted.length - 1],
-                padA = Math.max(10, (mx - mn) * .1),
-                lo = norm ? Math.max(0, lo0 - pad) : Math.max(0, mn - padA),
-                hi = norm ? hi0 + pad : mx + padA,
-                win = Math.max(1, Math.round(vals.length / 40)),
-                avg = vals.map((v, i) => {
-                    let a = 0, n = 0;
-                    for (let j = Math.max(0, i - win); j <= Math.min(vals.length - 1, i + win); ++j) a += vals[j], ++n;
-                    return a / n;
-                }),
-                X = i => 70 + (W - 110) * lay.pos[i],
+                H = cv.height;
+            if (g.clearRect(0, 0, W, H), g.font = "20px hordes, sans-serif", !kills.length) return g.fillStyle = "#5b858e", void (g.textAlign = "center", g.fillText(st.range === "All time" ? "No kills yet" : "No kills in this range", W / 2, H / 2), g.textAlign = "start");
+            const counts = lay.labels.map(l => l[2].length),
+                top = Math.max(1, ...counts),
+                step = Math.max(1, Math.ceil(top / 4)),
+                hi = step * 4,
                 XF = f => 70 + (W - 110) * f,
-                Y = v => 12 + (H - 34) * (1 - Math.max(0, Math.min(1, (v - lo) / (hi - lo))));
+                Y = v => 12 + (H - 34) * (1 - Math.max(0, Math.min(1, v / hi)));
             g.strokeStyle = "rgba(91,133,142,.35)", g.fillStyle = "#5b858e", g.lineWidth = 1;
             for (let i = 0; i <= 4; ++i) {
                 const y = 12 + (H - 34) * i / 4;
-                g.beginPath(), g.moveTo(70, y), g.lineTo(W - 40, y), g.stroke(), g.fillText(num(hi - (hi - lo) * i / 4), 0, y + 6);
+                g.beginPath(), g.moveTo(70, y), g.lineTo(W - 40, y), g.stroke(), g.fillText(num(hi - step * i), 0, y + 6);
             }
             g.strokeStyle = "rgba(91,133,142,.45)", g.lineWidth = 1, g.setLineDash([4, 6]), lay.seps.forEach(f => (g.beginPath(), g.moveTo(XF(f), 12), g.lineTo(XF(f), H - 22), g.stroke())), g.setLineDash([]);
             let lastEnd = -1e9;
-            const cyc = lay.labels.map(([f, lbl, idx]) => {
+            const pts = lay.labels.map(([f, lbl], i) => {
                 const x = XF(f),
                     w = g.measureText(lbl).width,
                     lx = Math.max(70, Math.min(W - 2 - w, x - w / 2));
-                return g.strokeStyle = "rgba(91,133,142,.12)", g.lineWidth = 1, g.beginPath(), g.moveTo(x, 12), g.lineTo(x, H - 22), g.stroke(), lx > lastEnd + 10 && (g.fillStyle = "#5b858e", g.fillText(lbl, lx, H - 2), lastEnd = lx + w), [x, idx.reduce((a, i) => a + vals[i], 0) / idx.length];
+                return g.strokeStyle = "rgba(91,133,142,.12)", g.lineWidth = 1, g.beginPath(), g.moveTo(x, 12), g.lineTo(x, H - 22), g.stroke(), lx > lastEnd + 10 && (g.fillStyle = "#5b858e", g.fillText(lbl, lx, H - 2), lastEnd = lx + w), [x, counts[i]];
             });
-            const dots = vals.length <= 400,
-                r = Math.max(2.5, Math.min(5, (W - 110) / Math.max(1, vals.length) / 3));
-            g.fillStyle = norm ? "rgba(52,203,73,.35)" : "rgba(52,203,73,.6)", dots && vals.forEach((v, i) => (g.beginPath(), g.arc(X(i), Y(v), r, 0, 6.283), g.fill()));
-            g.strokeStyle = "#34cb49", g.lineWidth = 3, g.lineJoin = "round", g.beginPath(), cyc.forEach(([x, v], i) => i ? g.lineTo(x, Y(v)) : g.moveTo(x, Y(v))), g.stroke();
-            g.fillStyle = "#34cb49", cyc.length <= 120 && cyc.forEach(([x, v]) => (g.beginPath(), g.arc(x, Y(v), 3, 0, 6.283), g.fill()));
-            if (hover < 0 || hover >= vals.length) return;
-            const k = kills[hover],
-                x = X(hover),
-                y = Y(vals[hover]);
-            g.strokeStyle = "rgba(245,194,71,.6)", g.lineWidth = 2, g.setLineDash([6, 6]), g.beginPath(), g.moveTo(x, 12), g.lineTo(x, H - 22), g.stroke(), g.setLineDash([]), g.fillStyle = "#f5c247", g.beginPath(), g.arc(x, y, 5.6, 0, 6.283), g.fill();
-            const l1 = num(vals[hover]) + " " + metric + (k._mps != null ? "  ·  " + num(k._mps) + " MPS" : ""),
-                l2 = fmtDate(k.date) + "  ·  kill #" + (hover + 1) + (k._items && k._items.length ? "  ·  " + k._items.length + " items" : ""),
+            g.strokeStyle = "#34cb49", g.lineWidth = 3, g.lineJoin = "round", g.beginPath(), pts.forEach(([x, v], i) => i ? g.lineTo(x, Y(v)) : g.moveTo(x, Y(v))), g.stroke();
+            g.fillStyle = "#34cb49", pts.length <= 200 && pts.forEach(([x, v]) => (g.beginPath(), g.arc(x, Y(v), 4, 0, 6.283), g.fill()));
+            if (hover < 0 || hover >= pts.length) return;
+            const idx = lay.labels[hover][2],
+                first = kills[idx[0]],
+                last = kills[idx[idx.length - 1]],
+                x = pts[hover][0],
+                y = Y(counts[hover]);
+            g.strokeStyle = "rgba(245,194,71,.6)", g.lineWidth = 2, g.setLineDash([6, 6]), g.beginPath(), g.moveTo(x, 12), g.lineTo(x, H - 22), g.stroke(), g.setLineDash([]), g.fillStyle = "#f5c247", g.beginPath(), g.arc(x, y, 6, 0, 6.283), g.fill();
+            const l1 = num(counts[hover]) + (counts[hover] === 1 ? " kill" : " kills"),
+                l2 = fmtDate(first.date) + (idx.length > 1 ? "  -  " + fmtDate(last.date) : ""),
                 tw = Math.max(g.measureText(l2).width, (g.font = "bold 24px hordes, sans-serif", g.measureText(l1).width)) + 20,
                 bx = Math.min(W - tw - 4, Math.max(74, x + 14)),
                 by = Math.max(4, Math.min(H - 70, y - 70));
@@ -31337,7 +31352,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             localStorage.getItem(from) !== null && localStorage.getItem(to) === null && localStorage.setItem(to, localStorage.getItem(from)), localStorage.removeItem(from);
         } catch (e) {}
     });
-    fw("mapEnabled", mapEnabled), fw("ssao", ssao), fw("fixSkybox", fixSkybox), fw("shaders2021", shaders2021), fw("colors2021", colors2021), fw("fixShadowAcne", fixShadowAcne), fw("stableSsao", stableSsao), fw("mountReskins", mountReskins), fw("fullDistantTerrain", fullDistantTerrain), fw("timeSlider", timeSlider), fw("timeToIngame", timeToIngame), fw("markOwnRevs", markOwnRevs), [["CCIndicator", CCIndicator], ["flashCCIndicator", flashCCIndicator], ["CCIndicatorOnNameplates", CCIndicatorOnNameplates], ["hideBuffs", hideBuffs], ["hideClassBuffs", hideClassBuffs], ["stackSameBuffs", stackSameBuffs], ["partyHeight", partyHeight], ["sortParty", sortParty], ["classColorParty", classColorParty], ["disablePartyNameplates", disablePartyNameplates], ["uncapNameplates", uncapNameplates], ["revUnfriendly", revUnfriendly], ["nextFriendlyIgnoreBots", nextFriendlyIgnoreBots], ["losTarget", losTarget], ["fxAlphaOverride", fxAlphaOverride], ["fxAlphaSprite", fxAlphaSprite], ["fxAlphaRibbon", fxAlphaRibbon], ["fxAlphaModel", fxAlphaModel], ["fxAlphaSkills", fxAlphaSkills], ["mouseOverTarget", mouseOverTarget]].forEach(([k, st]) => fw(k, st)), (() => {
+    fw("mapEnabled", mapEnabled), fw("ssao", ssao), fw("fixSkybox", fixSkybox), fw("shaders2021", shaders2021), fw("colors2021", colors2021), fw("fixShadowAcne", fixShadowAcne), fw("mountReskins", mountReskins), fw("fullDistantTerrain", fullDistantTerrain), fw("timeSlider", timeSlider), fw("timeToIngame", timeToIngame), fw("markOwnRevs", markOwnRevs), [["CCIndicator", CCIndicator], ["flashCCIndicator", flashCCIndicator], ["CCIndicatorOnNameplates", CCIndicatorOnNameplates], ["hideBuffs", hideBuffs], ["hideClassBuffs", hideClassBuffs], ["stackSameBuffs", stackSameBuffs], ["partyHeight", partyHeight], ["sortParty", sortParty], ["classColorParty", classColorParty], ["disablePartyNameplates", disablePartyNameplates], ["uncapNameplates", uncapNameplates], ["revUnfriendly", revUnfriendly], ["nextFriendlyIgnoreBots", nextFriendlyIgnoreBots], ["losTarget", losTarget], ["fxAlphaOverride", fxAlphaOverride], ["fxAlphaSprite", fxAlphaSprite], ["fxAlphaRibbon", fxAlphaRibbon], ["fxAlphaModel", fxAlphaModel], ["fxAlphaSkills", fxAlphaSkills], ["mouseOverTarget", mouseOverTarget]].forEach(([k, st]) => fw(k, st)), (() => {
         let was;
         sortParty.subscribe(v => (was !== void 0 && v && !was && partyOrderSave({}), was = v));
     })(), fw("blockSpecialSelling", blockSpecialSelling), fw("bloomBlur", bloomBlur), bloomBlur.set(!0), bloomBlur.subscribe(v => bloomBlurOn = v), fw("fogEnabled", fogSetting), fogSetting.set(!0), fogSetting.subscribe(v => fogOn = v), fw("fogDistance", fogDistance), fogDistance.set(100), fogDistance.subscribe(v => fogDistMul = (+v || 100) / 100), fw("skillbarCols", skillbarCols), fw("skillbarRows", skillbarRows), skillbarCols.subscribe(() => setTimeout(skillbarLayout)), skillbarRows.subscribe(() => setTimeout(skillbarLayout)), fw("disableWorldOverride", disableWorldOverride), disableWorldOverride.subscribe(v => !!v !== worldOverrideOff && typeof location != "undefined" && location.reload());
@@ -37163,7 +37178,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                         map = world && !classicPlain ? worldRetexture[world] : null,
                         raw = !classicPlain && world === "guardstone" && pathTextures.indexOf(i.texture) >= 0,
                         tex = raw ? gsPathKey : !classicPlain && orange === !0 && i.texture === orangePathTexture ? orangePathKey : map && map[i.texture] != null && Pc.has(map[i.texture]) ? map[i.texture] : i.texture;
-                    n.info[s * 4 + 0] = i.scale / 127, raw && (n.info[s * 4 + 0] = fvPathScale), n.info[s * 4 + 1] = i.darkest / 255 * 3, n.info[s * 4 + 2] = i.brightest / 255 * 3, n.info[s * 4 + 3] = i.spec / 255 * (!raw && map && map[i.texture] != null && world === "headless" ? headlessSpecScale : 1) * (!raw && oe.faivelRetexture && topGrassShown(o, world) === dirtSpecShown ? dirtSpecScale : 1), Ao(tex, r => {
+                    n.info[s * 4 + 0] = i.scale / 127, n.info[s * 4 + 1] = i.darkest / 255 * 3, n.info[s * 4 + 2] = i.brightest / 255 * 3, n.info[s * 4 + 3] = i.spec / 255 * (!raw && map && map[i.texture] != null && world === "headless" ? headlessSpecScale : 1) * (!raw && oe.faivelRetexture && topGrassShown(o, world) === dirtSpecShown ? dirtSpecScale : 1), Ao(tex, r => {
                         n.diffuse[s] = r, n.loaded++
                     })
                 }), Vy.set(e, n)
@@ -40975,8 +40990,14 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                         mf(r, ht[r.shadowProgram], !0, o)
                     }
                 }
-                sm(!1)
+                sm(!1), ++classicShadowStats.redraw, classicShadowLogOn && classicShadowLogEv("static redraw", {
+                    staticCasters: f1.length,
+                    chunksInShadowView: t.length,
+                    anchor: Fa[0].__anchor && Fa[0].__anchor.slice(0, 3).map(v => +v.toFixed(1)),
+                    polygonOffset: classicAcneFix
+                })
             }
+            classicShadowStats.dynamic = c1.length;
             wh(Fa[0], !0), V1(Kc[0], Zc, N.DEPTH_BUFFER_BIT), hm(Zc);
             for (let e = 0, n = c1.length; e < n; ++e) {
                 let o = c1[e];
@@ -41017,7 +41038,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             let e = gr,
                 n = ei;
             if (oe.ssao && classicAoA) {
-                let p = oe.stableSsao ? ht[35] : ht[54];
+                let p = ht[54];
                 Gn("aoDepth", ei.depthTexture, 0, p), hm(classicAoA), ks(np, p), Sf(36, classicAoB, classicAoA, null, [
                     ["step", 0]
                 ]), Sf(36, e, classicAoB, n, [
@@ -42642,7 +42663,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         }
         changeEntityMount(e, buff) {
             let oc = e && buff && rareMountCreature(buff, this.entity);
-            this.entity.mount && (this.entity.mount.onRemove(), this.entity.mount = void 0, this.entity.updateVisualPosition(0, T.time, T, !0)), e && (this.entity.mount = new If(this.entity), oc ? (this.entity.mount.setSkin(oc.skin, oc.colPrim, oc.colSec), this.entity.mount.ocSize = rareMountRideSize[oc.id] || rareMountRideSize[oc.name.toLowerCase()] || (this.entity.mount.skin && this.entity.mount.skin.skeleton === 2 ? 1 : oc.size), rareMountSeat(this.entity.mount, e)) : this.entity.mount.setSkin(e), this.entity.updateTransformScale(), this.entity.updateVisualPosition(0, T.time, T, !0), this.entity.updateTransformRotation(.016), this.entity.updateMountRotation(.016))
+            this.entity.mount && (this.entity.mount.onRemove(), this.entity.mount = void 0, this.entity.updateVisualPosition(0, T.time, T, !0)), e && (this.entity.mount = new If(this.entity), oc ? (this.entity.mount.setSkin(oc.skin, oc.colPrim, oc.colSec), this.entity.mount.ocSize = oc.custom && oc.mount ? oc.size : rareMountRideSize[oc.id] || rareMountRideSize[oc.name.toLowerCase()] || (this.entity.mount.skin && this.entity.mount.skin.skeleton === 2 ? 1 : oc.size), rareMountSeat(this.entity.mount, e)) : this.entity.mount.setSkin(e), this.entity.updateTransformScale(), this.entity.updateVisualPosition(0, T.time, T, !0), this.entity.updateTransformRotation(.016), this.entity.updateMountRotation(.016))
         }
     };
     var N1 = class {
