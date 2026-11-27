@@ -1804,6 +1804,14 @@
             }
         })(),
         classicShadowLogEv = (what, data) => console.log("[shadows] " + what, data),
+        classicShadowNormalScale = (() => {
+            try {
+                let v = parseFloat(localStorage.getItem("shadowNormalScale"));
+                return isFinite(v) ? v : 1
+            } catch (e) {
+                return 1
+            }
+        })(),
         classicAcneFix = (() => {
             try {
                 return localStorage.getItem("fixShadowAcne") === "true"
@@ -8857,7 +8865,7 @@ void main() {
         },
         Xv = {},
         classicShadowWarpSrc = t => classicPlain || t.indexOf("shadowPVMatrix[") < 0 || t.indexOf("uniform vec3 shadowRange;};") < 0 ? t : t.replace("uniform vec3 shadowRange;};", "uniform vec3 shadowRange;};vec4 shw(vec4 p){p.x=2.0/(1.0+exp(-10.0*p.x))-1.0;p.y=2.0/(1.0+exp(-10.0*p.y))-1.0;return p;}").replace(/shadowPVMatrix\[([01])\]\*\(vWorldPos\)/g, "shw(shadowPVMatrix[$1]*(vWorldPos))").replace(/shadowPVMatrix\[([01])\]\*vWorldPos(?![\w.])/g, "shw(shadowPVMatrix[$1]*vWorldPos)").replace(/shadowPVMatrix\[([01])\]\*vec4\(p,1\.0\)/g, "shw(shadowPVMatrix[$1]*vec4(p,1.0))"),
-        classicShadowNormalOffset = t => classicPlain || t.indexOf("vec3 b(vec3 c,vec3 d,vec3 e,vec3 f,float g,vec3 h,float i)") < 0 || t.indexOf("in vec3 vNormal;") < 0 || t.indexOf("uniform sampler2DShadow shadowMaps[2];") < 0 ? t : ((k, x) => x.replace("uniform sampler2DShadow shadowMaps[2];", "uniform sampler2DShadow shadowMaps[2];float shtx0(){mat4 m=shadowPVMatrix[0];return 2.0/(float(textureSize(shadowMaps[0],0).x)*length(vec3(m[0][0],m[1][0],m[2][0])));}float shtx1(){mat4 m=shadowPVMatrix[1];return 2.0/(float(textureSize(shadowMaps[1],0).x)*length(vec3(m[0][0],m[1][0],m[2][0])));}").split("shadowPVMatrix[0]*(vWorldPos)").join("shadowPVMatrix[0]*(vWorldPos+vec4(normalize(vNormal)*(" + k + "*shtx0()),0.0))").split("shadowPVMatrix[1]*(vWorldPos)").join("shadowPVMatrix[1]*(vWorldPos+vec4(normalize(vNormal)*(" + k + "*shtx1()),0.0))"))(t.indexOf("in vec4 vColor;") >= 0 ? "1.1378" : "2.2756", t),
+        classicShadowNormalOffset = t => classicPlain || t.indexOf("vec3 b(vec3 c,vec3 d,vec3 e,vec3 f,float g,vec3 h,float i)") < 0 || t.indexOf("in vec3 vNormal;") < 0 || t.indexOf("uniform sampler2DShadow shadowMaps[2];") < 0 ? t : ((k, x) => x.split("shadowPVMatrix[0]*(vWorldPos)").join("shadowPVMatrix[0]*(vWorldPos+vec4(normalize(vNormal)*(" + k + "),0.0))").split("shadowPVMatrix[1]*(vWorldPos)").join("shadowPVMatrix[1]*(vWorldPos+vec4(normalize(vNormal)*(" + k + "),0.0))"))(((t.indexOf("in vec4 vColor;") >= 0 ? .1 : .2) * classicShadowNormalScale).toFixed(4), t),
         Y4 = (t, e) => {
             t = classicShadowNormalOffset(classicShadowWarpSrc(t));
             if (Xv[t] !== void 0) return Xv[t];
