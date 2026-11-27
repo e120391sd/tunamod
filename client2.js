@@ -42252,7 +42252,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
                 for (let s = 0; s < 2; ++s) {
                     let i = t.body[2 + s],
                         r = Math.sin(n * 4 + s);
-                    J(i.position, s ? .5 : -.5, r * .2, 1), J(i.rotation, 0, 1.5, -r * .2)
+                    t.entity.mount !== void 0 ? (J(i.position, s ? .3 : -.3, -.5 + r * .05, .7), J(i.rotation, 0, s ? -1.3 + Math.PI : 1.3, .3 - r * .1)) : (J(i.position, s ? .5 : -.5, r * .2, 1), J(i.rotation, 0, 1.5, -r * .2))
                 }
             vo(t.body[0].rotation, (Math.sin(n * 1.8) * Math.cos(n * 2) * .3 + Math.sin(n * 1.4) * .3) * .1 + .2, (Math.sin(n * 1.3) + Math.sin(n * 2.4) * .6) * .1, (Math.sin(n * .4) + Math.sin(n * 1.9) * .5) * .1)
         };
