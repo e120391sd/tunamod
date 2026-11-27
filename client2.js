@@ -8501,7 +8501,7 @@ void main() {
             return list && list.find(c => c.custom && c.mount) || null
         },
         rareMountCreature = (buff, ent) => {
-            let cm = customMountCreature(buff);
+            let cm = !worldOverrideOff && customMountCreature(buff);
             if (cm) return cm;
             if (!oe.faivelRetexture || oe.mountReskins === !1 || !ent || !ent.pos || !buff.data) return null;
             let item = $r[buff.data[0]],
@@ -16189,7 +16189,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         tags: new Set([12, 14]),
         icon: "items/charm/charm13_q1",
         fx: {
-            visual: 108,
+            visual: worldOverrideOff ? 108 : 20,
             endSound: 69,
             apply: 76
         }
@@ -43167,7 +43167,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
             this.createInteraction()
         }
         postFixed(e, n, o) {
-            o.player !== void 0 && o.player.target === this.id && this.squaredDistance(o.player.pos) <= 25 ? (this.facingPlayer || (this.restingRot = this.rot), this.facingPlayer = !0, this.setRot(this.rotationToV3(o.player.pos))) : this.facingPlayer && (this.facingPlayer = !1, this.setRot(this.restingRot)), super.postFixed(e, n, o)
+            super.postFixed(e, n, o)
         }
         createInteraction() {
             Vo.set({
