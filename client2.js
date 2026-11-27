@@ -8866,8 +8866,9 @@ void main() {
         Xv = {},
         classicShadowWarpSrc = t => classicPlain || t.indexOf("shadowPVMatrix[") < 0 || t.indexOf("uniform vec3 shadowRange;};") < 0 ? t : t.replace("uniform vec3 shadowRange;};", "uniform vec3 shadowRange;};vec4 shw(vec4 p){p.x=2.0/(1.0+exp(-10.0*p.x))-1.0;p.y=2.0/(1.0+exp(-10.0*p.y))-1.0;return p;}").replace(/shadowPVMatrix\[([01])\]\*\(vWorldPos\)/g, "shw(shadowPVMatrix[$1]*(vWorldPos))").replace(/shadowPVMatrix\[([01])\]\*vWorldPos(?![\w.])/g, "shw(shadowPVMatrix[$1]*vWorldPos)").replace(/shadowPVMatrix\[([01])\]\*vec4\(p,1\.0\)/g, "shw(shadowPVMatrix[$1]*vec4(p,1.0))"),
         classicShadowNormalOffset = t => classicPlain || t.indexOf("vec3 b(vec3 c,vec3 d,vec3 e,vec3 f,float g,vec3 h,float i)") < 0 || t.indexOf("in vec3 vNormal;") < 0 || t.indexOf("uniform sampler2DShadow shadowMaps[2];") < 0 ? t : ((k, x) => x.split("shadowPVMatrix[0]*(vWorldPos)").join("shadowPVMatrix[0]*(vWorldPos+vec4(normalize(vNormal)*(" + k + "),0.0))").split("shadowPVMatrix[1]*(vWorldPos)").join("shadowPVMatrix[1]*(vWorldPos+vec4(normalize(vNormal)*(" + k + "),0.0))"))(((t.indexOf("in vec4 vColor;") >= 0 ? .1 : .2) * classicShadowNormalScale).toFixed(4), t),
+        classicShadowNoFade = t => classicPlain || t.indexOf("foliageDiffuse") >= 0 || t.indexOf("shadowRange[2]") < 0 ? t : t.replace(/vCameraDistance<shadowRange\[2\]\)\{float (\w+)=smoothstep\(shadowRange\[1\],shadowRange\[2\],vCameraDistance\);/g, "true){float $1=0.0;"),
         Y4 = (t, e) => {
-            t = classicShadowNormalOffset(classicShadowWarpSrc(t));
+            t = classicShadowNoFade(classicShadowNormalOffset(classicShadowWarpSrc(t)));
             if (Xv[t] !== void 0) return Xv[t];
             let n = Xv[t] = N.createShader(e);
             if (N.shaderSource(n, t), N.compileShader(n), !N.getShaderParameter(n, N.COMPILE_STATUS)) {
