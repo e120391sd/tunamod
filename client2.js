@@ -8865,7 +8865,7 @@ void main() {
         },
         Xv = {},
         classicShadowWarpSrc = t => classicPlain || t.indexOf("shadowPVMatrix[") < 0 || t.indexOf("uniform vec3 shadowRange;};") < 0 ? t : t.replace("uniform vec3 shadowRange;};", "uniform vec3 shadowRange;};vec4 shw(vec4 p){p.x=2.0/(1.0+exp(-10.0*p.x))-1.0;p.y=2.0/(1.0+exp(-10.0*p.y))-1.0;return p;}").replace(/shadowPVMatrix\[([01])\]\*\(vWorldPos\)/g, "shw(shadowPVMatrix[$1]*(vWorldPos))").replace(/shadowPVMatrix\[([01])\]\*vWorldPos(?![\w.])/g, "shw(shadowPVMatrix[$1]*vWorldPos)").replace(/shadowPVMatrix\[([01])\]\*vec4\(p,1\.0\)/g, "shw(shadowPVMatrix[$1]*vec4(p,1.0))"),
-        classicShadowNormalOffset = t => classicPlain || t.indexOf("vec3 b(vec3 c,vec3 d,vec3 e,vec3 f,float g,vec3 h,float i)") < 0 || t.indexOf("in vec3 vNormal;") < 0 || t.indexOf("uniform sampler2DShadow shadowMaps[2];") < 0 ? t : ((k, x) => x.split("shadowPVMatrix[0]*(vWorldPos)").join("shadowPVMatrix[0]*(vWorldPos+vec4(normalize(vNormal)*(" + k + "),0.0))").split("shadowPVMatrix[1]*(vWorldPos)").join("shadowPVMatrix[1]*(vWorldPos+vec4(normalize(vNormal)*(" + k + "),0.0))"))(((t.indexOf("in vec4 vColor;") >= 0 ? .1 : .2) * classicShadowNormalScale).toFixed(4), t),
+        classicShadowNormalOffset = t => classicPlain || t.indexOf("vec3 b(vec3 c,vec3 d,vec3 e,vec3 f,float g,vec3 h,float i)") < 0 || t.indexOf("in vec3 vNormal;") < 0 || t.indexOf("uniform sampler2DShadow shadowMaps[2];") < 0 ? t : ((k, x) => x.split("float j=clamp(dot(f,worldlight[2]),0.0,g);").join("float j=clamp(dot(f,worldlight[2]),0.0,1.0)*g;").split("shadowPVMatrix[0]*(vWorldPos)").join("shadowPVMatrix[0]*(vWorldPos+vec4(normalize(vNormal)*(" + k + "),0.0))").split("shadowPVMatrix[1]*(vWorldPos)").join("shadowPVMatrix[1]*(vWorldPos+vec4(normalize(vNormal)*(" + k + "),0.0))"))(((t.indexOf("in vec4 vColor;") >= 0 ? .1 : .2) * classicShadowNormalScale).toFixed(4), t),
         classicShadowNoFade = t => classicPlain || t.indexOf("foliageDiffuse") >= 0 || t.indexOf("shadowRange[2]") < 0 ? t : t.replace(/vCameraDistance<shadowRange\[2\]\)\{float (\w+)=smoothstep\(shadowRange\[1\],shadowRange\[2\],vCameraDistance\);/g, "true){float $1=0.0;"),
         Y4 = (t, e) => {
             t = classicShadowNoFade(classicShadowNormalOffset(classicShadowWarpSrc(t)));
@@ -33662,7 +33662,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         },
         YE = t => {
             if (!classicPlain) {
-                let size = Math.max(20, classicFogFar),
+                let size = 1010,
                     now = performance.now() / 1e3,
                     prev = Fa[0].__anchor,
                     keep = prev && prev[3] === size && now - prev[4] <= 10 && Math.hypot(tn.position[0] - prev[0], tn.position[1] - prev[1], tn.position[2] - prev[2]) <= 15,
