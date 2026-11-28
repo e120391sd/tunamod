@@ -33664,7 +33664,7 @@ precision highp float;precision highp int;in vec4 vWorldPos;out vec4 fragColor;v
         },
         YE = t => {
             if (!classicPlain) {
-                let size = 1010,
+                let size = 1010 * ([256, 512, 1024, 2048][oe.shadowmapResolution] || 1024) / 1024,
                     now = performance.now() / 1e3,
                     prev = Fa[0].__anchor,
                     keep = prev && prev[3] === size && now - prev[4] <= 10 && Math.hypot(tn.position[0] - prev[0], tn.position[1] - prev[1], tn.position[2] - prev[2]) <= 15,
